@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { useEffect } from 'react';
+import type { ReactNode } from "react";
+import { useEffect } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -11,17 +11,17 @@ interface ModalProps {
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose]);
 
@@ -33,7 +33,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         {/* biome-ignore lint/a11y/useKeyWithClickEvents: backdrop overlay for modal dismiss */}
         {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay for modal dismiss */}
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          className="fixed inset-0 bg-black/75 transition-opacity"
           onClick={onClose}
         />
         <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">

@@ -1,6 +1,6 @@
-import type { Product, ProductFormData } from '../types';
+import type { Product, ProductFormData } from "../types";
 
-const STORAGE_KEY = 'products';
+const STORAGE_KEY = "products";
 
 export const productService = {
   getAll: (): Product[] => {
@@ -10,7 +10,7 @@ export const productService = {
 
   getById: (id: string): Product | null => {
     const products = productService.getAll();
-    return products.find(p => p.id === id) || null;
+    return products.find((p) => p.id === id) || null;
   },
 
   create: (data: ProductFormData): Product => {
@@ -28,8 +28,8 @@ export const productService = {
 
   update: (id: string, data: Partial<ProductFormData>): Product => {
     const products = productService.getAll();
-    const index = products.findIndex(p => p.id === id);
-    if (index === -1) throw new Error('Product not found');
+    const index = products.findIndex((p) => p.id === id);
+    if (index === -1) throw new Error("Product not found");
 
     products[index] = {
       ...products[index],
@@ -42,7 +42,7 @@ export const productService = {
 
   delete: (id: string): void => {
     const products = productService.getAll();
-    const filtered = products.filter(p => p.id !== id);
+    const filtered = products.filter((p) => p.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
   },
 };

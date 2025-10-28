@@ -1,4 +1,4 @@
-import type { Product } from '../../products/types';
+import type { Product } from "../../products/types";
 
 export interface OrderItem {
   product: Product;

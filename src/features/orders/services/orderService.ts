@@ -1,4 +1,4 @@
-import type { Order, OrderFormData } from '../types';
+import type { Order, OrderFormData } from "../types";
 
 const STORAGE_KEY = "orders";
 

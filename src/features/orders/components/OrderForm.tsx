@@ -133,7 +133,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
               type="number"
               min="1"
               value={quantity}
-              onChange={(e) => setQuantity(Number.parseInt(e.target.value))}
+              onChange={(e) => setQuantity(Number.parseInt(e.target.value, 10))}
             />
           </div>
 
