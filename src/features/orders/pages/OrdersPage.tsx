@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button } from "../../../shared/components/Button";
-import { Modal } from "../../../shared/components/Modal";
-import { useOrders } from "../../../shared/contexts/OrderContext";
+import { Button } from "@/shared/components/button";
+import { Modal } from "@/shared/components/modal";
+import { useOrders } from "@/shared/contexts/OrderContext";
 import { OrderCard } from "../components/OrderCard";
 import { OrderForm } from "../components/OrderForm";
 import type { Order, OrderFormData } from "../types";

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useOrders } from "../../../shared/contexts/OrderContext";
-import { OrderCard } from "../../orders/components/OrderCard";
-import type { Order } from "../../orders/types";
+import { OrderCard } from "@/features/orders/components/OrderCard";
+import type { Order } from "@/features/orders/types";
+import { useOrders } from "@/shared/contexts/OrderContext";
 import { StatCard } from "../components/StatCard";
 import { dashboardService } from "../services/dashboardService";
 

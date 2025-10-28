@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button } from "../../../shared/components/Button";
-import { Modal } from "../../../shared/components/Modal";
-import { useProducts } from "../../../shared/contexts/ProductContext";
+import { Button } from "@/shared/components/button";
+import { Modal } from "@/shared/components/modal";
+import { useProducts } from "@/shared/contexts/ProductContext";
 import { ProductCard } from "../components/ProductCard";
 import { ProductForm } from "../components/ProductForm";
 import type { Product, ProductFormData } from "../types";

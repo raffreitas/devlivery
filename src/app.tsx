@@ -1,4 +1,4 @@
-import { AppRoutes } from "./routes";
+import { AppRoutes } from "./app-routes";
 import { OrderProvider } from "./shared/contexts/OrderContext";
 import { ProductProvider } from "./shared/contexts/ProductContext";
 

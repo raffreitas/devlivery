@@ -1,4 +1,4 @@
-# 🍕 Pizza Delivery - Sistema PDV
+# 🍕 Devlivery - Sistema PDV
 
 Sistema de PDV (Ponto de Venda) para delivery de pizzas desenvolvido com React, TypeScript e TailwindCSS.
 

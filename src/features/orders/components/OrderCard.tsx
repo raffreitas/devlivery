@@ -1,4 +1,4 @@
-import { Button } from "../../../shared/components/Button";
+import { Button } from "@/shared/components/button";
 import type { Order } from "../types";
 
 interface OrderCardProps {

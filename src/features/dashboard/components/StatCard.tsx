@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Card } from "../../../shared/components/Card";
+import { Card } from "@/shared/components/card";
 
 interface StatCardProps {
   title: string;

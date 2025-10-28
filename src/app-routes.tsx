@@ -1,8 +1,8 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { DashboardPage } from "../features/dashboard/pages/DashboardPage";
-import { OrdersPage } from "../features/orders/pages/OrdersPage";
-import { ProductsPage } from "../features/products/pages/ProductsPage";
-import { Layout } from "../shared/components/Layout";
+import { DashboardPage } from "./features/dashboard/pages/DashboardPage";
+import { OrdersPage } from "./features/orders/pages/OrdersPage";
+import { ProductsPage } from "./features/products/pages/ProductsPage";
+import { Layout } from "./shared/components/layout";
 
 const router = createBrowserRouter([
   {
