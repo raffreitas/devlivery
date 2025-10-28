@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/shared/components/button";
 import { Input } from "@/shared/components/input";
-import { useProducts } from "@/shared/contexts/ProductContext";
+import { useProducts } from "@/shared/contexts/product-context";
 import type { OrderFormData, OrderItem } from "../types";
 
 interface OrderFormProps {

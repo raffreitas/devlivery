@@ -19,7 +19,6 @@ export function ProductForm({
     description: initialData?.description || "",
     price: initialData?.price || 0,
     category: initialData?.category || "",
-    image: initialData?.image || "",
     available: initialData?.available ?? true,
   });
 
@@ -75,13 +74,6 @@ export function ProductForm({
         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
         placeholder="Ex: Pizza, Bebida, Sobremesa"
         required
-      />
-
-      <Input
-        label="URL da Imagem (opcional)"
-        type="url"
-        value={formData.image}
-        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
       />
 
       <div className="flex items-center">

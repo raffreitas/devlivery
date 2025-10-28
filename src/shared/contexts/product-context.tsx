@@ -6,7 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { productService } from "../../features/products/services/productService";
+import { productService } from "../../features/products/services/product-service";
 import type { Product, ProductFormData } from "../../features/products/types";
 
 interface ProductContextData {

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/shared/components/button";
 import { Modal } from "@/shared/components/modal";
-import { useProducts } from "@/shared/contexts/ProductContext";
-import { ProductCard } from "../components/ProductCard";
-import { ProductForm } from "../components/ProductForm";
+import { useProducts } from "@/shared/contexts/product-context";
+import { ProductCard } from "../components/product-card";
+import { ProductForm } from "../components/product-form";
 import type { Product, ProductFormData } from "../types";
 
 export function ProductsPage() {

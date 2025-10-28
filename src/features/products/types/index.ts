@@ -4,7 +4,6 @@ export interface Product {
   description: string;
   price: number;
   category: string;
-  image?: string;
   available: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -15,6 +14,5 @@ export interface ProductFormData {
   description: string;
   price: number;
   category: string;
-  image?: string;
   available: boolean;
 }
