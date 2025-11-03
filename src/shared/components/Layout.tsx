@@ -1,9 +1,19 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export function Layout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const onLogout = async () => {
+    await logout();
+    navigate("/login", { replace: true });
+  };
+
+  const isLogin = location.pathname === "/login";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -16,7 +26,8 @@ export function Layout() {
                   🍕 Devlivery
                 </h1>
               </div>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+              {!isLogin && (
+                <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <Link
                   to="/"
                   className={`${
@@ -47,7 +58,33 @@ export function Layout() {
                 >
                   Pedidos
                 </Link>
-              </div>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center space-x-4">
+              {isAuthenticated ? (
+                <>
+                  <span className="text-sm text-gray-700 hidden sm:inline">
+                    Olá, {user?.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={onLogout}
+                    className="text-sm text-gray-600 hover:text-gray-900"
+                  >
+                    Sair
+                  </button>
+                </>
+              ) : (
+                !isLogin && (
+                  <Link
+                    to="/login"
+                    className="text-sm text-gray-600 hover:text-gray-900"
+                  >
+                    Entrar
+                  </Link>
+                )
+              )}
             </div>
           </div>
         </div>
