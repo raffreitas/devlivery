@@ -1,9 +1,20 @@
+using Devlivery.WebApi.Features.Products.Commands.CreateProduct;
+using Devlivery.WebApi.Features.Products.Commands.DeleteProduct;
+using Devlivery.WebApi.Features.Products.Commands.UpdateProduct;
+using Devlivery.WebApi.Features.Products.Queries.GetAllProducts;
+using Devlivery.WebApi.Features.Products.Queries.GetProductById;
+
 namespace Devlivery.WebApi.Features.Products;
 
 public static class ProductFeature
 {
     public static IServiceCollection AddProductFeature(this IServiceCollection services)
     {
+        services.AddScoped<CreateProductHandler>();
+        services.AddScoped<DeleteProductHandler>();
+        services.AddScoped<UpdateProductHandler>();
+        services.AddScoped<GetAllProductsHandler>();
+        services.AddScoped<GetProductByIdHandler>();
         return services;
     }
 
@@ -11,11 +22,11 @@ public static class ProductFeature
     {
         var group = app.MapGroup("/api/products").WithTags("Products");
 
-        group.MapGet("", GetAllProducts.Handle);
-        group.MapGet("{id:guid}", GetProductById.Handle);
-        group.MapPost("", CreateProduct.Handle);
-        group.MapPut("{id:guid}", UpdateProduct.Handle);
-        group.MapDelete("{id:guid}", DeleteProduct.Handle);
+        CreateProductEndpoint.MapEndpoint(group);
+        DeleteProductEndpoint.MapEndpoint(group);
+        UpdateProductEndpoint.MapEndpoint(group);
+        GetAllProductsEndpoint.MapEndpoint(group);
+        GetProductByIdEndpoint.MapEndpoint(group);
 
         return app;
     }

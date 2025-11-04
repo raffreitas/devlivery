@@ -1,4 +1,8 @@
 ﻿using Devlivery.WebApi.Features.Orders.Commands.CreateOrder;
+using Devlivery.WebApi.Features.Orders.Commands.DeleteOrder;
+using Devlivery.WebApi.Features.Orders.Commands.UpdateOrderStatus;
+using Devlivery.WebApi.Features.Orders.Queries.GetAllOrders;
+using Devlivery.WebApi.Features.Orders.Queries.GetOrderById;
 
 namespace Devlivery.WebApi.Features.Orders;
 
@@ -7,6 +11,10 @@ public static class OrdersFeature
     public static IServiceCollection AddOrderFeature(this IServiceCollection services)
     {
         services.AddScoped<CreateOrderHandler>();
+        services.AddScoped<DeleteOrderHandler>();
+        services.AddScoped<UpdateOrderStatusHandler>();
+        services.AddScoped<GetAllOrdersHandler>();
+        services.AddScoped<GetOrderByIdHandler>();
         return services;
     }
 
@@ -15,10 +23,10 @@ public static class OrdersFeature
         var group = app.MapGroup("/api/orders").WithTags("Orders");
 
         CreateOrderEndpoint.MapEndpoint(group);
-        group.MapGet("", GetAllOrders.Handle);
-        group.MapGet("{id:guid}", GetOrderById.Handle);
-        group.MapPatch("{id:guid}/status", UpdateOrderStatus.Handle);
-        group.MapDelete("{id:guid}", DeleteOrder.Handle);
+        DeleteOrderEndpoint.MapEndpoint(group);
+        UpdateOrderStatusEndpoint.MapEndpoint(group);
+        GetAllOrdersEndpoint.MapEndpoint(group);
+        GetOrderByIdEndpoint.MapEndpoint(group);
 
         return app;
     }

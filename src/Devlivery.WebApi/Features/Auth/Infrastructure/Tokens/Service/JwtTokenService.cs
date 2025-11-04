@@ -1,28 +1,26 @@
 ﻿using System.Security.Claims;
 using System.Text;
-using Devlivery.WebApi.Features.Users.Domain;
-using Devlivery.WebApi.Shared.Abstractions;
-using Devlivery.WebApi.Shared.Infrastructure.Tokens.Settings;
-using FluentResults;
+using Devlivery.WebApi.Features.Auth.Abstractions;
+using Devlivery.WebApi.Features.Auth.Infrastructure.Tokens.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Devlivery.WebApi.Shared.Infrastructure.Tokens.Service;
+namespace Devlivery.WebApi.Features.Auth.Infrastructure.Tokens.Service;
 
 internal sealed class JwtTokenService(IOptions<JwtTokenSettings> options) : ITokenService
 {
     private readonly JwtTokenSettings _settings = options.Value;
 
-    public Task<string> GenerateTokenAsync(User user, CancellationToken cancellationToken = default)
+    public Task<string> GenerateTokenAsync(TokenRequest tokenRequest, CancellationToken cancellationToken = default)
     {
         var signinKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_settings.SecretKey));
         var credentials = new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256);
 
         List<Claim> claims =
         [
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email),
+            new(JwtRegisteredClaimNames.Sub, tokenRequest.SubjectId),
+            new(JwtRegisteredClaimNames.Email, tokenRequest.Email),
         ];
 
         var tokenDescriptor = new SecurityTokenDescriptor

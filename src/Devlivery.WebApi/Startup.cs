@@ -7,7 +7,6 @@ using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
 using Devlivery.WebApi.Shared.Infrastructure.Database.Seeder;
 using Devlivery.WebApi.Shared.Infrastructure.Identity;
 using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
-using Devlivery.WebApi.Shared.Infrastructure.Tokens;
 using Devlivery.WebApi.Shared.Presentation;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -32,11 +31,11 @@ public static class Startup
         // Shared Infrastructure
         builder.Services.AddIdentityFeature(builder.Configuration);
         builder.Services.AddDatabaseFeature(builder.Configuration);
-        builder.Services.AddTokensFeature(builder.Configuration);
 
-        // Application Features
-        builder.Services.AddAuthFeature();
+        // Features
+        builder.Services.AddAuthFeature(builder.Configuration);
         builder.Services.AddOrderFeature();
+        builder.Services.AddProductFeature();
 
         // CORS
         builder.Services.AddCors(options =>

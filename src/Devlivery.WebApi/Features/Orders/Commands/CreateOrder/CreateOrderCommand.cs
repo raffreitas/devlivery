@@ -10,7 +10,7 @@ public sealed record CreateOrderCommand(
 
 public sealed record OrderItemDto(Guid ProductId, int Quantity, string? Notes);
 
-public class Validator : AbstractValidator<CreateOrderCommand>
+public sealed class Validator : AbstractValidator<CreateOrderCommand>
 {
     public Validator()
     {

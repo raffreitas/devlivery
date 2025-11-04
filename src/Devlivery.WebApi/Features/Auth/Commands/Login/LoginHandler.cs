@@ -1,4 +1,4 @@
-﻿using Devlivery.WebApi.Shared.Abstractions;
+﻿using Devlivery.WebApi.Features.Auth.Abstractions;
 using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
 using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
 using FluentResults;
@@ -31,7 +31,8 @@ public sealed class LoginHandler(
         if (!signInResult.Succeeded)
             return Result.Fail("Invalid credentials");
 
-        var token = await tokenService.GenerateTokenAsync(user, cancellationToken);
+        var tokenRequest = new TokenRequest(user.Id.ToString(), user.Email);
+        var token = await tokenService.GenerateTokenAsync(tokenRequest, cancellationToken);
 
         return new LoginResponse(user.Id, user.Name, token);
     }
