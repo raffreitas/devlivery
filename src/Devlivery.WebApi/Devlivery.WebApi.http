@@ -1,0 +1,80 @@
+@Devlivery.WebApi_HostAddress = http://localhost:5000
+
+### Login
+POST {{Devlivery.WebApi_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@pizza.com",
+  "password": "123456"
+}
+
+### Get All Products
+GET {{Devlivery.WebApi_HostAddress}}/api/products
+
+### Get Product By Id
+GET {{Devlivery.WebApi_HostAddress}}/api/products/{{productId}}
+
+### Create Product
+POST {{Devlivery.WebApi_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+  "name": "Pizza Portuguesa",
+  "description": "Molho de tomate, mussarela, presunto, ovos, cebola e azeitonas",
+  "price": 42.00,
+  "category": "Pizza",
+  "available": true
+}
+
+### Update Product
+PUT {{Devlivery.WebApi_HostAddress}}/api/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Pizza Portuguesa",
+  "description": "Molho de tomate, mussarela, presunto, ovos, cebola e azeitonas",
+  "price": 45.00,
+  "category": "Pizza",
+  "available": true
+}
+
+### Delete Product
+DELETE {{Devlivery.WebApi_HostAddress}}/api/products/{{productId}}
+
+### Get All Orders
+GET {{Devlivery.WebApi_HostAddress}}/api/orders
+
+### Get Order By Id
+GET {{Devlivery.WebApi_HostAddress}}/api/orders/{{orderId}}
+
+### Create Order
+POST {{Devlivery.WebApi_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "productId": "{{productId}}",
+      "quantity": 2,
+      "notes": "Sem cebola"
+    }
+  ],
+  "customerName": "João Silva",
+  "customerPhone": "(11) 98765-4321",
+  "deliveryAddress": "Rua das Flores, 123 - Centro"
+}
+
+### Update Order Status
+PATCH {{Devlivery.WebApi_HostAddress}}/api/orders/{{orderId}}/status
+Content-Type: application/json
+
+{
+  "status": "preparing"
+}
+
+### Delete Order
+DELETE {{Devlivery.WebApi_HostAddress}}/api/orders/{{orderId}}
+
+### Get Dashboard Stats
+GET {{Devlivery.WebApi_HostAddress}}/api/dashboard/stats
