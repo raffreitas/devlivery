@@ -112,9 +112,9 @@ O workflow `main-build-deploy.yml` gera **migration bundles** durante o build:
 Para ativar a aplicação automática de migrations em produção:
 
 1. **Descomente** o job `apply-migrations` no workflow
-2. **Configure** os secrets no GitHub:
-   - `DATABASE_CONNECTION_STRING` - ApplicationDbContext
-   - `IDENTITY_CONNECTION_STRING` - ApplicationIdentityDbContext
+2. **Configure** o secret no GitHub:
+   - `DATABASE_CONNECTION_STRING` - Usado para ambos ApplicationDbContext e ApplicationIdentityDbContext
+   <!-- Apenas um secret é necessário; ambos os DbContexts usam o mesmo connection string. -->
 
 ```yaml
 apply-migrations:
