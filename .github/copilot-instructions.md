@@ -135,6 +135,8 @@ app.MapMyFeatureEndpoints();
 
 Both use **PostgreSQL with snake_case naming** via `UseSnakeCaseNamingConvention()`.
 
+**Same connection string for both**: Both contexts use `ConnectionStrings:DefaultConnection` from config. The separation is logical (different DbContexts), not physical (different databases).
+
 ### Using Makefile (preferred)
 ```bash
 # Create application migration
@@ -163,7 +165,7 @@ dotnet ef database update -c ApplicationDbContext
 
 ### Running locally
 ```bash
-# Start PostgreSQL
+# Start PostgreSQL (uses docker-compose.yml)
 docker-compose up -d
 
 # Run the API
@@ -173,13 +175,25 @@ dotnet run --project src/Devlivery.WebApi
 # Swagger/Scalar UI at /scalar/v1
 ```
 
-**Auto-migration**: In Development mode, `Startup.ConfigureApp()` automatically runs migrations and seeds data on startup.
+**Auto-migration**: In Development mode, `Startup.ConfigureApp()` automatically runs migrations and seeds data on startup. Both contexts are migrated.
+
+**Database**: PostgreSQL container `devlivery-postgres` on port 5432, database name `devlivery`.
 
 ### Test credentials
 ```
 Email: admin@pizza.com
 Password: 123456
 ```
+
+### CI/CD Pipeline
+`.github/workflows/main-build-deploy.yml` triggers on pushes to `main` branch:
+1. Builds solution, runs tests (if any exist)
+2. Creates version tag: `vYYYY.MM.DD-{short-sha}` (e.g., `v2025.11.04-a1b2c3d`)
+3. Builds Docker image, pushes to GitHub Container Registry with tags: `latest`, version tag, and branch-SHA
+4. Creates GitHub Release with version tag
+5. **Applies migrations to production** using `DATABASE_CONNECTION_STRING` secret
+
+**Critical**: Migrations run automatically on main branch. No manual migration needed for production.
 
 ## Critical Patterns & Conventions
 
@@ -233,10 +247,14 @@ JWT tokens configured in `Features/Auth/AuthFeature.cs`:
 ## Common Gotchas
 
 1. **Two DbContexts**: Remember to specify `-c ApplicationDbContext` or `-c ApplicationIdentityDbContext` in EF commands
-2. **Validators must be registered**: FluentValidation auto-scans via `AddValidatorsFromAssemblyContaining<Program>()`
-3. **Handler registration**: Each handler must be manually registered in the Feature file's `AddScoped<>()` calls
-4. **CancellationToken**: Always pass through to async DB operations
-5. **UTC timestamps**: Always use `DateTime.UtcNow` for `CreatedAt`/`UpdatedAt`
+2. **Same connection string**: Both contexts use `DefaultConnection` - they share the same database, not separate ones
+3. **Validators must be registered**: FluentValidation auto-scans via `AddValidatorsFromAssemblyContaining<Program>()`
+4. **Handler registration**: Each handler must be manually registered in the Feature file's `AddScoped<>()` calls
+5. **Endpoint registration order**: Call `Add[Feature]Feature()` in `Startup.ConfigureBuilder()`, then `Map[Feature]Endpoints()` in `Startup.ConfigureApp()`
+6. **CancellationToken**: Always pass through to async DB operations
+7. **UTC timestamps**: Always use `DateTime.UtcNow` for `CreatedAt`/`UpdatedAt`
+8. **Validation in endpoints**: Validation is NOT automatic - must explicitly call `validator.ValidateAsync()` in each endpoint
+9. **FluentResults pattern**: Return `Result.Ok()` or `Result.Fail()`, never throw exceptions for business logic
 
 ## Example Features to Reference
 
