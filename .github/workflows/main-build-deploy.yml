@@ -148,6 +148,9 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
+      - name: Build for migrations
+        run: dotnet build --no-restore --configuration Release
+
       - name: Install EF Core tools
         run: dotnet tool install --global dotnet-ef || dotnet tool update --global dotnet-ef
 
@@ -156,11 +159,11 @@ jobs:
           ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}
         run: |
           cd src/Devlivery.WebApi
-          dotnet ef database update -c ApplicationDbContext --no-build
+          dotnet ef database update -c ApplicationDbContext --configuration Release
 
       - name: Apply ApplicationIdentityDbContext migrations
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}
         run: |
           cd src/Devlivery.WebApi
-          dotnet ef database update -c ApplicationIdentityDbContext --no-build
+          dotnet ef database update -c ApplicationIdentityDbContext --configuration Release
