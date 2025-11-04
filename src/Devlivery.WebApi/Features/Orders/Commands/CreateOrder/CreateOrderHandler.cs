@@ -1,0 +1,59 @@
+﻿using Devlivery.WebApi.Features.Orders.Domain;
+using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
+using FluentResults;
+using Microsoft.EntityFrameworkCore;
+
+namespace Devlivery.WebApi.Features.Orders.Commands.CreateOrder;
+
+public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
+{
+    public async Task<Result<CreateOrderResponse>> HandleAsync(
+        CreateOrderCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
+        var products = await dbContext.Products
+            .Where(p => productIds.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+
+        if (products.Count != productIds.Count)
+        {
+            return Result.Fail("Um ou mais produtos não foram encontrados");
+        }
+
+        var total = command.Items.Sum(item =>
+        {
+            var product = products.First(p => p.Id == item.ProductId);
+            return product.Price * item.Quantity;
+        });
+
+        var now = DateTime.UtcNow;
+        var order = new Order
+        {
+            Id = Guid.CreateVersion7(),
+            CustomerName = command.CustomerName,
+            CustomerPhone = command.CustomerPhone,
+            DeliveryAddress = command.DeliveryAddress,
+            Status = "pending",
+            Total = total,
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        var orderItems = command.Items.Select(item => new OrderItem
+        {
+            Id = Guid.CreateVersion7(),
+            OrderId = order.Id,
+            ProductId = item.ProductId,
+            Quantity = item.Quantity,
+            Notes = item.Notes
+        }).ToList();
+
+        order.Items = orderItems;
+
+        dbContext.Orders.Add(order);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Ok(new CreateOrderResponse());
+    }
+}

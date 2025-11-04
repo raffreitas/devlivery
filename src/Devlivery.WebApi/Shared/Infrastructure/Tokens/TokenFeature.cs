@@ -1,5 +1,7 @@
 ﻿using System.Text;
+using Devlivery.WebApi.Shared.Abstractions;
 using Devlivery.WebApi.Shared.Extensions;
+using Devlivery.WebApi.Shared.Infrastructure.Tokens.Service;
 using Devlivery.WebApi.Shared.Infrastructure.Tokens.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -32,6 +34,8 @@ public static class TokenFeature
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.SecretKey))
                 };
             });
+
+        services.AddScoped<ITokenService, JwtTokenService>();
 
         services.AddAuthorization();
 

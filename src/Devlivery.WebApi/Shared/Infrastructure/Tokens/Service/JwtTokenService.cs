@@ -14,7 +14,7 @@ internal sealed class JwtTokenService(IOptions<JwtTokenSettings> options) : ITok
 {
     private readonly JwtTokenSettings _settings = options.Value;
 
-    public Task<Result<string>> GenerateTokenAsync(User user, CancellationToken cancellationToken = default)
+    public Task<string> GenerateTokenAsync(User user, CancellationToken cancellationToken = default)
     {
         var signinKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_settings.SecretKey));
         var credentials = new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256);
@@ -37,6 +37,6 @@ internal sealed class JwtTokenService(IOptions<JwtTokenSettings> options) : ITok
         var tokenHandler = new JsonWebTokenHandler();
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
 
-        return Task.FromResult(Result.Ok(accessToken));
+        return Task.FromResult(accessToken);
     }
 }

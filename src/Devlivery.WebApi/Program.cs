@@ -1,9 +1,8 @@
 using Devlivery.WebApi;
 
 // TODO:
-// [ ] - Refatorar slices
-// [x] - ADD ASP.NET Identity
-// [ ] - JWT Authentication
+// [x] - JWT Authentication
+// [ ] - Refatorar Slices
 // [ ] - Configura CI/CD
 // [ ] - Integrar com Front
 

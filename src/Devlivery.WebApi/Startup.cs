@@ -36,6 +36,7 @@ public static class Startup
 
         // Application Features
         builder.Services.AddAuthFeature();
+        builder.Services.AddOrderFeature();
 
         // CORS
         builder.Services.AddCors(options =>

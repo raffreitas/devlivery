@@ -1,4 +1,5 @@
-﻿using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
+﻿using Devlivery.WebApi.Shared.Abstractions;
+using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
 using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
 using FluentResults;
 using Microsoft.AspNetCore.Identity;
@@ -9,7 +10,8 @@ namespace Devlivery.WebApi.Features.Auth.Commands.Login;
 public sealed class LoginHandler(
     ApplicationDbContext dbContext,
     SignInManager<ApplicationUser> signInManager,
-    UserManager<ApplicationUser> userManager)
+    UserManager<ApplicationUser> userManager,
+    ITokenService tokenService)
 {
     public async Task<Result<LoginResponse>> HandleAsync(
         LoginCommand request,
@@ -29,7 +31,8 @@ public sealed class LoginHandler(
         if (!signInResult.Succeeded)
             return Result.Fail("Invalid credentials");
 
-        var token = $"mock-token-{Guid.NewGuid()}";
+        var token = await tokenService.GenerateTokenAsync(user, cancellationToken);
+
         return new LoginResponse(user.Id, user.Name, token);
     }
 }

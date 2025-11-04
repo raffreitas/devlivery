@@ -1,7 +1,12 @@
 namespace Devlivery.WebApi.Features.Products;
 
-public static class ProductEndpoints
+public static class ProductFeature
 {
+    public static IServiceCollection AddProductFeature(this IServiceCollection services)
+    {
+        return services;
+    }
+
     public static IEndpointRouteBuilder MapProductEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/products").WithTags("Products");
