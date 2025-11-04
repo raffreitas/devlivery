@@ -8,6 +8,7 @@ using Devlivery.WebApi.Shared.Infrastructure.Database.Seeder;
 using Devlivery.WebApi.Shared.Infrastructure.Identity;
 using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
 using Devlivery.WebApi.Shared.Infrastructure.Tokens;
+using Devlivery.WebApi.Shared.Presentation;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,10 @@ public static class Startup
         // Validators
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+        builder.Services.AddProblemDetails();
+
+        // OpenAPI
         builder.Services.AddOpenApi();
 
         // Shared Infrastructure

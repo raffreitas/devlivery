@@ -22,7 +22,6 @@ public sealed class LoginHandler(
             return Result.Fail("Invalid credentials");
 
         var identityUser = await userManager.FindByEmailAsync(user.Email);
-
         if (identityUser is null)
             return Result.Fail("Invalid credentials");
 

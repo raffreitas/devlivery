@@ -6,7 +6,7 @@ public static class LoginEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/auth/login", async (IValidator<LoginCommand> validator, LoginCommand command,
+        app.MapPost("/login", async (IValidator<LoginCommand> validator, LoginCommand command,
                 LoginHandler handler, CancellationToken ct) =>
             {
                 var validationResult = await validator.ValidateAsync(command, ct);
@@ -16,12 +16,14 @@ public static class LoginEndpoint
                 }
 
                 var result = await handler.HandleAsync(command, ct);
-
-                return Results.Ok(result);
+                return result.IsSuccess
+                    ? Results.Ok(result.Value)
+                    : Results.Unauthorized();
             })
             .WithTags("Auth")
             .WithName("Login")
-            .Produces<LoginResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest);
+            .Produces<LoginResponse>()
+            .ProducesValidationProblem()
+            .Produces(StatusCodes.Status401Unauthorized);
     }
 }
