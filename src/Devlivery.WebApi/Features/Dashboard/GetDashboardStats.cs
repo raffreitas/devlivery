@@ -1,4 +1,6 @@
 using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
+using Devlivery.WebApi.Shared.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Features.Dashboard;
@@ -12,7 +14,7 @@ public static class GetDashboardStats
         int DeliveredOrders,
         decimal AverageOrderValue);
 
-    public static async Task<IResult> Handle(ApplicationDbContext db)
+    public static async Task<Ok<ApiResponse<Response>>> Handle(ApplicationDbContext db)
     {
         var orders = await db.Orders.ToListAsync();
 
@@ -36,6 +38,6 @@ public static class GetDashboardStats
             deliveredOrders,
             averageOrderValue);
 
-        return Results.Ok(response);
+        return TypedResults.Ok(ApiResponse<Response>.Ok(response, "Dashboard statistics retrieved successfully"));
     }
 }

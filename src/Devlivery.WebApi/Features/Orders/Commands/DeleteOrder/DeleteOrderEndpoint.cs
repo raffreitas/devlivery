@@ -1,4 +1,7 @@
+using Devlivery.WebApi.Shared.Extensions;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.WebApi.Features.Orders.Commands.DeleteOrder;
 
@@ -6,28 +9,30 @@ public static class DeleteOrderEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("{id:guid}", async (
-            Guid id,
-            IValidator<DeleteOrderCommand> validator,
-            DeleteOrderHandler handler,
-            CancellationToken ct) =>
+        app.MapDelete("{id:guid}", Handle)
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+    }
+
+    private static async Task<Results<NoContent, ValidationProblem, NotFound<ProblemDetails>>> Handle(
+        Guid id,
+        IValidator<DeleteOrderCommand> validator,
+        DeleteOrderHandler handler,
+        CancellationToken ct)
+    {
+        var command = new DeleteOrderCommand(id);
+        
+        var validationResult = await validator.ValidateAsync(command, ct);
+        if (!validationResult.IsValid)
         {
-            var command = new DeleteOrderCommand(id);
-            
-            var validationResult = await validator.ValidateAsync(command, ct);
-            if (!validationResult.IsValid)
-            {
-                return Results.ValidationProblem(validationResult.ToDictionary());
-            }
+            return validationResult.ToValidationProblem();
+        }
 
-            var result = await handler.HandleAsync(command, ct);
-            
-            if (result.IsFailed)
-            {
-                return Results.NotFound(new { message = result.Errors[0].Message });
-            }
+        var result = await handler.HandleAsync(command, ct);
 
-            return Results.NoContent();
-        });
+        return result.IsSuccess
+            ? result.ToNoContent()
+            : result.ToNotFoundProblem();
     }
 }

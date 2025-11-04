@@ -1,4 +1,8 @@
+using Devlivery.WebApi.Shared.Extensions;
+using Devlivery.WebApi.Shared.Models;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.WebApi.Features.Products.Queries.GetProductById;
 
@@ -6,25 +10,30 @@ public static class GetProductByIdEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("{id:guid}", async (
-            Guid id,
-            IValidator<GetProductByIdQuery> validator,
-            GetProductByIdHandler handler,
-            CancellationToken ct) =>
+        app.MapGet("{id:guid}", Handle)
+            .Produces<ApiResponse<GetProductByIdResponse>>(StatusCodes.Status200OK)
+            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+    }
+
+    private static async Task<Results<Ok<ApiResponse<GetProductByIdResponse>>, ValidationProblem, NotFound<ProblemDetails>>> Handle(
+        Guid id,
+        IValidator<GetProductByIdQuery> validator,
+        GetProductByIdHandler handler,
+        CancellationToken ct)
+    {
+        var query = new GetProductByIdQuery(id);
+
+        var validationResult = await validator.ValidateAsync(query, ct);
+        if (!validationResult.IsValid)
         {
-            var query = new GetProductByIdQuery(id);
+            return validationResult.ToValidationProblem();
+        }
 
-            var validationResult = await validator.ValidateAsync(query, ct);
-            if (!validationResult.IsValid)
-            {
-                return Results.ValidationProblem(validationResult.ToDictionary());
-            }
+        var result = await handler.HandleAsync(query, ct);
 
-            var result = await handler.HandleAsync(query, ct);
-
-            return result.IsFailed
-                ? Results.NotFound(new { message = result.Errors[0].Message })
-                : Results.Ok(result.Value);
-        });
+        return result.IsSuccess
+            ? result.ToOk("Product retrieved successfully")
+            : result.ToNotFoundProblem();
     }
 }

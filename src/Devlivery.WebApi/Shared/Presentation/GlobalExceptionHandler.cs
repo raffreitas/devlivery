@@ -15,12 +15,16 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
         var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status500InternalServerError,
-            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1",
-                    Title = "An unexpected error occurred. Please contact support with the provided request ID."
+            Title = "Internal Server Error",
+            Detail = "An unexpected error occurred. Please contact support with the provided trace ID.",
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+            Instance = httpContext.Request.Path
         };
-        problemDetails.Extensions["requestId"] = httpContext.TraceIdentifier;
+        
+        problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
+        problemDetails.Extensions["timestamp"] = DateTime.UtcNow;
 
-        httpContext.Response.StatusCode = problemDetails.Status.Value;
+        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
