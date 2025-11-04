@@ -1,4 +1,8 @@
+using Devlivery.WebApi.Shared.Extensions;
+using Devlivery.WebApi.Shared.Models;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.WebApi.Features.Products.Commands.UpdateProduct;
 
@@ -13,35 +17,37 @@ public static class UpdateProductEndpoint
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("{id:guid}", async (
-            Guid id,
-            Request request,
-            IValidator<UpdateProductCommand> validator,
-            UpdateProductHandler handler,
-            CancellationToken ct) =>
+        app.MapPut("{id:guid}", Handle)
+            .Produces<ApiResponse<UpdateProductResponse>>(StatusCodes.Status200OK)
+            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+    }
+
+    private static async Task<Results<Ok<ApiResponse<UpdateProductResponse>>, ValidationProblem, NotFound<ProblemDetails>>> Handle(
+        Guid id,
+        Request request,
+        IValidator<UpdateProductCommand> validator,
+        UpdateProductHandler handler,
+        CancellationToken ct)
+    {
+        var command = new UpdateProductCommand(
+            id,
+            request.Name,
+            request.Description,
+            request.Price,
+            request.Category,
+            request.Available);
+        
+        var validationResult = await validator.ValidateAsync(command, ct);
+        if (!validationResult.IsValid)
         {
-            var command = new UpdateProductCommand(
-                id,
-                request.Name,
-                request.Description,
-                request.Price,
-                request.Category,
-                request.Available);
-            
-            var validationResult = await validator.ValidateAsync(command, ct);
-            if (!validationResult.IsValid)
-            {
-                return Results.ValidationProblem(validationResult.ToDictionary());
-            }
+            return validationResult.ToValidationProblem();
+        }
 
-            var result = await handler.HandleAsync(command, ct);
-            
-            if (result.IsFailed)
-            {
-                return Results.NotFound(new { message = result.Errors[0].Message });
-            }
+        var result = await handler.HandleAsync(command, ct);
 
-            return Results.Ok(result.Value);
-        });
+        return result.IsSuccess
+            ? result.ToOk("Product updated successfully")
+            : result.ToNotFoundProblem();
     }
 }

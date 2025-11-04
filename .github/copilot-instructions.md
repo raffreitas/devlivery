@@ -64,36 +64,42 @@ public sealed class DoSomethingHandler(ApplicationDbContext dbContext)
 }
 ```
 
-### 4. Create Endpoint with manual validation
+### 4. Create Endpoint with Typed Results and Problem Details
 ```csharp
 // DoSomethingEndpoint.cs
+using Devlivery.WebApi.Shared.Extensions;
+using Devlivery.WebApi.Shared.Models;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 public static class DoSomethingEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/do-something", async (
-            IValidator<DoSomethingCommand> validator,
-            DoSomethingCommand request,
-            DoSomethingHandler handler,
-            CancellationToken ct) =>
+        app.MapPost("/do-something", Handle)
+            .Produces<ApiResponse<DoSomethingResponse>>(StatusCodes.Status201Created)
+            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+    }
+
+    private static async Task<Results<Created<ApiResponse<DoSomethingResponse>>, ValidationProblem, BadRequest<ProblemDetails>>> Handle(
+        DoSomethingCommand request,
+        IValidator<DoSomethingCommand> validator,
+        DoSomethingHandler handler,
+        CancellationToken ct)
+    {
+        var validationResult = await validator.ValidateAsync(request, ct);
+        if (!validationResult.IsValid)
         {
-            var validationResult = await validator.ValidateAsync(request, ct);
-            if (!validationResult.IsValid)
-            {
-                return Results.ValidationProblem(validationResult.ToDictionary());
-            }
+            return validationResult.ToValidationProblem();
+        }
 
-            var result = await handler.HandleAsync(request, ct);
-            
-            if (result.IsFailed)
-            {
-                return Results.Problem(result.Errors[0].Message);
-            }
+        var result = await handler.HandleAsync(request, ct);
 
-            return Results.Created($"/api/my-feature/{result.Value.Id}", result.Value);
-        });
+        return result.IsSuccess
+            ? result.ToCreated($"/api/my-feature/{result.Value.Id}", "Resource created successfully")
+            : result.ToBadRequestProblem();
     }
 }
 ```
@@ -135,6 +141,8 @@ app.MapMyFeatureEndpoints();
 
 Both use **PostgreSQL with snake_case naming** via `UseSnakeCaseNamingConvention()`.
 
+**Same connection string for both**: Both contexts use `ConnectionStrings:DefaultConnection` from config. The separation is logical (different DbContexts), not physical (different databases).
+
 ### Using Makefile (preferred)
 ```bash
 # Create application migration
@@ -163,7 +171,7 @@ dotnet ef database update -c ApplicationDbContext
 
 ### Running locally
 ```bash
-# Start PostgreSQL
+# Start PostgreSQL (uses docker-compose.yml)
 docker-compose up -d
 
 # Run the API
@@ -173,7 +181,9 @@ dotnet run --project src/Devlivery.WebApi
 # Swagger/Scalar UI at /scalar/v1
 ```
 
-**Auto-migration**: In Development mode, `Startup.ConfigureApp()` automatically runs migrations and seeds data on startup.
+**Auto-migration**: In Development mode, `Startup.ConfigureApp()` automatically runs migrations and seeds data on startup. Both contexts are migrated.
+
+**Database**: PostgreSQL container `devlivery-postgres` on port 5432, database name `devlivery`.
 
 ### Test credentials
 ```
@@ -181,15 +191,73 @@ Email: admin@pizza.com
 Password: 123456
 ```
 
+### CI/CD Pipeline
+`.github/workflows/main-build-deploy.yml` triggers on pushes to `main` branch:
+1. Builds solution, runs tests (if any exist)
+2. Creates version tag: `vYYYY.MM.DD-{short-sha}` (e.g., `v2025.11.04-a1b2c3d`)
+3. Builds Docker image, pushes to GitHub Container Registry with tags: `latest`, version tag, and branch-SHA
+4. Creates GitHub Release with version tag
+5. **Applies migrations to production** using `DATABASE_CONNECTION_STRING` secret
+
+**Critical**: Migrations run automatically on main branch. No manual migration needed for production.
+
 ## Critical Patterns & Conventions
 
-### 1. Dependency Injection via Constructor
+### 1. API Response Pattern (CRITICAL)
+All endpoints MUST follow the standardized response pattern:
+
+**Typed Results**: Use ASP.NET Core Typed Results for explicit status codes
+```csharp
+Task<Results<Ok<ApiResponse<T>>, ValidationProblem, NotFound<ProblemDetails>>> Handle(...)
+```
+
+**Success responses**: Wrap data in `ApiResponse<T>`
+```csharp
+return result.ToOk("Operation successful");
+return result.ToCreated($"/api/resource/{id}", "Resource created");
+return result.ToNoContent(); // for DELETE
+```
+
+**Error responses**: Use Problem Details (RFC 7807)
+```csharp
+return validationResult.ToValidationProblem();  // 400 with validation errors
+return result.ToBadRequestProblem();            // 400 with business error
+return result.ToNotFoundProblem();              // 404 resource not found
+```
+
+**Available extension methods**:
+- `ToOk<T>(message)` - 200 OK with ApiResponse
+- `ToCreated<T>(uri, message)` - 201 Created with ApiResponse
+- `ToNoContent()` - 204 No Content
+- `ToBadRequestProblem()` - 400 Bad Request with ProblemDetails
+- `ToNotFoundProblem()` - 404 Not Found with ProblemDetails
+- `ToValidationProblem()` - 400 with validation errors
+
+**Endpoint structure pattern**:
+```csharp
+public static void MapEndpoint(IEndpointRouteBuilder app)
+{
+    app.MapGet("{id:guid}", Handle)
+        .Produces<ApiResponse<ProductResponse>>(StatusCodes.Status200OK)
+        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+        .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+}
+
+private static async Task<Results<Ok<ApiResponse<ProductResponse>>, ValidationProblem, NotFound<ProblemDetails>>> Handle(...)
+{
+    // Implementation
+}
+```
+
+See `docs/API-RESPONSE-PATTERN.md` for complete documentation.
+
+### 2. Dependency Injection via Constructor
 Always use primary constructors for handlers:
 ```csharp
 public sealed class MyHandler(ApplicationDbContext dbContext, ILogger<MyHandler> logger)
 ```
 
-### 2. FluentResults for error handling
+### 3. FluentResults for error handling
 Never throw exceptions for business logic failures. Use `Result<T>`:
 ```csharp
 if (product is null)
@@ -198,22 +266,22 @@ if (product is null)
 return Result.Ok(response);
 ```
 
-### 3. Manual validation in endpoints
+### 4. Manual validation in endpoints
 Unlike some CQRS frameworks, validation is **explicitly called** in each endpoint:
 ```csharp
 var validationResult = await validator.ValidateAsync(request, ct);
 if (!validationResult.IsValid)
-    return Results.ValidationProblem(validationResult.ToDictionary());
+    return validationResult.ToValidationProblem();
 ```
 
-### 4. Configuration extensions
+### 5. Configuration extensions
 Use custom extensions for safe config retrieval:
 ```csharp
 var connString = configuration.GetConnectionStringOrThrow("DefaultConnection");
 var settings = configuration.GetOrThrow<JwtTokenSettings>(JwtTokenSettings.SectionName);
 ```
 
-### 5. Feature-based service registration
+### 6. Feature-based service registration
 Each feature has `Add[Feature]Feature()` and `Map[Feature]Endpoints()` extension methods.
 
 ## Shared Infrastructure
@@ -225,7 +293,20 @@ JWT tokens configured in `Features/Auth/AuthFeature.cs`:
 - Configured via `AddTokensConfiguration()` method
 
 ### Global Exception Handler
-`Shared/Presentation/GlobalExceptionHandler.cs` catches all unhandled exceptions and returns ProblemDetails with `requestId` for tracking.
+`Shared/Presentation/GlobalExceptionHandler.cs` catches all unhandled exceptions and returns RFC 7807 Problem Details with `traceId` for tracking.
+
+**Example error response**:
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+  "title": "Internal Server Error",
+  "status": 500,
+  "detail": "An unexpected error occurred. Please contact support with the provided trace ID.",
+  "instance": "/api/products/123",
+  "traceId": "00-1234567890abcdef-fedcba0987654321-00",
+  "timestamp": "2025-11-04T10:30:00Z"
+}
+```
 
 ### Database Seeder
 `Shared/Infrastructure/Database/Seeder/DatabaseSeeder.cs` runs automatically in Development to seed admin user and initial data.
@@ -233,10 +314,17 @@ JWT tokens configured in `Features/Auth/AuthFeature.cs`:
 ## Common Gotchas
 
 1. **Two DbContexts**: Remember to specify `-c ApplicationDbContext` or `-c ApplicationIdentityDbContext` in EF commands
-2. **Validators must be registered**: FluentValidation auto-scans via `AddValidatorsFromAssemblyContaining<Program>()`
-3. **Handler registration**: Each handler must be manually registered in the Feature file's `AddScoped<>()` calls
-4. **CancellationToken**: Always pass through to async DB operations
-5. **UTC timestamps**: Always use `DateTime.UtcNow` for `CreatedAt`/`UpdatedAt`
+2. **Same connection string**: Both contexts use `DefaultConnection` - they share the same database, not separate ones
+3. **Validators must be registered**: FluentValidation auto-scans via `AddValidatorsFromAssemblyContaining<Program>()`
+4. **Handler registration**: Each handler must be manually registered in the Feature file's `AddScoped<>()` calls
+5. **Endpoint registration order**: Call `Add[Feature]Feature()` in `Startup.ConfigureBuilder()`, then `Map[Feature]Endpoints()` in `Startup.ConfigureApp()`
+6. **CancellationToken**: Always pass through to async DB operations
+7. **UTC timestamps**: Always use `DateTime.UtcNow` for `CreatedAt`/`UpdatedAt`
+8. **Validation in endpoints**: Validation is NOT automatic - must explicitly call `validator.ValidateAsync()` in each endpoint
+9. **FluentResults pattern**: Return `Result.Ok()` or `Result.Fail()`, never throw exceptions for business logic
+10. **Typed Results**: Always use Typed Results (Results<Ok<T>, NotFound<P>>) for explicit status codes
+11. **Problem Details**: All errors must return RFC 7807 Problem Details format
+12. **ApiResponse wrapper**: All success responses must be wrapped in `ApiResponse<T>`
 
 ## Example Features to Reference
 

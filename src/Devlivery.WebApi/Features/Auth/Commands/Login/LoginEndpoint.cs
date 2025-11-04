@@ -1,4 +1,8 @@
-﻿using FluentValidation;
+﻿using Devlivery.WebApi.Shared.Extensions;
+using Devlivery.WebApi.Shared.Models;
+using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.WebApi.Features.Auth.Commands.Login;
 
@@ -6,24 +10,30 @@ public static class LoginEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/login", async (IValidator<LoginCommand> validator, LoginCommand command,
-                LoginHandler handler, CancellationToken ct) =>
-            {
-                var validationResult = await validator.ValidateAsync(command, ct);
-                if (!validationResult.IsValid)
-                {
-                    return Results.ValidationProblem(validationResult.ToDictionary());
-                }
-
-                var result = await handler.HandleAsync(command, ct);
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : Results.Unauthorized();
-            })
+        app.MapPost("/login", Handle)
             .WithTags("Auth")
             .WithName("Login")
-            .Produces<LoginResponse>()
-            .ProducesValidationProblem()
-            .Produces(StatusCodes.Status401Unauthorized);
+            .Produces<ApiResponse<LoginResponse>>(StatusCodes.Status200OK)
+            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized);
+    }
+
+    private static async Task<Results<Ok<ApiResponse<LoginResponse>>, ValidationProblem, UnauthorizedHttpResult>> Handle(
+        LoginCommand command,
+        IValidator<LoginCommand> validator,
+        LoginHandler handler,
+        CancellationToken ct)
+    {
+        var validationResult = await validator.ValidateAsync(command, ct);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationProblem();
+        }
+
+        var result = await handler.HandleAsync(command, ct);
+
+        return result.IsSuccess
+            ? result.ToOk("Login successful")
+            : TypedResults.Unauthorized();
     }
 }
