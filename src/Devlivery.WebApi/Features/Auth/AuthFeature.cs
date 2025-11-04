@@ -5,6 +5,7 @@ using Devlivery.WebApi.Features.Auth.Infrastructure.Tokens.Service;
 using Devlivery.WebApi.Features.Auth.Infrastructure.Tokens.Settings;
 using Devlivery.WebApi.Shared.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Devlivery.WebApi.Features.Auth;
@@ -14,9 +15,12 @@ public static class AuthFeature
     public static IServiceCollection AddAuthFeature(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<LoginHandler>();
-
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddTokensConfiguration(configuration);
+        services.AddAuthorizationBuilder()
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build());
         return services;
     }
 
@@ -44,8 +48,6 @@ public static class AuthFeature
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.SecretKey))
                 };
             });
-
-        services.AddAuthorization();
     }
 
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)

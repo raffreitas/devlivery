@@ -11,6 +11,7 @@ public static class LoginEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/login", Handle)
+            .AllowAnonymous()
             .WithTags("Auth")
             .WithName("Login")
             .Produces<ApiResponse<LoginResponse>>(StatusCodes.Status200OK)
