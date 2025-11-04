@@ -174,23 +174,47 @@ O projeto irá:
 
 ## 📊 Migrations
 
-### Criar uma nova migration
+O projeto utiliza **dois DbContexts separados**:
+- `ApplicationDbContext` - Dados da aplicação (Products, Orders)
+- `ApplicationIdentityDbContext` - Dados de autenticação (Users, Roles)
+
+### Comandos via Makefile (Recomendado)
 
 ```bash
-dotnet ef migrations add NomeDaMigration
+# Criar nova migration
+make migration-db VERSION=002           # ApplicationDbContext
+make migration-identity VERSION=002     # ApplicationIdentityDbContext
+
+# Aplicar migrations
+make migration-update-db                # ApplicationDbContext
+make migration-update-identity          # ApplicationIdentityDbContext
+
+# Verificar status
+make migration-status
 ```
 
-### Aplicar migrations
+### Scripts de Migration
 
 ```bash
-dotnet ef database update
+# Aplicar todas as migrations localmente
+./scripts/apply-migrations.sh          # Linux/macOS
+./scripts/apply-migrations.ps1         # Windows
+
+# Gerar migration bundles para CI/CD
+./scripts/generate-migration-bundle.sh
 ```
 
-### Reverter migration
+### EF Core direto (Alternativa)
 
 ```bash
-dotnet ef database update NomeDaMigrationAnterior
+# Criar migration
+dotnet ef migrations add v002 -o ./Shared/Infrastructure/Database/Migrations -c ApplicationDbContext
+
+# Aplicar migration
+dotnet ef database update -c ApplicationDbContext
 ```
+
+📘 **Para estratégias completas de migration em diferentes ambientes, consulte:** [docs/MIGRATIONS.md](docs/MIGRATIONS.md)
 
 ## ➕ Como Adicionar uma Nova Feature
 
