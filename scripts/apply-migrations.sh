@@ -13,9 +13,15 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Verificar se a connection string foi fornecida
+if [ -n "$DATABASE_CONNECTION_STRING" ]; then
+    echo -e "${YELLOW}ℹ️  Usando connection string da variável de ambiente${NC}"
+    export ConnectionStrings__DefaultConnection="$DATABASE_CONNECTION_STRING"
+fi
+
 echo ""
 echo -e "${YELLOW}📦 Aplicando migrations do ApplicationDbContext...${NC}"
-if dotnet ef database update -c ApplicationDbContext --project $PROJECT_DIR --no-build; then
+if dotnet ef database update -c ApplicationDbContext --project $PROJECT_DIR; then
     echo -e "${GREEN}✅ ApplicationDbContext atualizado com sucesso!${NC}"
 else
     echo -e "${RED}❌ Erro ao aplicar migrations do ApplicationDbContext${NC}"
@@ -24,7 +30,7 @@ fi
 
 echo ""
 echo -e "${YELLOW}🔐 Aplicando migrations do ApplicationIdentityDbContext...${NC}"
-if dotnet ef database update -c ApplicationIdentityDbContext --project $PROJECT_DIR --no-build; then
+if dotnet ef database update -c ApplicationIdentityDbContext --project $PROJECT_DIR; then
     echo -e "${GREEN}✅ ApplicationIdentityDbContext atualizado com sucesso!${NC}"
 else
     echo -e "${RED}❌ Erro ao aplicar migrations do ApplicationIdentityDbContext${NC}"

@@ -178,7 +178,18 @@ O projeto utiliza **dois DbContexts separados**:
 - `ApplicationDbContext` - Dados da aplicação (Products, Orders)
 - `ApplicationIdentityDbContext` - Dados de autenticação (Users, Roles)
 
-### Comandos via Makefile (Recomendado)
+### ✅ Configuração Atual: Automatizado via CI/CD
+
+As migrations são **aplicadas automaticamente** na branch `main` pelo GitHub Actions!
+
+**⚠️ Pré-requisito:** Configure o secret `DATABASE_CONNECTION_STRING` no GitHub antes do primeiro deploy:
+```bash
+GitHub → Settings → Secrets → New repository secret
+Name: DATABASE_CONNECTION_STRING
+Value: Host=prod-db;Port=5432;Database=devlivery;Username=...;Password=...
+```
+
+### Comandos via Makefile (Desenvolvimento Local)
 
 ```bash
 # Criar nova migration
@@ -199,9 +210,6 @@ make migration-status
 # Aplicar todas as migrations localmente
 ./scripts/apply-migrations.sh          # Linux/macOS
 ./scripts/apply-migrations.ps1         # Windows
-
-# Gerar migration bundles para CI/CD
-./scripts/generate-migration-bundle.sh
 ```
 
 ### EF Core direto (Alternativa)
@@ -214,7 +222,9 @@ dotnet ef migrations add v002 -o ./Shared/Infrastructure/Database/Migrations -c 
 dotnet ef database update -c ApplicationDbContext
 ```
 
-📘 **Para estratégias completas de migration em diferentes ambientes, consulte:** [docs/MIGRATIONS.md](docs/MIGRATIONS.md)
+📘 **Para estratégias completas de migration em diferentes ambientes, consulte:**
+- [docs/MIGRATIONS.md](docs/MIGRATIONS.md) - Documentação completa
+- [docs/MIGRATIONS-QUICKSTART.md](docs/MIGRATIONS-QUICKSTART.md) - Referência rápida
 
 ## ➕ Como Adicionar uma Nova Feature
 
