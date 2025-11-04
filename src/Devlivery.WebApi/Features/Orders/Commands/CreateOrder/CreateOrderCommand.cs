@@ -14,14 +14,24 @@ public sealed class Validator : AbstractValidator<CreateOrderCommand>
 {
     public Validator()
     {
-        RuleFor(x => x.Items).NotEmpty();
+        RuleFor(x => x.Items).NotEmpty().WithMessage("O campo '{PropertyName}' não pode estar vazio.");
+
         RuleForEach(x => x.Items).ChildRules(item =>
         {
-            item.RuleFor(x => x.ProductId).NotEmpty();
-            item.RuleFor(x => x.Quantity).GreaterThan(0);
+            item.RuleFor(x => x.ProductId).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
+            item.RuleFor(x => x.Quantity).GreaterThan(0).WithMessage("O campo '{PropertyName}' deve ser maior que {ComparisonValue}.");
         });
-        RuleFor(x => x.CustomerName).NotEmpty().MaximumLength(200);
-        RuleFor(x => x.CustomerPhone).NotEmpty().MaximumLength(20);
-        RuleFor(x => x.DeliveryAddress).NotEmpty().MaximumLength(500);
+
+        RuleFor(x => x.CustomerName)
+            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
+            .MaximumLength(200).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+
+        RuleFor(x => x.CustomerPhone)
+            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
+            .MaximumLength(20).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+
+        RuleFor(x => x.DeliveryAddress)
+            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
+            .MaximumLength(500).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
     }
 }

@@ -47,12 +47,12 @@ public static class ResultExtensions
     /// </summary>
     public static NotFound<ProblemDetails> ToNotFoundProblem(this Result result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? "Resource not found";
+        var errorMessage = result.Errors[0]?.Message ?? "Recurso não encontrado";
 
         var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status404NotFound,
-            Title = "Resource Not Found",
+            Title = "Recurso não encontrado",
             Detail = errorMessage,
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4"
         };
@@ -65,12 +65,12 @@ public static class ResultExtensions
     /// </summary>
     public static BadRequest<ProblemDetails> ToBadRequestProblem(this Result result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? "Bad request";
+        var errorMessage = result.Errors[0]?.Message ?? "Requisição inválida";
 
         var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Bad Request",
+            Title = "Requisição inválida",
             Detail = errorMessage,
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
         };
@@ -83,12 +83,12 @@ public static class ResultExtensions
     /// </summary>
     public static NotFound<ProblemDetails> ToNotFoundProblem<T>(this Result<T> result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? "Resource not found";
+        var errorMessage = result.Errors[0]?.Message ?? "Recurso não encontrado";
 
         var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status404NotFound,
-            Title = "Resource Not Found",
+            Title = "Recurso não encontrado",
             Detail = errorMessage,
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4"
         };
@@ -101,12 +101,12 @@ public static class ResultExtensions
     /// </summary>
     public static BadRequest<ProblemDetails> ToBadRequestProblem<T>(this Result<T> result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? "Bad request";
+        var errorMessage = result.Errors[0]?.Message ?? "Requisição inválida";
 
         var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Bad Request",
+            Title = "Requisição inválida",
             Detail = errorMessage,
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
         };

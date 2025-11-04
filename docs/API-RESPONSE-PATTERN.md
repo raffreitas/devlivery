@@ -36,9 +36,9 @@ Estrutura padronizada para todos os erros:
 ```json
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
-  "title": "Resource Not Found",
-  "status": 404,
-  "detail": "Product with ID 123 was not found",
+    "title": "Recurso não encontrado",
+    "status": 404,
+    "detail": "Produto com ID 123 não foi encontrado",
   "instance": "/api/products/123"
 }
 ```
@@ -57,14 +57,46 @@ Para erros de validação (400):
 ```json
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-  "title": "One or more validation errors occurred",
+  "title": "Um ou mais erros de validação ocorreram",
   "status": 400,
   "errors": {
-    "Name": ["The Name field is required."],
-    "Price": ["Price must be greater than 0."]
+    "Name": ["O campo 'Name' é obrigatório."],
+    "Price": ["O campo 'Price' deve ser maior que 0."]
   }
 }
 ```
+
+### Validação: mensagens em Português (regra do projeto)
+
+Todas as mensagens de validação expostas pela API devem estar em Português (pt-BR). Para garantir consistência e clareza para os consumidores da API, adote as seguintes práticas:
+
+- Sempre forneça mensagens personalizadas nos Validators usando `.WithMessage(...)` em vez de depender apenas das mensagens padrão em inglês do FluentValidation.
+- Use os placeholders do FluentValidation para manter as mensagens reutilizáveis e informativas: `{PropertyName}`, `{PropertyValue}`, `{ComparisonValue}`, `{MinLength}`, `{MaxLength}`.
+- Faça as mensagens curtas, claras e orientadas ao usuário (ex.: "O campo '{PropertyName}' é obrigatório.").
+
+Exemplo de Validator com mensagens em Português:
+
+```csharp
+public sealed class Validator : AbstractValidator<CreateProductCommand>
+{
+    public Validator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
+            .MaximumLength(200).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+
+        RuleFor(x => x.Price)
+            .GreaterThan(0).WithMessage("O campo '{PropertyName}' deve ser maior que {ComparisonValue}.");
+    }
+}
+```
+
+Observações:
+
+- Não traduza apenas via configuração global de cultura: preferimos mensagens explícitas em cada Validator para manter controle fino e consistência entre mensagens customizadas e padrão.
+- Se existir mensagem padrão do FluentValidation que ainda esteja em inglês e não seja sobrescrita por `.WithMessage(...)`, atualize o Validator correspondente para fornecer a tradução.
+- Use mensagens diferentes quando o contexto exigir (por exemplo, mensagens mais amigáveis para campos voltados ao usuário). 
+
 
 ## Status Codes Utilizados
 
@@ -286,11 +318,11 @@ Content-Type: application/problem+json
 
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-  "title": "One or more validation errors occurred",
+    "title": "Um ou mais erros de validação ocorreram",
   "status": 400,
   "errors": {
-    "Name": ["The Name field is required."],
-    "Price": ["Price must be greater than 0."]
+        "Name": ["O campo 'Name' é obrigatório."],
+        "Price": ["O campo 'Price' deve ser maior que 0."]
   }
 }
 ```
@@ -302,9 +334,9 @@ Content-Type: application/problem+json
 
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
-  "title": "Resource Not Found",
-  "status": 404,
-  "detail": "Product with ID 123e4567-e89b-12d3-a456-426614174000 was not found"
+    "title": "Recurso não encontrado",
+    "status": 404,
+    "detail": "Produto com ID 123e4567-e89b-12d3-a456-426614174000 não foi encontrado"
 }
 ```
 
@@ -315,9 +347,9 @@ Content-Type: application/problem+json
 
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-  "title": "Internal Server Error",
-  "status": 500,
-  "detail": "An unexpected error occurred. Please contact support with the provided trace ID.",
+    "title": "Erro interno do servidor",
+    "status": 500,
+    "detail": "Ocorreu um erro inesperado. Por favor, contate o suporte com o trace ID fornecido.",
   "instance": "/api/products/123",
   "traceId": "00-1234567890abcdef-fedcba0987654321-00",
   "timestamp": "2025-11-04T10:30:00Z"

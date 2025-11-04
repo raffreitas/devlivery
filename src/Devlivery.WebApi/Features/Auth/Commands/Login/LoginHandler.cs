@@ -21,15 +21,15 @@ public sealed class LoginHandler(
             .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken: cancellationToken);
 
         if (user is null)
-            return Result.Fail("Invalid credentials");
+            return Result.Fail("Credenciais inválidas");
 
         var identityUser = await userManager.FindByEmailAsync(user.Email);
         if (identityUser is null)
-            return Result.Fail("Invalid credentials");
+            return Result.Fail("Credenciais inválidas");
 
         var signInResult = await signInManager.CheckPasswordSignInAsync(identityUser, request.Password, false);
         if (!signInResult.Succeeded)
-            return Result.Fail("Invalid credentials");
+            return Result.Fail("Credenciais inválidas");
 
         var tokenRequest = new TokenRequest(user.Id.ToString(), user.Email);
         var token = await tokenService.GenerateTokenAsync(tokenRequest, cancellationToken);
