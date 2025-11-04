@@ -33,7 +33,6 @@ help:
 	@echo "  make migration-remove-db             - Remove última migration do Database"
 	@echo "  make migration-remove-identity       - Remove última migration do Identity"
 	@echo ""
-	@echo "  make migration-bundle                - Gera migration bundles para CI/CD"
 	@echo "  make migration-apply-all             - Aplica todas as migrations (DB + Identity)"
 	@echo ""
 	@echo "Exemplos:"
@@ -109,10 +108,3 @@ migration-apply-all:
 	@$(MAKE) migration-update-identity
 	@echo ""
 	@echo "✅ Todas as migrations foram aplicadas com sucesso!"
-
-# Gera migration bundles para CI/CD
-migration-bundle:
-	@echo "📦 Gerando migration bundles para CI/CD..."
-	@chmod +x ./scripts/generate-migration-bundle.sh
-	@./scripts/generate-migration-bundle.sh
-	@echo "✅ Migration bundles gerados com sucesso!"
