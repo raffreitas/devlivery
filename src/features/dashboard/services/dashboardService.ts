@@ -1,4 +1,5 @@
-import type { Order } from "../../orders/types";
+import type { Order } from "@/features/orders/types";
+import { type ApiResponse, api } from "@/shared/services/api";
 import type { DashboardStats } from "../types";
 
 export const dashboardService = {
@@ -38,5 +39,27 @@ export const dashboardService = {
       delivered: orders.filter((o) => o.status === "delivered").length,
       cancelled: orders.filter((o) => o.status === "cancelled").length,
     };
+  },
+
+  getStats: async (): Promise<DashboardStats> => {
+    const res = await api.get<
+      ApiResponse<{
+        totalOrders: number;
+        totalRevenue: number;
+        pendingOrders: number;
+        deliveredOrders: number;
+        averageOrderValue: number;
+      } | null>
+    >("/api/dashboard/stats");
+    if (!res.success || !res.data) {
+      return {
+        totalOrders: 0,
+        totalRevenue: 0,
+        pendingOrders: 0,
+        deliveredOrders: 0,
+        averageOrderValue: 0,
+      };
+    }
+    return res.data;
   },
 };

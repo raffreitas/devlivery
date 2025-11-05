@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { OrderCard } from "@/features/orders/components/OrderCard";
+import { useOrders } from "@/features/orders/hooks/useOrders";
 import type { Order } from "@/features/orders/types";
-import { useOrders } from "@/shared/contexts/OrderContext";
 import { StatCard } from "../components/StatCard";
 import { dashboardService } from "../services/dashboardService";
 

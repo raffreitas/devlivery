@@ -1,14 +1,13 @@
+import { type ApiResponse, api } from "@/shared/services/api";
 import type { AuthState, Credentials, User } from "../types";
 
-const AUTH_STORAGE_KEY = "auth";
+export const AUTH_STORAGE_KEY = "devlivery@auth";
 
-const mockUser: User = {
-  id: "1",
-  name: "Atendente",
-  email: "admin@pizza.com",
-};
-
-const mockPassword = "123456";
+interface LoginResponseDto {
+  userId: string;
+  userName: string;
+  token: string;
+}
 
 export const authService = {
   getAuth: (): AuthState => {
@@ -28,20 +27,28 @@ export const authService = {
   },
 
   login: async ({ email, password }: Credentials): Promise<AuthState> => {
-    // Simula uma chamada à API
-    await new Promise((r) => setTimeout(r, 300));
+    const res = await api.post<ApiResponse<LoginResponseDto>>(
+      "/api/auth/login",
+      { email, password },
+    );
 
-    if (email === mockUser.email && password === mockPassword) {
-      const token = "mock-token-" + crypto.randomUUID();
-      const auth: AuthState = { user: mockUser, token };
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-      return auth;
+    if (!res.success || !res.data) {
+      throw new Error(res.message || "Falha no login");
     }
-    throw new Error("Credenciais inválidas");
+
+    const user: User = {
+      id: res.data.userId,
+      name: res.data.userName,
+      email,
+    };
+    const auth: AuthState = { user, token: res.data.token };
+
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+    return auth;
   },
 
   logout: async (): Promise<void> => {
-    await new Promise((r) => setTimeout(r, 100));
+    // não há endpoint de logout no backend; apenas limpa o storage
     localStorage.removeItem(AUTH_STORAGE_KEY);
   },
 };

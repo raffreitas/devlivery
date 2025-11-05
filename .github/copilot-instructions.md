@@ -3,14 +3,14 @@
 ## Project Overview
 - **Stack:** React + TypeScript + Vite + TailwindCSS
 - **Purpose:** A web application for managing products and orders in a delivery service.
-- **State Management:** Context API with LocalStorage persistence.
-- **Structure:** Modular feature folders under `src/features/` (dashboard, orders, products), shared components in `src/shared/components/`, and context providers in `src/shared/contexts/`.
+- **State Management:** React Query for server state (products, orders, dashboard) + AuthContext for auth state.
+- **Structure:** Modular feature folders under `src/features/` (dashboard, orders, products), shared components in `src/shared/components/`, and shared services in `src/shared/services/`.
 - **Routing:** Uses `react-router-dom` for client-side routing, with routes defined in `src/routes/index.tsx`.
 
 ## Architecture & Patterns
 - **Feature-based organization:** Each domain (dashboard, orders, products) has its own folder with `components/`, `hooks/`, `pages/`, `services/`, and `types/`.
 - **Shared UI:** Common UI elements (Button, Card, Input, Layout, Modal) are in `src/shared/components/`.
-- **Context API:** State management for orders and products via React Contexts in `src/shared/contexts/`.
+- **Server State:** Managed via React Query hooks inside each feature (e.g., `features/products/hooks/useProducts.ts`).
 - **Service Layer:** API/data logic is separated into service files (e.g., `orderService.ts`, `productService.ts`).
 - **Type Safety:** Types are defined per feature in `types/index.ts` files.
 
@@ -40,15 +40,16 @@
 ## Example Patterns
 - **Feature Service Example:**
   - `src/features/orders/services/orderService.ts` handles API/data logic for orders.
-- **Context Usage:**
-  - `src/shared/contexts/OrderContext.tsx` provides order state and actions to components.
+- **Feature Hook Example:**
+  - `src/features/orders/hooks/useOrders.ts` encapsulates queries and mutations.
 - **Shared Component Example:**
-  - `src/shared/components/Button.tsx` is used across features for consistent UI.
+  - `src/shared/components/button.tsx` is used across features for consistent UI.
 
 ## Key Files & Directories
 - `src/features/` — Feature modules
 - `src/shared/components/` — Reusable UI components
-- `src/shared/contexts/` — Context providers
+- `src/shared/contexts/` — Context providers (Auth somente)
+- `src/shared/services/` — HTTP client e utilidades
 - `src/routes/index.tsx` — App routing
 - `vite.config.ts` — Vite configuration
 - `README.md` — Additional setup and linting details

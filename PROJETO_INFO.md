@@ -1,6 +1,6 @@
 # 🍕 Devlivery - Sistema PDV
 
-Sistema de PDV (Ponto de Venda) para delivery de pizzas desenvolvido com React, TypeScript e TailwindCSS.
+Sistema de PDV (Ponto de Venda) para delivery de pizzas desenvolvido com React, TypeScript e TailwindCSS, integrado a um backend REST.
 
 ## ✨ Funcionalidades
 
@@ -72,8 +72,8 @@ src/
 - **TypeScript** - Tipagem estática
 - **TailwindCSS** - Estilização
 - **React Router** - Navegação
-- **Context API** - Gerenciamento de estado
-- **LocalStorage** - Persistência de dados
+- **React Query** - Estado do servidor e cache
+- **AuthContext** - Estado de autenticação (user/token) persistido em LocalStorage
 - **Vite** - Build tool
 
 ## 🚀 Como Executar
@@ -97,11 +97,11 @@ src/
 - **/products** - Gerenciamento de produtos
 - **/orders** - Gerenciamento de pedidos
 
-## 💾 Armazenamento
+## 💾 API & Armazenamento
 
-Os dados são persistidos no **LocalStorage** do navegador:
-- `products` - Lista de produtos
-- `orders` - Lista de pedidos
+- Os dados de Produtos, Pedidos e Dashboard vêm do backend via HTTP.
+- Configure a base da API via `VITE_API_URL`.
+- O token JWT é salvo em LocalStorage após o login, e é enviado como `Authorization: Bearer <token>` pelo client HTTP.
 
 ## 🎨 Componentes Compartilhados
 
@@ -137,8 +137,7 @@ Os dados são persistidos no **LocalStorage** do navegador:
 
 ## 🔮 Próximos Passos
 
-- [ ] Autenticação de usuários
-- [ ] Backend com API REST
+- [ ] Página de detalhes de pedido/produto usando hooks de `byId`
 - [ ] Impressão de pedidos
 - [ ] Notificações em tempo real
 - [ ] Relatórios e gráficos
