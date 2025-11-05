@@ -54,6 +54,29 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
         dbContext.Orders.Add(order);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return Result.Ok(new CreateOrderResponse());
+
+        var productsDict = products.ToDictionary(k => k.Id, v => v);
+        var orderItemsWithProducts = orderItems.Select(oi => new OrderItemResponseDto(
+            new ProductResponseDto(
+                productsDict[oi.ProductId].Id,
+                productsDict[oi.ProductId].Name,
+                productsDict[oi.ProductId].Description,
+                productsDict[oi.ProductId].Price,
+                productsDict[oi.ProductId].Category,
+                productsDict[oi.ProductId].CreatedAt,
+                productsDict[oi.ProductId].UpdatedAt),
+            oi.Quantity,
+            oi.Notes)).ToArray();
+
+        return new CreateOrderResponse(
+            order.Id,
+            orderItemsWithProducts,
+            order.CustomerName,
+            order.CustomerPhone,
+            order.DeliveryAddress,
+            order.Status,
+            order.Total,
+            order.CreatedAt,
+            order.UpdatedAt);
     }
 }

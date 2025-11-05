@@ -19,7 +19,8 @@ public sealed class Validator : AbstractValidator<CreateOrderCommand>
         RuleForEach(x => x.Items).ChildRules(item =>
         {
             item.RuleFor(x => x.ProductId).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
-            item.RuleFor(x => x.Quantity).GreaterThan(0).WithMessage("O campo '{PropertyName}' deve ser maior que {ComparisonValue}.");
+            item.RuleFor(x => x.Quantity).GreaterThan(0)
+                .WithMessage("O campo '{PropertyName}' deve ser maior que {ComparisonValue}.");
         });
 
         RuleFor(x => x.CustomerName)
