@@ -1,5 +1,5 @@
+import type { Order } from "@/features/orders/types";
 import { type ApiResponse, api } from "@/shared/services/api";
-import type { Order } from "../../orders/types";
 import type { DashboardStats } from "../types";
 
 export const dashboardService = {

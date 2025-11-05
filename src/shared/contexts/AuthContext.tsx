@@ -7,8 +7,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { authService } from "../../features/auth/services/authService";
-import type { AuthState, Credentials, User } from "../../features/auth/types";
+import { authService } from "@/features/auth/services/authService";
+import type { AuthState, Credentials, User } from "@/features/auth/types";
 
 interface AuthContextData {
   user: User | null;

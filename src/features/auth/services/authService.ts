@@ -1,7 +1,7 @@
 import { type ApiResponse, api } from "@/shared/services/api";
 import type { AuthState, Credentials, User } from "../types";
 
-const AUTH_STORAGE_KEY = "devlivery@auth";
+export const AUTH_STORAGE_KEY = "devlivery@auth";
 
 interface LoginResponseDto {
   userId: string;

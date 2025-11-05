@@ -1,4 +1,5 @@
-import { env } from "../../env";
+import { env } from "@/env";
+import { AUTH_STORAGE_KEY } from "@/features/auth/services/authService";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -22,7 +23,7 @@ export class ApiError extends Error {
 
 function getAuthToken(): string | null {
   try {
-    const raw = localStorage.getItem("auth");
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { token: string | null };
     return parsed.token ?? null;
