@@ -26,6 +26,7 @@ public static class Startup
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
+        services.AddHealthChecksConfiguration();
 
         // OpenAPI/Swagger
         services.AddOpenApiConfiguration();
@@ -40,17 +41,7 @@ public static class Startup
         services.AddProductFeature();
 
         // CORS
-        services.AddCors(options =>
-        {
-            options.AddDefaultPolicy(policy =>
-            {
-                policy.WithOrigins("http://localhost:5173", "http://localhost:3000")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-            });
-        });
-
-        services.AddHealthChecksConfiguration();
+        services.AddCorsConfiguration();
     }
 
     public static void ConfigureApp(WebApplication app)
@@ -66,7 +57,7 @@ public static class Startup
             DatabaseSeeder.SeedAsync(db, userManager).GetAwaiter().GetResult();
         }
 
-        // Security middlewares
+        // Security
         if (!app.Environment.IsDevelopment())
         {
             app.UseHsts();
@@ -74,9 +65,9 @@ public static class Startup
 
         app.UseHttpsRedirection();
 
-        app.UseCors();
+        app.UseCorsConfiguration();
 
-        // Map endpoints
+        // Endpoints
         app.MapHealthChecks("/health").AllowAnonymous();
         app.MapAuthEndpoints();
         app.MapProductEndpoints();
