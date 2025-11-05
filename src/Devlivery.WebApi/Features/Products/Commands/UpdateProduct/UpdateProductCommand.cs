@@ -12,7 +12,7 @@ public sealed record UpdateProductCommand(
 
 public sealed class Validator : AbstractValidator<UpdateProductCommand>
 {
-        public Validator()
+    public Validator()
     {
         RuleFor(x => x.Id).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
 

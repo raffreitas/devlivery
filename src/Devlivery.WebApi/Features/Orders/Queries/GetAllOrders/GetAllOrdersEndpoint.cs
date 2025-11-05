@@ -15,7 +15,7 @@ public static class GetAllOrdersEndpoint
     }
 
     private static async Task<Results<Ok<ApiResponse<List<GetAllOrdersResponse>>>, BadRequest<ProblemDetails>>> Handle(
-        GetAllOrdersHandler handler, 
+        GetAllOrdersHandler handler,
         CancellationToken ct)
     {
         var query = new GetAllOrdersQuery();

@@ -9,7 +9,7 @@ public class OrderItem
     public Guid ProductId { get; set; }
     public int Quantity { get; set; }
     public string? Notes { get; set; }
-    
+
     public Order Order { get; set; } = null!;
     public Product Product { get; set; } = null!;
 }

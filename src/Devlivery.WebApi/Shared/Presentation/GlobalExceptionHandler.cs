@@ -20,7 +20,7 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
             Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
             Instance = httpContext.Request.Path
         };
-        
+
         problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
         problemDetails.Extensions["timestamp"] = DateTime.UtcNow;
 

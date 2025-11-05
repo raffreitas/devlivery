@@ -19,7 +19,7 @@ public static class GetDashboardStats
         var orders = await db.Orders.ToListAsync();
 
         var totalOrders = orders.Count;
-        
+
         var totalRevenue = orders
             .Where(o => o.Status != "cancelled")
             .Sum(o => o.Total);

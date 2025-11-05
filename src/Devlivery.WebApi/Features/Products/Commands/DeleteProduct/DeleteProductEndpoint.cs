@@ -22,7 +22,7 @@ public static class DeleteProductEndpoint
         CancellationToken ct)
     {
         var command = new DeleteProductCommand(id);
-        
+
         var validationResult = await validator.ValidateAsync(command, ct);
         if (!validationResult.IsValid)
         {

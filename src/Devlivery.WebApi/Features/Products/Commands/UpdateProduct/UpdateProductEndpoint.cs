@@ -37,7 +37,7 @@ public static class UpdateProductEndpoint
             request.Price,
             request.Category,
             request.Available);
-        
+
         var validationResult = await validator.ValidateAsync(command, ct);
         if (!validationResult.IsValid)
         {

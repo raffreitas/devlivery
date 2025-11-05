@@ -26,7 +26,7 @@ public static class UpdateOrderStatusEndpoint
         CancellationToken ct)
     {
         var command = new UpdateOrderStatusCommand(id, request.Status);
-        
+
         var validationResult = await validator.ValidateAsync(command, ct);
         if (!validationResult.IsValid)
         {
