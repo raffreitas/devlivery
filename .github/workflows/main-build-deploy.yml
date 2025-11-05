@@ -59,6 +59,14 @@ jobs:
             echo "No test projects found, skipping tests"
           fi
 
+      - name: Cache .NET tools
+        uses: actions/cache@v4
+        with:
+          path: ~/.dotnet/tools
+          key: ${{ runner.os }}-dotnet-tools-${{ env.DOTNET_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-tools-
+
       - name: Install EF Core tools
         run: dotnet tool install --global dotnet-ef || dotnet tool update --global dotnet-ef
 
@@ -145,11 +153,27 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json', '**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build for migrations
         run: dotnet build --no-restore --configuration Release
+
+      - name: Cache .NET tools
+        uses: actions/cache@v4
+        with:
+          path: ~/.dotnet/tools
+          key: ${{ runner.os }}-dotnet-tools-${{ env.DOTNET_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-tools-
 
       - name: Install EF Core tools
         run: dotnet tool install --global dotnet-ef || dotnet tool update --global dotnet-ef
