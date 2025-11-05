@@ -3,7 +3,7 @@ import { LoginPage } from "./features/auth/pages/LoginPage";
 import { DashboardPage } from "./features/dashboard/pages/DashboardPage";
 import { OrdersPage } from "./features/orders/pages/OrdersPage";
 import { ProductsPage } from "./features/products/pages/products-page";
-import { Layout } from "./shared/components/layout";
+import { Layout } from "./shared/components/Layout";
 import { RequireAuth } from "./shared/components/RequireAuth";
 
 const router = createBrowserRouter([

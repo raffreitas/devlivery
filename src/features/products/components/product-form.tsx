@@ -33,7 +33,7 @@ export function ProductForm({
         label="Nome do Produto"
         type="text"
         value={formData.name}
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
         required
       />
 
@@ -47,7 +47,7 @@ export function ProductForm({
         <textarea
           id="description"
           value={formData.description}
-          onChange={(e) =>
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
             setFormData({ ...formData, description: e.target.value })
           }
           className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
@@ -61,7 +61,7 @@ export function ProductForm({
         type="number"
         step="0.01"
         value={formData.price}
-        onChange={(e) =>
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setFormData({ ...formData, price: Number.parseFloat(e.target.value) })
         }
         required
@@ -71,7 +71,7 @@ export function ProductForm({
         label="Categoria"
         type="text"
         value={formData.category}
-        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, category: e.target.value })}
         placeholder="Ex: Pizza, Bebida, Sobremesa"
         required
       />
@@ -81,7 +81,7 @@ export function ProductForm({
           type="checkbox"
           id="available"
           checked={formData.available}
-          onChange={(e) =>
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setFormData({ ...formData, available: e.target.checked })
           }
           className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
