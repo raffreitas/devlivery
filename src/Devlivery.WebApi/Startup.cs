@@ -10,7 +10,6 @@ using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
 using Devlivery.WebApi.Shared.Presentation;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi;
@@ -43,23 +42,11 @@ public static class Startup
 
         // CORS
         services.AddCorsConfiguration();
-
-        // Reverse proxy headers (Railway, Docker, etc.)
-        services.Configure<ForwardedHeadersOptions>(options =>
-        {
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            // Trust all proxies/networks by clearing the known lists; rely on platform firewall
-            options.KnownNetworks.Clear();
-            options.KnownProxies.Clear();
-        });
     }
 
     public static void ConfigureApp(WebApplication app)
     {
         app.UseOpenApiConfiguration();
-
-        // Root endpoint for platform health checks (Railway)
-        app.MapGet("/", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 
         if (app.Environment.IsDevelopment())
         {
@@ -70,9 +57,6 @@ public static class Startup
             DatabaseSeeder.SeedAsync(db, userManager).GetAwaiter().GetResult();
         }
 
-        // Forward proxy headers early so scheme/host are correct behind Railway
-        app.UseForwardedHeaders();
-
         // CORS
         app.UseCorsConfiguration();
 
@@ -82,11 +66,7 @@ public static class Startup
             app.UseHsts();
         }
 
-        // In PaaS (Railway) HTTPS is terminated at the edge; avoid redirect loops/port issues
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseHttpsRedirection();
-        }
+        app.UseHttpsRedirection();
 
         // Authentication & Authorization
         app.UseAuthentication();
