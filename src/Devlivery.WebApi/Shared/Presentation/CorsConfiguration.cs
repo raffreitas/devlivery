@@ -2,15 +2,18 @@
 
 public static class CorsConfiguration
 {
+    private const string DefaultPolicyName = "DefaultCorsPolicy";
+
     public static IServiceCollection AddCorsConfiguration(this IServiceCollection services)
     {
         services.AddCors(options =>
         {
-            options.AddDefaultPolicy(policy =>
+            options.AddPolicy(DefaultPolicyName, policy =>
             {
-                policy.WithOrigins("http://localhost:5173", "http://localhost:3000")
+                policy.WithOrigins("http://localhost:5173")
                     .AllowAnyHeader()
-                    .AllowAnyMethod();
+                    .AllowAnyMethod()
+                    .AllowCredentials();
             });
         });
 
@@ -19,7 +22,7 @@ public static class CorsConfiguration
 
     public static IApplicationBuilder UseCorsConfiguration(this IApplicationBuilder app)
     {
-        app.UseCors();
+        app.UseCors(DefaultPolicyName);
         return app;
     }
 }

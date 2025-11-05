@@ -57,6 +57,9 @@ public static class Startup
             DatabaseSeeder.SeedAsync(db, userManager).GetAwaiter().GetResult();
         }
 
+        // CORS
+        app.UseCorsConfiguration();
+
         // Security
         if (!app.Environment.IsDevelopment())
         {
@@ -65,7 +68,9 @@ public static class Startup
 
         app.UseHttpsRedirection();
 
-        app.UseCorsConfiguration();
+        // Authentication & Authorization
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         // Endpoints
         app.MapHealthChecks("/health").AllowAnonymous();
