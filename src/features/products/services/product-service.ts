@@ -1,48 +1,66 @@
+import { type ApiResponse, api } from "@/shared/services/api";
 import type { Product, ProductFormData } from "../types";
 
-const STORAGE_KEY = "products";
+interface ProductDto {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  available: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function mapProductDto(dto: ProductDto): Product {
+  return {
+    id: dto.id,
+    name: dto.name,
+    description: dto.description,
+    price: dto.price,
+    category: dto.category,
+    available: dto.available,
+    createdAt: new Date(dto.createdAt),
+    updatedAt: new Date(dto.updatedAt),
+  };
+}
 
 export const productService = {
-  getAll: (): Product[] => {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+  getAll: async (): Promise<Product[]> => {
+    const res =
+      await api.get<ApiResponse<ProductDto[] | null>>("/api/products");
+    const list = res.data ?? [];
+    return list.map(mapProductDto);
   },
 
-  getById: (id: string): Product | null => {
-    const products = productService.getAll();
-    return products.find((p) => p.id === id) || null;
+  getById: async (id: string): Promise<Product | null> => {
+    const res = await api.get<ApiResponse<ProductDto | null>>(
+      `/api/products/${id}`,
+    );
+    return res.data ? mapProductDto(res.data) : null;
   },
 
-  create: (data: ProductFormData): Product => {
-    const products = productService.getAll();
-    const newProduct: Product = {
-      ...data,
-      id: crypto.randomUUID(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    products.push(newProduct);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-    return newProduct;
+  create: async (data: ProductFormData): Promise<Product> => {
+    const res = await api.post<ApiResponse<ProductDto | null>>(
+      "/api/products",
+      data,
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.message || "Erro ao criar produto");
+    return mapProductDto(res.data);
   },
 
-  update: (id: string, data: Partial<ProductFormData>): Product => {
-    const products = productService.getAll();
-    const index = products.findIndex((p) => p.id === id);
-    if (index === -1) throw new Error("Product not found");
-
-    products[index] = {
-      ...products[index],
-      ...data,
-      updatedAt: new Date(),
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-    return products[index];
+  update: async (id: string, data: ProductFormData): Promise<Product> => {
+    const res = await api.put<ApiResponse<ProductDto | null>>(
+      `/api/products/${id}`,
+      data,
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.message || "Erro ao atualizar produto");
+    return mapProductDto(res.data);
   },
 
-  delete: (id: string): void => {
-    const products = productService.getAll();
-    const filtered = products.filter((p) => p.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+  delete: async (id: string): Promise<void> => {
+    await api.delete<void>(`/api/products/${id}`);
   },
 };
