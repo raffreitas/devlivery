@@ -79,7 +79,9 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
           label="Nome do Cliente"
           type="text"
           value={customerName}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomerName(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setCustomerName(e.target.value)
+          }
           required
         />
 
@@ -87,7 +89,9 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
           label="Telefone"
           type="tel"
           value={customerPhone}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomerPhone(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setCustomerPhone(e.target.value)
+          }
           placeholder="(00) 00000-0000"
           required
         />
@@ -96,7 +100,9 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
           label="Endereço de Entrega"
           type="text"
           value={deliveryAddress}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeliveryAddress(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setDeliveryAddress(e.target.value)
+          }
           required
         />
       </div>
@@ -115,7 +121,9 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
             <select
               id="product-select"
               value={selectedProductId}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedProductId(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                setSelectedProductId(e.target.value)
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="">Selecione um produto</option>
@@ -133,7 +141,9 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
               type="number"
               min="1"
               value={quantity}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuantity(Number.parseInt(e.target.value, 10))}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setQuantity(Number.parseInt(e.target.value, 10))
+              }
             />
           </div>
 
@@ -142,7 +152,9 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
               label="Observações"
               type="text"
               value={notes}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNotes(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setNotes(e.target.value)
+              }
               placeholder="Ex: sem cebola"
             />
           </div>

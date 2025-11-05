@@ -33,7 +33,9 @@ export function ProductForm({
         label="Nome do Produto"
         type="text"
         value={formData.name}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setFormData({ ...formData, name: e.target.value })
+        }
         required
       />
 
@@ -71,7 +73,9 @@ export function ProductForm({
         label="Categoria"
         type="text"
         value={formData.category}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, category: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setFormData({ ...formData, category: e.target.value })
+        }
         placeholder="Ex: Pizza, Bebida, Sobremesa"
         required
       />
