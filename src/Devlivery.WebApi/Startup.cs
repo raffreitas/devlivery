@@ -41,7 +41,7 @@ public static class Startup
         services.AddProductFeature();
 
         // CORS
-        services.AddCorsConfiguration();
+        services.AddCorsConfiguration(configuration);
     }
 
     public static void ConfigureApp(WebApplication app)

@@ -4,13 +4,18 @@ public static class CorsConfiguration
 {
     private const string DefaultPolicyName = "DefaultCorsPolicy";
 
-    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services)
+    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services,
+        IConfiguration configuration)
     {
+        var allowedOrigins = configuration.GetValue<string>("ALLOWED_ORIGINS") ?? "http://localhost:5173";
+
+        var origins = allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
         services.AddCors(options =>
         {
             options.AddPolicy(DefaultPolicyName, policy =>
             {
-                policy.WithOrigins("http://localhost:5173")
+                policy.WithOrigins(origins)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
