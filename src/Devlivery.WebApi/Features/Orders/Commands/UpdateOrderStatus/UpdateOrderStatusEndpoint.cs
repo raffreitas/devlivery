@@ -13,8 +13,8 @@ public static class UpdateOrderStatusEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPatch("{id:guid}/status", Handle)
-            .Produces<ApiResponse<UpdateOrderStatusResponse>>(StatusCodes.Status200OK)
-            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<UpdateOrderStatusResponse>>()
+            .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
     }
 

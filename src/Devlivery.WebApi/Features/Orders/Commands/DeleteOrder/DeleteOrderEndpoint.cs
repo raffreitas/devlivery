@@ -11,7 +11,7 @@ public static class DeleteOrderEndpoint
     {
         app.MapDelete("{id:guid}", Handle)
             .Produces(StatusCodes.Status204NoContent)
-            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
     }
 

@@ -8,7 +8,7 @@ public sealed class Validator : AbstractValidator<UpdateOrderStatusCommand>
 {
     public Validator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.Id).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
         RuleFor(x => x.Status)
             .NotEmpty()
             .Must(status => new[] { "pending", "preparing", "ready", "delivered", "cancelled" }.Contains(status))

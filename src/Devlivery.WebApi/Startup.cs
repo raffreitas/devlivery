@@ -11,7 +11,6 @@ using Devlivery.WebApi.Shared.Presentation;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Scalar.AspNetCore;
 
 namespace Devlivery.WebApi;
 
@@ -19,45 +18,38 @@ public static class Startup
 {
     public static void ConfigureBuilder(WebApplicationBuilder builder)
     {
+        var services = builder.Services;
+        var configuration = builder.Configuration;
+
         // Validators
-        builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+        services.AddValidatorsFromAssemblyContaining<Program>();
 
-        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-        builder.Services.AddProblemDetails();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddProblemDetails();
+        services.AddHealthChecksConfiguration();
 
-        // OpenAPI
-        builder.Services.AddOpenApi();
+        // OpenAPI/Swagger
+        services.AddOpenApiConfiguration();
 
         // Shared Infrastructure
-        builder.Services.AddIdentityFeature(builder.Configuration);
-        builder.Services.AddDatabaseFeature(builder.Configuration);
+        services.AddIdentityFeature(configuration);
+        services.AddDatabaseFeature(configuration);
 
         // Features
-        builder.Services.AddAuthFeature(builder.Configuration);
-        builder.Services.AddOrderFeature();
-        builder.Services.AddProductFeature();
+        services.AddAuthFeature(configuration);
+        services.AddOrderFeature();
+        services.AddProductFeature();
 
         // CORS
-        builder.Services.AddCors(options =>
-        {
-            options.AddDefaultPolicy(policy =>
-            {
-                policy.WithOrigins("http://localhost:5173", "http://localhost:3000")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-            });
-        });
+        services.AddCorsConfiguration();
     }
 
     public static void ConfigureApp(WebApplication app)
     {
-        // Configure the HTTP request pipeline.
+        app.UseOpenApiConfiguration();
+
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
-            app.MapScalarApiReference();
-
-            // Auto migrate and seed
             using var scope = app.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
@@ -65,9 +57,23 @@ public static class Startup
             DatabaseSeeder.SeedAsync(db, userManager).GetAwaiter().GetResult();
         }
 
-        app.UseCors();
+        // CORS
+        app.UseCorsConfiguration();
 
-        // Map endpoints
+        // Security
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseHsts();
+        }
+
+        app.UseHttpsRedirection();
+
+        // Authentication & Authorization
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        // Endpoints
+        app.MapHealthChecks("/health").AllowAnonymous();
         app.MapAuthEndpoints();
         app.MapProductEndpoints();
         app.MapOrderEndpoints();

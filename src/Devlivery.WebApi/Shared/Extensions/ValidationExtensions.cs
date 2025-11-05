@@ -22,7 +22,7 @@ public static class ValidationExtensions
 
         return TypedResults.ValidationProblem(
             errors,
-            title: "One or more validation errors occurred",
+            title: "Um ou mais erros de validação ocorreram",
             type: "https://tools.ietf.org/html/rfc7231#section-6.5.1"
         );
     }

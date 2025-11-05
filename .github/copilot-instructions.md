@@ -1,4 +1,53 @@
-# Devlivery WebAPI - AI Coding Agent Instructions
+## Devlivery WebAPI — Quick AI Agent Guide
+
+This short guide tells an AI coding agent what matters most to be productive in this repository.
+
+1) Big picture
+- .NET 9 Minimal API using Vertical Slice Architecture (VSA) + CQRS. Each feature lives under `src/Devlivery.WebApi/Features/[FeatureName]` and contains Commands, Queries, Handlers, Endpoints and a `*Feature.cs` for DI/endpoint registration.
+- Two DbContexts: `ApplicationDbContext` (app data) and `ApplicationIdentityDbContext` (identity). Both use the same `DefaultConnection` (Postgres) and snake_case naming.
+
+2) Key repo patterns (do not deviate)
+- Endpoints: Minimal API typed results (e.g. `Task<Results<Ok<ApiResponse<T>>, ValidationProblem, NotFound<ProblemDetails>>> Handle(...)`). See `docs/API-RESPONSE-PATTERN.md` for canonical examples.
+- Validation: Validators live with the Command/Query file and are named `Validator`. Endpoints MUST call `validator.ValidateAsync()` explicitly.
+- Error handling: Use `FluentResults` (return `Result.Ok()` / `Result.Fail()`), and map to ProblemDetails via shared `ResultExtensions`.
+- Success responses: wrap payloads in `ApiResponse<T>` and use `ToOk`, `ToCreated`, `ToNoContent` helpers from `Shared/Extensions`.
+
+3) Where to look (high-value files)
+- `src/Devlivery.WebApi/Program.cs` and `Startup.cs` — app boot, feature registration, auto-migration in Development.
+- `src/Devlivery.WebApi/Features/*` — examples: `Products`, `Orders`, `Auth`, `Dashboard`.
+- `src/Devlivery.WebApi/Shared/Extensions/` — `ResultExtensions`, `ValidationExtensions`, `ConfigurationExtensions` (use these helpers). 
+- `docs/API-RESPONSE-PATTERN.md` — required response shapes and typed-results examples.
+- `scripts/apply-migrations.ps1` and `Makefile` — migration commands used in development.
+
+4) Common workflows & exact commands
+- Start local DB + app (recommended):
+  - `docker-compose up -d` (root of repo)
+  - `dotnet run --project src/Devlivery.WebApi`
+- Create/apply migrations (Makefile helper):
+  - `make migration-db VERSION=v002` (ApplicationDbContext)
+  - `make migration-identity VERSION=v002` (ApplicationIdentityDbContext)
+  - `make migration-update-db` / `make migration-update-identity` (apply)
+- Alternate: use EF tooling with `-c ApplicationDbContext` or `-c ApplicationIdentityDbContext`.
+
+5) Conventions to enforce in edits
+- Do not throw business exceptions — return `Result.Fail()` and map it to ProblemDetails.
+- Keep feature cohesion: add handlers/validators/endpoints inside the same feature folder.
+- Register handlers in the feature `Add[Feature]Feature()` method and map endpoints in `Map[Feature]Endpoints()`.
+- Validation messages must be user-friendly and in PT-BR.
+
+6) CI/CD and migrations note
+- GitHub Actions on `main` applies migrations in CI using the `DATABASE_CONNECTION_STRING` secret. Avoid ad-hoc production migration changes without CI updates.
+
+7) Quick examples (where to copy patterns)
+- Create product flow: `Features/Products/Commands/CreateProduct/*` — follow the Command → Handler → Endpoint → Feature.cs pattern.
+- API shape examples: `Features/Products/*Endpoint.cs` and `Shared/Models/ApiResponse.cs`.
+
+8) When you need to run tests or verify changes
+- Use `dotnet build` / `dotnet run` for quick checks. Use `Devlivery.WebApi.http` (root of project) with the REST Client extension or run Postman to exercise endpoints.
+
+If anything here seems missing or unclear, tell me which area you want expanded (migrations, endpoint examples, or feature wiring) and I will iterate.
+
+-- end# Devlivery WebAPI - AI Coding Agent Instructions
 
 ## Architecture Overview
 
@@ -325,6 +374,7 @@ JWT tokens configured in `Features/Auth/AuthFeature.cs`:
 10. **Typed Results**: Always use Typed Results (Results<Ok<T>, NotFound<P>>) for explicit status codes
 11. **Problem Details**: All errors must return RFC 7807 Problem Details format
 12. **ApiResponse wrapper**: All success responses must be wrapped in `ApiResponse<T>`
+13. **Validation Messages**: All validation messages must be user-friendly and in Portuguese PT-BR.
 
 ## Example Features to Reference
 
