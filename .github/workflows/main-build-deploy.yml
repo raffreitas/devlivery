@@ -71,6 +71,7 @@ jobs:
         run: dotnet tool install --global dotnet-ef || dotnet tool update --global dotnet-ef
 
       - name: Generate version tag
+        if: false  # Disabled for now
         id: version
         run: |
           # Generate version based on date and short SHA
@@ -79,6 +80,7 @@ jobs:
           echo "Generated version: $VERSION"
 
       - name: Create and push tag
+        if: false  # Disabled for now
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -86,9 +88,11 @@ jobs:
           git push origin ${{ steps.version.outputs.version }}
 
       - name: Set up Docker Buildx
+        if: false  # Disabled for now
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GitHub Container Registry
+        if: false  # Disabled for now
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -96,6 +100,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata for Docker
+        if: false  # Disabled for now
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -106,6 +111,7 @@ jobs:
             type=sha,prefix={{branch}}-
 
       - name: Build and push Docker image
+        if: false  # Disabled for now
         uses: docker/build-push-action@v5
         with:
           context: .
