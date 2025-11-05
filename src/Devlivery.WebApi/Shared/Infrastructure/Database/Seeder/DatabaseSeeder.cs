@@ -23,13 +23,16 @@ public static class DatabaseSeeder
             CreatedAt = DateTime.UtcNow,
         };
 
-        await userManager.CreateAsync(new ApplicationUser
+        var identityResult = await userManager.CreateAsync(new ApplicationUser
         {
             UserId = user.Id,
             UserName = user.Email,
             Email = user.Email,
             EmailConfirmed = true,
-        }, "123456");
+        }, "ChangeIt123!");
+
+        if (!identityResult.Succeeded)
+            return;
 
         db.Users.Add(user);
 
