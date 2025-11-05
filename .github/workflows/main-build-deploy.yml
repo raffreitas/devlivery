@@ -117,27 +117,6 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.version.outputs.version }}
-          name: Release ${{ steps.version.outputs.version }}
-          body: |
-            ## 🚀 Release ${{ steps.version.outputs.version }}
-
-            **Docker Image:**
-            ```
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
-            ```
-
-            **Changes:** ${{ github.event.head_commit.message }}
-
-            **Commit:** ${{ github.sha }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   apply-migrations:
     name: Apply Database Migrations
     runs-on: ubuntu-latest
