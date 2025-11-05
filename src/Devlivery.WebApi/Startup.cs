@@ -42,7 +42,7 @@ public static class Startup
         services.AddProductFeature();
 
         // CORS
-        services.AddCorsConfiguration(configuration);
+        services.AddCorsConfiguration();
 
         // Reverse proxy headers (Railway, Docker, etc.)
         services.Configure<ForwardedHeadersOptions>(options =>
