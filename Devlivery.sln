@@ -10,6 +10,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Itens", "Solution 
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{341F9882-EF26-49B3-965C-3AD2A122CCE0}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\main-build-deploy.yml = .github\workflows\main-build-deploy.yml
+		.github\workflows\pr-validation.yml = .github\workflows\pr-validation.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +29,8 @@ Global
 		{A9927372-038B-4A4F-805D-738A7142C00F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9927372-038B-4A4F-805D-738A7142C00F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9927372-038B-4A4F-805D-738A7142C00F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{341F9882-EF26-49B3-965C-3AD2A122CCE0} = {297A2D62-925A-43A2-BA32-7CA06406E895}
 	EndGlobalSection
 EndGlobal

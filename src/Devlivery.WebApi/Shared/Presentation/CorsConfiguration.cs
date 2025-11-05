@@ -7,7 +7,7 @@ public static class CorsConfiguration
     public static IServiceCollection AddCorsConfiguration(this IServiceCollection services,
         IConfiguration configuration)
     {
-        var allowedOrigins = configuration.GetValue<string>("ALLOWED_ORIGINS") ?? "http://localhost:5173";
+        var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS") ?? "http://localhost:5173";
 
         var origins = allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
