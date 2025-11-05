@@ -3,7 +3,7 @@ import { Button } from "@/shared/components/button";
 import { Modal } from "@/shared/components/modal";
 import { ProductCard } from "../components/product-card";
 import { ProductForm } from "../components/product-form";
-import { useProducts } from "../hooks/useProducts";
+import { useProducts } from "../hooks/use-products";
 import type { Product, ProductFormData } from "../types";
 
 export function ProductsPage() {

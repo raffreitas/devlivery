@@ -1,10 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { LoginPage } from "./features/auth/pages/LoginPage";
-import { DashboardPage } from "./features/dashboard/pages/DashboardPage";
-import { OrdersPage } from "./features/orders/pages/OrdersPage";
+import { LoginPage } from "./features/auth/pages/login-page";
+import { DashboardPage } from "./features/dashboard/pages/dashboard-page";
+import { OrdersPage } from "./features/orders/pages/orders-page";
 import { ProductsPage } from "./features/products/pages/products-page";
-import { Layout } from "./shared/components/Layout";
-import { RequireAuth } from "./shared/components/RequireAuth";
+import { Layout } from "./shared/components/layout";
+import { RequireAuth } from "./shared/components/require-auth";
 
 const router = createBrowserRouter([
   {

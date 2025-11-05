@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { orderService } from "../services/orderService";
+import { orderService } from "../services/order-service";
 import type { Order, OrderFormData } from "../types";
 
 export function useOrders() {

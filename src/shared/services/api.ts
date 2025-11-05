@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import { AUTH_STORAGE_KEY } from "@/features/auth/services/authService";
+import { AUTH_STORAGE_KEY } from "@/features/auth/services/auth-service";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 

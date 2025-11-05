@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/shared/components/button";
 import { Modal } from "@/shared/components/modal";
-import { OrderCard } from "../components/OrderCard";
-import { OrderForm } from "../components/OrderForm";
-import { useOrders } from "../hooks/useOrders";
+import { OrderCard } from "../components/order-card";
+import { OrderForm } from "../components/order-form";
+import { useOrders } from "../hooks/use-orders";
 import type { Order, OrderFormData } from "../types";
 
 export function OrdersPage() {

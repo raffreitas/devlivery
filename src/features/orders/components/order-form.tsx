@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useProducts } from "@/features/products/hooks/useProducts";
+import { useProducts } from "@/features/products/hooks/use-products";
 import { Button } from "@/shared/components/button";
 import { Input } from "@/shared/components/input";
 import type { OrderFormData, OrderItem } from "../types";

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/button";
 import { Input } from "@/shared/components/input";
-import { useAuth } from "@/shared/contexts/AuthContext";
+import { useAuth } from "@/shared/contexts/auth-context";
 
 export function LoginPage() {
   const { login, loading } = useAuth();

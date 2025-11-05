@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { OrderCard } from "@/features/orders/components/OrderCard";
-import { useOrders } from "@/features/orders/hooks/useOrders";
+import { OrderCard } from "@/features/orders/components/order-card";
+import { useOrders } from "@/features/orders/hooks/use-orders";
 import type { Order } from "@/features/orders/types";
-import { StatCard } from "../components/StatCard";
-import { dashboardService } from "../services/dashboardService";
+import { StatCard } from "../components/stat-card";
+import { dashboardService } from "../services/dashboard-service";
 
 export function DashboardPage() {
   const { orders, loading, updateOrderStatus, deleteOrder } = useOrders();
