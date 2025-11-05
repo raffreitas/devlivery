@@ -7,6 +7,7 @@ using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
 using Devlivery.WebApi.Shared.Infrastructure.Database.Seeder;
 using Devlivery.WebApi.Shared.Infrastructure.Identity;
 using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
+using Devlivery.WebApi.Shared.Infrastructure.Observability;
 using Devlivery.WebApi.Shared.Presentation;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -42,6 +43,10 @@ public static class Startup
 
         // CORS
         services.AddCorsConfiguration();
+
+        // Observability
+        builder.AddObservabilityFeature();
+        
     }
 
     public static void ConfigureApp(WebApplication app)
