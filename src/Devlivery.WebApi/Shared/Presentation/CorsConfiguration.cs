@@ -10,19 +10,10 @@ public static class CorsConfiguration
         {
             options.AddPolicy(DefaultPolicyName, policy =>
             {
-                var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS") 
-                                   ?? "http://localhost:5173";
-                
-                // Dividir origens permitidas (separadas por vírgula)
-                var origins = allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                           .Select(o => o.Trim())
-                                           .ToArray();
-
-                policy.WithOrigins(origins)
+                policy.WithOrigins("http://localhost:5173")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowCredentials()
-                    .SetIsOriginAllowedToAllowWildcardSubdomains(); // Para *.railway.app em review apps
+                    .AllowCredentials();
             });
         });
 
