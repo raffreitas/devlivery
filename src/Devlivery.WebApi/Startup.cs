@@ -9,6 +9,7 @@ using Devlivery.WebApi.Shared.Infrastructure.Identity;
 using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
 using Devlivery.WebApi.Shared.Presentation;
 using FluentValidation;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,12 +22,41 @@ public static class Startup
         var services = builder.Services;
         var configuration = builder.Configuration;
 
+        // Configurar Forwarded Headers para funcionar atrás de proxy (Nginx/Railway)
+        services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor 
+                                     | ForwardedHeaders.XForwardedProto
+                                     | ForwardedHeaders.XForwardedHost;
+            
+            // Em produção, confiar apenas na rede privada do Railway
+            if (!builder.Environment.IsDevelopment())
+            {
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            }
+            
+            // Limite de proxies para evitar spoofing
+            options.ForwardLimit = 2;
+        });
+
         // Validators
         services.AddValidatorsFromAssemblyContaining<Program>();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
         services.AddHealthChecksConfiguration();
+        
+        // Configurar HSTS para produção
+        if (!builder.Environment.IsDevelopment())
+        {
+            services.AddHsts(options =>
+            {
+                options.MaxAge = TimeSpan.FromDays(365);
+                options.IncludeSubDomains = true;
+                options.Preload = true;
+            });
+        }
 
         // OpenAPI/Swagger
         services.AddOpenApiConfiguration();
@@ -60,13 +90,32 @@ public static class Startup
         // CORS
         app.UseCorsConfiguration();
 
-        // Security
-        if (!app.Environment.IsDevelopment())
+        // Security Headers & HTTPS
+        if (app.Environment.IsDevelopment())
         {
-            app.UseHsts();
+            // Em desenvolvimento, redireciona para HTTPS
+            app.UseHttpsRedirection();
         }
-
-        app.UseHttpsRedirection();
+        else
+        {
+            // Em produção (Railway), usa HSTS mas NÃO redireciona
+            // O Railway/Nginx já fazem SSL termination
+            app.UseHsts();
+            
+            // Configura para confiar nos headers do proxy (X-Forwarded-*)
+            app.UseForwardedHeaders();
+            
+            // Adiciona headers de segurança adicionais
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+                context.Response.Headers.Append("X-Frame-Options", "DENY");
+                context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+                context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+                context.Response.Headers.Append("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+                await next();
+            });
+        }
 
         // Authentication & Authorization
         app.UseAuthentication();
