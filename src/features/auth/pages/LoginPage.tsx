@@ -11,8 +11,8 @@ export function LoginPage() {
     state?: { from?: { pathname?: string } };
   };
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@pizza.com");
+  const [password, setPassword] = useState("123456");
   const [error, setError] = useState<string | null>(null);
 
   const from = location.state?.from?.pathname || "/";
@@ -32,6 +32,9 @@ export function LoginPage() {
     <div className="max-w-md mx-auto">
       <div className="bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Entrar</h1>
+        <p className="text-sm text-gray-600 mb-6">
+          Use admin@pizza.com e 123456 para acessar
+        </p>
 
         {error && (
           <div className="mb-4 p-3 rounded bg-red-50 text-red-700 border border-red-200 text-sm">
