@@ -18,8 +18,8 @@ public static class UpdateProductEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("{id:guid}", Handle)
-            .Produces<ApiResponse<UpdateProductResponse>>(StatusCodes.Status200OK)
-            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<UpdateProductResponse>>()
+            .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
     }
 

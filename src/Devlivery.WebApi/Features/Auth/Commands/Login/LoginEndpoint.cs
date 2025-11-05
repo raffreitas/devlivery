@@ -12,18 +12,17 @@ public static class LoginEndpoint
     {
         app.MapPost("/login", Handle)
             .AllowAnonymous()
-            .WithTags("Auth")
-            .WithName("Login")
-            .Produces<ApiResponse<LoginResponse>>(StatusCodes.Status200OK)
-            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<LoginResponse>>()
+            .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized);
     }
 
-    private static async Task<Results<Ok<ApiResponse<LoginResponse>>, ValidationProblem, UnauthorizedHttpResult>> Handle(
-        LoginCommand command,
-        IValidator<LoginCommand> validator,
-        LoginHandler handler,
-        CancellationToken ct)
+    private static async Task<Results<Ok<ApiResponse<LoginResponse>>, ValidationProblem, UnauthorizedHttpResult>>
+        Handle(
+            LoginCommand command,
+            IValidator<LoginCommand> validator,
+            LoginHandler handler,
+            CancellationToken ct)
     {
         var validationResult = await validator.ValidateAsync(command, ct);
         if (!validationResult.IsValid)

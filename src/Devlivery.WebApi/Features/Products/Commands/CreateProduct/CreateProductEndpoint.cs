@@ -12,7 +12,7 @@ public static class CreateProductEndpoint
     {
         app.MapPost("", Handle)
             .Produces<ApiResponse<CreateProductResponse>>(StatusCodes.Status201Created)
-            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
     }
 

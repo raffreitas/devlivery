@@ -11,8 +11,8 @@ public static class GetOrderByIdEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("{id:guid}", Handle)
-            .Produces<ApiResponse<GetOrderByIdResponse>>(StatusCodes.Status200OK)
-            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<GetOrderByIdResponse>>()
+            .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
     }
 

@@ -10,7 +10,7 @@ public static class GetAllOrdersEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("", Handle)
-            .Produces<ApiResponse<List<GetAllOrdersResponse>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<List<GetAllOrdersResponse>>>()
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
     }
 

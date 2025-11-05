@@ -77,7 +77,7 @@ public static class Startup
         app.UseCors();
 
         // Map endpoints
-        app.MapHealthChecks("/health");
+        app.MapHealthChecks("/health").AllowAnonymous();
         app.MapAuthEndpoints();
         app.MapProductEndpoints();
         app.MapOrderEndpoints();
