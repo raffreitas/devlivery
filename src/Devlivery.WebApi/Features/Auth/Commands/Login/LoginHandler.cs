@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Devlivery.WebApi.Features.Auth.Commands.Login;
 
 public sealed class LoginHandler(
+    ILogger<LoginHandler> logger,
     ApplicationDbContext dbContext,
     SignInManager<ApplicationUser> signInManager,
     UserManager<ApplicationUser> userManager,
@@ -21,15 +22,24 @@ public sealed class LoginHandler(
             .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken: cancellationToken);
 
         if (user is null)
+        {
+            logger.LogInformation("Failed login attempt for email: {Email}", request.Email);
             return Result.Fail("Credenciais inválidas");
+        }
 
         var identityUser = await userManager.FindByEmailAsync(user.Email);
         if (identityUser is null)
+        {
+            logger.LogInformation("Failed login attempt for email: {Email}", request.Email);
             return Result.Fail("Credenciais inválidas");
+        }
 
         var signInResult = await signInManager.CheckPasswordSignInAsync(identityUser, request.Password, false);
         if (!signInResult.Succeeded)
+        {
+            logger.LogInformation("Failed login attempt for email: {Email}", request.Email);
             return Result.Fail("Credenciais inválidas");
+        }
 
         var tokenRequest = new TokenRequest(user.Id.ToString(), user.Email);
         var token = await tokenService.GenerateTokenAsync(tokenRequest, cancellationToken);
