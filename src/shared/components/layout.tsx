@@ -74,7 +74,7 @@ export function Layout() {
                   <button
                     type="button"
                     onClick={onLogout}
-                    className="text-sm text-gray-600 hover:text-gray-900 inline-flex items-center gap-1"
+                    className="text-sm text-gray-600 hover:text-gray-900 inline-flex items-center gap-1 cursor-pointer"
                   >
                     <LogOut className="w-4 h-4" />
                     Sair
