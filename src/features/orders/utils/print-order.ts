@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { OrderPrint } from "../components/order-print";
 import type { Order } from "../types";
@@ -150,17 +151,20 @@ export function printOrder(order: Order) {
     if (rootElement) {
       // Render the React component
       const root = createRoot(rootElement);
-      root.render(OrderPrint({ order }));
+      root.render(createElement(OrderPrint, { order }));
 
       // Wait a bit for rendering to complete, then print
+      const RENDER_DELAY = 500;
+      const CLEANUP_DELAY = 1000;
+
       setTimeout(() => {
         iframe.contentWindow?.print();
 
         // Clean up after printing
         setTimeout(() => {
           document.body.removeChild(iframe);
-        }, 1000);
-      }, 500);
+        }, CLEANUP_DELAY);
+      }, RENDER_DELAY);
     }
   };
 }
