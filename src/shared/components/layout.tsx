@@ -1,10 +1,4 @@
-import {
-  LayoutDashboard,
-  LogOut,
-  Package,
-  Pizza,
-  ShoppingCart,
-} from "lucide-react";
+import { LayoutDashboard, LogOut, Package, ShoppingCart } from "lucide-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context";
 
@@ -29,9 +23,8 @@ export function Layout() {
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="shrink-0 flex items-center">
-                <Pizza className="w-8 h-8 text-orange-600 mr-2" />
                 <h1 className="text-2xl font-bold text-orange-600">
-                  Devlivery
+                  🍕 Devlivery
                 </h1>
               </div>
               {!isLogin && (
