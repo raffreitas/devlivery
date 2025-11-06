@@ -19,7 +19,7 @@ Features/[FeatureName]/
 └── [FeatureName]Feature.cs          # DI registration + endpoint mapping
 `
 
-**Database**: Two DbContexts (`ApplicationDbContext` for app data, `ApplicationIdentityDbContext` for auth) using the same PostgreSQL connection with snake_case naming via `UseSnakeCaseNamingConvention()`.
+**Database**: Two DbContexts (`ApplicationDbContext` for app data, `ApplicationIdentityDbContext` for auth) using the same PostgreSQL connection string (`DefaultConnection`) with snake_case naming via `UseSnakeCaseNamingConvention()`.
 
 ## Critical Patterns (Do NOT Deviate)
 
@@ -113,22 +113,19 @@ make migration-update-identity             # Apply identity migrations
 `
 
 **Using EF Core directly**:
-`ash
-dotnet ef migrations add v002 -o ./Shared/Infrastructure/Database/Migrations -c ApplicationDbContext
+```bash
+dotnet ef migrations add v002 -o ./Shared/Database/Migrations -c ApplicationDbContext
 dotnet ef database update -c ApplicationDbContext
-`
+```
 
 **Migration naming**: Use `vXXX` format (v001, v002, v003).
 
 ### CI/CD
 GitHub Actions on `main` branch (`.github/workflows/main-build-deploy.yml`):
 1. Builds and tests solution
-2. Creates version tag: `vYYYY.MM.DD-{short-sha}`
-3. Builds/pushes Docker image to GHCR
-4. **Applies migrations to production** using `DATABASE_CONNECTION_STRING` secret
-5. Creates GitHub release
+2. **Applies migrations to production** using `DATABASE_CONNECTION_STRING` secret for both contexts
 
-**Important**: Migrations run automatically on main branch — no manual production migrations needed.
+**Important**: Migrations run automatically on main branch — no manual production migrations needed. Docker image builds and version tagging are currently disabled in the workflow.
 
 ## Adding a New Feature
 

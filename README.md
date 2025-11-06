@@ -11,6 +11,7 @@ Este projeto implementa **Vertical Slice Architecture** (VSA), onde cada feature
 - **Vertical Slice Architecture**: Organização por funcionalidade ao invés de camadas técnicas
 - **CQRS Pattern**: Separação clara entre Commands (escrita) e Queries (leitura)
 - **Minimal APIs**: APIs leves, performáticas e modernas do .NET 9
+- **Typed Results**: Respostas HTTP tipadas e explícitas seguindo RFC 7807
 - **FluentValidation**: Validação robusta e declarativa
 - **FluentResults**: Tratamento de erros tipado e funcional
 - **Entity Framework Core**: ORM para PostgreSQL
@@ -124,7 +125,42 @@ Cada operação (Command ou Query) segue a estrutura:
 Request → Endpoint → Validation → Handler → Business Logic → Response
 ```
 
-## 🚀 Como Executar
+## � Padrão de Resposta da API
+
+A API segue o padrão **RFC 7807 Problem Details** para erros e usa **Typed Results** para todas as respostas:
+
+### Respostas de Sucesso
+
+Todas as respostas de sucesso são envolvidas em `ApiResponse<T>`:
+
+```json
+{
+  "success": true,
+  "data": { /* dados retornados */ },
+  "message": "Operação realizada com sucesso",
+  "timestamp": "2025-11-04T10:30:00Z"
+}
+```
+
+### Respostas de Erro
+
+Erros seguem o padrão RFC 7807:
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+  "title": "Um ou mais erros de validação ocorreram",
+  "status": 400,
+  "errors": {
+    "Name": ["O campo 'Name' é obrigatório."]
+  }
+}
+```
+
+📘 **Para detalhes completos sobre respostas da API, consulte:**
+- [docs/API-RESPONSE-PATTERN.md](docs/API-RESPONSE-PATTERN.md)
+
+## �🚀 Como Executar
 
 ### Pré-requisitos
 
@@ -276,7 +312,7 @@ public sealed class Validator : AbstractValidator<MeuCommand>
 ```csharp
 // MeuCommandHandler.cs
 using FluentResults;
-using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
+using Devlivery.WebApi.Shared.Database.Context;
 
 namespace Devlivery.WebApi.Features.MinhaFeature.Commands.MeuCommand;
 
@@ -299,7 +335,11 @@ public sealed class MeuCommandHandler(ApplicationDbContext dbContext)
 
 ```csharp
 // MeuCommandEndpoint.cs
+using Devlivery.WebApi.Shared.Extensions;
+using Devlivery.WebApi.Shared.Models;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.WebApi.Features.MinhaFeature.Commands.MeuCommand;
 
@@ -307,27 +347,27 @@ public static class MeuCommandEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("", async (
-            IValidator<MeuCommand> validator,
-            MeuCommand request,
-            MeuCommandHandler handler,
-            CancellationToken ct) =>
-        {
-            var validationResult = await validator.ValidateAsync(request, ct);
-            if (!validationResult.IsValid)
-            {
-                return Results.ValidationProblem(validationResult.ToDictionary());
-            }
+        app.MapPost("", Handle)
+            .Produces<ApiResponse<MeuCommandResponse>>(StatusCodes.Status201Created)
+            .ProducesValidationProblem()
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+    }
 
-            var result = await handler.HandleAsync(request, ct);
-            
-            if (result.IsFailed)
-            {
-                return Results.Problem(result.Errors.First().Message);
-            }
+    private static async Task<Results<Created<ApiResponse<MeuCommandResponse>>, ValidationProblem, BadRequest<ProblemDetails>>> Handle(
+        MeuCommand request,
+        IValidator<MeuCommand> validator,
+        MeuCommandHandler handler,
+        CancellationToken ct)
+    {
+        var validationResult = await validator.ValidateAsync(request, ct);
+        if (!validationResult.IsValid)
+            return validationResult.ToValidationProblem();
 
-            return Results.Created("", result.Value);
-        });
+        var result = await handler.HandleAsync(request, ct);
+
+        return result.IsSuccess
+            ? result.ToCreated($"/api/minha-feature/{result.Value.Id}", "Recurso criado com sucesso")
+            : result.ToBadRequestProblem();
     }
 }
 ```
@@ -441,17 +481,49 @@ Content-Type: application/json
 
 ```
 Email: admin@pizza.com
-Senha: 123456
+Senha: ChangeIt123!
 ```
 
 ## 📦 Dependências Principais
 
-- **Microsoft.EntityFrameworkCore** (9.0.0) - ORM para acesso a dados
-- **Npgsql.EntityFrameworkCore.PostgreSQL** (9.0.0) - Provider PostgreSQL
-- **FluentValidation** (11.11.0) - Validação de dados
-- **FluentResults** - Tratamento de erros funcional
+- **Microsoft.EntityFrameworkCore** (9.0.10) - ORM para acesso a dados
+- **Npgsql.EntityFrameworkCore.PostgreSQL** (9.0.10) - Provider PostgreSQL
+- **FluentValidation** (12.1.0) - Validação de dados
+- **FluentResults** (4.0.0) - Tratamento de erros funcional
+- **ASP.NET Core Identity** (9.0.0) - Autenticação e autorização
+- **JWT Bearer Authentication** - Tokens de acesso
+- **EFCore.NamingConventions** - Convenção snake_case para PostgreSQL
 
-## � Benefícios da Arquitetura
+## 🔧 Extension Methods Úteis
+
+O projeto fornece extension methods para facilitar o trabalho com `Result<T>` e validações:
+
+### ResultExtensions
+
+Localizado em `Shared/Extensions/ResultExtensions.cs`:
+
+- `ToOk<T>(message)` - Converte Result em 200 OK
+- `ToCreated<T>(uri, message)` - Converte Result em 201 Created
+- `ToNoContent()` - Retorna 204 No Content
+- `ToBadRequestProblem()` - Converte erro em 400 Bad Request
+- `ToNotFoundProblem()` - Converte erro em 404 Not Found
+
+### ValidationExtensions
+
+Localizado em `Shared/Extensions/ValidationExtensions.cs`:
+
+- `ToValidationProblem()` - Converte ValidationResult em 400 Validation Problem
+
+## 📊 Observabilidade
+
+O projeto está preparado para observabilidade com:
+
+- **OpenTelemetry**: Integração configurada
+- **Grafana**: Suporte para métricas e traces
+- **Health Checks**: Endpoint `/health` disponível
+- **Scalar API Documentation**: Interface interativa em `/scalar/v1`
+
+## 📋 Benefícios da Arquitetura
 
 ### Vertical Slice Architecture
 - ✅ **Alta coesão**: Todo código relacionado a uma feature fica junto
@@ -468,11 +540,16 @@ Senha: 123456
 ## 🛠️ Tecnologias
 
 - .NET 9
-- PostgreSQL
-- Entity Framework Core
-- Minimal APIs
-- FluentValidation
-- FluentResults
+- PostgreSQL 16
+- Entity Framework Core 9
+- ASP.NET Core Minimal APIs
+- FluentValidation 12.1.0
+- FluentResults 4.0.0
+- ASP.NET Core Identity
+- JWT Bearer Authentication
+- EFCore.NamingConventions (snake_case)
+- OpenTelemetry
+- Scalar (API Documentation)
 
 ---
 
