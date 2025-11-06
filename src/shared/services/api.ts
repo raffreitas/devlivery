@@ -70,7 +70,11 @@ async function request<T>(
   try {
     json = await res.json();
   } catch {
-    if (!res.ok) throw new ApiError(res.statusText, res.status);
+    if (!res.ok) {
+      if (res.status === 401) throw new UnauthorizedError(res.statusText);
+      throw new ApiError(res.statusText, res.status);
+    }
+
     return undefined as unknown as T;
   }
 

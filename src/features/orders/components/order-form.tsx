@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useProducts } from "@/features/products/hooks/use-products";
+import { AutocompleteSelect } from "@/shared/components/autocomplete-select";
 import { Button } from "@/shared/components/button";
 import { Input } from "@/shared/components/input";
 import type { OrderFormData, OrderItem } from "../types";
@@ -16,11 +17,21 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [items, setItems] = useState<OrderItem[]>([]);
-  const [selectedProductId, setSelectedProductId] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    null,
+  );
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
 
   const availableProducts = products.filter((p) => p.available);
+  const productOptions = useMemo(
+    () =>
+      availableProducts.map((product) => ({
+        value: product.id,
+        label: `${product.name} - R$ ${product.price.toFixed(2)}`,
+      })),
+    [availableProducts],
+  );
 
   const handleAddItem = () => {
     if (!selectedProductId) return;
@@ -43,7 +54,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       setItems([...items, { product, quantity, notes: notes || undefined }]);
     }
 
-    setSelectedProductId("");
+    setSelectedProductId(null);
     setQuantity(1);
     setNotes("");
   };
@@ -128,27 +139,14 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-1">
-            <label
-              htmlFor="product-select"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Produto
-            </label>
-            <select
+            <AutocompleteSelect
               id="product-select"
+              label="Produto"
+              placeholder="Selecione ou pesquise um produto"
               value={selectedProductId}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                setSelectedProductId(e.target.value)
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option value="">Selecione um produto</option>
-              {availableProducts.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name} - R$ {product.price.toFixed(2)}
-                </option>
-              ))}
-            </select>
+              onChange={setSelectedProductId}
+              options={productOptions}
+            />
           </div>
 
           <div>

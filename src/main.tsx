@@ -1,22 +1,36 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { App } from "./app.tsx";
-import { authService } from "./features/auth/services/auth-service";
+import { router } from "./app-routes.tsx";
 import { UnauthorizedError } from "./shared/services/api";
+import { authEvents } from "./shared/services/auth-events";
 
 const queryClient = new QueryClient({
-  defaultOptions: {
-    mutations: {
-      onError: (error) => {
-        if (error instanceof UnauthorizedError) {
-          void authService.logout();
-          window.location.href = "/login";
-        }
-      },
+  queryCache: new QueryCache({
+    onError: (error) => {
+      if (error instanceof UnauthorizedError) {
+        authEvents.emit();
+        void router.navigate("/login", { replace: true });
+      }
     },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error) => {
+      if (error instanceof UnauthorizedError) {
+        authEvents.emit();
+        void router.navigate("/login", { replace: true });
+      }
+    },
+  }),
+  defaultOptions: {
     queries: {
       retry: (failureCount, error) => {
         if (error instanceof UnauthorizedError) return false;

@@ -24,6 +24,8 @@ const router = createBrowserRouter([
   },
 ]);
 
+export { router };
+
 export function AppRoutes() {
   return <RouterProvider router={router} />;
 }
