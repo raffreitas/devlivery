@@ -1,11 +1,11 @@
 using Devlivery.WebApi.Features.Products.Domain;
 using Devlivery.WebApi.Features.Users.Domain;
-using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
-using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
+using Devlivery.WebApi.Shared.Database.Context;
+using Devlivery.WebApi.Shared.Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.WebApi.Shared.Infrastructure.Database.Seeder;
+namespace Devlivery.WebApi.Shared.Database.Seeder;
 
 public static class DatabaseSeeder
 {

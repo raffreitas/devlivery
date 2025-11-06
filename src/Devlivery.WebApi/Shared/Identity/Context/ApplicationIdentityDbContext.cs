@@ -1,9 +1,9 @@
-﻿using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
+﻿using Devlivery.WebApi.Shared.Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.WebApi.Shared.Infrastructure.Identity.Context;
+namespace Devlivery.WebApi.Shared.Identity.Context;
 
 public sealed class ApplicationIdentityDbContext(DbContextOptions<ApplicationIdentityDbContext> options)
     : IdentityDbContext<ApplicationUser>(options)

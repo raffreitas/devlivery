@@ -2,12 +2,12 @@
 using Devlivery.WebApi.Features.Dashboard;
 using Devlivery.WebApi.Features.Orders;
 using Devlivery.WebApi.Features.Products;
-using Devlivery.WebApi.Shared.Infrastructure.Database;
-using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
-using Devlivery.WebApi.Shared.Infrastructure.Database.Seeder;
-using Devlivery.WebApi.Shared.Infrastructure.Identity;
-using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
-using Devlivery.WebApi.Shared.Infrastructure.Observability;
+using Devlivery.WebApi.Shared.Database;
+using Devlivery.WebApi.Shared.Database.Context;
+using Devlivery.WebApi.Shared.Database.Seeder;
+using Devlivery.WebApi.Shared.Identity;
+using Devlivery.WebApi.Shared.Identity.Models;
+using Devlivery.WebApi.Shared.Observability;
 using Devlivery.WebApi.Shared.Presentation;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -46,7 +46,6 @@ public static class Startup
 
         // Observability
         builder.AddObservabilityFeature();
-        
     }
 
     public static void ConfigureApp(WebApplication app)
@@ -76,6 +75,8 @@ public static class Startup
         // Authentication & Authorization
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseObservabilityFeature();
 
         // Endpoints
         app.MapHealthChecks("/health").AllowAnonymous();

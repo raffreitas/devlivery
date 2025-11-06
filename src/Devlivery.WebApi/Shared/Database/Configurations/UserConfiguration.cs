@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Devlivery.WebApi.Shared.Infrastructure.Database.Configurations;
+namespace Devlivery.WebApi.Shared.Database.Configurations;
 
 public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {

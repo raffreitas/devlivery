@@ -1,8 +1,8 @@
-﻿using Devlivery.WebApi.Shared.Extensions;
-using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
+﻿using Devlivery.WebApi.Shared.Database.Context;
+using Devlivery.WebApi.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.WebApi.Shared.Infrastructure.Database;
+namespace Devlivery.WebApi.Shared.Database;
 
 public static class DatabaseFeature
 {

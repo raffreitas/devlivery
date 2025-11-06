@@ -1,5 +1,5 @@
 using Devlivery.WebApi.Features.Products.Domain;
-using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
+using Devlivery.WebApi.Shared.Database.Context;
 using FluentResults;
 
 namespace Devlivery.WebApi.Features.Products.Commands.CreateProduct;

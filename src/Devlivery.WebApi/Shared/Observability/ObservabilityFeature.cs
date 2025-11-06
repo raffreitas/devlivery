@@ -1,10 +1,10 @@
-﻿using Grafana.OpenTelemetry;
-using Npgsql;
+﻿using Devlivery.WebApi.Shared.Observability.Middleware;
+using Grafana.OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace Devlivery.WebApi.Shared.Infrastructure.Observability;
+namespace Devlivery.WebApi.Shared.Observability;
 
 public static class ObservabilityFeature
 {
@@ -39,8 +39,7 @@ public static class ObservabilityFeature
                 .AddMeter()
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
-                .AddRuntimeInstrumentation()
-                .AddNpgsqlInstrumentation())
+                .AddRuntimeInstrumentation())
             .UseGrafana();
 
         builder.Logging.AddOpenTelemetry(options =>
@@ -52,5 +51,11 @@ public static class ObservabilityFeature
         });
 
         return services;
+    }
+
+    public static IApplicationBuilder UseObservabilityFeature(this IApplicationBuilder app)
+    {
+        app.UseMiddleware<RequestLoggingMiddleware>();
+        return app;
     }
 }

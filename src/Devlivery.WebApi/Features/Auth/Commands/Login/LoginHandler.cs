@@ -1,6 +1,6 @@
 ﻿using Devlivery.WebApi.Features.Auth.Abstractions;
-using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
-using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
+using Devlivery.WebApi.Shared.Database.Context;
+using Devlivery.WebApi.Shared.Identity.Models;
 using FluentResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

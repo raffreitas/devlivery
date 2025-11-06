@@ -1,4 +1,4 @@
-using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
+using Devlivery.WebApi.Shared.Database.Context;
 using Devlivery.WebApi.Shared.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;

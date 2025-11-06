@@ -1,5 +1,5 @@
 ﻿using Devlivery.WebApi.Features.Orders.Domain;
-using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
+using Devlivery.WebApi.Shared.Database.Context;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 

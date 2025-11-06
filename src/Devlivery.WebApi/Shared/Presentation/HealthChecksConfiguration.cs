@@ -1,5 +1,5 @@
-﻿using Devlivery.WebApi.Shared.Infrastructure.Database.Context;
-using Devlivery.WebApi.Shared.Infrastructure.Identity.Context;
+﻿using Devlivery.WebApi.Shared.Database.Context;
+using Devlivery.WebApi.Shared.Identity.Context;
 
 namespace Devlivery.WebApi.Shared.Presentation;
 

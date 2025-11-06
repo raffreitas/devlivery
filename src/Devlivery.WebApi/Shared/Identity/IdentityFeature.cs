@@ -1,10 +1,10 @@
 ﻿using Devlivery.WebApi.Shared.Extensions;
-using Devlivery.WebApi.Shared.Infrastructure.Identity.Context;
-using Devlivery.WebApi.Shared.Infrastructure.Identity.Models;
+using Devlivery.WebApi.Shared.Identity.Context;
+using Devlivery.WebApi.Shared.Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.WebApi.Shared.Infrastructure.Identity;
+namespace Devlivery.WebApi.Shared.Identity;
 
 public static class IdentityFeature
 {
