@@ -5,8 +5,8 @@
 PROJECT_DIR = src/Devlivery.WebApi
 
 # Migrations paths
-MIGRATIONS_DB_PATH = ./Shared/Infrastructure/Database/Migrations
-MIGRATIONS_IDENTITY_PATH = ./Shared/Infrastructure/Identity/Migrations
+MIGRATIONS_DB_PATH = ./Shared/Database/Migrations
+MIGRATIONS_IDENTITY_PATH = ./Shared/Identity/Migrations
 
 # Contexts
 CONTEXT_DB = ApplicationDbContext
