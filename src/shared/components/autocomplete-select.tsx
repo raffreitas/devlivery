@@ -1,4 +1,6 @@
+import { X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 type BaseOption = {
   value: string;
@@ -38,9 +40,15 @@ export function AutocompleteSelect({
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = useMemo(
     () => options.find((option) => option.value === value) ?? null,
@@ -74,11 +82,47 @@ export function AutocompleteSelect({
   }, [filteredOptions, highlightedIndex]);
 
   useEffect(() => {
+    if (isOpen && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    } else {
+      setDropdownPosition(null);
+    }
+
+    const handleScroll = () => {
+      if (isOpen && inputRef.current) {
+        const rect = inputRef.current.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY + 8,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+        });
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener("scroll", handleScroll, true);
+      window.addEventListener("resize", handleScroll);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         containerRef.current &&
         event.target instanceof Node &&
-        !containerRef.current.contains(event.target)
+        !containerRef.current.contains(event.target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
       ) {
         setIsOpen(false);
       }
@@ -207,15 +251,25 @@ export function AutocompleteSelect({
             className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-600"
             aria-label="Limpar seleção"
           >
-            ×
+            <X className="w-4 h-4" />
           </button>
         )}
+      </div>
 
-        {isOpen && (
+      {isOpen &&
+        dropdownPosition &&
+        createPortal(
           <div
+            ref={dropdownRef}
             id={`${id ?? "autocomplete"}-listbox`}
             role="listbox"
-            className="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto"
+            style={{
+              position: "fixed",
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              width: `${dropdownPosition.width}px`,
+            }}
+            className="z-100 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto"
           >
             {filteredOptions.length === 0 && (
               <div className="px-3 py-2 text-sm text-gray-500">
@@ -252,9 +306,9 @@ export function AutocompleteSelect({
                 </button>
               );
             })}
-          </div>
+          </div>,
+          document.body,
         )}
-      </div>
 
       <input type="hidden" name={name} value={value ?? ""} />
     </div>
