@@ -35,6 +35,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
             o.DeliveryAddress,
             o.Status,
             o.Total,
+            o.DeliveryFee,
             o.CreatedAt,
             o.UpdatedAt)).ToList();
 

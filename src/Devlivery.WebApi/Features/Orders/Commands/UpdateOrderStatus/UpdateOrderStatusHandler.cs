@@ -44,6 +44,7 @@ public sealed class UpdateOrderStatusHandler(ApplicationDbContext dbContext)
             order.DeliveryAddress,
             order.Status,
             order.Total,
+            order.DeliveryFee,
             order.CreatedAt,
             order.UpdatedAt);
 

@@ -21,11 +21,12 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
             return Result.Fail("Um ou mais produtos não foram encontrados");
         }
 
-        var total = command.Items.Sum(item =>
+        var itemsSubtotal = command.Items.Sum(item =>
         {
             var product = products.First(p => p.Id == item.ProductId);
             return product.Price * item.Quantity;
         });
+        var total = itemsSubtotal + command.DeliveryFee;
 
         var now = DateTime.UtcNow;
         var order = new Order
@@ -36,6 +37,7 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
             DeliveryAddress = command.DeliveryAddress,
             Status = "pending",
             Total = total,
+            DeliveryFee = command.DeliveryFee,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -76,6 +78,7 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
             order.DeliveryAddress,
             order.Status,
             order.Total,
+            order.DeliveryFee,
             order.CreatedAt,
             order.UpdatedAt);
     }

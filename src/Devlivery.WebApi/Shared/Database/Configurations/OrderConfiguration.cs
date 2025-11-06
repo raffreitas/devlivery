@@ -14,6 +14,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(e => e.DeliveryAddress).IsRequired().HasMaxLength(500);
         builder.Property(e => e.Status).IsRequired().HasMaxLength(20);
         builder.Property(e => e.Total).HasPrecision(18, 2);
+        builder.Property(e => e.DeliveryFee).HasPrecision(18, 2);
 
         builder.HasMany(e => e.Items)
             .WithOne(e => e.Order)

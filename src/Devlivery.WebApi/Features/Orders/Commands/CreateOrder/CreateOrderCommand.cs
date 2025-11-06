@@ -6,7 +6,8 @@ public sealed record CreateOrderCommand(
     OrderItemDto[] Items,
     string CustomerName,
     string CustomerPhone,
-    string DeliveryAddress);
+    string DeliveryAddress,
+    decimal DeliveryFee = 0);
 
 public sealed record OrderItemDto(Guid ProductId, int Quantity, string? Notes);
 
@@ -34,5 +35,8 @@ public sealed class Validator : AbstractValidator<CreateOrderCommand>
         RuleFor(x => x.DeliveryAddress)
             .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
             .MaximumLength(500).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+
+        RuleFor(x => x.DeliveryFee)
+            .GreaterThanOrEqualTo(0).WithMessage("O campo '{PropertyName}' deve ser maior ou igual a {ComparisonValue}.");
     }
 }
