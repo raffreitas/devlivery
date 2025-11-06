@@ -21,6 +21,13 @@ export class ApiError extends Error {
   }
 }
 
+export class UnauthorizedError extends ApiError {
+  constructor(message = "Não autorizado", details?: unknown) {
+    super(message, 401, details);
+    this.name = "UnauthorizedError";
+  }
+}
+
 function getAuthToken(): string | null {
   try {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY);
@@ -73,6 +80,11 @@ async function request<T>(
       (typeof j.title === "string" && j.title) ||
       (typeof j.message === "string" && j.message) ||
       res.statusText;
+
+    if (res.status === 401) {
+      throw new UnauthorizedError(String(errMsg), json);
+    }
+
     throw new ApiError(String(errMsg), res.status, json);
   }
 
