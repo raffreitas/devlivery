@@ -1,5 +1,6 @@
 import { Button } from "@/shared/components/button";
 import type { Order } from "../types";
+import { printOrder } from "../utils/print-order";
 
 interface OrderCardProps {
   order: Order;
@@ -49,6 +50,10 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
     if (window.confirm("Tem certeza que deseja excluir este pedido?")) {
       onDelete(order.id);
     }
+  };
+
+  const handlePrint = () => {
+    printOrder(order);
   };
 
   return (
@@ -102,6 +107,9 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
       </div>
 
       <div className="flex justify-end space-x-2 mt-4">
+        <Button size="sm" variant="secondary" onClick={handlePrint}>
+          Imprimir
+        </Button>
         {order.status !== "cancelled" && order.status !== "delivered" && (
           <Button size="sm" variant="danger" onClick={handleCancel}>
             Cancelar
