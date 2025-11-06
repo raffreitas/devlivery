@@ -262,7 +262,9 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-900">Total:</span>
+                <span className="text-lg font-semibold text-gray-900">
+                  Total:
+                </span>
                 <span className="text-2xl font-bold text-orange-600">
                   R$ {total.toFixed(2)}
                 </span>
