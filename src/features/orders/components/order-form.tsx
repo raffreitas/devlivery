@@ -14,6 +14,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryFee, setDeliveryFee] = useState(0);
   const [items, setItems] = useState<OrderItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -62,10 +63,15 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       customerName,
       customerPhone,
       deliveryAddress,
+      deliveryFee,
     });
   };
 
-  const total = items.reduce(
+  const total =
+    items.reduce((sum, item) => sum + item.product.price * item.quantity, 0) +
+    deliveryFee;
+
+  const subtotal = items.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0,
   );
@@ -102,6 +108,16 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
           value={deliveryAddress}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setDeliveryAddress(e.target.value)
+          }
+          required
+        />
+
+        <Input
+          label="Taxa de Entrega"
+          type="number"
+          value={deliveryFee}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setDeliveryFee(Number.parseFloat(e.target.value))
           }
           required
         />
@@ -230,13 +246,29 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
                 ))}
               </tbody>
             </table>
-            <div className="bg-gray-50 px-4 py-3 flex justify-between items-center">
-              <span className="text-lg font-semibold text-gray-900">
-                Total:
-              </span>
-              <span className="text-2xl font-bold text-orange-600">
-                R$ {total.toFixed(2)}
-              </span>
+            <div className="bg-gray-50 px-4 py-3">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm text-gray-600">Subtotal</span>
+                <span className="text-sm font-medium text-gray-900">
+                  R$ {subtotal.toFixed(2)}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm text-gray-600">Taxa de Entrega</span>
+                <span className="text-sm font-medium text-gray-900">
+                  R$ {deliveryFee.toFixed(2)}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-semibold text-gray-900">
+                  Total:
+                </span>
+                <span className="text-2xl font-bold text-orange-600">
+                  R$ {total.toFixed(2)}
+                </span>
+              </div>
             </div>
           </div>
         )}

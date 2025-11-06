@@ -36,10 +36,30 @@ export function OrderPrint({ order }: OrderPrintProps) {
       </div>
 
       <div className="border-t-2 border-dashed border-gray-800 pt-2 mb-3">
-        <div className="flex justify-between font-bold text-lg">
-          <span>TOTAL:</span>
-          <span>R$ {order.total.toFixed(2)}</span>
-        </div>
+        {(() => {
+          const subtotal = order.items.reduce(
+            (s, it) => s + it.product.price * it.quantity,
+            0,
+          );
+          return (
+            <div>
+              <div className="flex justify-between">
+                <span>SUBTOTAL:</span>
+                <span>R$ {subtotal.toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>TAXA DE ENTREGA:</span>
+                <span>R$ {order.deliveryFee.toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between font-bold text-lg mt-2">
+                <span>TOTAL:</span>
+                <span>R$ {order.total.toFixed(2)}</span>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       <div className="text-center text-xs border-t border-gray-800 pt-2">
