@@ -27,6 +27,7 @@ interface OrderDto {
   deliveryAddress: string;
   status: Order["status"] | string;
   total: number;
+  deliveryFee: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -57,6 +58,7 @@ function mapOrder(dto: OrderDto): Order {
     deliveryAddress: dto.deliveryAddress,
     status: dto.status as Order["status"],
     total: dto.total,
+    deliveryFee: dto.deliveryFee,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };
@@ -97,6 +99,7 @@ export const orderService = {
       customerName: data.customerName,
       customerPhone: data.customerPhone,
       deliveryAddress: data.deliveryAddress,
+      deliveryFee: data.deliveryFee,
     };
     const res = await api.post<ApiResponse<OrderDto | null>>(
       "/api/orders",

@@ -14,6 +14,7 @@ export interface Order {
   deliveryAddress: string;
   status: "pending" | "preparing" | "ready" | "delivered" | "cancelled";
   total: number;
+  deliveryFee: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,4 +24,5 @@ export interface OrderFormData {
   customerName: string;
   customerPhone: string;
   deliveryAddress: string;
+  deliveryFee: number;
 }

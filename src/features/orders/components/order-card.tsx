@@ -1,6 +1,7 @@
 import { Button } from "@/shared/components/button";
 import { usePrintOrder } from "../hooks/usePrintOrder";
 import type { Order } from "../types";
+import { OrderCardTotal } from "./order-card-total";
 import { OrderPrint } from "./order-print";
 
 interface OrderCardProps {
@@ -96,13 +97,8 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
         </ul>
       </div>
 
-      <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-        <div>
-          <span className="text-sm text-gray-600">Total:</span>
-          <span className="text-xl font-bold text-orange-600 ml-2">
-            R$ {order.total.toFixed(2)}
-          </span>
-        </div>
+      <div className="pt-4 border-t border-gray-200">
+        <OrderCardTotal order={order} />
       </div>
 
       <div className="flex justify-end space-x-2 mt-4">
