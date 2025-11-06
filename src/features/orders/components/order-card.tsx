@@ -1,5 +1,7 @@
 import { Button } from "@/shared/components/button";
+import { usePrintOrder } from "../hooks/usePrintOrder";
 import type { Order } from "../types";
+import { OrderPrint } from "./order-print";
 
 interface OrderCardProps {
   order: Order;
@@ -24,6 +26,8 @@ const statusLabels = {
 };
 
 export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
+  const { contentRef, handlePrint } = usePrintOrder();
+
   const nextStatus: Record<Order["status"], Order["status"] | null> = {
     pending: "preparing",
     preparing: "ready",
@@ -102,6 +106,9 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
       </div>
 
       <div className="flex justify-end space-x-2 mt-4">
+        <Button size="sm" variant="secondary" onClick={handlePrint}>
+          Imprimir
+        </Button>
         {order.status !== "cancelled" && order.status !== "delivered" && (
           <Button size="sm" variant="danger" onClick={handleCancel}>
             Cancelar
@@ -123,6 +130,13 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
 
       <div className="mt-3 text-xs text-gray-500">
         Pedido criado em: {new Date(order.createdAt).toLocaleString("pt-BR")}
+      </div>
+
+      {/* Hidden print component */}
+      <div style={{ display: "none" }}>
+        <div ref={contentRef}>
+          <OrderPrint order={order} />
+        </div>
       </div>
     </div>
   );
