@@ -9,6 +9,7 @@ import {
 } from "react";
 import { authService } from "@/features/auth/services/auth-service";
 import type { AuthState, Credentials, User } from "@/features/auth/types";
+import { authEvents } from "@/shared/services/auth-events";
 
 interface AuthContextData {
   user: User | null;
@@ -50,6 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
   }, []);
+
+  // Escuta eventos de erro de autenticação (ex: 401 Unauthorized)
+  useEffect(() => {
+    const unsubscribe = authEvents.subscribe(() => {
+      void logout();
+    });
+    return unsubscribe;
+  }, [logout]);
 
   const value: AuthContextData = useMemo(
     () => ({

@@ -10,14 +10,14 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { App } from "./app.tsx";
 import { router } from "./app-routes.tsx";
-import { authService } from "./features/auth/services/auth-service";
 import { UnauthorizedError } from "./shared/services/api";
+import { authEvents } from "./shared/services/auth-events";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
       if (error instanceof UnauthorizedError) {
-        void authService.logout();
+        authEvents.emit();
         void router.navigate("/login", { replace: true });
       }
     },
@@ -25,7 +25,7 @@ const queryClient = new QueryClient({
   mutationCache: new MutationCache({
     onError: (error) => {
       if (error instanceof UnauthorizedError) {
-        void authService.logout();
+        authEvents.emit();
         void router.navigate("/login", { replace: true });
       }
     },
