@@ -8,6 +8,7 @@ public sealed record GetOrderByIdResponse(
     string DeliveryAddress,
     string Status,
     decimal Total,
+    decimal DeliveryFee,
     DateTime CreatedAt,
     DateTime UpdatedAt);
 

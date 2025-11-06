@@ -8,6 +8,7 @@ public sealed record CreateOrderResponse(
     string DeliveryAddress,
     string Status,
     decimal Total,
+    decimal DeliveryFee,
     DateTime CreatedAt,
     DateTime UpdatedAt);
 

@@ -8,6 +8,7 @@ public class Order
     public string DeliveryAddress { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public decimal Total { get; set; }
+    public decimal DeliveryFee { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
