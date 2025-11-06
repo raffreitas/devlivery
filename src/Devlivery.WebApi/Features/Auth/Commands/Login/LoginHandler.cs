@@ -23,21 +23,24 @@ public sealed class LoginHandler(
 
         if (user is null)
         {
-            logger.LogInformation("Failed login attempt for email: {Email}", request.Email);
+            logger.LogInformation("Failed login attempt.");
+            logger.LogDebug("Failed login attempt for email: {Email}", request.Email);
             return Result.Fail("Credenciais inválidas");
         }
 
         var identityUser = await userManager.FindByEmailAsync(user.Email);
         if (identityUser is null)
         {
-            logger.LogInformation("Failed login attempt for email: {Email}", request.Email);
+            logger.LogInformation("Failed login attempt.");
+            logger.LogDebug("Failed login attempt for email: {Email}", request.Email);
             return Result.Fail("Credenciais inválidas");
         }
 
         var signInResult = await signInManager.CheckPasswordSignInAsync(identityUser, request.Password, false);
         if (!signInResult.Succeeded)
         {
-            logger.LogInformation("Failed login attempt for email: {Email}", request.Email);
+            logger.LogInformation("Failed login attempt.");
+            logger.LogDebug("Failed login attempt for email: {Email}", request.Email);
             return Result.Fail("Credenciais inválidas");
         }
 
