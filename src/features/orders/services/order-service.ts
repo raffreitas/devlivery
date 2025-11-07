@@ -1,6 +1,7 @@
 import type { Product } from "@/features/products/types";
 import { type ApiResponse, api } from "@/shared/services/api";
-import type { Order, OrderFormData } from "../types";
+import type { Order, OrderFormData, PaymentMethod } from "../types";
+import { PAYMENT_METHODS } from "../types";
 
 interface ProductDto {
   id: string;
@@ -26,6 +27,7 @@ interface OrderDto {
   customerPhone: string;
   deliveryAddress: string;
   status: Order["status"] | string;
+  paymentMethod?: string | null;
   total: number;
   deliveryFee: number;
   createdAt: string;
@@ -46,6 +48,12 @@ function mapProduct(dto: ProductDto): Product {
 }
 
 function mapOrder(dto: OrderDto): Order {
+  // Se paymentMethod existe e é uma chave válida, usa; senão usa "Cash" como padrão
+  const paymentMethod =
+    dto.paymentMethod && dto.paymentMethod in PAYMENT_METHODS
+      ? (dto.paymentMethod as PaymentMethod)
+      : "Cash";
+
   return {
     id: dto.id,
     items: dto.items.map((i) => ({
@@ -57,6 +65,7 @@ function mapOrder(dto: OrderDto): Order {
     customerPhone: dto.customerPhone,
     deliveryAddress: dto.deliveryAddress,
     status: dto.status as Order["status"],
+    paymentMethod,
     total: dto.total,
     deliveryFee: dto.deliveryFee,
     createdAt: new Date(dto.createdAt),
@@ -100,6 +109,7 @@ export const orderService = {
       customerPhone: data.customerPhone,
       deliveryAddress: data.deliveryAddress,
       deliveryFee: data.deliveryFee,
+      paymentMethod: data.paymentMethod,
     };
     const res = await api.post<ApiResponse<OrderDto | null>>(
       "/api/orders",

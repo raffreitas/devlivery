@@ -1,5 +1,13 @@
 import type { Product } from "@/features/products/types";
 
+export const PAYMENT_METHODS = {
+  Cash: "Dinheiro",
+  Card: "Cartão",
+  Pix: "Pix",
+} as const;
+
+export type PaymentMethod = keyof typeof PAYMENT_METHODS;
+
 export interface OrderItem {
   product: Product;
   quantity: number;
@@ -13,6 +21,7 @@ export interface Order {
   customerPhone: string;
   deliveryAddress: string;
   status: "pending" | "preparing" | "ready" | "delivered" | "cancelled";
+  paymentMethod: PaymentMethod;
   total: number;
   deliveryFee: number;
   createdAt: Date;
@@ -22,7 +31,8 @@ export interface Order {
 export interface OrderFormData {
   items: OrderItem[];
   customerName: string;
-  customerPhone: string;
+  customerPhone?: string;
+  paymentMethod: PaymentMethod;
   deliveryAddress: string;
   deliveryFee: number;
 }

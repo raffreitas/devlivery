@@ -3,7 +3,7 @@ import { useProducts } from "@/features/products/hooks/use-products";
 import { AutocompleteSelect } from "@/shared/components/autocomplete-select";
 import { Button } from "@/shared/components/button";
 import { Input } from "@/shared/components/input";
-import type { OrderFormData, OrderItem } from "../types";
+import type { OrderFormData, OrderItem, PaymentMethod } from "../types";
 
 interface OrderFormProps {
   onSubmit: (data: OrderFormData) => void;
@@ -13,7 +13,9 @@ interface OrderFormProps {
 export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
   const { products } = useProducts();
   const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(
+    null,
+  );
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [items, setItems] = useState<OrderItem[]>([]);
@@ -65,16 +67,23 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!paymentMethod) {
+      alert("Selecione um método de pagamento");
+      return;
+    }
+
     if (items.length === 0) {
       alert("Adicione pelo menos um produto ao pedido");
       return;
     }
+
     onSubmit({
       items,
       customerName,
-      customerPhone,
       deliveryAddress,
       deliveryFee,
+      paymentMethod: paymentMethod,
     });
   };
 
@@ -103,17 +112,6 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
         />
 
         <Input
-          label="Telefone"
-          type="tel"
-          value={customerPhone}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setCustomerPhone(e.target.value)
-          }
-          placeholder="(00) 00000-0000"
-          required
-        />
-
-        <Input
           label="Endereço de Entrega"
           type="text"
           value={deliveryAddress}
@@ -126,11 +124,26 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
         <Input
           label="Taxa de Entrega"
           type="number"
+          min="0"
           value={deliveryFee}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setDeliveryFee(Number.parseFloat(e.target.value))
           }
           required
+        />
+
+        <AutocompleteSelect<PaymentMethod>
+          id="payment-select"
+          label="Método de Pagamento"
+          placeholder="Selecione um método de pagamento"
+          value={paymentMethod}
+          autocomplete={false}
+          onChange={(v) => setPaymentMethod(v as PaymentMethod | null)}
+          options={[
+            { value: "Cash" as PaymentMethod, label: "Dinheiro" },
+            { value: "Card" as PaymentMethod, label: "Cartão" },
+            { value: "Pix" as PaymentMethod, label: "Pix" },
+          ]}
         />
       </div>
 
