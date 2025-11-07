@@ -1,6 +1,6 @@
 import type { Product } from "@/features/products/types";
 import { type ApiResponse, api } from "@/shared/services/api";
-import type { Order, OrderFormData } from "../types";
+import type { Order, OrderFormData, PaymentMethod } from "../types";
 
 interface ProductDto {
   id: string;
@@ -23,9 +23,10 @@ interface OrderDto {
   id: string;
   items: OrderItemDto[];
   customerName: string;
-  customerPhone: string;
+  customerPhone?: string;
   deliveryAddress: string;
   status: Order["status"] | string;
+  paymentMethod: string;
   total: number;
   deliveryFee: number;
   createdAt: string;
@@ -57,6 +58,7 @@ function mapOrder(dto: OrderDto): Order {
     customerPhone: dto.customerPhone,
     deliveryAddress: dto.deliveryAddress,
     status: dto.status as Order["status"],
+    paymentMethod: dto.paymentMethod as PaymentMethod,
     total: dto.total,
     deliveryFee: dto.deliveryFee,
     createdAt: new Date(dto.createdAt),
@@ -100,6 +102,7 @@ export const orderService = {
       customerPhone: data.customerPhone,
       deliveryAddress: data.deliveryAddress,
       deliveryFee: data.deliveryFee,
+      paymentMethod: data.paymentMethod,
     };
     const res = await api.post<ApiResponse<OrderDto | null>>(
       "/api/orders",

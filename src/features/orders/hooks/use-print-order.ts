@@ -9,8 +9,8 @@ export function usePrintOrder() {
     documentTitle: "Pedido - Devlivery",
     pageStyle: `
       @page {
-        size: 50mm auto;
-        margin: 2mm;
+        size: 55mm auto;
+        margin: 1mm;
       }
 
       body {
@@ -22,6 +22,7 @@ export function usePrintOrder() {
         padding: 2mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        font-weight: 550;
       }
 
       .print-receipt {

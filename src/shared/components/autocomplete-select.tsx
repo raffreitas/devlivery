@@ -2,41 +2,43 @@ import { X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-type BaseOption = {
-  value: string;
+type BaseOption<T extends string = string> = {
+  value: T;
   label: string;
   description?: string;
 };
 
-export type AutocompleteOption = BaseOption;
+export type AutocompleteOption<T extends string = string> = BaseOption<T>;
 
-interface AutocompleteSelectProps {
+interface AutocompleteSelectProps<T extends string = string> {
   id?: string;
   name?: string;
   label?: string;
   placeholder?: string;
-  value?: string | null;
+  value?: T | null;
   disabled?: boolean;
   required?: boolean;
   className?: string;
   emptyMessage?: string;
-  options: AutocompleteOption[];
-  onChange: (value: string | null) => void;
+  autocomplete?: boolean;
+  options: AutocompleteOption<T>[];
+  onChange: (value: T | null) => void;
 }
 
-export function AutocompleteSelect({
+export function AutocompleteSelect<T extends string = string>({
   id,
   name,
   label,
   placeholder = "",
-  value = null,
+  value = null as T | null,
   disabled = false,
   required = false,
   className = "",
   emptyMessage = "Nenhuma opção encontrada",
   options,
+  autocomplete = true,
   onChange,
-}: AutocompleteSelectProps) {
+}: AutocompleteSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
@@ -132,7 +134,7 @@ export function AutocompleteSelect({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (option: AutocompleteOption) => {
+  const handleSelect = (option: AutocompleteOption<T>) => {
     onChange(option.value);
     setInputValue(option.label);
     setIsOpen(false);
@@ -225,6 +227,7 @@ export function AutocompleteSelect({
           ref={inputRef}
           name={name}
           type="text"
+          readOnly={!autocomplete}
           value={inputValue}
           placeholder={placeholder}
           disabled={disabled}
@@ -239,7 +242,7 @@ export function AutocompleteSelect({
           aria-controls={`${id ?? "autocomplete"}-listbox`}
           aria-activedescendant={
             isOpen && highlightedIndex >= 0
-              ? `${id ?? "autocomplete"}-option-${filteredOptions[highlightedIndex]?.value}`
+              ? `${id ?? "autocomplete"}-option-${String(filteredOptions[highlightedIndex]?.value)}`
               : undefined
           }
         />
@@ -283,9 +286,9 @@ export function AutocompleteSelect({
 
               return (
                 <button
-                  key={option.value}
+                  key={String(option.value)}
                   type="button"
-                  id={`${id ?? "autocomplete"}-option-${option.value}`}
+                  id={`${id ?? "autocomplete"}-option-${String(option.value)}`}
                   role="option"
                   aria-selected={isSelected}
                   className={`w-full text-left px-3 py-2 cursor-pointer transition-colors ${

@@ -11,15 +11,15 @@ export function OrderCardTotal({ order }: OrderCardTotalProps) {
   );
   return (
     <div className="flex justify-between items-center">
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-600 space-y-1">
         <div>Subtotal: R$ {subtotal.toFixed(2)}</div>
         <div>Taxa de Entrega: R$ {order.deliveryFee.toFixed(2)}</div>
       </div>
-      <div>
-        <span className="text-sm text-gray-600">Total:</span>
-        <span className="text-xl font-bold text-orange-600 ml-2">
+      <div className="text-right">
+        <div className="text-sm text-gray-600">Total:</div>
+        <div className="text-2xl font-bold text-orange-600">
           R$ {order.total.toFixed(2)}
-        </span>
+        </div>
       </div>
     </div>
   );
