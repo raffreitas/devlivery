@@ -36,6 +36,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
             o.Status,
             o.Total,
             o.DeliveryFee,
+            o.PaymentMethod.ToString(),
             o.CreatedAt,
             o.UpdatedAt)).ToList();
 
