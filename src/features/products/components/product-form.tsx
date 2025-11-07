@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AutocompleteSelect } from "@/shared/components/autocomplete-select";
 import { Button } from "@/shared/components/button";
 import { Input } from "@/shared/components/input";
 import type { ProductFormData } from "../types";
@@ -7,12 +8,14 @@ interface ProductFormProps {
   initialData?: ProductFormData & { id?: string };
   onSubmit: (data: ProductFormData) => void;
   onCancel: () => void;
+  categoryOptions?: { value: string; label: string }[];
 }
 
 export function ProductForm({
   initialData,
   onSubmit,
   onCancel,
+  categoryOptions,
 }: ProductFormProps) {
   const [formData, setFormData] = useState<ProductFormData>({
     name: initialData?.name || "",
@@ -69,14 +72,15 @@ export function ProductForm({
         required
       />
 
-      <Input
+      <AutocompleteSelect
+        id="category"
+        name="category"
         label="Categoria"
-        type="text"
-        value={formData.category}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setFormData({ ...formData, category: e.target.value })
-        }
         placeholder="Ex: Pizza, Bebida, Sobremesa"
+        options={categoryOptions ?? []}
+        value={formData.category || null}
+        allowCustomValue={true}
+        onChange={(v) => setFormData({ ...formData, category: v ?? "" })}
         required
       />
 
