@@ -4,11 +4,12 @@ public sealed record UpdateOrderStatusResponse(
     Guid Id,
     List<OrderItemDto> Items,
     string CustomerName,
-    string CustomerPhone,
+    string? CustomerPhone,
     string DeliveryAddress,
     string Status,
     decimal Total,
     decimal DeliveryFee,
+    string PaymentMethod,
     DateTime CreatedAt,
     DateTime UpdatedAt);
 

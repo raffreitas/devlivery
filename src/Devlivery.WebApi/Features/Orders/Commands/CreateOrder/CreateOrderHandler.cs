@@ -11,6 +11,9 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
         CreateOrderCommand command,
         CancellationToken cancellationToken = default)
     {
+        if (!Enum.TryParse<PaymentMethod>(command.PaymentMethod, ignoreCase: true, out var paymentMethod))
+            return Result.Fail("Método de pagamento inválido");
+
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
         var products = await dbContext.Products
             .Where(p => productIds.Contains(p.Id))
@@ -36,6 +39,7 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
             CustomerPhone = command.CustomerPhone,
             DeliveryAddress = command.DeliveryAddress,
             Status = "pending",
+            PaymentMethod = paymentMethod,
             Total = total,
             DeliveryFee = command.DeliveryFee,
             CreatedAt = now,
@@ -76,6 +80,7 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
             order.CustomerName,
             order.CustomerPhone,
             order.DeliveryAddress,
+            order.PaymentMethod.ToString(),
             order.Status,
             order.Total,
             order.DeliveryFee,

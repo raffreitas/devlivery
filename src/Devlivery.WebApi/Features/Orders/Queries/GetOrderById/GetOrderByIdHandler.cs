@@ -40,6 +40,7 @@ public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext)
             order.Status,
             order.Total,
             order.DeliveryFee,
+            order.PaymentMethod.ToString(),
             order.CreatedAt,
             order.UpdatedAt);
 
