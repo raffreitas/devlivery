@@ -33,13 +33,12 @@ public sealed class Validator : AbstractValidator<CreateOrderCommand>
         When(x => !string.IsNullOrWhiteSpace(x.CustomerPhone), () =>
         {
             RuleFor(x => x.CustomerPhone)
-                .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
                 .MaximumLength(20).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
         });
 
         RuleFor(x => x.PaymentMethod)
             .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .IsEnumName(typeof(PaymentMethod))
+            .IsEnumName(typeof(PaymentMethod), caseSensitive: false)
             .WithMessage("O campo '{PropertyName}' deve ser um método de pagamento válido.");
 
         RuleFor(x => x.DeliveryAddress)
