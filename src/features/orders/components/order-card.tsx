@@ -1,7 +1,7 @@
 import { Button } from "@/shared/components/button";
+import { getPaymentOptionLabel } from "../constants/payment-methods";
 import { usePrintOrder } from "../hooks/use-print-order";
 import type { Order } from "../types";
-import { formatPaymentMethod } from "../utils/formatters";
 import { OrderCardTotal } from "./order-card-total";
 import { OrderPrint } from "./order-print";
 
@@ -67,7 +67,7 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
               {order.customerName}
             </h3>
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-              {formatPaymentMethod(order.paymentMethod)}
+              {getPaymentOptionLabel(order.paymentMethod)}
             </span>
           </div>
           <p className="text-sm text-gray-600">{order.customerPhone}</p>

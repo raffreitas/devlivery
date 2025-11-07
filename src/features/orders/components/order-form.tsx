@@ -3,6 +3,7 @@ import { useProducts } from "@/features/products/hooks/use-products";
 import { AutocompleteSelect } from "@/shared/components/autocomplete-select";
 import { Button } from "@/shared/components/button";
 import { Input } from "@/shared/components/input";
+import { getPaymentOptions } from "../constants/payment-methods";
 import type { OrderFormData, OrderItem, PaymentMethod } from "../types";
 
 interface OrderFormProps {
@@ -139,11 +140,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
           value={paymentMethod}
           autocomplete={false}
           onChange={(v) => setPaymentMethod(v as PaymentMethod | null)}
-          options={[
-            { value: "Cash" as PaymentMethod, label: "Dinheiro" },
-            { value: "Card" as PaymentMethod, label: "Cartão" },
-            { value: "Pix" as PaymentMethod, label: "Pix" },
-          ]}
+          options={getPaymentOptions()}
         />
       </div>
 

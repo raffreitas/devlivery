@@ -1,12 +1,6 @@
 import type { Product } from "@/features/products/types";
 
-export const PAYMENT_METHODS = {
-  Cash: "Dinheiro",
-  Card: "Cartão",
-  Pix: "Pix",
-} as const;
-
-export type PaymentMethod = keyof typeof PAYMENT_METHODS;
+export type PaymentMethod = "Cash" | "CreditCard" | "DebitCard" | "Pix";
 
 export interface OrderItem {
   product: Product;

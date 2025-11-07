@@ -1,5 +1,5 @@
+import { getPaymentOptionLabel } from "../constants/payment-methods";
 import type { Order } from "../types";
-import { formatPaymentMethod } from "../utils/formatters";
 
 interface OrderPrintProps {
   order: Order;
@@ -17,7 +17,7 @@ export function OrderPrint({ order }: OrderPrintProps) {
         <p className="font-semibold">Cliente: {order.customerName}</p>
         {order.customerPhone && <p>Tel: {order.customerPhone}</p>}
         <p>End: {order.deliveryAddress}</p>
-        <p>Pagamento: {formatPaymentMethod(order.paymentMethod)}</p>
+        <p>Pagamento: {getPaymentOptionLabel(order.paymentMethod)}</p>
       </div>
 
       <div className="mb-3">
