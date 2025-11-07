@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type BaseOption<T extends string = string> = {
@@ -21,6 +21,11 @@ interface AutocompleteSelectProps<T extends string = string> {
   className?: string;
   emptyMessage?: string;
   autocomplete?: boolean;
+  /**
+   * When true, the component will call `onChange` with the raw typed value
+   * (allowing creation of new values not present in `options`).
+   */
+  allowCustomValue?: boolean;
   options: AutocompleteOption<T>[];
   onChange: (value: T | null) => void;
 }
@@ -37,6 +42,7 @@ export function AutocompleteSelect<T extends string = string>({
   emptyMessage = "Nenhuma opção encontrada",
   options,
   autocomplete = true,
+  allowCustomValue = false,
   onChange,
 }: AutocompleteSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
@@ -69,146 +75,174 @@ export function AutocompleteSelect<T extends string = string>({
     );
   }, [inputValue, options]);
 
-  useEffect(() => {
-    if (isOpen) {
-      return;
+  // Calculate display value based on mode and current state
+  const displayValue = useMemo(() => {
+    if (allowCustomValue && value && !selectedOption) {
+      return value;
     }
+    return selectedOption?.label ?? "";
+  }, [allowCustomValue, value, selectedOption]);
 
-    setInputValue(selectedOption?.label ?? "");
-  }, [selectedOption, isOpen]);
-
+  // Sync inputValue with displayValue when dropdown closes
   useEffect(() => {
-    if (highlightedIndex >= filteredOptions.length) {
+    if (!isOpen) {
+      setInputValue(displayValue);
+    }
+  }, [isOpen, displayValue]);
+
+  // Reset highlighted index if it's out of bounds
+  useEffect(() => {
+    if (
+      highlightedIndex >= filteredOptions.length &&
+      filteredOptions.length > 0
+    ) {
       setHighlightedIndex(filteredOptions.length - 1);
+    } else if (filteredOptions.length === 0) {
+      setHighlightedIndex(-1);
     }
-  }, [filteredOptions, highlightedIndex]);
+  }, [filteredOptions.length, highlightedIndex]);
 
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
+  // Update dropdown position when opened or on scroll/resize
+  const updateDropdownPosition = useCallback(() => {
+    if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect();
       setDropdownPosition({
         top: rect.bottom + window.scrollY + 8,
         left: rect.left + window.scrollX,
         width: rect.width,
       });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      updateDropdownPosition();
+      window.addEventListener("scroll", updateDropdownPosition, true);
+      window.addEventListener("resize", updateDropdownPosition);
     } else {
       setDropdownPosition(null);
     }
 
-    const handleScroll = () => {
-      if (isOpen && inputRef.current) {
-        const rect = inputRef.current.getBoundingClientRect();
-        setDropdownPosition({
-          top: rect.bottom + window.scrollY + 8,
-          left: rect.left + window.scrollX,
-          width: rect.width,
-        });
-      }
-    };
-
-    if (isOpen) {
-      window.addEventListener("scroll", handleScroll, true);
-      window.addEventListener("resize", handleScroll);
-    }
-
     return () => {
-      window.removeEventListener("scroll", handleScroll, true);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener("scroll", updateDropdownPosition, true);
+      window.removeEventListener("resize", updateDropdownPosition);
     };
-  }, [isOpen]);
+  }, [isOpen, updateDropdownPosition]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        event.target instanceof Node &&
-        !containerRef.current.contains(event.target) &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
-        setIsOpen(false);
-      }
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (
+      containerRef.current &&
+      event.target instanceof Node &&
+      !containerRef.current.contains(event.target) &&
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target)
+    ) {
+      setIsOpen(false);
     }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (option: AutocompleteOption<T>) => {
-    onChange(option.value);
-    setInputValue(option.label);
-    setIsOpen(false);
-    setHighlightedIndex(-1);
-  };
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [handleClickOutside]);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const nextValue = event.target.value;
-    setInputValue(nextValue);
-    setIsOpen(true);
-    setHighlightedIndex(0);
+  const handleSelect = useCallback(
+    (option: AutocompleteOption<T>) => {
+      onChange(option.value);
+      setInputValue(option.label);
+      setIsOpen(false);
+      setHighlightedIndex(-1);
+    },
+    [onChange],
+  );
 
-    if (selectedOption && nextValue !== selectedOption.label) {
-      onChange(null);
-    }
-  };
+  const handleInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const nextValue = event.target.value;
+      setInputValue(nextValue);
+      setIsOpen(true);
+      setHighlightedIndex(0);
 
-  const handleInputFocus = () => {
+      if (allowCustomValue) {
+        // forward the typed value to the parent so it can create a new entry
+        // note: typed value is always a string and T extends string
+        onChange(nextValue as T);
+      } else {
+        if (selectedOption && nextValue !== selectedOption.label) {
+          onChange(null);
+        }
+      }
+    },
+    [allowCustomValue, onChange, selectedOption],
+  );
+
+  const handleInputFocus = useCallback(() => {
     setIsOpen(true);
     if (filteredOptions.length > 0) {
       setHighlightedIndex(0);
     }
-  };
+  }, [filteredOptions.length]);
 
-  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!isOpen && ["ArrowDown", "ArrowUp"].includes(event.key)) {
-      setIsOpen(true);
-      setHighlightedIndex(0);
-      return;
-    }
+  const handleInputKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!isOpen && ["ArrowDown", "ArrowUp"].includes(event.key)) {
+        setIsOpen(true);
+        setHighlightedIndex(0);
+        return;
+      }
 
-    switch (event.key) {
-      case "ArrowDown": {
-        event.preventDefault();
-        setHighlightedIndex((prev) => {
-          const nextIndex = Math.min(prev + 1, filteredOptions.length - 1);
-          return nextIndex < 0 ? 0 : nextIndex;
-        });
-        break;
-      }
-      case "ArrowUp": {
-        event.preventDefault();
-        setHighlightedIndex((prev) => Math.max(prev - 1, 0));
-        break;
-      }
-      case "Enter": {
-        if (isOpen && highlightedIndex >= 0) {
+      switch (event.key) {
+        case "ArrowDown": {
           event.preventDefault();
-          const option = filteredOptions[highlightedIndex];
-          if (option) {
-            handleSelect(option);
-          }
+          setHighlightedIndex((prev) => {
+            const nextIndex = Math.min(prev + 1, filteredOptions.length - 1);
+            return nextIndex < 0 ? 0 : nextIndex;
+          });
+          break;
         }
-        break;
+        case "ArrowUp": {
+          event.preventDefault();
+          setHighlightedIndex((prev) => Math.max(prev - 1, 0));
+          break;
+        }
+        case "Enter": {
+          if (isOpen && highlightedIndex >= 0) {
+            event.preventDefault();
+            const option = filteredOptions[highlightedIndex];
+            if (option) {
+              handleSelect(option);
+            }
+          }
+          break;
+        }
+        case "Escape": {
+          event.preventDefault();
+          setIsOpen(false);
+          setInputValue(displayValue);
+          setHighlightedIndex(-1);
+          break;
+        }
+        default:
+          break;
       }
-      case "Escape": {
-        event.preventDefault();
-        setIsOpen(false);
-        setInputValue(selectedOption?.label ?? "");
-        setHighlightedIndex(-1);
-        break;
-      }
-      default:
-        break;
-    }
-  };
+    },
+    [
+      isOpen,
+      filteredOptions.length,
+      highlightedIndex,
+      filteredOptions,
+      handleSelect,
+      displayValue,
+    ],
+  );
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setInputValue("");
     setIsOpen(false);
     setHighlightedIndex(-1);
     onChange(null);
     inputRef.current?.focus();
-  };
+  }, [onChange]);
 
   return (
     <div className={`w-full ${className}`} ref={containerRef}>
@@ -247,7 +281,7 @@ export function AutocompleteSelect<T extends string = string>({
           }
         />
 
-        {selectedOption && !disabled && (
+        {inputValue && !disabled && (
           <button
             type="button"
             onClick={handleClear}

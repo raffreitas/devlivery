@@ -120,6 +120,7 @@ export function ProductsPage() {
           initialData={editingProduct || undefined}
           onSubmit={handleCreateOrUpdate}
           onCancel={handleCloseModal}
+          categoryOptions={categories.map((c) => ({ value: c, label: c }))}
         />
       </Modal>
     </div>
