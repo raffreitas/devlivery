@@ -23,7 +23,7 @@ interface OrderDto {
   id: string;
   items: OrderItemDto[];
   customerName: string;
-  customerPhone: string;
+  customerPhone?: string;
   deliveryAddress: string;
   status: Order["status"] | string;
   paymentMethod: string;
