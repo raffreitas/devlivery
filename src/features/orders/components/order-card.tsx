@@ -70,7 +70,9 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
               {getPaymentOptionLabel(order.paymentMethod)}
             </span>
           </div>
-          <p className="text-sm text-gray-600">{order.customerPhone}</p>
+          {order.customerPhone && (
+            <p className="text-sm text-gray-600">{order.customerPhone}</p>
+          )}
           <p className="text-sm text-gray-600">{order.deliveryAddress}</p>
         </div>
         <span

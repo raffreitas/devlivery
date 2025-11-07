@@ -84,7 +84,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       customerName,
       deliveryAddress,
       deliveryFee,
-      paymentMethod: paymentMethod,
+      paymentMethod,
     });
   };
 
@@ -128,7 +128,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
           min="0"
           value={deliveryFee}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setDeliveryFee(Number.parseFloat(e.target.value))
+            setDeliveryFee(Number.parseFloat(e.target.value || "") || 0)
           }
           required
         />
@@ -139,7 +139,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
           placeholder="Selecione um método de pagamento"
           value={paymentMethod}
           autocomplete={false}
-          onChange={(v) => setPaymentMethod(v as PaymentMethod | null)}
+          onChange={(v) => setPaymentMethod(v)}
           options={getPaymentOptions()}
         />
       </div>
@@ -166,7 +166,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
               min="1"
               value={quantity}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setQuantity(Number.parseInt(e.target.value, 10))
+                setQuantity(Number.parseInt(e.target.value || "", 10) || 1)
               }
             />
           </div>

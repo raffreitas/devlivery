@@ -135,7 +135,7 @@ export function AutocompleteSelect<T extends string = string>({
   }, []);
 
   const handleSelect = (option: AutocompleteOption<T>) => {
-    onChange(option.value as T);
+    onChange(option.value);
     setInputValue(option.label);
     setIsOpen(false);
     setHighlightedIndex(-1);
@@ -185,7 +185,7 @@ export function AutocompleteSelect<T extends string = string>({
           event.preventDefault();
           const option = filteredOptions[highlightedIndex];
           if (option) {
-            handleSelect(option as AutocompleteOption<T>);
+            handleSelect(option);
           }
         }
         break;
@@ -296,7 +296,7 @@ export function AutocompleteSelect<T extends string = string>({
                   } ${isSelected ? "text-orange-600" : "text-gray-900"}`}
                   onMouseEnter={() => setHighlightedIndex(index)}
                   onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => handleSelect(option as AutocompleteOption<T>)}
+                  onClick={() => handleSelect(option)}
                 >
                   <span className="block text-sm font-medium">
                     {option.label}
@@ -313,11 +313,7 @@ export function AutocompleteSelect<T extends string = string>({
           document.body,
         )}
 
-      <input
-        type="hidden"
-        name={name}
-        value={(value as unknown as string) ?? ""}
-      />
+      <input type="hidden" name={name} value={value ?? ""} />
     </div>
   );
 }
