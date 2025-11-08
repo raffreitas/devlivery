@@ -10,6 +10,7 @@ import { Modal } from "@/shared/components/modal";
 import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
+import { getPaymentOptions } from "../constants/payment-methods";
 import { useOrders } from "../hooks/use-orders";
 import type { Order, OrderFormData } from "../types";
 
@@ -22,6 +23,14 @@ const statusOptions: AutocompleteOption<Order["status"] | "all">[] = [
   { value: "cancelled", label: "Cancelado" },
 ];
 
+const paymentOptions: AutocompleteOption<Order["paymentMethod"] | "all">[] = [
+  { value: "all", label: "Todos" },
+  ...getPaymentOptions().map((o) => ({
+    value: o.value as Order["paymentMethod"],
+    label: o.label,
+  })),
+];
+
 export function OrdersPage() {
   const {
     inputStartDate,
@@ -32,6 +41,9 @@ export function OrdersPage() {
     setEndDate,
     resetToToday,
   } = useDateRangeFilter({ defaultDaysBack: 2, debounceMs: 500 });
+  const [paymentFilter, setPaymentFilter] = useState<
+    Order["paymentMethod"] | "all"
+  >("all");
 
   const {
     orders,
@@ -40,7 +52,11 @@ export function OrdersPage() {
     createOrder,
     updateOrderStatus,
     deleteOrder,
-  } = useOrders(startDate, endDate);
+  } = useOrders(
+    startDate,
+    endDate,
+    paymentFilter === "all" ? undefined : paymentFilter,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<Order["status"] | "all">(
     "all",
@@ -56,9 +72,10 @@ export function OrdersPage() {
       ? orders
       : orders.filter((order) => order.status === statusFilter);
 
-  const sortedOrders = [...filteredOrders].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  );
+  const filteredByPayment =
+    paymentFilter === "all"
+      ? filteredOrders
+      : filteredOrders.filter((order) => order.paymentMethod === paymentFilter);
 
   return (
     <div className="space-y-6">
@@ -75,24 +92,37 @@ export function OrdersPage() {
         <Button onClick={() => setIsModalOpen(true)}>+ Novo Pedido</Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <div className="flex flex-wrap items-end gap-4">
-          <DateRangeFilter
-            startDate={inputStartDate}
-            endDate={inputEndDate}
-            onStartChange={setStartDate}
-            onEndChange={setEndDate}
-            onReset={resetToToday}
-          />
+      <div className="bg-white rounded-lg shadow-md p-3">
+        <div className="flex items-end gap-4 flex-nowrap overflow-x-auto p-1">
+          <div className="flex items-end gap-4">
+            <AutocompleteSelect
+              label="Status"
+              value={statusFilter}
+              options={statusOptions}
+              onChange={(value) => setStatusFilter(value ?? "all")}
+              placeholder="Selecione um status"
+              autocomplete={false}
+            />
 
-          <AutocompleteSelect
-            label="Status"
-            value={statusFilter}
-            options={statusOptions}
-            onChange={(value) => setStatusFilter(value ?? "all")}
-            placeholder="Selecione um status"
-            className="w-48"
-          />
+            <AutocompleteSelect
+              label="Pagamento"
+              value={paymentFilter}
+              options={paymentOptions}
+              onChange={(value) => setPaymentFilter(value ?? "all")}
+              placeholder="Selecione método"
+              autocomplete={false}
+            />
+          </div>
+
+          <div className="ml-auto">
+            <DateRangeFilter
+              startDate={inputStartDate}
+              endDate={inputEndDate}
+              onStartChange={setStartDate}
+              onEndChange={setEndDate}
+              onReset={resetToToday}
+            />
+          </div>
         </div>
       </div>
 
@@ -100,7 +130,7 @@ export function OrdersPage() {
         <div className="flex justify-center items-center h-64">
           <div className="text-xl text-gray-600">Carregando...</div>
         </div>
-      ) : sortedOrders.length === 0 ? (
+      ) : filteredByPayment.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">
             {orders.length === 0
@@ -114,14 +144,21 @@ export function OrdersPage() {
             isFetching ? "opacity-60" : "opacity-100"
           }`}
         >
-          {sortedOrders.map((order) => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              onUpdateStatus={updateOrderStatus}
-              onDelete={deleteOrder}
-            />
-          ))}
+          {filteredByPayment
+            .map((o) => o)
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime(),
+            )
+            .map((order) => (
+              <OrderCard
+                key={order.id}
+                order={order}
+                onUpdateStatus={updateOrderStatus}
+                onDelete={deleteOrder}
+              />
+            ))}
         </div>
       )}
 

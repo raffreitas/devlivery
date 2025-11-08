@@ -70,12 +70,14 @@ export const orderService = {
   getAll: async (params?: {
     startDate?: string;
     endDate?: string;
+    paymentMethod?: string;
   }): Promise<Order[]> => {
     let url = "/api/orders";
-    if (params?.startDate || params?.endDate) {
+    if (params?.startDate || params?.endDate || params?.paymentMethod) {
       const qp = new URLSearchParams();
       if (params.startDate) qp.set("start", params.startDate);
       if (params.endDate) qp.set("end", params.endDate);
+      if (params.paymentMethod) qp.set("paymentMethod", params.paymentMethod);
       url = `${url}?${qp.toString()}`;
     }
     const res = await api.get<ApiResponse<OrderDto[] | null>>(url);
