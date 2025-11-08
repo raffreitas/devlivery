@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/shared/components/button";
+import { LoadingSpinner } from "@/shared/components/loading-spinner";
 import { Modal } from "@/shared/components/modal";
 import { ProductCard } from "../components/product-card";
 import { ProductForm } from "../components/product-form";
@@ -7,8 +8,14 @@ import { useProducts } from "../hooks/use-products";
 import type { Product, ProductFormData } from "../types";
 
 export function ProductsPage() {
-  const { products, loading, createProduct, updateProduct, deleteProduct } =
-    useProducts();
+  const {
+    products,
+    loading,
+    isFetching,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+  } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,18 +58,18 @@ export function ProductsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-xl text-gray-600">Carregando...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Produtos</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900">Produtos</h1>
+          {isFetching && (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <LoadingSpinner size="sm" className="text-orange-500" />
+              <span>Atualizando...</span>
+            </div>
+          )}
+        </div>
         <Button onClick={() => setIsModalOpen(true)}>+ Novo Produto</Button>
       </div>
 
@@ -90,7 +97,11 @@ export function ProductsPage() {
         </select>
       </div>
 
-      {filteredProducts.length === 0 ? (
+      {loading && products.length === 0 ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="text-xl text-gray-600">Carregando...</div>
+        </div>
+      ) : filteredProducts.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">
             {products.length === 0
@@ -99,7 +110,11 @@ export function ProductsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-200 ${
+            isFetching ? "opacity-60" : "opacity-100"
+          }`}
+        >
           {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}

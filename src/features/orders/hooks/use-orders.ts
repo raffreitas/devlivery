@@ -9,6 +9,7 @@ export function useOrders(startDate?: string, endDate?: string) {
     queryKey: ["orders", { startDate, endDate }],
     queryFn: () => orderService.getAll({ startDate, endDate }),
     staleTime: 30_000,
+    placeholderData: (previousData) => previousData,
   });
 
   const createMutation = useMutation({
@@ -30,6 +31,7 @@ export function useOrders(startDate?: string, endDate?: string) {
   return {
     orders: (ordersQuery.data ?? []) as Order[],
     loading: ordersQuery.isLoading,
+    isFetching: ordersQuery.isFetching,
     refetch: ordersQuery.refetch,
     createOrder: (data: OrderFormData) => createMutation.mutateAsync(data),
     updateOrderStatus: (id: string, status: Order["status"]) =>

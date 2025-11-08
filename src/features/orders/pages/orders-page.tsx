@@ -1,6 +1,11 @@
 import { useState } from "react";
+import {
+  type AutocompleteOption,
+  AutocompleteSelect,
+} from "@/shared/components/autocomplete-select";
 import { Button } from "@/shared/components/button";
 import { DateRangeFilter } from "@/shared/components/date-range-filter";
+import { LoadingSpinner } from "@/shared/components/loading-spinner";
 import { Modal } from "@/shared/components/modal";
 import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
 import { OrderCard } from "../components/order-card";
@@ -8,21 +13,34 @@ import { OrderForm } from "../components/order-form";
 import { useOrders } from "../hooks/use-orders";
 import type { Order, OrderFormData } from "../types";
 
+const statusOptions: AutocompleteOption<Order["status"] | "all">[] = [
+  { value: "all", label: "Todos" },
+  { value: "pending", label: "Pendente" },
+  { value: "preparing", label: "Em Preparo" },
+  { value: "ready", label: "Pronto" },
+  { value: "delivered", label: "Entregue" },
+  { value: "cancelled", label: "Cancelado" },
+];
+
 export function OrdersPage() {
   const {
-    inputStart,
-    setInputStart,
-    inputEnd,
-    setInputEnd,
+    inputStartDate,
+    inputEndDate,
     startDate,
     endDate,
-    applyRange,
+    setStartDate,
+    setEndDate,
     resetToToday,
-    isInvalid,
-  } = useDateRangeFilter({ defaultDaysBack: 2 });
+  } = useDateRangeFilter({ defaultDaysBack: 2, debounceMs: 500 });
 
-  const { orders, loading, createOrder, updateOrderStatus, deleteOrder } =
-    useOrders(startDate, endDate);
+  const {
+    orders,
+    loading,
+    isFetching,
+    createOrder,
+    updateOrderStatus,
+    deleteOrder,
+  } = useOrders(startDate, endDate);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<Order["status"] | "all">(
     "all",
@@ -42,54 +60,47 @@ export function OrdersPage() {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-xl text-gray-600">Carregando...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Pedidos</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900">Pedidos</h1>
+          {isFetching && (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <LoadingSpinner size="sm" className="text-orange-500" />
+              <span>Atualizando...</span>
+            </div>
+          )}
+        </div>
         <Button onClick={() => setIsModalOpen(true)}>+ Novo Pedido</Button>
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-4">
         <div className="flex flex-wrap items-end gap-4">
           <DateRangeFilter
-            inputStart={inputStart}
-            inputEnd={inputEnd}
-            onStartChange={setInputStart}
-            onEndChange={setInputEnd}
-            onApply={applyRange}
+            startDate={inputStartDate}
+            endDate={inputEndDate}
+            onStartChange={setStartDate}
+            onEndChange={setEndDate}
             onReset={resetToToday}
-            isInvalid={isInvalid}
           />
 
-          <div className="flex items-center space-x-2 ml-auto">
-            <span className="text-sm font-medium text-gray-700">Status:</span>
-            <select
-              value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value as Order["status"] | "all")
-              }
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option value="all">Todos</option>
-              <option value="pending">Pendente</option>
-              <option value="preparing">Em Preparo</option>
-              <option value="ready">Pronto</option>
-              <option value="delivered">Entregue</option>
-              <option value="cancelled">Cancelado</option>
-            </select>
-          </div>
+          <AutocompleteSelect
+            label="Status"
+            value={statusFilter}
+            options={statusOptions}
+            onChange={(value) => setStatusFilter(value ?? "all")}
+            placeholder="Selecione um status"
+            className="w-48"
+          />
         </div>
       </div>
 
-      {sortedOrders.length === 0 ? (
+      {loading && orders.length === 0 ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="text-xl text-gray-600">Carregando...</div>
+        </div>
+      ) : sortedOrders.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">
             {orders.length === 0
@@ -98,7 +109,11 @@ export function OrdersPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-200 ${
+            isFetching ? "opacity-60" : "opacity-100"
+          }`}
+        >
           {sortedOrders.map((order) => (
             <OrderCard
               key={order.id}

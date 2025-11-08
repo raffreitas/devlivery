@@ -2,23 +2,19 @@ import { Button } from "./button";
 import { Input } from "./input";
 
 interface DateRangeFilterProps {
-  inputStart: string;
-  inputEnd: string;
+  startDate: string;
+  endDate: string;
   onStartChange: (value: string) => void;
   onEndChange: (value: string) => void;
-  onApply: () => void;
   onReset: () => void;
-  isInvalid: boolean;
 }
 
 export function DateRangeFilter({
-  inputStart,
-  inputEnd,
+  startDate,
+  endDate,
   onStartChange,
   onEndChange,
-  onApply,
   onReset,
-  isInvalid,
 }: DateRangeFilterProps) {
   return (
     <div className="flex items-end space-x-2">
@@ -26,7 +22,7 @@ export function DateRangeFilter({
         id="startDate"
         label="Início"
         type="date"
-        value={inputStart}
+        value={startDate}
         onChange={(e) => onStartChange(e.target.value)}
         className="w-40"
       />
@@ -35,18 +31,13 @@ export function DateRangeFilter({
         id="endDate"
         label="Fim"
         type="date"
-        value={inputEnd}
+        value={endDate}
         onChange={(e) => onEndChange(e.target.value)}
         className="w-40"
       />
-      <div className="flex items-center space-x-2">
-        <Button variant="secondary" size="md" onClick={onReset} type="button">
-          Hoje
-        </Button>
-        <Button onClick={onApply} size="md" type="button" disabled={isInvalid}>
-          Aplicar
-        </Button>
-      </div>
+      <Button variant="secondary" size="md" onClick={onReset} type="button">
+        Hoje
+      </Button>
     </div>
   );
 }

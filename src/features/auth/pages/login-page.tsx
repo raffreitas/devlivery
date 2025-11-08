@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/button";
 import { Input } from "@/shared/components/input";
+import { LoadingSpinner } from "@/shared/components/loading-spinner";
 import { useAuth } from "@/shared/contexts/auth-context";
 
 export function LoginPage() {
@@ -63,7 +64,14 @@ export function LoginPage() {
           />
 
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Entrando..." : "Entrar"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <LoadingSpinner size="sm" className="text-white" />
+                Entrando...
+              </span>
+            ) : (
+              "Entrar"
+            )}
           </Button>
         </form>
       </div>
