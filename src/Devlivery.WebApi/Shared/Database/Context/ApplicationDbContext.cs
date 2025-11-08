@@ -2,6 +2,7 @@ using Devlivery.WebApi.Features.Orders.Domain;
 using Devlivery.WebApi.Features.Products.Domain;
 using Devlivery.WebApi.Features.Users.Domain;
 using Devlivery.WebApi.Shared.Database.Configurations;
+using Devlivery.WebApi.Shared.Database.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Shared.Database.Context;
@@ -21,5 +22,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         modelBuilder.ApplyConfiguration(new ProductConfiguration());
         modelBuilder.ApplyConfiguration(new OrderConfiguration());
         modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
+
+        modelBuilder.UseUtcDateTimeConverter();
     }
 }
