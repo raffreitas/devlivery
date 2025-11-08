@@ -2,12 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { orderService } from "../services/order-service";
 import type { Order, OrderFormData } from "../types";
 
-export function useOrders() {
+export function useOrders(startDate?: string, endDate?: string) {
   const queryClient = useQueryClient();
 
   const ordersQuery = useQuery({
-    queryKey: ["orders"],
-    queryFn: orderService.getAll,
+    queryKey: ["orders", { startDate, endDate }],
+    queryFn: () => orderService.getAll({ startDate, endDate }),
     staleTime: 30_000,
   });
 

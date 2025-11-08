@@ -1,14 +1,28 @@
 import { useState } from "react";
 import { Button } from "@/shared/components/button";
+import { DateRangeFilter } from "@/shared/components/date-range-filter";
 import { Modal } from "@/shared/components/modal";
+import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
 import { useOrders } from "../hooks/use-orders";
 import type { Order, OrderFormData } from "../types";
 
 export function OrdersPage() {
+  const {
+    inputStart,
+    setInputStart,
+    inputEnd,
+    setInputEnd,
+    startDate,
+    endDate,
+    applyRange,
+    resetToToday,
+    isInvalid,
+  } = useDateRangeFilter({ defaultDaysBack: 2 });
+
   const { orders, loading, createOrder, updateOrderStatus, deleteOrder } =
-    useOrders();
+    useOrders(startDate, endDate);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<Order["status"] | "all">(
     "all",
@@ -43,24 +57,36 @@ export function OrdersPage() {
         <Button onClick={() => setIsModalOpen(true)}>+ Novo Pedido</Button>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <span className="text-sm font-medium text-gray-700">
-          Filtrar por status:
-        </span>
-        <select
-          value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(e.target.value as Order["status"] | "all")
-          }
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-        >
-          <option value="all">Todos</option>
-          <option value="pending">Pendente</option>
-          <option value="preparing">Em Preparo</option>
-          <option value="ready">Pronto</option>
-          <option value="delivered">Entregue</option>
-          <option value="cancelled">Cancelado</option>
-        </select>
+      <div className="bg-white rounded-lg shadow-md p-4">
+        <div className="flex flex-wrap items-end gap-4">
+          <DateRangeFilter
+            inputStart={inputStart}
+            inputEnd={inputEnd}
+            onStartChange={setInputStart}
+            onEndChange={setInputEnd}
+            onApply={applyRange}
+            onReset={resetToToday}
+            isInvalid={isInvalid}
+          />
+
+          <div className="flex items-center space-x-2 ml-auto">
+            <span className="text-sm font-medium text-gray-700">Status:</span>
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as Order["status"] | "all")
+              }
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="all">Todos</option>
+              <option value="pending">Pendente</option>
+              <option value="preparing">Em Preparo</option>
+              <option value="ready">Pronto</option>
+              <option value="delivered">Entregue</option>
+              <option value="cancelled">Cancelado</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {sortedOrders.length === 0 ? (

@@ -3,24 +3,33 @@ import { useEffect, useState } from "react";
 import { OrderCard } from "@/features/orders/components/order-card";
 import { useOrders } from "@/features/orders/hooks/use-orders";
 import type { Order } from "@/features/orders/types";
+import { DateRangeFilter } from "@/shared/components/date-range-filter";
+import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
 import { StatCard } from "../components/stat-card";
 import { dashboardService } from "../services/dashboard-service";
 
 export function DashboardPage() {
-  const { orders, loading, updateOrderStatus, deleteOrder } = useOrders();
+  const {
+    inputStart,
+    setInputStart,
+    inputEnd,
+    setInputEnd,
+    startDate,
+    endDate,
+    applyRange,
+    resetToToday,
+    isInvalid,
+  } = useDateRangeFilter();
+
+  const { orders, loading, updateOrderStatus, deleteOrder } = useOrders(
+    startDate,
+    endDate,
+  );
+
   const [todayOrders, setTodayOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const filtered = orders.filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      orderDate.setHours(0, 0, 0, 0);
-      return orderDate.getTime() === today.getTime();
-    });
-
-    setTodayOrders(filtered);
+    setTodayOrders(orders);
   }, [orders]);
 
   if (loading) {
@@ -43,9 +52,21 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Visão geral dos pedidos de hoje</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1">Visão geral dos pedidos</p>
+        </div>
+
+        <DateRangeFilter
+          inputStart={inputStart}
+          inputEnd={inputEnd}
+          onStartChange={setInputStart}
+          onEndChange={setInputEnd}
+          onApply={applyRange}
+          onReset={resetToToday}
+          isInvalid={isInvalid}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
