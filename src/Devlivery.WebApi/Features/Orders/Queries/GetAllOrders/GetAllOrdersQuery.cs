@@ -1,3 +1,3 @@
 namespace Devlivery.WebApi.Features.Orders.Queries.GetAllOrders;
 
-public sealed record GetAllOrdersQuery;
+public sealed record GetAllOrdersQuery(DateTime? StartDate, DateTime? EndDate, string? PaymentMethod);
