@@ -8,11 +8,11 @@ public static class ModelBuilderExtensions
     public static void UseUtcDateTimeConverter(this ModelBuilder modelBuilder)
     {
         var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
-            v => v.Kind == DateTimeKind.Utc ? v : DateTime.SpecifyKind(v, DateTimeKind.Utc),
+            v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
             v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
 
         var nullableDateTimeConverter = new ValueConverter<DateTime?, DateTime?>(
-            v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : null,
+            v => v.HasValue ? v.Value.Kind == DateTimeKind.Utc ? v.Value : v.Value.ToUniversalTime() : null,
             v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : null);
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())

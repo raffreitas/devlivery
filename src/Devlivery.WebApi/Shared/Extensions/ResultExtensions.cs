@@ -10,6 +10,9 @@ namespace Devlivery.WebApi.Shared.Extensions;
 /// </summary>
 public static class ResultExtensions
 {
+    private const string BadRequestTitle = "Requisição inválida";
+    private const string NotFoundTitle = "Recurso não encontrado";
+
     /// <summary>
     /// Converts a Result to an Ok<T> response (200)
     /// </summary>
@@ -43,16 +46,16 @@ public static class ResultExtensions
     }
 
     /// <summary>
-    /// Converts a failed Result to a NotFound ProblemDetails (404)
+    /// Converts a failed Result with generic type to a NotFound ProblemDetails (404)
     /// </summary>
-    public static NotFound<ProblemDetails> ToNotFoundProblem(this Result result)
+    public static NotFound<ProblemDetails> ToNotFoundProblem<T>(this Result<T> result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? "Recurso não encontrado";
+        var errorMessage = result.Errors[0]?.Message ?? NotFoundTitle;
 
         var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status404NotFound,
-            Title = "Recurso não encontrado",
+            Title = NotFoundTitle,
             Detail = errorMessage,
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4"
         };
@@ -61,34 +64,16 @@ public static class ResultExtensions
     }
 
     /// <summary>
-    /// Converts a failed Result to a BadRequest ProblemDetails (400)
+    /// Converts a failed Result to a NotFound ProblemDetails (404)
     /// </summary>
-    public static BadRequest<ProblemDetails> ToBadRequestProblem(this Result result)
+    public static NotFound<ProblemDetails> ToNotFoundProblem(this Result result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? "Requisição inválida";
-
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Requisição inválida",
-            Detail = errorMessage,
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
-        };
-
-        return TypedResults.BadRequest(problemDetails);
-    }
-
-    /// <summary>
-    /// Converts a failed Result with generic type to a NotFound ProblemDetails (404)
-    /// </summary>
-    public static NotFound<ProblemDetails> ToNotFoundProblem<T>(this Result<T> result)
-    {
-        var errorMessage = result.Errors[0]?.Message ?? "Recurso não encontrado";
+        var errorMessage = result.Errors[0]?.Message ?? NotFoundTitle;
 
         var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status404NotFound,
-            Title = "Recurso não encontrado",
+            Title = NotFoundTitle,
             Detail = errorMessage,
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4"
         };
@@ -101,12 +86,30 @@ public static class ResultExtensions
     /// </summary>
     public static BadRequest<ProblemDetails> ToBadRequestProblem<T>(this Result<T> result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? "Requisição inválida";
+        var errorMessage = result.Errors[0]?.Message ?? BadRequestTitle;
 
         var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Requisição inválida",
+            Title = BadRequestTitle,
+            Detail = errorMessage,
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+        };
+
+        return TypedResults.BadRequest(problemDetails);
+    }
+
+    /// <summary>
+    /// Converts a failed Result to a BadRequest ProblemDetails (400)
+    /// </summary>
+    public static BadRequest<ProblemDetails> ToBadRequestProblem(this Result result)
+    {
+        var errorMessage = result.Errors[0]?.Message ?? BadRequestTitle;
+
+        var problemDetails = new ProblemDetails
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = BadRequestTitle,
             Detail = errorMessage,
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
         };
