@@ -17,19 +17,17 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
             .ThenInclude(i => i.Product)
             .AsQueryable();
 
-        // Date filtering strategy:
-        // Instead of comparing only the Date component (which forces a function on the column and can break index usage
-        // and introduce timezone edge cases), we normalize the start to the beginning of the day and make the end
-        // an exclusive upper bound at the start of the next day. This includes all records created on the end date.
+        // Date filtering: Convert local Brazil time (BRT/BRST) to UTC before querying
+        // Database stores all dates in UTC, but filters are expected in local time (America/Sao_Paulo)
         if (query.StartDate.HasValue)
         {
-            var startUtc = query.StartDate.Value.ToUtcStartOfDay();
+            var startUtc = query.StartDate.Value.ToBrazilStartOfDayUtc();
             ordersQuery = ordersQuery.Where(o => o.CreatedAt >= startUtc);
         }
 
         if (query.EndDate.HasValue)
         {
-            var endExclusiveUtc = query.EndDate.Value.ToUtcEndExclusiveOfDay();
+            var endExclusiveUtc = query.EndDate.Value.ToBrazilEndOfDayExclusiveUtc();
             ordersQuery = ordersQuery.Where(o => o.CreatedAt < endExclusiveUtc);
         }
 
