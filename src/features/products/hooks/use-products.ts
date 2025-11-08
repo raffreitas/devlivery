@@ -9,6 +9,7 @@ export function useProducts() {
     queryKey: ["products"],
     queryFn: productService.getAll,
     staleTime: 60_000,
+    placeholderData: (previousData) => previousData,
   });
 
   const createMutation = useMutation({
@@ -30,6 +31,7 @@ export function useProducts() {
   return {
     products: (productsQuery.data ?? []) as Product[],
     loading: productsQuery.isLoading,
+    isFetching: productsQuery.isFetching,
     refetch: productsQuery.refetch,
     createProduct: (data: ProductFormData) => createMutation.mutateAsync(data),
     updateProduct: (id: string, data: ProductFormData) =>

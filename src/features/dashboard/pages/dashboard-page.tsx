@@ -3,33 +3,33 @@ import { useEffect, useState } from "react";
 import { OrderCard } from "@/features/orders/components/order-card";
 import { useOrders } from "@/features/orders/hooks/use-orders";
 import type { Order } from "@/features/orders/types";
+import { DateRangeFilter } from "@/shared/components/date-range-filter";
+import { LoadingSpinner } from "@/shared/components/loading-spinner";
+import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
 import { StatCard } from "../components/stat-card";
 import { dashboardService } from "../services/dashboard-service";
 
 export function DashboardPage() {
-  const { orders, loading, updateOrderStatus, deleteOrder } = useOrders();
+  const {
+    inputStartDate,
+    inputEndDate,
+    startDate,
+    endDate,
+    setStartDate,
+    setEndDate,
+    resetToToday,
+  } = useDateRangeFilter({ debounceMs: 500 });
+
+  const { orders, isFetching, updateOrderStatus, deleteOrder } = useOrders(
+    startDate,
+    endDate,
+  );
+
   const [todayOrders, setTodayOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const filtered = orders.filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      orderDate.setHours(0, 0, 0, 0);
-      return orderDate.getTime() === today.getTime();
-    });
-
-    setTodayOrders(filtered);
+    setTodayOrders(orders);
   }, [orders]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-xl text-gray-600">Carregando...</div>
-      </div>
-    );
-  }
 
   const stats = dashboardService.calculateStats(todayOrders);
   const ordersByStatus = dashboardService.getOrdersByStatus(todayOrders);
@@ -43,12 +43,34 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Visão geral dos pedidos de hoje</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            {isFetching && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <LoadingSpinner size="sm" className="text-orange-500" />
+                <span>Atualizando...</span>
+              </div>
+            )}
+          </div>
+          <p className="text-gray-600 mt-1">Visão geral dos pedidos</p>
+        </div>
+
+        <DateRangeFilter
+          startDate={inputStartDate}
+          endDate={inputEndDate}
+          onStartChange={setStartDate}
+          onEndChange={setEndDate}
+          onReset={resetToToday}
+        />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transition-opacity duration-200 ${
+          isFetching ? "opacity-60" : "opacity-100"
+        }`}
+      >
         <StatCard
           title="Total de Pedidos"
           value={stats.totalOrders}
@@ -78,7 +100,11 @@ export function DashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div
+        className={`grid grid-cols-1 lg:grid-cols-3 gap-6 transition-opacity duration-200 ${
+          isFetching ? "opacity-60" : "opacity-100"
+        }`}
+      >
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">

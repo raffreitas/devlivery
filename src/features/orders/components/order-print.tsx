@@ -28,7 +28,9 @@ export function OrderPrint({ order }: OrderPrintProps) {
               <span>
                 {item.quantity}x {item.product.name}
               </span>
-              <span>R$ {(item.product.price * item.quantity).toFixed(2)}</span>
+              <span className="text-end whitespace-nowrap">
+                R$ {(item.product.price * item.quantity).toFixed(2)}
+              </span>
             </div>
             {item.notes && <p className="text-sm ml-4">Obs: {item.notes}</p>}
           </div>
