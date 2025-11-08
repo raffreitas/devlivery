@@ -17,9 +17,10 @@ export function usePrintOrder() {
         font-family: 'Courier New', monospace;
         font-size: 12px;
         line-height: 1.4;
-        width: 50mm;
+        width: 55mm;
         margin: 0 auto;
         padding: 2mm;
+        padding-right: 5mm; /* Specific for printing */
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         font-weight: 550;
