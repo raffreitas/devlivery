@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { formatDate } from "../utils/formaters";
+import { formatDate } from "../utils/formatters";
 
 interface UseDateRangeFilterOptions {
   defaultDaysBack?: number;

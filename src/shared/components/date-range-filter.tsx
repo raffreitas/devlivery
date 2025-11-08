@@ -26,7 +26,7 @@ export function DateRangeFilter({
         onChange={(e) => onStartChange(e.target.value)}
         className="w-40"
       />
-      <span className="text-sm text-gray-500 pb-2">até</span>
+      <span className="text-sm text-gray-500 pb-3">até</span>
       <Input
         id="endDate"
         label="Fim"

@@ -145,7 +145,6 @@ export function OrdersPage() {
           }`}
         >
           {filteredByPayment
-            .map((o) => o)
             .sort(
               (a, b) =>
                 new Date(b.createdAt).getTime() -

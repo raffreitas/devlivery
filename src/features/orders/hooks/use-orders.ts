@@ -5,7 +5,7 @@ import type { Order, OrderFormData, PaymentMethod } from "../types";
 export function useOrders(
   startDate?: string,
   endDate?: string,
-  paymentMethod?: PaymentMethod | undefined,
+  paymentMethod?: PaymentMethod,
 ) {
   const queryClient = useQueryClient();
 
