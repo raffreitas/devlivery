@@ -19,7 +19,7 @@ export function usePrintOrder() {
         line-height: 1.4;
         width: 55mm;
         margin: 0 auto;
-        padding: 2mm;
+        padding: 1mm;
         padding-right: 5mm; /* Specific for printing */
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -48,6 +48,14 @@ export function usePrintOrder() {
 
       .text-xs {
         font-size: 9px;
+      }
+
+      .text-end {
+        text-align: end;
+      }
+
+      .whitespace-nowrap {
+        white-space: nowrap;
       }
 
       .font-bold {
