@@ -30,15 +30,11 @@ make migration-remove-db
 make migration-remove-identity
 ```
 
-### Scripts PowerShell/Bash
+### Script PowerShell (Windows)
 
-```bash
+```powershell
 # Aplicar todas as migrations localmente
-./scripts/apply-migrations.sh          # Linux/macOS
-./scripts/apply-migrations.ps1         # Windows
-
-# Gerar migration bundles
-./scripts/generate-migration-bundle.sh
+.\scripts\apply-migrations.ps1
 ```
 
 ## 🚀 Estratégias por Ambiente
@@ -72,54 +68,15 @@ if (app.Environment.IsDevelopment())
 
 ### 2. **CI/CD Pipeline** 🔄
 
-**Método**: dotnet ef via GitHub Actions
+**Método**: dotnet ef via GitHub Actions (✅ ATIVO)
 
-O workflow `main-build-deploy.yml` possui um job opcional (comentado) que aplica migrations usando `dotnet ef`:
+O workflow `main-build-deploy.yml` possui um job dedicado que aplica migrations automaticamente:
 
-```yaml
-- name: Apply ApplicationDbContext migrations
-  env:
-    ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}
-  run: |
-    cd src/Devlivery.WebApi
-    dotnet ef database update -c ApplicationDbContext
-```
-
-**Como funciona:**
-1. Instala o `dotnet-ef` global tool
-2. Usa variável de ambiente para connection string
-3. Executa `dotnet ef database update` para cada contexto
-4. Falha o deploy se migrations falharem
-
-**Prós**:
-- ✅ Simples e direto
-- ✅ Usa ferramentas oficiais do EF Core
-- ✅ Logs claros no GitHub Actions
-- ✅ Não requer artifacts ou bundles
-
-**Contras**:
-- ⚠️ Requer .NET SDK instalado (já presente no runner)
-- ⚠️ Precisa do código-fonte (já feito checkout)
-
----
-
-### 3. **Staging/Production Deploy** 🌐
-
-**Método**: Job automatizado no CI/CD ✅ **ATIVO**
-
-O workflow está configurado para aplicar migrations automaticamente na branch `main`:
-
-**Pré-requisitos:**
-1. ✅ Job `apply-migrations` está ativo no workflow
-2. ⚠️ **Configure** o secret no GitHub:
-   - `DATABASE_CONNECTION_STRING` - Connection string do banco de produção
-
-**Como funciona:**
 ```yaml
 apply-migrations:
   name: Apply Database Migrations
-  needs: build-test-publish  # Executa após build bem-sucedido
-  if: github.ref == 'refs/heads/main'  # Apenas na branch main
+  needs: build-test-publish
+  if: github.ref == 'refs/heads/main'
   steps:
     - name: Apply ApplicationDbContext migrations
       env:
@@ -129,50 +86,87 @@ apply-migrations:
         dotnet ef database update -c ApplicationDbContext
 ```
 
-**Fluxo:**
-1. Push na branch `main`
-2. Build & Test executado
-3. ✅ **Migrations aplicadas automaticamente**
-4. Docker image publicado
-5. Release criado
+**Como funciona:**
+1. Executa após o build ser bem-sucedido
+2. Instala o `dotnet-ef` global tool
+3. Usa secret `DATABASE_CONNECTION_STRING` do GitHub
+4. Executa `dotnet ef database update` para cada contexto
+5. Falha o deploy se migrations falharem
 
 **Prós**:
 - ✅ Totalmente automatizado
-- ✅ Aplicado antes do deploy da aplicação
-- ✅ Logs centralizados no GitHub Actions
+- ✅ Simples e direto
 - ✅ Usa ferramentas oficiais do EF Core
-- ✅ Falha o deploy se migrations falharem
+- ✅ Logs claros no GitHub Actions
+- ✅ Aplicado antes de qualquer deploy
 
 **Contras**:
-- ⚠️ Requer configuração de secret `DATABASE_CONNECTION_STRING`
-- ⚠️ Pode causar downtime em migrations pesadas
-- ⚠️ Executa automaticamente a cada push na main
+- ⚠️ Requer configuração do secret `DATABASE_CONNECTION_STRING`
+- ⚠️ Executado automaticamente em todo push na main
+
+---
+
+### 3. **Staging/Production Deploy** 🌐
+
+**Método Atual**: Job automatizado no CI/CD ✅ **ATIVO**
+
+As migrations são aplicadas automaticamente na branch `main` através do GitHub Actions.
+
+**Pré-requisito:**
+⚠️ **Configure o secret no GitHub:**
+- Acesse: `Settings → Secrets and variables → Actions → New repository secret`
+- Name: `DATABASE_CONNECTION_STRING`
+- Value: Connection string de produção
+
+**Fluxo automático:**
+1. Push na branch `main`
+2. Build & Test executado com sucesso
+3. ✅ **Migrations aplicadas automaticamente** (job `apply-migrations`)
+4. Aplicação está pronta para deploy
+
+**Prós**:
+- ✅ Totalmente automatizado
+- ✅ Garante que o banco está atualizado antes do deploy
+- ✅ Logs centralizados no GitHub Actions
+- ✅ Falha o deploy se houver problemas nas migrations
+
+**Contras**:
+- ⚠️ Requer configuração do secret `DATABASE_CONNECTION_STRING`
+- ⚠️ Pode causar downtime em migrations pesadas (considere janela de manutenção)
 
 ---
 
 ### 4. **Manual/SSH** 🖥️
 
-**Método**: Executar script ou comando direto no servidor
+**Método**: Executar comandos diretos (para casos especiais)
+
+Se precisar aplicar migrations manualmente ou fazer rollback:
 
 ```bash
-# Opção 1: Usar o script
-export DATABASE_CONNECTION_STRING="Host=prod-db;Database=devlivery;Username=user;Password=***"
-./scripts/apply-migrations.sh
-
-# Opção 2: Executar comandos diretos
+# Conecte via SSH ao servidor e execute:
 cd src/Devlivery.WebApi
+
+# Aplicar migrations
 dotnet ef database update -c ApplicationDbContext
 dotnet ef database update -c ApplicationIdentityDbContext
+
+# Rollback para uma migration específica
+dotnet ef database update v001 -c ApplicationDbContext
 ```
 
+**Quando usar:**
+- 🔧 Rollback de migrations
+- 🔧 Troubleshooting de problemas
+- 🔧 Janela de manutenção programada
+
 **Prós**:
-- ✅ Controle total
-- ✅ Pode ser executado em janela de manutenção
-- ✅ Fácil rollback (`dotnet ef database update <migration-anterior>`)
+- ✅ Controle total do processo
+- ✅ Permite rollback fácil
+- ✅ Ideal para janelas de manutenção
 
 **Contras**:
-- ❌ Manual
-- ❌ Requer acesso ao servidor
+- ❌ Processo manual
+- ❌ Requer acesso SSH ao servidor
 - ❌ Requer .NET SDK instalado no servidor
 
 ---
@@ -202,13 +196,22 @@ Host=prod-db.example.com;Port=5432;Database=devlivery;Username=app_user;Password
 
 ## 🎯 Recomendações
 
-### Para Desenvolvimento
-✅ Use auto-migration (padrão atual) - configurado em `Startup.cs`
+### Para Desenvolvimento Local
+✅ **Use auto-migration** (padrão atual)
+- Configurado automaticamente em `Startup.cs`
+- Migrations são aplicadas no startup em modo Development
+- Dados de seed também são aplicados automaticamente
 
-### Para Staging/Produção
-✅ **Configurado**: CI/CD job automatizado com `dotnet ef` ativo
-⚠️ **Requer**: Secret `DATABASE_CONNECTION_STRING` configurado no GitHub
-💡 **Alternativa**: Desabilitar o job e usar execução manual via SSH (mais controle)
+### Para Produção
+✅ **CI/CD Automatizado** (configuração atual)
+- Migrations aplicadas automaticamente na branch `main`
+- ⚠️ **Requer**: Secret `DATABASE_CONNECTION_STRING` configurado
+- ✅ **Vantagem**: Zero intervenção manual, processo confiável
+
+💡 **Alternativas para casos especiais:**
+- Desabilitar o job `apply-migrations` no workflow
+- Executar migrations manualmente via SSH em janela de manutenção
+- Útil para migrations complexas que requerem monitoramento
 
 ## 🔄 Workflow Completo
 
@@ -252,74 +255,38 @@ Se preferir controle manual, você pode:
    ./scripts/apply-migrations.sh
    ```
 
-## 🐳 Bonus: Migrations no Docker
+## � Troubleshooting
 
-Se quiser aplicar migrations no startup do container:
+### ❌ Erro: "dotnet ef not found"
 
-**Opção 1: Multi-stage build com script** (Recomendado)
-
-```dockerfile
-# Adicionar stage para instalar EF tools
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS migration
-WORKDIR /src
-COPY ["src/Devlivery.WebApi/Devlivery.WebApi.csproj", "src/Devlivery.WebApi/"]
-RUN dotnet restore "src/Devlivery.WebApi/Devlivery.WebApi.csproj"
-COPY . .
-RUN dotnet tool install --global dotnet-ef
-
-# Stage final
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-COPY --from=migration /root/.dotnet/tools /tools
-ENV PATH="${PATH}:/tools"
-
-# Copiar script de entrypoint
-COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
-```
-
-**docker-entrypoint.sh:**
 ```bash
-#!/bin/bash
-set -e
-
-echo "Applying migrations..."
-
-if [ -n "$ConnectionStrings__DefaultConnection" ]; then
-    cd /src/src/Devlivery.WebApi
-    dotnet ef database update -c ApplicationDbContext || echo "Warning: Failed to apply DB migrations"
-    dotnet ef database update -c ApplicationIdentityDbContext || echo "Warning: Failed to apply Identity migrations"
-else
-    echo "Warning: No connection string provided, skipping migrations"
-fi
-
-echo "Starting application..."
-cd /app
-exec dotnet Devlivery.WebApi.dll
+# Instale o EF Core tools globalmente
+dotnet tool install --global dotnet-ef
 ```
 
-**Opção 2: Init container no Kubernetes/Docker Compose**
+### ❌ Erro: "No DbContext was found"
 
-```yaml
-# docker-compose.yml
-services:
-  migration:
-    image: devlivery-webapi:latest
-    command: sh -c "dotnet ef database update -c ApplicationDbContext && dotnet ef database update -c ApplicationIdentityDbContext"
-    environment:
-      - ConnectionStrings__DefaultConnection=${DATABASE_CONNECTION_STRING}
-    depends_on:
-      - postgres
-  
-  api:
-    image: devlivery-webapi:latest
-    depends_on:
-      migration:
-        condition: service_completed_successfully
-    # ... resto da config
+Certifique-se de especificar o contexto:
+```bash
+dotnet ef database update -c ApplicationDbContext
 ```
+
+### ❌ Erro: "Unable to create an object of type 'ApplicationDbContext'"
+
+Verifique se a connection string está configurada:
+```bash
+# Para linha de comando
+export ConnectionStrings__DefaultConnection="Host=localhost;Database=devlivery;..."
+
+# Ou use o appsettings.Development.json
+```
+
+### ❌ Migrations falhando no CI/CD
+
+1. Verifique se o secret `DATABASE_CONNECTION_STRING` está configurado corretamente
+2. Teste a connection string localmente primeiro
+3. Verifique os logs do GitHub Actions para detalhes do erro
+4. Confirme que o banco de dados está acessível
 
 ## 📚 Referências
 

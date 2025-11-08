@@ -220,7 +220,7 @@ As migrations são **aplicadas automaticamente** na branch `main` pelo GitHub Ac
 
 **⚠️ Pré-requisito:** Configure o secret `DATABASE_CONNECTION_STRING` no GitHub antes do primeiro deploy:
 ```bash
-GitHub → Settings → Secrets → New repository secret
+GitHub → Settings → Secrets and variables → Actions → New repository secret
 Name: DATABASE_CONNECTION_STRING
 Value: Host=prod-db;Port=5432;Database=devlivery;Username=...;Password=...
 ```
@@ -240,19 +240,18 @@ make migration-update-identity          # ApplicationIdentityDbContext
 make migration-status
 ```
 
-### Scripts de Migration
+### Scripts de Migration (Windows)
 
-```bash
+```powershell
 # Aplicar todas as migrations localmente
-./scripts/apply-migrations.sh          # Linux/macOS
-./scripts/apply-migrations.ps1         # Windows
+.\scripts\apply-migrations.ps1
 ```
 
 ### EF Core direto (Alternativa)
 
 ```bash
 # Criar migration
-dotnet ef migrations add v002 -o ./Shared/Infrastructure/Database/Migrations -c ApplicationDbContext
+dotnet ef migrations add v002 -o ./Shared/Database/Migrations -c ApplicationDbContext
 
 # Aplicar migration
 dotnet ef database update -c ApplicationDbContext
@@ -423,6 +422,10 @@ app.MapMinhaFeatureEndpoints();
 
 ### 📋 Orders
 - `GET /api/orders` - Listar todos os pedidos (com items e produtos)
+  - **Query Parameters opcionais:**
+    - `start` - Data inicial (filtrar por data de criação)
+    - `end` - Data final (filtrar por data de criação)
+    - `paymentMethod` - Filtrar por método de pagamento
 - `GET /api/orders/{id}` - Buscar pedido por ID (com items e produtos)
 - `POST /api/orders` - Criar novo pedido
 - `PATCH /api/orders/{id}/status` - Atualizar status do pedido
@@ -435,12 +438,21 @@ app.MapMinhaFeatureEndpoints();
 - `delivered` - Entregue
 - `cancelled` - Cancelado
 
+**Métodos de pagamento válidos:**
+- `Cash` - Dinheiro
+- `CreditCard` - Cartão de Crédito
+- `DebitCard` - Cartão de Débito
+- `Pix` - PIX
+
 ### 📊 Dashboard
 - `GET /api/dashboard/stats` - Estatísticas gerais do dashboard
 
 ## 🧪 Testando a API
 
-Use o arquivo `Devlivery.WebApi.http` no Visual Studio Code com a extensão REST Client ou no Rider.
+Acesse a interface **Scalar** para testar a API de forma interativa:
+
+- **Scalar UI**: `http://localhost:5000/scalar/v1`
+- **Health Check**: `http://localhost:5000/health`
 
 ### Exemplos de Requisições
 
@@ -473,16 +485,25 @@ Content-Type: application/json
   ],
   "customerName": "João Silva",
   "customerPhone": "(11) 98765-4321",
-  "deliveryAddress": "Rua das Flores, 123 - São Paulo, SP"
+  "deliveryAddress": "Rua das Flores, 123 - São Paulo, SP",
+  "paymentMethod": "Pix",
+  "deliveryFee": 5.00
 }
+```
+
+#### Listar Pedidos com Filtros
+```http
+GET http://localhost:5000/api/orders?start=2025-01-01&end=2025-12-31&paymentMethod=Pix
 ```
 
 ## 🔐 Credenciais de Teste
 
 ```
 Email: admin@pizza.com
-Senha: ChangeIt123!
+Senha: 123456
 ```
+
+> **Nota**: O seed de dados é aplicado automaticamente no ambiente de desenvolvimento.
 
 ## 📦 Dependências Principais
 

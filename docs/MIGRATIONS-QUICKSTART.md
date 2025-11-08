@@ -19,53 +19,47 @@ make migration-apply-all
 
 ✅ **Migrations são aplicadas automaticamente na branch main!**
 
-**Pré-requisito:**
-⚠️ Configure o secret `DATABASE_CONNECTION_STRING` no GitHub antes do primeiro deploy!
+**Pré-requisito OBRIGATÓRIO:**
+⚠️ Configure o secret `DATABASE_CONNECTION_STRING` no GitHub antes do primeiro push:
+
+```bash
+GitHub → Settings → Secrets and variables → Actions → New repository secret
+Name: DATABASE_CONNECTION_STRING
+Value: Host=prod-db;Port=5432;Database=devlivery;Username=...;Password=...
+```
 
 **O workflow automaticamente:**
-1. Instala EF Core tools
-2. Compila e testa a aplicação
-3. ✅ **Aplica migrations no banco de produção**
-4. Gera e publica Docker image
-5. Cria release
+1. Build & Test da aplicação
+2. ✅ **Aplica migrations em ambos os contextos** (ApplicationDbContext e ApplicationIdentityDbContext)
+3. Migrations aplicadas com sucesso = deploy pode prosseguir
 
 ### Produção
 
 #### ✅ Método Atual: Automatizado via CI/CD
 
-Migrations são aplicadas automaticamente a cada push na `main`:
+Migrations são aplicadas automaticamente a cada push na branch `main`.
 
-```yaml
-# Configurado no workflow:
-apply-migrations:
-  name: Apply Database Migrations
-  if: github.ref == 'refs/heads/main'  # Apenas main
-```
+**Como funciona:**
+- Job `apply-migrations` executa após build bem-sucedido
+- Aplica migrations em ambos os contextos (ApplicationDbContext e ApplicationIdentityDbContext)
+- Se migrations falharem, o workflow para e não prossegue
 
-**Configuração necessária:**
-```bash
-# GitHub → Settings → Secrets → New repository secret
-Name: DATABASE_CONNECTION_STRING
-Value: Host=prod-db;Port=5432;Database=devlivery;Username=...;Password=...
-```
+**⚠️ Importante:** Configure o secret `DATABASE_CONNECTION_STRING` antes do primeiro deploy!
 
-#### 🔧 Alternativa: Manual (Mais controle)
+#### 🔧 Alternativa: Execução Manual
 
-Se preferir controle manual, você pode:
-1. Comentar o job `apply-migrations` no workflow
-2. Executar via SSH:
+Para casos especiais (rollback, troubleshooting, janela de manutenção):
 
 ```bash
-# SSH no servidor
-export DATABASE_CONNECTION_STRING="Host=prod-db;Database=devlivery;Username=user;Password=***"
-
-# Executar script
-./scripts/apply-migrations.sh
-
-# OU comandos diretos
+# Conecte via SSH no servidor e execute:
 cd src/Devlivery.WebApi
+
+# Aplicar migrations
 dotnet ef database update -c ApplicationDbContext
 dotnet ef database update -c ApplicationIdentityDbContext
+
+# Fazer rollback para uma migration específica
+dotnet ef database update v001 -c ApplicationDbContext
 ```
 
 ---
@@ -81,6 +75,7 @@ dotnet ef database update -c ApplicationIdentityDbContext
 │     3. make migration-update-db                                 │
 │                                                                  │
 │  ✅ Auto-apply no startup (Development mode)                    │
+│  ✅ Seed de dados aplicado automaticamente                      │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 
@@ -93,10 +88,10 @@ dotnet ef database update -c ApplicationIdentityDbContext
 │  1. ✅ Build & Test                                             │
 │  2. ✅ Apply Migrations (ApplicationDbContext)                  │
 │  3. ✅ Apply Migrations (ApplicationIdentityDbContext)          │
-│  4. ✅ Build & Push Docker image                                │
-│  5. ✅ Create GitHub Release                                    │
 │                                                                  │
-│  ⚠️ Requer: DATABASE_CONNECTION_STRING configurado              │
+│  ⚠️ Requer: SECRET DATABASE_CONNECTION_STRING configurado       │
+│                                                                  │
+│  Se migrations falharem → workflow PARA aqui                    │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 
@@ -106,11 +101,8 @@ dotnet ef database update -c ApplicationIdentityDbContext
 │                          PRODUÇÃO                                │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  ✅ Migrations já aplicadas pelo CI/CD                          │
-│  ✅ Docker image atualizado disponível                          │
-│  ✅ Release criado automaticamente                              │
-│                                                                  │
-│  Próximo passo: Deploy da nova imagem Docker                    │
+│  ✅ Banco de dados atualizado com últimas migrations            │
+│  ✅ Aplicação pronta para deployment                            │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -127,47 +119,57 @@ dotnet ef database update -c ApplicationIdentityDbContext
 - [x] ✅ **Job de migrations ATIVO** - aplica automaticamente na main
 - [x] Auto-migration em Development
 
-### ⚠️ O que você DEVE fazer antes do primeiro deploy
+### ⚠️ CRÍTICO: Configure antes do primeiro deploy
 
-- [ ] **CRÍTICO**: Configurar secret `DATABASE_CONNECTION_STRING` no GitHub
-  - Settings → Secrets and variables → Actions → New repository secret
-  - Name: `DATABASE_CONNECTION_STRING`
-  - Value: Connection string de produção
+- [ ] **OBRIGATÓRIO**: Configurar secret `DATABASE_CONNECTION_STRING` no GitHub
+  ```
+  GitHub → Settings → Secrets and variables → Actions → New repository secret
+  Name: DATABASE_CONNECTION_STRING
+  Value: Host=prod-db;Port=5432;Database=devlivery;Username=...;Password=...
+  ```
 
-### ⚙️ Opções disponíveis
+> **⚠️ Sem este secret configurado, o job de migrations falhará!**
 
-- ✅ **Atual**: Migrations automáticas via CI/CD (ativo)
-- 🔧 **Alternativa**: Comentar o job e usar execução manual (mais controle)
+### ⚙️ Configuração Atual
+
+- ✅ **Migrations automáticas ATIVAS** via CI/CD
+- ✅ Executadas em todo push na branch `main`
+- ✅ Aplicadas ANTES da aplicação ser deployada
+- 🔧 **Alternativa**: Execução manual via SSH (para casos especiais)
 
 ---
 
-## 📞 Troubleshooting
+## 📞 Troubleshooting Comum
 
 ### ❌ "dotnet ef not found"
 
 ```bash
+# Instale o EF Core tools globalmente
 dotnet tool install --global dotnet-ef
 ```
 
-### ❌ "Permission denied" nos scripts
+### ❌ "No DbContext was found"
 
 ```bash
-chmod +x scripts/*.sh
+# Sempre especifique o contexto
+dotnet ef database update -c ApplicationDbContext
+dotnet ef database update -c ApplicationIdentityDbContext
 ```
 
 ### ❌ Connection string inválida
 
-Verifique o formato:
+Formato correto:
 ```
-Host=localhost;Port=5432;Database=devlivery;Username=postgres;Password=***
+Host=localhost;Port=5432;Database=devlivery;Username=postgres;Password=sua_senha
 ```
 
 ### ❌ Migrations falhando no CI/CD
 
-1. Verifique se o secret `DATABASE_CONNECTION_STRING` está configurado
-2. Teste a connection string localmente
-3. Verifique os logs do GitHub Actions
-4. Confirme que o banco de dados está acessível do runner
+**Checklist:**
+1. ✅ Secret `DATABASE_CONNECTION_STRING` está configurado no GitHub?
+2. ✅ Connection string está correta?
+3. ✅ Banco de dados está acessível?
+4. 📋 Verifique os logs detalhados no GitHub Actions
 
 ---
 

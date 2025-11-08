@@ -86,6 +86,19 @@ public sealed class CreateProductHandler(ApplicationDbContext dbContext, ILogger
 }
 `
 
+### 5. Query Filtering Pattern
+For list queries with optional filters, use nullable parameters in the Query record:
+
+`csharp
+// Query with optional filters
+public sealed record GetAllOrdersQuery(DateTime? StartDate, DateTime? EndDate, string? PaymentMethod);
+
+// Handler applies filters conditionally
+var query = dbContext.Orders.AsQueryable();
+if (request.StartDate.HasValue)
+    query = query.Where(o => o.CreatedAt >= request.StartDate.Value);
+`
+
 ## Development Workflow
 
 ### Start App Locally
@@ -125,7 +138,9 @@ GitHub Actions on `main` branch (`.github/workflows/main-build-deploy.yml`):
 1. Builds and tests solution
 2. **Applies migrations to production** using `DATABASE_CONNECTION_STRING` secret for both contexts
 
-**Important**: Migrations run automatically on main branch — no manual production migrations needed. Docker image builds and version tagging are currently disabled in the workflow.
+**Important**: Migrations run automatically on main branch — no manual production migrations needed.
+
+**Note**: Docker image building and version tagging are currently disabled in the workflow (configured with `if: false`). To enable, remove the `if: false` conditions from the Docker-related steps in `.github/workflows/main-build-deploy.yml`.
 
 ## Adding a New Feature
 
@@ -262,6 +277,7 @@ app.MapMyFeatureEndpoints();
 7. **Handler registration**: Each handler must be manually registered in Feature's `Add[Feature]Feature()` method
 8. **UTC timestamps**: Always use `DateTime.UtcNow` for `CreatedAt`/`UpdatedAt`
 9. **CancellationToken**: Always pass through to async DB operations
+10. **Query filtering**: Use nullable parameters in Query records for optional filters, apply conditionally in Handler
 
 ## Testing
 
