@@ -105,9 +105,6 @@ Devlivery.WebApi/
 │   │   │   ├── Order.cs                         # Entidade de domínio
 │   │   │   └── OrderItem.cs                     # Entidade de domínio
 │   │   └── OrdersFeature.cs                     # Registros de DI e endpoints
-│   │
-│   └── Dashboard/                    # Dashboard e estatísticas
-│       └── GetDashboardStats.cs
 
 ```
 
@@ -443,9 +440,6 @@ app.MapMinhaFeatureEndpoints();
 - `CreditCard` - Cartão de Crédito
 - `DebitCard` - Cartão de Débito
 - `Pix` - PIX
-
-### 📊 Dashboard
-- `GET /api/dashboard/stats` - Estatísticas gerais do dashboard
 
 ## 🧪 Testando a API
 

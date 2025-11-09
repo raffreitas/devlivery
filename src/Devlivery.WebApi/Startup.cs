@@ -1,5 +1,4 @@
 ﻿using Devlivery.WebApi.Features.Auth;
-using Devlivery.WebApi.Features.Dashboard;
 using Devlivery.WebApi.Features.Orders;
 using Devlivery.WebApi.Features.Products;
 using Devlivery.WebApi.Shared.Database;
@@ -83,6 +82,5 @@ public static class Startup
         app.MapAuthEndpoints();
         app.MapProductEndpoints();
         app.MapOrderEndpoints();
-        app.MapDashboardEndpoints();
     }
 }
