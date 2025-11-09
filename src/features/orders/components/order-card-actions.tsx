@@ -29,8 +29,10 @@ export function OrderCardActions({
   onDelete,
   hasNextStatus,
 }: OrderCardActionsProps) {
-  const showCancel = order.status !== "cancelled" && order.status !== "delivered";
-  const showDelete = order.status === "delivered" || order.status === "cancelled";
+  const showCancel =
+    order.status !== "cancelled" && order.status !== "delivered";
+  const showDelete =
+    order.status === "delivered" || order.status === "cancelled";
 
   return (
     <div className="border-t border-gray-200 pt-4 mt-auto">
