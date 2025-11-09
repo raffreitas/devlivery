@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { Product } from "@/features/products/types";
 import { AutocompleteSelect } from "@/shared/components/autocomplete-select";
 import { Button } from "@/shared/components/button";
@@ -24,10 +25,14 @@ export function ProductSelector({
   onNotesChange,
   onAddItem,
 }: ProductSelectorProps) {
-  const productOptions = products.map((product) => ({
-    value: product.id,
-    label: `${product.name} - R$ ${product.price.toFixed(2)}`,
-  }));
+  const productOptions = useMemo(
+    () =>
+      products.map((product) => ({
+        value: product.id,
+        label: `${product.name} - R$ ${product.price.toFixed(2)}`,
+      })),
+    [products],
+  );
 
   return (
     <div className="space-y-4">
