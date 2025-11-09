@@ -1,4 +1,4 @@
-import type { Order } from "@/features/orders/types";
+import type { Order, PaymentMethod } from "@/features/orders/types";
 import { type ApiResponse, api } from "@/shared/services/api";
 import type { DashboardStats } from "../types";
 
@@ -39,6 +39,28 @@ export const dashboardService = {
       delivered: orders.filter((o) => o.status === "delivered").length,
       cancelled: orders.filter((o) => o.status === "cancelled").length,
     };
+  },
+
+  getPaymentBreakdown: (orders: Order[]) => {
+    const validOrders = orders.filter((o) => o.status !== "cancelled");
+
+    const breakdown = validOrders.reduce(
+      (acc, order) => {
+        acc[order.paymentMethod] =
+          (acc[order.paymentMethod] || 0) + order.total;
+        return acc;
+      },
+      { Cash: 0, CreditCard: 0, DebitCard: 0, Pix: 0 } as Record<
+        PaymentMethod,
+        number
+      >,
+    );
+
+    const total = Object.values(breakdown).reduce(
+      (sum, value) => sum + value,
+      0,
+    );
+    return { breakdown, total };
   },
 
   getStats: async (): Promise<DashboardStats> => {
