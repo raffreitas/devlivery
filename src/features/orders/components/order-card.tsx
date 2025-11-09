@@ -1,4 +1,8 @@
 import { Button } from "@/shared/components/button";
+import {
+  ORDER_STATUS_STYLES,
+  PAYMENT_METHOD_STYLES,
+} from "@/shared/constants/ui-styles";
 import { getPaymentOptionLabel } from "../constants/payment-methods";
 import { usePrintOrder } from "../hooks/use-print-order";
 import type { Order } from "../types";
@@ -10,22 +14,6 @@ interface OrderCardProps {
   onUpdateStatus: (id: string, status: Order["status"]) => void;
   onDelete: (id: string) => void;
 }
-
-const statusColors = {
-  pending: "bg-yellow-100 text-yellow-800",
-  preparing: "bg-blue-100 text-blue-800",
-  ready: "bg-purple-100 text-purple-800",
-  delivered: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
-};
-
-const statusLabels = {
-  pending: "Pendente",
-  preparing: "Em Preparo",
-  ready: "Pronto",
-  delivered: "Entregue",
-  cancelled: "Cancelado",
-};
 
 export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
   const { contentRef, handlePrint } = usePrintOrder();
@@ -66,9 +54,18 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
             <h3 className="text-lg font-semibold text-gray-900">
               {order.customerName}
             </h3>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-              {getPaymentOptionLabel(order.paymentMethod)}
-            </span>
+            {(() => {
+              const paymentStyle = PAYMENT_METHOD_STYLES[order.paymentMethod];
+              const PaymentIcon = paymentStyle.icon;
+              return (
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${paymentStyle.bg} ${paymentStyle.text} ${paymentStyle.border}`}
+                >
+                  <PaymentIcon className="w-3 h-3" />
+                  {getPaymentOptionLabel(order.paymentMethod)}
+                </span>
+              );
+            })()}
           </div>
           {order.customerPhone && (
             <p className="text-sm text-gray-600">{order.customerPhone}</p>
@@ -76,9 +73,9 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
           <p className="text-sm text-gray-600">{order.deliveryAddress}</p>
         </div>
         <span
-          className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[order.status]}`}
+          className={`px-3 py-1 rounded-full text-sm font-medium ${ORDER_STATUS_STYLES[order.status].badgeBg} ${ORDER_STATUS_STYLES[order.status].badgeText}`}
         >
-          {statusLabels[order.status]}
+          {ORDER_STATUS_STYLES[order.status].label}
         </span>
       </div>
 

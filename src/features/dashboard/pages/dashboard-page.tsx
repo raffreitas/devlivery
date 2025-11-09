@@ -5,7 +5,9 @@ import { useOrders } from "@/features/orders/hooks/use-orders";
 import type { Order } from "@/features/orders/types";
 import { DateRangeFilter } from "@/shared/components/date-range-filter";
 import { LoadingSpinner } from "@/shared/components/loading-spinner";
+import { ORDER_STATUS_STYLES } from "@/shared/constants/ui-styles";
 import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
+import { PaymentBreakdownCard } from "../components/payment-breakdown-card";
 import { StatCard } from "../components/stat-card";
 import { dashboardService } from "../services/dashboard-service";
 
@@ -33,6 +35,7 @@ export function DashboardPage() {
 
   const stats = dashboardService.calculateStats(todayOrders);
   const ordersByStatus = dashboardService.getOrdersByStatus(todayOrders);
+  const paymentBreakdown = dashboardService.getPaymentBreakdown(todayOrders);
 
   const activeOrders = todayOrders
     .filter((o) => o.status !== "delivered" && o.status !== "cancelled")
@@ -130,61 +133,52 @@ export function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Status dos Pedidos
-          </h2>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">
-                Pendentes
-              </span>
-              <span className="text-lg font-bold text-yellow-600">
-                {ordersByStatus.pending}
-              </span>
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Status dos Pedidos
+            </h2>
+            <div className="space-y-3">
+              {(
+                Object.entries(ordersByStatus) as Array<
+                  [keyof typeof ORDER_STATUS_STYLES, number]
+                >
+              ).map(([status, count]) => {
+                const style = ORDER_STATUS_STYLES[status];
+                const Icon = style.icon;
+
+                return (
+                  <div
+                    key={status}
+                    className={`flex justify-between items-center p-3 ${style.bg} rounded-lg`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className={`w-4 h-4 ${style.text}`} />
+                      <span className="text-sm font-medium text-gray-700">
+                        {style.label}
+                      </span>
+                    </div>
+                    <span className={`text-lg font-bold ${style.text}`}>
+                      {count}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">
-                Em Preparo
-              </span>
-              <span className="text-lg font-bold text-blue-600">
-                {ordersByStatus.preparing}
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">Prontos</span>
-              <span className="text-lg font-bold text-purple-600">
-                {ordersByStatus.ready}
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">
-                Entregues
-              </span>
-              <span className="text-lg font-bold text-green-600">
-                {ordersByStatus.delivered}
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">
-                Cancelados
-              </span>
-              <span className="text-lg font-bold text-red-600">
-                {ordersByStatus.cancelled}
-              </span>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">
+                  Ticket Médio
+                </span>
+                <span className="text-xl font-bold text-orange-600">
+                  R$ {stats.averageOrderValue.toFixed(2)}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-700">
-                Ticket Médio
-              </span>
-              <span className="text-xl font-bold text-orange-600">
-                R$ {stats.averageOrderValue.toFixed(2)}
-              </span>
-            </div>
-          </div>
+          <PaymentBreakdownCard paymentBreakdown={paymentBreakdown} />
         </div>
       </div>
     </div>

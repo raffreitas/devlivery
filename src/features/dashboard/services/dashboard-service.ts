@@ -41,6 +41,32 @@ export const dashboardService = {
     };
   },
 
+  getPaymentBreakdown: (orders: Order[]) => {
+    const validOrders = orders.filter((o) => o.status !== "cancelled");
+
+    const breakdown = {
+      Cash: validOrders
+        .filter((o) => o.paymentMethod === "Cash")
+        .reduce((sum, o) => sum + o.total, 0),
+      CreditCard: validOrders
+        .filter((o) => o.paymentMethod === "CreditCard")
+        .reduce((sum, o) => sum + o.total, 0),
+      DebitCard: validOrders
+        .filter((o) => o.paymentMethod === "DebitCard")
+        .reduce((sum, o) => sum + o.total, 0),
+      Pix: validOrders
+        .filter((o) => o.paymentMethod === "Pix")
+        .reduce((sum, o) => sum + o.total, 0),
+    };
+
+    const total = Object.values(breakdown).reduce(
+      (sum, value) => sum + value,
+      0,
+    );
+
+    return { breakdown, total };
+  },
+
   getStats: async (): Promise<DashboardStats> => {
     const res = await api.get<
       ApiResponse<{
