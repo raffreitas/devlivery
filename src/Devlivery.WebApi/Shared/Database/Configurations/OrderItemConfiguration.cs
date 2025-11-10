@@ -11,7 +11,8 @@ public sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
     {
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Quantity).IsRequired();
-        builder.Property(e => e.UnitPrice).HasPrecision(18, 2).IsRequired();
+        builder.Property(e => e.UnitPrice).HasPrecision(18, 2)
+            .IsRequired();
         builder.Property(e => e.Notes).HasMaxLength(500);
 
         builder.HasOne<Product>()

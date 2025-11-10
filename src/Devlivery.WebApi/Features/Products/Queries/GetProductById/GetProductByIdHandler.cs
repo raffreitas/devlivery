@@ -11,6 +11,7 @@ public sealed class GetProductByIdHandler(ApplicationDbContext dbContext)
         CancellationToken cancellationToken = default)
     {
         var product = await dbContext.Products
+            .AsNoTracking()
             .Where(p => p.Id == query.Id)
             .Select(p => new GetProductByIdResponse(
                 p.Id,

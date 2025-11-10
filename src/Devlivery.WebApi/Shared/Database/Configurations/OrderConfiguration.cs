@@ -19,7 +19,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasMany(e => e.Items)
             .WithOne()
-            .HasForeignKey("order_id")
+            .HasForeignKey("order_id").IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

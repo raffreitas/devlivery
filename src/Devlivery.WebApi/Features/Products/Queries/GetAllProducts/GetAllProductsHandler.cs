@@ -11,6 +11,7 @@ public sealed class GetAllProductsHandler(ApplicationDbContext dbContext)
         CancellationToken cancellationToken = default)
     {
         var products = await dbContext.Products
+            .AsNoTracking()
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new GetAllProductsResponse(
                 p.Id,

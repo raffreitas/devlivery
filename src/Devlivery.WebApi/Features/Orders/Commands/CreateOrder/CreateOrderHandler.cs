@@ -16,6 +16,7 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
 
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
         var products = await dbContext.Products
+            .AsNoTracking()
             .Where(p => productIds.Contains(p.Id))
             .ToListAsync(cancellationToken);
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);

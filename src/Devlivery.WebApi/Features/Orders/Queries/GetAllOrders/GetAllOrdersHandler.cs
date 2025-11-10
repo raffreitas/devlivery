@@ -46,6 +46,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
             .Select(i => i.ProductId)
             .ToHashSet();
         var products = await dbContext.Products
+            .AsNoTracking()
             .Where(p => productIds.Contains(p.Id))
             .ToListAsync(cancellationToken);
 
