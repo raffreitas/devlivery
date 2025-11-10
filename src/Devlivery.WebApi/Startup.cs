@@ -60,6 +60,8 @@ public static class Startup
             DatabaseSeeder.SeedAsync(db, userManager).GetAwaiter().GetResult();
         }
 
+        app.UseExceptionHandler();
+
         // CORS
         app.UseCorsConfiguration();
 
