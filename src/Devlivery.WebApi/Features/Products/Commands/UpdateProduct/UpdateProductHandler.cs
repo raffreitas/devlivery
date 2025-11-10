@@ -12,16 +12,19 @@ public sealed class UpdateProductHandler(ApplicationDbContext dbContext)
             .FirstOrDefaultAsync(p => p.Id == command.Id, cancellationToken);
 
         if (product is null)
-        {
             return Result.Fail("Produto não encontrado");
-        }
 
-        product.Name = command.Name;
-        product.Description = command.Description;
-        product.Price = command.Price;
-        product.Category = command.Category;
-        product.Available = command.Available;
-        product.UpdatedAt = DateTime.UtcNow;
+        product.Update(
+            name: command.Name,
+            description: command.Description,
+            price: command.Price,
+            category: command.Category
+        );
+
+        if (command.Available)
+            product.SetAsAvailable();
+        else
+            product.SetAsUnavailable();
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

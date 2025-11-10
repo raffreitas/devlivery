@@ -1,14 +1,13 @@
 ﻿using Bogus;
 using Devlivery.WebApi.Features.Orders.Domain;
+using Devlivery.WebApi.Features.Products.Domain;
 
 namespace Devlivery.WebApi.Tests.Common.Builders;
 
 public class OrderItemBuilder
 {
     private readonly Faker _faker = new();
-    private Guid _orderItemId = Guid.NewGuid();
-    private Guid _productId = Guid.NewGuid();
-    private Guid _orderId = Guid.NewGuid();
+    private Product _product;
     private int _quantity;
     private string _notes;
 
@@ -17,23 +16,12 @@ public class OrderItemBuilder
     {
         _quantity = _faker.Random.Int(min: 1);
         _notes = _faker.Lorem.Sentence();
+        _product = new ProductBuilder().Build();
     }
 
-    public OrderItemBuilder WithOrderItemId(Guid orderItemId)
+    public OrderItemBuilder WithProduct(Product product)
     {
-        _orderItemId = orderItemId;
-        return this;
-    }
-
-    public OrderItemBuilder WithProductId(Guid productId)
-    {
-        _productId = productId;
-        return this;
-    }
-
-    public OrderItemBuilder WithOrderId(Guid orderId)
-    {
-        _orderId = orderId;
+        _product = product;
         return this;
     }
 
@@ -52,13 +40,10 @@ public class OrderItemBuilder
 
     public OrderItem Build()
     {
-        return new OrderItem
-        {
-            Id = _orderItemId,
-            ProductId = _productId,
-            OrderId = _orderId,
-            Quantity = _quantity,
-            Notes = _notes
-        };
+        return new OrderItem(
+            productId: _product.Id,
+            quantity: _quantity,
+            unitPrice: _product.Price,
+            notes: _notes);
     }
 }

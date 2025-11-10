@@ -22,12 +22,11 @@ public sealed class GetAllOrdersEndpointTests(OrdersWebApplicationFactory factor
         var token = await GetAccessTokenAsync();
         var product = new ProductBuilder().Build();
         var orderItem = new OrderItemBuilder()
-            .WithProductId(product.Id)
+            .WithProduct(product)
             .Build();
         var order = new OrderBuilder()
             .WithItems(orderItem)
             .WithDeliveryFee(0m)
-            .WithTotal(orderItem.Quantity * product.Price)
             .Build();
 
         using var scope = Factory.Services.CreateScope();

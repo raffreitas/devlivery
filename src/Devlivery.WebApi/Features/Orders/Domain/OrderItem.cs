@@ -1,15 +1,20 @@
-using Devlivery.WebApi.Features.Products.Domain;
+using Devlivery.WebApi.Shared.Domain;
 
 namespace Devlivery.WebApi.Features.Orders.Domain;
 
-public class OrderItem
+public sealed class OrderItem : Entity
 {
-    public Guid Id { get; set; }
-    public Guid OrderId { get; set; }
-    public Guid ProductId { get; set; }
-    public int Quantity { get; set; }
-    public string? Notes { get; set; }
+    public Guid ProductId { get; private set; }
+    public int Quantity { get; private set; }
+    public decimal UnitPrice { get; private set; }
+    public string? Notes { get; private set; }
+    public decimal TotalPrice => UnitPrice * Quantity;
 
-    public Order Order { get; set; } = null!;
-    public Product Product { get; set; } = null!;
+    public OrderItem(Guid productId, int quantity, decimal unitPrice, string? notes)
+    {
+        ProductId = productId;
+        Quantity = quantity;
+        UnitPrice = unitPrice;
+        Notes = notes;
+    }
 }

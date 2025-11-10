@@ -80,13 +80,7 @@ public abstract class WebApiBaseFixture<TFactory>(TFactory factory)
 
         using var scope = Factory.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            Email = email,
-            CreatedAt = DateTime.UtcNow,
-        };
+        var user = new User(name, email);
 
         var identityResult = await userManager.CreateAsync(new ApplicationUser
         {

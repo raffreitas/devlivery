@@ -12,19 +12,14 @@ public sealed class UpdateOrderStatusHandler(ApplicationDbContext dbContext)
     {
         var order = await dbContext.Orders
             .Include(o => o.Items)
-            .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(o => o.Id == command.Id, cancellationToken);
 
         if (order is null)
-        {
             return Result.Fail("Pedido não encontrado");
-        }
 
-        order.Status = command.Status;
-        order.UpdatedAt = DateTime.UtcNow;
+        order.UpdateStatus(command.Status);
 
         await dbContext.SaveChangesAsync(cancellationToken);
-
         return Result.Ok();
     }
 }
