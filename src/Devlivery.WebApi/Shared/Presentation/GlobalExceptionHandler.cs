@@ -17,7 +17,7 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
             Status = StatusCodes.Status500InternalServerError,
             Title = "Internal Server Error",
             Detail = "An unexpected error occurred. Please contact support with the provided trace ID.",
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+            Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
             Instance = httpContext.Request.Path,
             Extensions =
             {

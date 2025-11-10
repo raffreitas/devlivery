@@ -12,9 +12,11 @@ public static class ResultExtensions
 {
     private const string BadRequestTitle = "Requisição inválida";
     private const string NotFoundTitle = "Recurso não encontrado";
+    private const string HttpRfc400 = "https://tools.ietf.org/html/rfc9110#section-15.5.1";
+    private const string HttpRfc404 = "https://tools.ietf.org/html/rfc9110#section-15.5.4";
 
     /// <summary>
-    /// Converts a Result to an Ok<T> response (200)
+    /// Converts a Result to an Ok (ApiResponse of T) response (200)
     /// </summary>
     public static Ok<ApiResponse<T>> ToOk<T>(this Result<T> result, string? message = null)
     {
@@ -22,7 +24,7 @@ public static class ResultExtensions
     }
 
     /// <summary>
-    /// Converts a Result to a Created<T> response (201)
+    /// Converts a Result to a Created (ApiResponse of T) response (201)
     /// </summary>
     public static Created<ApiResponse<T>> ToCreated<T>(this Result<T> result, string uri, string? message = null)
     {
@@ -57,7 +59,7 @@ public static class ResultExtensions
             Status = StatusCodes.Status404NotFound,
             Title = NotFoundTitle,
             Detail = errorMessage,
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4"
+            Type = HttpRfc404
         };
 
         return TypedResults.NotFound(problemDetails);
@@ -75,7 +77,7 @@ public static class ResultExtensions
             Status = StatusCodes.Status404NotFound,
             Title = NotFoundTitle,
             Detail = errorMessage,
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4"
+            Type = HttpRfc404
         };
 
         return TypedResults.NotFound(problemDetails);
@@ -93,7 +95,7 @@ public static class ResultExtensions
             Status = StatusCodes.Status400BadRequest,
             Title = BadRequestTitle,
             Detail = errorMessage,
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+            Type = HttpRfc400
         };
 
         return TypedResults.BadRequest(problemDetails);
@@ -111,7 +113,7 @@ public static class ResultExtensions
             Status = StatusCodes.Status400BadRequest,
             Title = BadRequestTitle,
             Detail = errorMessage,
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+            Type = HttpRfc400
         };
 
         return TypedResults.BadRequest(problemDetails);

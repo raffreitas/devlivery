@@ -35,7 +35,7 @@ Estrutura padronizada para todos os erros:
 
 ```json
 {
-  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.4",
     "title": "Recurso não encontrado",
     "status": 404,
     "detail": "Produto com ID 123 não foi encontrado",
@@ -56,7 +56,7 @@ Para erros de validação (400):
 
 ```json
 {
-  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
   "title": "Um ou mais erros de validação ocorreram",
   "status": 400,
   "errors": {
@@ -317,7 +317,7 @@ HTTP/1.1 400 Bad Request
 Content-Type: application/problem+json
 
 {
-  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
     "title": "Um ou mais erros de validação ocorreram",
   "status": 400,
   "errors": {
@@ -333,7 +333,7 @@ HTTP/1.1 404 Not Found
 Content-Type: application/problem+json
 
 {
-  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.4",
     "title": "Recurso não encontrado",
     "status": 404,
     "detail": "Produto com ID 123e4567-e89b-12d3-a456-426614174000 não foi encontrado"
@@ -346,7 +346,7 @@ HTTP/1.1 500 Internal Server Error
 Content-Type: application/problem+json
 
 {
-  "type": "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.6.1",
     "title": "Erro interno do servidor",
     "status": 500,
     "detail": "Ocorreu um erro inesperado. Por favor, contate o suporte com o trace ID fornecido.",
