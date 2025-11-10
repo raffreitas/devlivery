@@ -1,5 +1,4 @@
 using Devlivery.WebApi.Shared.Extensions;
-using Devlivery.WebApi.Shared.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +12,12 @@ public static class UpdateOrderStatusEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPatch("{id:guid}/status", Handle)
-            .Produces<ApiResponse<UpdateOrderStatusResponse>>()
+            .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<Ok<ApiResponse<UpdateOrderStatusResponse>>, ValidationProblem, NotFound<ProblemDetails>>> Handle(
+    private static async Task<Results<NoContent, ValidationProblem, NotFound<ProblemDetails>>> Handle(
         Guid id,
         Request request,
         IValidator<UpdateOrderStatusCommand> validator,
@@ -36,7 +35,7 @@ public static class UpdateOrderStatusEndpoint
         var result = await handler.HandleAsync(command, ct);
 
         return result.IsSuccess
-            ? result.ToOk("Order status updated successfully")
+            ? result.ToNoContent()
             : result.ToNotFoundProblem();
     }
 }

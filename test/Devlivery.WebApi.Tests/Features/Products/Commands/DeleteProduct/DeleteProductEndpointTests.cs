@@ -1,6 +1,6 @@
 using System.Net;
-using System.Text.Json;
-using Devlivery.WebApi.Tests.Setup;
+using Devlivery.WebApi.Tests.Common;
+using Devlivery.WebApi.Tests.Common.Builders;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Products.Commands.DeleteProduct;
@@ -14,23 +14,12 @@ public sealed class DeleteProductEndpointTests(CustomWebApplicationFactory facto
     {
         // Arrange
         var token = await GetAccessTokenAsync();
-
-        var createCommand = new
-        {
-            Name = Faker.Commerce.ProductName(),
-            Description = Faker.Commerce.ProductDescription(),
-            Price = Faker.Random.Decimal(1.0m, 500m),
-            Category = Faker.Commerce.Categories(1)[0],
-            Available = true
-        };
-        var createResponse = await PostAsync("/api/products", createCommand, token);
-        createResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
-        await using var createBody = await createResponse.Content.ReadAsStreamAsync();
-        var created = await JsonDocument.ParseAsync(createBody);
-        var id = created.RootElement.GetProperty("data").GetProperty("id").GetGuid();
+        var product = new ProductBuilder().Build();
+        await AppDbContext.Products.AddAsync(product);
+        await AppDbContext.SaveChangesAsync();
 
         // Act
-        var response = await DeleteAsync($"/api/products/{id}", token);
+        var response = await DeleteAsync($"/api/products/{product.Id}", token);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Devlivery.WebApi.Tests.Setup;
+namespace Devlivery.WebApi.Tests.Common;
 
 [Collection("Integration Tests")]
 public abstract class WebApiBaseFixture

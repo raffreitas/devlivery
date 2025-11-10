@@ -1,4 +1,4 @@
-namespace Devlivery.WebApi.Tests.Setup;
+namespace Devlivery.WebApi.Tests.Common;
 
 [CollectionDefinition("Integration Tests")]
 public sealed class IntegrationTestCollection : ICollectionFixture<CustomWebApplicationFactory>

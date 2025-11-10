@@ -6,7 +6,7 @@ namespace Devlivery.WebApi.Features.Orders.Commands.UpdateOrderStatus;
 
 public sealed class UpdateOrderStatusHandler(ApplicationDbContext dbContext)
 {
-    public async Task<Result<UpdateOrderStatusResponse>> HandleAsync(
+    public async Task<Result> HandleAsync(
         UpdateOrderStatusCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -25,30 +25,6 @@ public sealed class UpdateOrderStatusHandler(ApplicationDbContext dbContext)
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var response = new UpdateOrderStatusResponse(
-            order.Id,
-            order.Items.Select(i => new OrderItemDto(
-                new ProductDto(
-                    i.Product.Id,
-                    i.Product.Name,
-                    i.Product.Description,
-                    i.Product.Price,
-                    i.Product.Category,
-                    i.Product.Available,
-                    i.Product.CreatedAt,
-                    i.Product.UpdatedAt),
-                i.Quantity,
-                i.Notes)).ToList(),
-            order.CustomerName,
-            order.CustomerPhone,
-            order.DeliveryAddress,
-            order.Status,
-            order.Total,
-            order.DeliveryFee,
-            order.PaymentMethod.ToString(),
-            order.CreatedAt,
-            order.UpdatedAt);
-
-        return Result.Ok(response);
+        return Result.Ok();
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 using Devlivery.WebApi.Features.Auth.Commands.Login;
-using Devlivery.WebApi.Tests.Setup;
+using Devlivery.WebApi.Tests.Common;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Auth.Commands.Login;

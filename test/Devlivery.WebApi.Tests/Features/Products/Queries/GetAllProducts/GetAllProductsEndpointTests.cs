@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
-using Devlivery.WebApi.Tests.Setup;
+using Devlivery.WebApi.Tests.Common;
+using Devlivery.WebApi.Tests.Common.Builders;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Products.Queries.GetAllProducts;
@@ -14,29 +15,10 @@ public sealed class GetAllProductsEndpointTests(CustomWebApplicationFactory fact
     {
         // Arrange
         var token = await GetAccessTokenAsync();
-
-        // create two products
-        var command1 = new
-        {
-            Name = Faker.Commerce.ProductName(),
-            Description = Faker.Commerce.ProductDescription(),
-            Price = Faker.Random.Decimal(1.0m, 500m),
-            Category = Faker.Commerce.Categories(1)[0],
-            Available = true
-        };
-        var command2 = new
-        {
-            Name = Faker.Commerce.ProductName(),
-            Description = Faker.Commerce.ProductDescription(),
-            Price = Faker.Random.Decimal(1.0m, 500m),
-            Category = Faker.Commerce.Categories(1)[0],
-            Available = true
-        };
-
-        var r1 = await PostAsync("/api/products", command1, token);
-        r1.StatusCode.ShouldBe(HttpStatusCode.Created);
-        var r2 = await PostAsync("/api/products", command2, token);
-        r2.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var product1 = new ProductBuilder().Build();
+        var product2 = new ProductBuilder().Build();
+        await AppDbContext.Products.AddRangeAsync(product1, product2);
+        await AppDbContext.SaveChangesAsync();
 
         // Act
         var response = await GetAsync("/api/products", token);

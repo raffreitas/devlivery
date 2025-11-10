@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using Devlivery.WebApi.Features.Products.Commands.CreateProduct;
-using Devlivery.WebApi.Tests.Setup;
+using Devlivery.WebApi.Tests.Common;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Products.Commands.CreateProduct;
@@ -30,20 +30,14 @@ public sealed class CreateProductEndpointTests(CustomWebApplicationFactory facto
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
         await using var responseBody = await response.Content.ReadAsStreamAsync();
         var responseData = await JsonDocument.ParseAsync(responseBody);
-        responseData.ShouldNotBeNull();
-        var apiResponse = responseData.RootElement.GetProperty("data");
-        apiResponse.GetProperty("id").GetGuid().ShouldNotBe(Guid.Empty);
-        apiResponse.GetProperty("name").GetString().ShouldBe(name);
-        apiResponse.GetProperty("description").GetString().ShouldBe(description);
-        apiResponse.GetProperty("price").GetDecimal().ShouldBe(price);
-        apiResponse.GetProperty("category").GetString().ShouldBe(category);
-        apiResponse.GetProperty("available").GetBoolean().ShouldBe(available);
+        responseData.RootElement.TryGetProperty("data", out var data).ShouldBeTrue();
+        data.GetProperty("productId").GetGuid().ShouldNotBe(Guid.Empty);
     }
 
     [Fact]
     public async Task CreateProduct_WithInvalidData_ReturnsValidationProblem()
     {
-        // Arrange - invalid: empty name and non-positive price
+        // Arrange
         var accessToken = await GetAccessTokenAsync();
         var command = new CreateProductCommand("", "", 0m, "", false);
 

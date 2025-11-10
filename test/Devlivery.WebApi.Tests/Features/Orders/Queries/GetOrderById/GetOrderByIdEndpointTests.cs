@@ -1,50 +1,41 @@
 using System.Net;
 using System.Text.Json;
-using Devlivery.WebApi.Tests.Setup;
+using Devlivery.WebApi.Tests.Common;
+using Devlivery.WebApi.Tests.Common.Builders;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Orders.Queries.GetOrderById;
 
 [Trait("Category", "Integration Tests")]
-public sealed class GetOrderByIdEndpointTests(CustomWebApplicationFactory factory) : WebApiBaseFixture(factory), IAsyncLifetime
+public sealed class GetOrderByIdEndpointTests(CustomWebApplicationFactory factory)
+    : WebApiBaseFixture(factory), IAsyncLifetime
 {
     [Fact]
     public async Task GetOrderById_ReturnsOrder()
     {
         // Arrange
         var token = await GetAccessTokenAsync();
+        var product = new ProductBuilder().Build();
+        var orderItem = new OrderItemBuilder()
+            .WithProductId(product.Id)
+            .Build();
+        var order = new OrderBuilder()
+            .WithItems(orderItem)
+            .WithDeliveryFee(0m)
+            .WithTotal(orderItem.Quantity * product.Price)
+            .Build();
 
-        var productCmd = new { Name = Faker.Commerce.ProductName(), Description = Faker.Commerce.ProductDescription(), Price = 12.0m, Category = Faker.Commerce.Categories(1)[0], Available = true };
-        var prodResp = await PostAsync("/api/products", productCmd, token);
-        prodResp.StatusCode.ShouldBe(HttpStatusCode.Created);
-        await using var prodBody = await prodResp.Content.ReadAsStreamAsync();
-        var prodData = await JsonDocument.ParseAsync(prodBody);
-        var productId = prodData.RootElement.GetProperty("data").GetProperty("id").GetGuid();
-
-        var orderCommand = new
-        {
-            Items = new[] { new { ProductId = productId, Quantity = 3, Notes = "" } },
-            CustomerName = Faker.Name.FullName(),
-            CustomerPhone = Faker.Phone.PhoneNumber(),
-            DeliveryAddress = Faker.Address.FullAddress(),
-            PaymentMethod = "cash",
-            DeliveryFee = 0m
-        };
-
-        var createResp = await PostAsync("/api/orders", orderCommand, token);
-        createResp.StatusCode.ShouldBe(HttpStatusCode.Created);
-        await using var createBody = await createResp.Content.ReadAsStreamAsync();
-        var created = await JsonDocument.ParseAsync(createBody);
-        var id = created.RootElement.GetProperty("data").GetProperty("id").GetGuid();
+        await AppDbContext.AddRangeAsync(product, order);
+        await AppDbContext.SaveChangesAsync();
 
         // Act
-        var response = await GetAsync($"/api/orders/{id}", token);
+        var response = await GetAsync($"/api/orders/{order.Id}", token);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         await using var responseBody = await response.Content.ReadAsStreamAsync();
         var data = await JsonDocument.ParseAsync(responseBody);
-        data.RootElement.GetProperty("data").GetProperty("id").GetGuid().ShouldBe(id);
+        data.RootElement.GetProperty("data").GetProperty("id").GetGuid().ShouldBe(order.Id);
     }
 
     [Fact]

@@ -1,48 +1,52 @@
 using System.Net;
 using System.Text.Json;
-using Devlivery.WebApi.Tests.Setup;
+using Devlivery.WebApi.Features.Orders.Domain;
+using Devlivery.WebApi.Tests.Common;
+using Devlivery.WebApi.Tests.Common.Builders;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Orders.Commands.CreateOrder;
 
 [Trait("Category", "Integration Tests")]
-public sealed class CreateOrderEndpointTests(CustomWebApplicationFactory factory) : WebApiBaseFixture(factory), IAsyncLifetime
+public sealed class CreateOrderEndpointTests(CustomWebApplicationFactory factory)
+    : WebApiBaseFixture(factory), IAsyncLifetime
 {
     [Fact]
     public async Task CreateOrder_WithValidData_ReturnsCreatedAndOrder()
     {
         // Arrange
         var token = await GetAccessTokenAsync();
+        var product = new ProductBuilder().Build();
+        AppDbContext.Products.Add(product);
+        await AppDbContext.SaveChangesAsync();
 
-        // create a product to reference in order item
-        var productCmd = new { Name = Faker.Commerce.ProductName(), Description = Faker.Commerce.ProductDescription(), Price = 10.0m, Category = Faker.Commerce.Categories(1)[0], Available = true };
-        var prodResp = await PostAsync("/api/products", productCmd, token);
-        prodResp.StatusCode.ShouldBe(HttpStatusCode.Created);
-        await using var prodBody = await prodResp.Content.ReadAsStreamAsync();
-        var prodData = await JsonDocument.ParseAsync(prodBody);
-        var productId = prodData.RootElement.GetProperty("data").GetProperty("id").GetGuid();
-
-        var orderCommand = new
+        var request = new
         {
-            Items = new[] { new { ProductId = productId, Quantity = 2, Notes = "No onions" } },
+            Items = new[]
+            {
+                new
+                {
+                    ProductId = product.Id,
+                    Quantity = Faker.Random.Number(1, 10),
+                    Notes = Faker.Lorem.Sentence(),
+                }
+            },
             CustomerName = Faker.Name.FullName(),
             CustomerPhone = Faker.Phone.PhoneNumber(),
             DeliveryAddress = Faker.Address.FullAddress(),
-            PaymentMethod = "cash",
-            DeliveryFee = 5.0m
+            PaymentMethod = Faker.PickRandom<PaymentMethod>().ToString(),
+            DeliveryFee = Faker.Random.Decimal(0, 100)
         };
 
         // Act
-        var response = await PostAsync("/api/orders", orderCommand, token);
+        var response = await PostAsync("/api/orders", request, token);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
         await using var responseBody = await response.Content.ReadAsStreamAsync();
         var responseData = await JsonDocument.ParseAsync(responseBody);
         var data = responseData.RootElement.GetProperty("data");
-        data.GetProperty("id").GetGuid().ShouldNotBe(Guid.Empty);
-        data.GetProperty("customerName").GetString().ShouldBe(orderCommand.CustomerName);
-        data.GetProperty("items").EnumerateArray().First().GetProperty("quantity").GetInt32().ShouldBe(2);
+        data.GetProperty("orderId").GetGuid().ShouldNotBe(Guid.Empty);
     }
 
     [Fact]
@@ -52,7 +56,15 @@ public sealed class CreateOrderEndpointTests(CustomWebApplicationFactory factory
         var token = await GetAccessTokenAsync();
 
         // invalid: empty items
-        var orderCommand = new { Items = Array.Empty<object>(), CustomerName = "", CustomerPhone = "", DeliveryAddress = "", PaymentMethod = "", DeliveryFee = -1m };
+        var orderCommand = new
+        {
+            Items = Array.Empty<object>(),
+            CustomerName = "",
+            CustomerPhone = "",
+            DeliveryAddress = "",
+            PaymentMethod = "",
+            DeliveryFee = -1m
+        };
 
         // Act
         var response = await PostAsync("/api/orders", orderCommand, token);

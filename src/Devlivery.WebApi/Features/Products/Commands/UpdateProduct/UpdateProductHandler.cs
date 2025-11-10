@@ -6,9 +6,7 @@ namespace Devlivery.WebApi.Features.Products.Commands.UpdateProduct;
 
 public sealed class UpdateProductHandler(ApplicationDbContext dbContext)
 {
-    public async Task<Result<UpdateProductResponse>> HandleAsync(
-        UpdateProductCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task<Result> HandleAsync(UpdateProductCommand command, CancellationToken cancellationToken = default)
     {
         var product = await dbContext.Products
             .FirstOrDefaultAsync(p => p.Id == command.Id, cancellationToken);
@@ -27,16 +25,6 @@ public sealed class UpdateProductHandler(ApplicationDbContext dbContext)
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var response = new UpdateProductResponse(
-            product.Id,
-            product.Name,
-            product.Description,
-            product.Price,
-            product.Category,
-            product.Available,
-            product.CreatedAt,
-            product.UpdatedAt);
-
-        return Result.Ok(response);
+        return Result.Ok();
     }
 }

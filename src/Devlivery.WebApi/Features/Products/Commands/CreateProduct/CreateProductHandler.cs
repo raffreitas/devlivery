@@ -26,15 +26,7 @@ public sealed class CreateProductHandler(ApplicationDbContext dbContext)
         dbContext.Products.Add(product);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var response = new CreateProductResponse(
-            product.Id,
-            product.Name,
-            product.Description,
-            product.Price,
-            product.Category,
-            product.Available,
-            product.CreatedAt,
-            product.UpdatedAt);
+        var response = new CreateProductResponse(product.Id);
 
         return Result.Ok(response);
     }
