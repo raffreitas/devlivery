@@ -6,14 +6,19 @@ using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Products.Commands.CreateProduct;
 
+[Collection("Products Tests")]
 [Trait("Category", "Integration Tests")]
-public sealed class CreateProductEndpointTests(CustomWebApplicationFactory factory)
-    : WebApiBaseFixture(factory), IAsyncLifetime
+public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory factory)
+    : WebApiBaseFixture<ProductsWebApplicationFactory>(factory)
 {
     [Fact]
     public async Task CreateProduct_WithValidData_ReturnsCreatedAndProduct()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
+        await ResetDatabaseAsync();
+
         var accessToken = await GetAccessTokenAsync();
         var name = Faker.Commerce.ProductName();
         var description = Faker.Commerce.ProductDescription();
@@ -38,6 +43,10 @@ public sealed class CreateProductEndpointTests(CustomWebApplicationFactory facto
     public async Task CreateProduct_WithInvalidData_ReturnsValidationProblem()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
+        await ResetDatabaseAsync();
+
         var accessToken = await GetAccessTokenAsync();
         var command = new CreateProductCommand("", "", 0m, "", false);
 
@@ -51,7 +60,4 @@ public sealed class CreateProductEndpointTests(CustomWebApplicationFactory facto
         responseData.RootElement.TryGetProperty("errors", out var errors).ShouldBeTrue();
         errors.ValueKind.ShouldBe(JsonValueKind.Object);
     }
-
-    public Task InitializeAsync() => Task.CompletedTask;
-    public async Task DisposeAsync() => await CleanUpDatabaseAsync();
 }

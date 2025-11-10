@@ -4,36 +4,23 @@ using Bogus;
 using Devlivery.WebApi.Features.Auth.Abstractions;
 using Devlivery.WebApi.Features.Users.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Identity.Context;
 using Devlivery.WebApi.Shared.Identity.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Devlivery.WebApi.Tests.Common;
 
-[Collection("Integration Tests")]
-public abstract class WebApiBaseFixture
+/// <summary>
+/// Base class for integration tests with helper methods.
+/// Each test should call ResetDatabaseAsync() in constructor or setup.
+/// </summary>
+public abstract class WebApiBaseFixture<TFactory>(TFactory factory)
+    where TFactory : BaseWebApplicationFactory<Program>
 {
     protected static Faker Faker => new();
-    protected readonly ApplicationDbContext AppDbContext;
+    protected readonly TFactory Factory = factory;
 
-    private readonly ApplicationIdentityDbContext _identityDbContext;
-    private readonly IServiceScope _serviceScope;
-    private readonly HttpClient _httpClient;
-
-    protected WebApiBaseFixture(CustomWebApplicationFactory factory)
-    {
-        _httpClient = factory.CreateClient();
-        _serviceScope = factory.Services.CreateScope();
-        AppDbContext = _serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        _identityDbContext = _serviceScope.ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>();
-
-        if (AppDbContext.Database.GetPendingMigrations().Any())
-            AppDbContext.Database.Migrate();
-        if (_identityDbContext.Database.GetPendingMigrations().Any())
-            _identityDbContext.Database.Migrate();
-    }
+    private readonly HttpClient _httpClient = factory.CreateClient();
 
     protected async Task<HttpResponseMessage> PostAsync<T>(string method, T request, string? token = "")
     {
@@ -80,10 +67,9 @@ public abstract class WebApiBaseFixture
         return await _httpClient.DeleteAsync(method);
     }
 
-    protected async Task CleanUpDatabaseAsync()
+    protected async Task ResetDatabaseAsync()
     {
-        await AppDbContext.Database.EnsureDeletedAsync();
-        await _identityDbContext.Database.EnsureDeletedAsync();
+        await Factory.ResetDatabaseAsync();
     }
 
     protected async Task<User> CreateUserAsync(string? name = null, string? email = null, string? password = null)
@@ -92,7 +78,8 @@ public abstract class WebApiBaseFixture
         email ??= Faker.Internet.Email();
         password ??= Faker.Internet.Password(length: 5, prefix: "P@ssw0rd1");
 
-        var userManager = _serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        using var scope = Factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -112,8 +99,9 @@ public abstract class WebApiBaseFixture
         if (!identityResult.Succeeded)
             throw new InvalidOperationException("Failed to create user in identity store.");
 
-        await AppDbContext.Users.AddAsync(user);
-        await AppDbContext.SaveChangesAsync();
+        var appDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await appDbContext.Users.AddAsync(user);
+        await appDbContext.SaveChangesAsync();
 
         return user;
     }
@@ -121,7 +109,9 @@ public abstract class WebApiBaseFixture
     protected async Task<string> GetAccessTokenAsync(User? user = null)
     {
         user ??= await CreateUserAsync();
-        var tokenService = _serviceScope.ServiceProvider.GetRequiredService<ITokenService>();
+
+        using var scope = Factory.Services.CreateScope();
+        var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
         var tokenRequest = new TokenRequest(user.Id.ToString(), user.Email);
         var token = await tokenService.GenerateTokenAsync(tokenRequest);
         return token;

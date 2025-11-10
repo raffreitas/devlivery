@@ -1,22 +1,30 @@
 using System.Net;
+using Devlivery.WebApi.Shared.Database.Context;
 using Devlivery.WebApi.Tests.Common;
 using Devlivery.WebApi.Tests.Common.Builders;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Products.Commands.DeleteProduct;
 
+[Collection("Products Tests")]
 [Trait("Category", "Integration Tests")]
-public sealed class DeleteProductEndpointTests(CustomWebApplicationFactory factory)
-    : WebApiBaseFixture(factory), IAsyncLifetime
+public sealed class DeleteProductEndpointTests(ProductsWebApplicationFactory factory)
+    : WebApiBaseFixture<ProductsWebApplicationFactory>(factory)
 {
     [Fact]
     public async Task DeleteProduct_WithExistingProduct_ReturnsNoContent()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
         var token = await GetAccessTokenAsync();
         var product = new ProductBuilder().Build();
-        await AppDbContext.Products.AddAsync(product);
-        await AppDbContext.SaveChangesAsync();
+
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Products.AddAsync(product);
+        await dbContext.SaveChangesAsync();
 
         // Act
         var response = await DeleteAsync($"/api/products/{product.Id}", token);
@@ -29,6 +37,8 @@ public sealed class DeleteProductEndpointTests(CustomWebApplicationFactory facto
     public async Task DeleteProduct_WithNonExistingId_ReturnsNotFound()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
         var token = await GetAccessTokenAsync();
         var nonExistingId = Guid.NewGuid();
 
@@ -38,7 +48,4 @@ public sealed class DeleteProductEndpointTests(CustomWebApplicationFactory facto
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
-
-    public Task InitializeAsync() => Task.CompletedTask;
-    public async Task DisposeAsync() => await CleanUpDatabaseAsync();
 }

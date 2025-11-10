@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 using Devlivery.WebApi.Features.Auth.Commands.Login;
 using Devlivery.WebApi.Tests.Common;
@@ -6,13 +6,17 @@ using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Auth.Commands.Login;
 
+[Collection("Auth Tests")]
 [Trait("Category", "Integration Tests")]
-public sealed class LoginEndpointTests(CustomWebApplicationFactory factory) : WebApiBaseFixture(factory), IAsyncLifetime
+public sealed class LoginEndpointTests(AuthWebApplicationFactory factory)
+    : WebApiBaseFixture<AuthWebApplicationFactory>(factory)
 {
     [Fact]
     public async Task Login_WithValidCredentials_ReturnsJwtToken()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
         var email = Faker.Internet.Email();
         const string password = "P@ssw0rd!";
         await CreateUserAsync(email: email, password: password);
@@ -33,6 +37,8 @@ public sealed class LoginEndpointTests(CustomWebApplicationFactory factory) : We
     public async Task Login_WithInvalidCredentials_ReturnsUnauthorized()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
         var email = Faker.Internet.Email();
         const string password = "P@ssw0rd!";
         await CreateUserAsync(email: email, password: password);
@@ -44,7 +50,4 @@ public sealed class LoginEndpointTests(CustomWebApplicationFactory factory) : We
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
-
-    public Task InitializeAsync() => Task.CompletedTask;
-    public async Task DisposeAsync() => await CleanUpDatabaseAsync();
 }

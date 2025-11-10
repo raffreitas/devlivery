@@ -1,19 +1,24 @@
 using System.Net;
 using System.Text.Json;
+using Devlivery.WebApi.Shared.Database.Context;
 using Devlivery.WebApi.Tests.Common;
 using Devlivery.WebApi.Tests.Common.Builders;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Orders.Queries.GetAllOrders;
 
+[Collection("Orders Tests")]
 [Trait("Category", "Integration Tests")]
-public sealed class GetAllOrdersEndpointTests(CustomWebApplicationFactory factory)
-    : WebApiBaseFixture(factory), IAsyncLifetime
+public sealed class GetAllOrdersEndpointTests(OrdersWebApplicationFactory factory)
+    : WebApiBaseFixture<OrdersWebApplicationFactory>(factory)
 {
     [Fact]
     public async Task GetAllOrders_ReturnsListOfOrders()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
         var token = await GetAccessTokenAsync();
         var product = new ProductBuilder().Build();
         var orderItem = new OrderItemBuilder()
@@ -25,8 +30,10 @@ public sealed class GetAllOrdersEndpointTests(CustomWebApplicationFactory factor
             .WithTotal(orderItem.Quantity * product.Price)
             .Build();
 
-        await AppDbContext.AddRangeAsync(product, order);
-        await AppDbContext.SaveChangesAsync();
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.AddRangeAsync(product, order);
+        await dbContext.SaveChangesAsync();
 
         // Act
         var response = await GetAsync("/api/orders", token);
@@ -38,7 +45,4 @@ public sealed class GetAllOrdersEndpointTests(CustomWebApplicationFactory factor
         var list = data.RootElement.GetProperty("data").EnumerateArray().ToList();
         list.Count.ShouldBeGreaterThanOrEqualTo(1);
     }
-
-    public Task InitializeAsync() => Task.CompletedTask;
-    public async Task DisposeAsync() => await CleanUpDatabaseAsync();
 }

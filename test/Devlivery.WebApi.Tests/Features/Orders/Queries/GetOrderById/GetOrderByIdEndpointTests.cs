@@ -1,19 +1,24 @@
 using System.Net;
 using System.Text.Json;
+using Devlivery.WebApi.Shared.Database.Context;
 using Devlivery.WebApi.Tests.Common;
 using Devlivery.WebApi.Tests.Common.Builders;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Orders.Queries.GetOrderById;
 
+[Collection("Orders Tests")]
 [Trait("Category", "Integration Tests")]
-public sealed class GetOrderByIdEndpointTests(CustomWebApplicationFactory factory)
-    : WebApiBaseFixture(factory), IAsyncLifetime
+public sealed class GetOrderByIdEndpointTests(OrdersWebApplicationFactory factory)
+    : WebApiBaseFixture<OrdersWebApplicationFactory>(factory)
 {
     [Fact]
     public async Task GetOrderById_ReturnsOrder()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
         var token = await GetAccessTokenAsync();
         var product = new ProductBuilder().Build();
         var orderItem = new OrderItemBuilder()
@@ -25,8 +30,10 @@ public sealed class GetOrderByIdEndpointTests(CustomWebApplicationFactory factor
             .WithTotal(orderItem.Quantity * product.Price)
             .Build();
 
-        await AppDbContext.AddRangeAsync(product, order);
-        await AppDbContext.SaveChangesAsync();
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.AddRangeAsync(product, order);
+        await dbContext.SaveChangesAsync();
 
         // Act
         var response = await GetAsync($"/api/orders/{order.Id}", token);
@@ -41,14 +48,16 @@ public sealed class GetOrderByIdEndpointTests(CustomWebApplicationFactory factor
     [Fact]
     public async Task GetOrderById_WithNonExistingId_ReturnsNotFound()
     {
+        // Arrange
+        await ResetDatabaseAsync();
+
         var token = await GetAccessTokenAsync();
         var nonExisting = Guid.NewGuid();
 
+        // Act
         var response = await GetAsync($"/api/orders/{nonExisting}", token);
 
+        // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
-
-    public Task InitializeAsync() => Task.CompletedTask;
-    public async Task DisposeAsync() => await CleanUpDatabaseAsync();
 }

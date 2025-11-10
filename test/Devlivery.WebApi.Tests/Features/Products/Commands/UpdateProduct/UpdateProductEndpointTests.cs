@@ -1,23 +1,31 @@
 using System.Net;
+using Devlivery.WebApi.Shared.Database.Context;
 using Devlivery.WebApi.Tests.Common;
 using Devlivery.WebApi.Tests.Common.Builders;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Products.Commands.UpdateProduct;
 
+[Collection("Products Tests")]
 [Trait("Category", "Integration Tests")]
-public sealed class UpdateProductEndpointTests(CustomWebApplicationFactory factory)
-    : WebApiBaseFixture(factory), IAsyncLifetime
+public sealed class UpdateProductEndpointTests(ProductsWebApplicationFactory factory)
+    : WebApiBaseFixture<ProductsWebApplicationFactory>(factory)
 {
     [Fact]
     public async Task UpdateProduct_WithValidData_ReturnsOkAndUpdatedProduct()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
         var token = await GetAccessTokenAsync();
 
         var product = new ProductBuilder().Build();
-        await AppDbContext.Products.AddAsync(product);
-        await AppDbContext.SaveChangesAsync();
+
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Products.AddAsync(product);
+        await dbContext.SaveChangesAsync();
 
         var updateRequest = new
         {
@@ -39,6 +47,8 @@ public sealed class UpdateProductEndpointTests(CustomWebApplicationFactory facto
     public async Task UpdateProduct_WithNonExistingId_ReturnsNotFound()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
         var token = await GetAccessTokenAsync();
         var product = new ProductBuilder().Build();
         var nonExistingId = Guid.NewGuid();
@@ -58,7 +68,4 @@ public sealed class UpdateProductEndpointTests(CustomWebApplicationFactory facto
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
-
-    public Task InitializeAsync() => Task.CompletedTask;
-    public async Task DisposeAsync() => await CleanUpDatabaseAsync();
 }

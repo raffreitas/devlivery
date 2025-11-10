@@ -1,24 +1,32 @@
 using System.Net;
 using System.Text.Json;
 using Devlivery.WebApi.Features.Orders.Domain;
+using Devlivery.WebApi.Shared.Database.Context;
 using Devlivery.WebApi.Tests.Common;
 using Devlivery.WebApi.Tests.Common.Builders;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace Devlivery.WebApi.Tests.Features.Orders.Commands.CreateOrder;
 
+[Collection("Orders Tests")]
 [Trait("Category", "Integration Tests")]
-public sealed class CreateOrderEndpointTests(CustomWebApplicationFactory factory)
-    : WebApiBaseFixture(factory), IAsyncLifetime
+public sealed class CreateOrderEndpointTests(OrdersWebApplicationFactory factory)
+    : WebApiBaseFixture<OrdersWebApplicationFactory>(factory)
 {
     [Fact]
     public async Task CreateOrder_WithValidData_ReturnsCreatedAndOrder()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
         var token = await GetAccessTokenAsync();
         var product = new ProductBuilder().Build();
-        AppDbContext.Products.Add(product);
-        await AppDbContext.SaveChangesAsync();
+
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        dbContext.Products.Add(product);
+        await dbContext.SaveChangesAsync();
 
         var request = new
         {
@@ -53,6 +61,8 @@ public sealed class CreateOrderEndpointTests(CustomWebApplicationFactory factory
     public async Task CreateOrder_WithInvalidData_ReturnsValidationProblem()
     {
         // Arrange
+        await ResetDatabaseAsync();
+
         var token = await GetAccessTokenAsync();
 
         // invalid: empty items
@@ -75,7 +85,4 @@ public sealed class CreateOrderEndpointTests(CustomWebApplicationFactory factory
         var responseData = await JsonDocument.ParseAsync(responseBody);
         responseData.RootElement.TryGetProperty("errors", out _).ShouldBeTrue();
     }
-
-    public Task InitializeAsync() => Task.CompletedTask;
-    public async Task DisposeAsync() => await CleanUpDatabaseAsync();
 }
