@@ -1,14 +1,16 @@
 import { CheckCircle, ClipboardList, Clock, DollarSign } from "lucide-react";
 import { useEffect, useState } from "react";
-import { OrderCard } from "@/features/orders/components/order-card";
 import { useOrders } from "@/features/orders/hooks/use-orders";
 import type { Order } from "@/features/orders/types";
-import { DateRangeFilter } from "@/shared/components/date-range-filter";
-import { LoadingSpinner } from "@/shared/components/loading-spinner";
-import { ORDER_STATUS_STYLES } from "@/shared/constants/ui-styles";
+import { BottomSheet } from "@/shared/components/bottom-sheet";
+import { Button } from "@/shared/components/button";
 import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
+import { ActiveOrdersSection } from "../components/active-orders-section";
+import { DashboardFiltersContent } from "../components/dashboard-filters-content";
+import { DashboardHeader } from "../components/dashboard-header";
 import { PaymentBreakdownCard } from "../components/payment-breakdown-card";
 import { StatCard } from "../components/stat-card";
+import { StatsSidebar } from "../components/stats-sidebar";
 import { dashboardService } from "../services/dashboard-service";
 
 export function DashboardPage() {
@@ -28,6 +30,7 @@ export function DashboardPage() {
   );
 
   const [todayOrders, setTodayOrders] = useState<Order[]>([]);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   useEffect(() => {
     setTodayOrders(orders);
@@ -45,142 +48,98 @@ export function DashboardPage() {
     );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            {isFetching && (
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <LoadingSpinner size="sm" className="text-orange-500" />
-                <span>Atualizando...</span>
-              </div>
-            )}
-          </div>
-          <p className="text-gray-600 mt-1">Visão geral dos pedidos</p>
-        </div>
-
-        <DateRangeFilter
-          startDate={inputStartDate}
-          endDate={inputEndDate}
+    <>
+      <div className="space-y-4 sm:space-y-6">
+        <DashboardHeader
+          isFetching={isFetching}
+          inputStartDate={inputStartDate}
+          inputEndDate={inputEndDate}
           onStartChange={setStartDate}
           onEndChange={setEndDate}
           onReset={resetToToday}
-        />
-      </div>
-
-      <div
-        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transition-opacity duration-200 ${
-          isFetching ? "opacity-60" : "opacity-100"
-        }`}
-      >
-        <StatCard
-          title="Total de Pedidos"
-          value={stats.totalOrders}
-          icon={<ClipboardList className="w-6 h-6" />}
-          color="orange"
+          onOpenFilters={() => setIsFiltersOpen(true)}
         />
 
-        <StatCard
-          title="Receita Total"
-          value={`R$ ${stats.totalRevenue.toFixed(2)}`}
-          icon={<DollarSign className="w-6 h-6" />}
-          color="green"
-        />
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 transition-opacity duration-200 ${
+            isFetching ? "opacity-60" : "opacity-100"
+          }`}
+        >
+          <StatCard
+            title="Total de Pedidos"
+            value={stats.totalOrders}
+            icon={<ClipboardList className="w-5 h-5 sm:w-6 sm:h-6" />}
+            color="orange"
+          />
 
-        <StatCard
-          title="Pedidos Ativos"
-          value={stats.pendingOrders}
-          icon={<Clock className="w-6 h-6" />}
-          color="blue"
-        />
+          <StatCard
+            title="Receita Total"
+            value={`R$ ${stats.totalRevenue.toFixed(2)}`}
+            icon={<DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />}
+            color="green"
+          />
 
-        <StatCard
-          title="Pedidos Entregues"
-          value={stats.deliveredOrders}
-          icon={<CheckCircle className="w-6 h-6" />}
-          color="purple"
-        />
-      </div>
+          <StatCard
+            title="Pedidos Ativos"
+            value={stats.pendingOrders}
+            icon={<Clock className="w-5 h-5 sm:w-6 sm:h-6" />}
+            color="blue"
+          />
 
-      <div
-        className={`grid grid-cols-1 lg:grid-cols-3 gap-6 transition-opacity duration-200 ${
-          isFetching ? "opacity-60" : "opacity-100"
-        }`}
-      >
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Pedidos Ativos ({activeOrders.length})
-            </h2>
-
-            {activeOrders.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
-                Nenhum pedido ativo no momento
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {activeOrders.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onUpdateStatus={updateOrderStatus}
-                    onDelete={deleteOrder}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          <StatCard
+            title="Pedidos Entregues"
+            value={stats.deliveredOrders}
+            icon={<CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
+            color="purple"
+          />
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Status dos Pedidos
-            </h2>
-            <div className="space-y-3">
-              {(
-                Object.entries(ordersByStatus) as Array<
-                  [keyof typeof ORDER_STATUS_STYLES, number]
-                >
-              ).map(([status, count]) => {
-                const style = ORDER_STATUS_STYLES[status];
-                const Icon = style.icon;
-
-                return (
-                  <div
-                    key={status}
-                    className={`flex justify-between items-center p-3 ${style.bg} rounded-lg`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Icon className={`w-4 h-4 ${style.text}`} />
-                      <span className="text-sm font-medium text-gray-700">
-                        {style.label}
-                      </span>
-                    </div>
-                    <span className={`text-lg font-bold ${style.text}`}>
-                      {count}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">
-                  Ticket Médio
-                </span>
-                <span className="text-xl font-bold text-orange-600">
-                  R$ {stats.averageOrderValue.toFixed(2)}
-                </span>
-              </div>
-            </div>
+        <div
+          className={`grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 transition-opacity duration-200 ${
+            isFetching ? "opacity-60" : "opacity-100"
+          }`}
+        >
+          <div className="lg:col-span-2">
+            <ActiveOrdersSection
+              orders={activeOrders}
+              onUpdateStatus={updateOrderStatus}
+              onDelete={deleteOrder}
+            />
           </div>
 
-          <PaymentBreakdownCard paymentBreakdown={paymentBreakdown} />
+          <div className="space-y-4 sm:space-y-6">
+            <StatsSidebar
+              ordersByStatus={ordersByStatus}
+              averageOrderValue={stats.averageOrderValue}
+            />
+
+            <PaymentBreakdownCard paymentBreakdown={paymentBreakdown} />
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Bottom Sheet de Filtros (fora do container space-y) */}
+      <BottomSheet
+        isOpen={isFiltersOpen}
+        onClose={() => setIsFiltersOpen(false)}
+        title="Filtros"
+      >
+        <div className="space-y-4">
+          <DashboardFiltersContent
+            inputStartDate={inputStartDate}
+            inputEndDate={inputEndDate}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+            onResetDates={resetToToday}
+          />
+
+          <div className="pt-4 pb-2 border-t border-gray-200">
+            <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
+              Aplicar Filtros
+            </Button>
+          </div>
+        </div>
+      </BottomSheet>
+    </>
   );
 }

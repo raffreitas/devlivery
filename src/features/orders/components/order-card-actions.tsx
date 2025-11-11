@@ -35,8 +35,8 @@ export function OrderCardActions({
     order.status === "delivered" || order.status === "cancelled";
 
   return (
-    <div className="border-t border-gray-200 pt-4 mt-auto">
-      <div className="flex flex-wrap items-center justify-end gap-2">
+    <div className="border-t border-gray-200 pt-3 sm:pt-4 mt-auto">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-end gap-2">
         <Button size="sm" variant="secondary" onClick={onPrint}>
           Imprimir
         </Button>
@@ -47,7 +47,10 @@ export function OrderCardActions({
         )}
         {hasNextStatus && (
           <Button size="sm" variant="success" onClick={onNextStatus}>
-            {getNextStatusLabel(order.status)}
+            <span className="hidden sm:inline">
+              {getNextStatusLabel(order.status)}
+            </span>
+            <span className="sm:hidden">Avançar</span>
           </Button>
         )}
         {showDelete && (
@@ -57,8 +60,8 @@ export function OrderCardActions({
         )}
       </div>
 
-      <div className="mt-3 text-xs text-gray-500">
-        Pedido criado em: {new Date(order.createdAt).toLocaleString("pt-BR")}
+      <div className="mt-2 sm:mt-3 text-xs text-gray-500">
+        Criado em: {new Date(order.createdAt).toLocaleString("pt-BR")}
       </div>
     </div>
   );

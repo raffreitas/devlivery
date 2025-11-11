@@ -15,3 +15,11 @@ export interface PaymentBreakdown {
   };
   total: number;
 }
+
+export interface OrdersByStatus {
+  pending: number;
+  preparing: number;
+  ready: number;
+  delivered: number;
+  cancelled: number;
+}

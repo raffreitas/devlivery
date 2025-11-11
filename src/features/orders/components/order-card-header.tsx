@@ -15,26 +15,32 @@ export function OrderCardHeader({ order }: OrderCardHeaderProps) {
   const statusStyle = ORDER_STATUS_STYLES[order.status];
 
   return (
-    <div className="flex justify-between items-start mb-4">
-      <div className="flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="text-lg font-semibold text-gray-900">
+    <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start mb-3 sm:mb-4">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
             {order.customerName}
           </h3>
           <span
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${paymentStyle.bg} ${paymentStyle.text} ${paymentStyle.border}`}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${paymentStyle.bg} ${paymentStyle.text} ${paymentStyle.border} shrink-0`}
           >
             <PaymentIcon className="w-3 h-3" />
-            {getPaymentOptionLabel(order.paymentMethod)}
+            <span className="hidden sm:inline">
+              {getPaymentOptionLabel(order.paymentMethod)}
+            </span>
           </span>
         </div>
         {order.customerPhone && (
-          <p className="text-sm text-gray-600">{order.customerPhone}</p>
+          <p className="text-xs sm:text-sm text-gray-600 truncate">
+            {order.customerPhone}
+          </p>
         )}
-        <p className="text-sm text-gray-600">{order.deliveryAddress}</p>
+        <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
+          {order.deliveryAddress}
+        </p>
       </div>
       <span
-        className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyle.badgeBg} ${statusStyle.badgeText}`}
+        className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${statusStyle.badgeBg} ${statusStyle.badgeText} shrink-0 self-start`}
       >
         {statusStyle.label}
       </span>

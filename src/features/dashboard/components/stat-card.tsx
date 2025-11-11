@@ -23,11 +23,15 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <Card>
-      <div className="flex items-center">
-        <div className={`p-3 rounded-full ${colorClasses[color]}`}>{icon}</div>
-        <div className="ml-4">
-          <p className="text-sm text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+      <div className="flex items-center gap-3 sm:gap-4">
+        <div className={`p-2 sm:p-3 rounded-full ${colorClasses[color]}`}>
+          {icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs sm:text-sm text-gray-600 truncate">{title}</p>
+          <p className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
+            {value}
+          </p>
         </div>
       </div>
     </Card>

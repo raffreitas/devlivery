@@ -43,7 +43,7 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col h-full">
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow flex flex-col h-full">
       <OrderCardHeader order={order} />
 
       <div className="flex-1 flex flex-col justify-between">
@@ -51,7 +51,7 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
           <OrderCardItems items={order.items} />
         </div>
 
-        <div className="pt-4 border-t border-gray-200">
+        <div className="pt-3 sm:pt-4 border-t border-gray-200">
           <OrderCardTotal order={order} />
         </div>
       </div>
