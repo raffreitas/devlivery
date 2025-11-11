@@ -1,14 +1,7 @@
 import type { ReactNode } from "react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { authService } from "@/features/auth/services/auth-service";
-import type { AuthState, Credentials, User } from "@/features/auth/types";
+import { createContext, useContext, useEffect } from "react";
+import { useAuthQuery } from "@/features/auth/hooks/use-auth";
+import type { Credentials, User } from "@/features/auth/types";
 import { authEvents } from "@/shared/services/auth-events";
 
 interface AuthContextData {
@@ -23,56 +16,17 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ user: null, token: null });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const initial = authService.getAuth();
-    setState(initial);
-    setLoading(false);
-  }, []);
-
-  const login = useCallback(async (credentials: Credentials) => {
-    setLoading(true);
-    try {
-      const auth = await authService.login(credentials);
-      setState(auth);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const logout = useCallback(async () => {
-    setLoading(true);
-    try {
-      await authService.logout();
-      setState({ user: null, token: null });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const auth = useAuthQuery();
 
   // Escuta eventos de erro de autenticação (ex: 401 Unauthorized)
   useEffect(() => {
     const unsubscribe = authEvents.subscribe(() => {
-      void logout();
+      void auth.logout();
     });
     return unsubscribe;
-  }, [logout]);
+  }, [auth]);
 
-  const value: AuthContextData = useMemo(
-    () => ({
-      user: state.user,
-      token: state.token,
-      loading,
-      login,
-      logout,
-      isAuthenticated: Boolean(state.token),
-    }),
-    [state.user, state.token, loading, login, logout],
-  );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

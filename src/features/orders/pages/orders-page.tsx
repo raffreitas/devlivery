@@ -149,7 +149,6 @@ export function OrdersPage() {
         />
       </Modal>
 
-      {/* Bottom Sheet de Filtros (fora do container space-y) */}
       <BottomSheet
         isOpen={isFiltersOpen}
         onClose={() => setIsFiltersOpen(false)}

@@ -8,10 +8,13 @@ import { RequireAuth } from "./shared/components/require-auth";
 
 const router = createBrowserRouter([
   {
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
     path: "/",
     element: <Layout />,
     children: [
-      { path: "login", element: <LoginPage /> },
       {
         element: <RequireAuth />,
         children: [
