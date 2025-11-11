@@ -35,13 +35,13 @@ export function ProductSelector({
   );
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="md:col-span-1">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="sm:col-span-2 lg:col-span-1">
           <AutocompleteSelect
             id="product-select"
             label="Produto"
-            placeholder="Selecione ou pesquise um produto"
+            placeholder="Selecione ou pesquise"
             value={selectedProductId}
             onChange={onProductChange}
             options={productOptions}
@@ -60,7 +60,7 @@ export function ProductSelector({
           />
         </div>
 
-        <div>
+        <div className="sm:col-span-2 lg:col-span-1">
           <Input
             label="Observações"
             type="text"
@@ -78,7 +78,7 @@ export function ProductSelector({
         variant="secondary"
         onClick={onAddItem}
         disabled={!selectedProductId}
-        className="w-full md:w-auto"
+        className="w-full sm:w-auto"
       >
         + Adicionar Item
       </Button>

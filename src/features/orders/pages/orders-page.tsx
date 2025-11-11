@@ -1,15 +1,14 @@
 import { useState } from "react";
-import {
-  type AutocompleteOption,
-  AutocompleteSelect,
-} from "@/shared/components/autocomplete-select";
+import type { AutocompleteOption } from "@/shared/components/autocomplete-select";
+import { BottomSheet } from "@/shared/components/bottom-sheet";
 import { Button } from "@/shared/components/button";
-import { DateRangeFilter } from "@/shared/components/date-range-filter";
-import { LoadingSpinner } from "@/shared/components/loading-spinner";
 import { Modal } from "@/shared/components/modal";
 import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
+import { OrdersFilters } from "../components/orders-filters";
+import { OrdersFiltersContent } from "../components/orders-filters-content";
+import { OrdersHeader } from "../components/orders-header";
 import { getPaymentOptions } from "../constants/payment-methods";
 import { useOrders } from "../hooks/use-orders";
 import type { Order, OrderFormData } from "../types";
@@ -58,6 +57,7 @@ export function OrdersPage() {
     paymentFilter === "all" ? undefined : paymentFilter,
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<Order["status"] | "all">(
     "all",
   );
@@ -78,88 +78,65 @@ export function OrdersPage() {
       : filteredOrders.filter((order) => order.paymentMethod === paymentFilter);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold text-gray-900">Pedidos</h1>
-          {isFetching && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <LoadingSpinner size="sm" className="text-orange-500" />
-              <span>Atualizando...</span>
+    <>
+      <div className="space-y-4 sm:space-y-6">
+        <OrdersHeader
+          isFetching={isFetching}
+          onNewOrder={() => setIsModalOpen(true)}
+        />
+
+        <OrdersFilters
+          statusFilter={statusFilter}
+          paymentFilter={paymentFilter}
+          statusOptions={statusOptions}
+          paymentOptions={paymentOptions}
+          inputStartDate={inputStartDate}
+          inputEndDate={inputEndDate}
+          onStatusChange={setStatusFilter}
+          onPaymentChange={setPaymentFilter}
+          onStartDateChange={setStartDate}
+          onEndDateChange={setEndDate}
+          onResetDates={resetToToday}
+          onOpenFilters={() => setIsFiltersOpen(true)}
+        />
+
+        {loading && orders.length === 0 ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="text-base sm:text-xl text-gray-600">
+              Carregando...
             </div>
-          )}
-        </div>
-        <Button onClick={() => setIsModalOpen(true)}>+ Novo Pedido</Button>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md p-3">
-        <div className="flex items-end gap-4 flex-nowrap overflow-x-auto p-1">
-          <div className="flex items-end gap-4">
-            <AutocompleteSelect
-              label="Status"
-              value={statusFilter}
-              options={statusOptions}
-              onChange={(value) => setStatusFilter(value ?? "all")}
-              placeholder="Selecione um status"
-              autocomplete={false}
-            />
-
-            <AutocompleteSelect
-              label="Pagamento"
-              value={paymentFilter}
-              options={paymentOptions}
-              onChange={(value) => setPaymentFilter(value ?? "all")}
-              placeholder="Selecione método"
-              autocomplete={false}
-            />
           </div>
-
-          <div className="ml-auto">
-            <DateRangeFilter
-              startDate={inputStartDate}
-              endDate={inputEndDate}
-              onStartChange={setStartDate}
-              onEndChange={setEndDate}
-              onReset={resetToToday}
-            />
+        ) : filteredByPayment.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-sm sm:text-lg">
+              {orders.length === 0
+                ? "Nenhum pedido cadastrado. Comece criando um novo pedido!"
+                : "Nenhum pedido encontrado com o filtro aplicado."}
+            </p>
           </div>
-        </div>
+        ) : (
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 transition-opacity duration-200 ${
+              isFetching ? "opacity-60" : "opacity-100"
+            }`}
+          >
+            {filteredByPayment
+              .sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime(),
+              )
+              .map((order) => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  onUpdateStatus={updateOrderStatus}
+                  onDelete={deleteOrder}
+                />
+              ))}
+          </div>
+        )}
       </div>
-
-      {loading && orders.length === 0 ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="text-xl text-gray-600">Carregando...</div>
-        </div>
-      ) : filteredByPayment.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">
-            {orders.length === 0
-              ? "Nenhum pedido cadastrado. Comece criando um novo pedido!"
-              : "Nenhum pedido encontrado com o filtro aplicado."}
-          </p>
-        </div>
-      ) : (
-        <div
-          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-200 ${
-            isFetching ? "opacity-60" : "opacity-100"
-          }`}
-        >
-          {filteredByPayment
-            .sort(
-              (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime(),
-            )
-            .map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                onUpdateStatus={updateOrderStatus}
-                onDelete={deleteOrder}
-              />
-            ))}
-        </div>
-      )}
 
       <Modal
         isOpen={isModalOpen}
@@ -171,6 +148,35 @@ export function OrdersPage() {
           onCancel={() => setIsModalOpen(false)}
         />
       </Modal>
-    </div>
+
+      {/* Bottom Sheet de Filtros (fora do container space-y) */}
+      <BottomSheet
+        isOpen={isFiltersOpen}
+        onClose={() => setIsFiltersOpen(false)}
+        title="Filtros"
+      >
+        <div className="space-y-4">
+          <OrdersFiltersContent
+            statusFilter={statusFilter}
+            paymentFilter={paymentFilter}
+            statusOptions={statusOptions}
+            paymentOptions={paymentOptions}
+            inputStartDate={inputStartDate}
+            inputEndDate={inputEndDate}
+            onStatusChange={setStatusFilter}
+            onPaymentChange={setPaymentFilter}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+            onResetDates={resetToToday}
+          />
+
+          <div className="pt-4 pb-2 border-t border-gray-200">
+            <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
+              Aplicar Filtros
+            </Button>
+          </div>
+        </div>
+      </BottomSheet>
+    </>
   );
 }

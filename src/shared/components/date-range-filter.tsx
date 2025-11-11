@@ -17,25 +17,30 @@ export function DateRangeFilter({
   onReset,
 }: DateRangeFilterProps) {
   return (
-    <div className="flex items-end space-x-2">
+    <div className="flex items-end gap-2 flex-wrap sm:flex-nowrap">
       <Input
         id="startDate"
         label="Início"
         type="date"
         value={startDate}
         onChange={(e) => onStartChange(e.target.value)}
-        className="w-40"
+        className="w-full sm:w-32 lg:w-40"
       />
-      <span className="text-sm text-gray-500 pb-3">até</span>
+      <span className="hidden sm:inline text-sm text-gray-500 pb-3">até</span>
       <Input
         id="endDate"
         label="Fim"
         type="date"
         value={endDate}
         onChange={(e) => onEndChange(e.target.value)}
-        className="w-40"
+        className="w-full sm:w-32 lg:w-40"
       />
-      <Button variant="secondary" size="md" onClick={onReset} type="button">
+      <Button
+        variant="secondary"
+        onClick={onReset}
+        type="button"
+        className="w-full sm:w-auto h-[42px]"
+      >
         Hoje
       </Button>
     </div>

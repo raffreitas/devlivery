@@ -88,7 +88,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
   const total = subtotal + deliveryFee;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       <CustomerInfoSection
         customerName={customerName}
         deliveryAddress={deliveryAddress}
@@ -100,8 +100,8 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
         onPaymentMethodChange={setPaymentMethod}
       />
 
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Itens do Pedido</h3>
+      <div className="space-y-3 sm:space-y-4">
+        <h3 className="text-base sm:text-lg font-semibold">Itens do Pedido</h3>
 
         <ProductSelector
           products={availableProducts}
@@ -123,7 +123,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
         />
       </div>
 
-      <div className="flex justify-end space-x-3 pt-4 border-t">
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
         <Button type="button" variant="secondary" onClick={onCancel}>
           Cancelar
         </Button>
