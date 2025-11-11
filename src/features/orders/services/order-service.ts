@@ -103,7 +103,7 @@ export const orderService = {
     });
   },
 
-  create: async (data: OrderFormData): Promise<Order> => {
+  create: async (data: OrderFormData): Promise<void> => {
     const payload = {
       items: data.items.map((i) => ({
         productId: i.product.id,
@@ -116,23 +116,13 @@ export const orderService = {
       deliveryFee: data.deliveryFee,
       paymentMethod: data.paymentMethod,
     };
-    const res = await api.post<ApiResponse<OrderDto | null>>(
-      "/api/orders",
-      payload,
-    );
-    if (!res.success || !res.data)
-      throw new Error(res.message || "Erro ao criar pedido");
-    return mapOrder(res.data);
+    await api.post<void>("/api/orders", payload);
   },
 
-  updateStatus: async (id: string, status: Order["status"]): Promise<Order> => {
-    const res = await api.patch<ApiResponse<OrderDto | null>>(
-      `/api/orders/${id}/status`,
-      { status },
-    );
-    if (!res.success || !res.data)
-      throw new Error(res.message || "Erro ao atualizar status do pedido");
-    return mapOrder(res.data);
+  updateStatus: async (id: string, status: Order["status"]): Promise<void> => {
+    await api.patch<void>(`/api/orders/${id}/status`, {
+      status,
+    });
   },
 
   delete: async (id: string): Promise<void> => {

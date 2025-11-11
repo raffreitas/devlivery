@@ -40,24 +40,12 @@ export const productService = {
     return res.data ? mapProductDto(res.data) : null;
   },
 
-  create: async (data: ProductFormData): Promise<Product> => {
-    const res = await api.post<ApiResponse<ProductDto | null>>(
-      "/api/products",
-      data,
-    );
-    if (!res.success || !res.data)
-      throw new Error(res.message || "Erro ao criar produto");
-    return mapProductDto(res.data);
+  create: async (data: ProductFormData): Promise<void> => {
+    await api.post<void>("/api/products", data);
   },
 
-  update: async (id: string, data: ProductFormData): Promise<Product> => {
-    const res = await api.put<ApiResponse<ProductDto | null>>(
-      `/api/products/${id}`,
-      data,
-    );
-    if (!res.success || !res.data)
-      throw new Error(res.message || "Erro ao atualizar produto");
-    return mapProductDto(res.data);
+  update: async (id: string, data: ProductFormData): Promise<void> => {
+    await api.put<void>(`/api/products/${id}`, data);
   },
 
   delete: async (id: string): Promise<void> => {
