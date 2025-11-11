@@ -24,47 +24,58 @@ public abstract class WebApiBaseFixture<TFactory>(TFactory factory)
 
     protected async Task<HttpResponseMessage> PostAsync<T>(string method, T request, string? token = "")
     {
-        if (!string.IsNullOrWhiteSpace(token))
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var msg = new HttpRequestMessage(HttpMethod.Post, method);
 
-        return await _httpClient.PostAsJsonAsync(method, request);
+        if (!string.IsNullOrWhiteSpace(token))
+            msg.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        msg.Content = JsonContent.Create(request);
+
+        return await _httpClient.SendAsync(msg);
     }
 
     protected async Task<HttpResponseMessage> PutAsync<T>(string method, T request, string? token = "")
     {
-        if (!string.IsNullOrWhiteSpace(token))
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var msg = new HttpRequestMessage(HttpMethod.Put, method);
 
-        return await _httpClient.PutAsJsonAsync(method, request);
+        if (!string.IsNullOrWhiteSpace(token))
+            msg.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        msg.Content = JsonContent.Create(request);
+
+        return await _httpClient.SendAsync(msg);
     }
 
     protected async Task<HttpResponseMessage> PatchAsync<T>(string method, T request, string? token = "")
     {
-        if (!string.IsNullOrWhiteSpace(token))
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var msg = new HttpRequestMessage(HttpMethod.Patch, method);
 
-        var msg = new HttpRequestMessage(new HttpMethod("PATCH"), method)
-        {
-            Content = JsonContent.Create(request)
-        };
+        if (!string.IsNullOrWhiteSpace(token))
+            msg.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        msg.Content = JsonContent.Create(request);
 
         return await _httpClient.SendAsync(msg);
     }
 
     protected async Task<HttpResponseMessage> GetAsync(string method, string? token = "")
     {
-        if (!string.IsNullOrWhiteSpace(token))
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var msg = new HttpRequestMessage(HttpMethod.Get, method);
 
-        return await _httpClient.GetAsync(method);
+        if (!string.IsNullOrWhiteSpace(token))
+            msg.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return await _httpClient.SendAsync(msg);
     }
 
     protected async Task<HttpResponseMessage> DeleteAsync(string method, string? token = "")
     {
-        if (!string.IsNullOrWhiteSpace(token))
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var msg = new HttpRequestMessage(HttpMethod.Delete, method);
 
-        return await _httpClient.DeleteAsync(method);
+        if (!string.IsNullOrWhiteSpace(token))
+            msg.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return await _httpClient.SendAsync(msg);
     }
 
     protected async Task ResetDatabaseAsync()
