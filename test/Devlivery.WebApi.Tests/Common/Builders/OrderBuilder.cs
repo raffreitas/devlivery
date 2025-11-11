@@ -17,7 +17,7 @@ public class OrderBuilder
     public OrderBuilder()
     {
         _customerName = _faker.Name.FirstName();
-        _customerPhone = _faker.Phone.PhoneNumber();
+        _customerPhone = _faker.Phone.PhoneNumber("## #####-####");
         _deliveryAddress = _faker.Address.FullAddress();
         _paymentMethod = _faker.PickRandom<PaymentMethod>();
         _deliveryFee = _faker.Random.Decimal(0.0m, 20.0m);
