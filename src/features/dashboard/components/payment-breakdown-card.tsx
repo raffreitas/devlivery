@@ -19,7 +19,9 @@ export function PaymentBreakdownCard({
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex items-center gap-2 mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Resumo do Caixa</h2>
+        <h2 className="text-xl font-semibold text-gray-900">
+          Resumo de Vendas
+        </h2>
       </div>
 
       <div className="space-y-3 mb-6">
@@ -33,7 +35,7 @@ export function PaymentBreakdownCard({
             return (
               <div
                 key={method}
-                className={`flex items-center justify-between p-3 rounded-lg border ${style.bg} ${style.text} ${style.border}`}
+                className={`flex items-center justify-between p-3 rounded-lg ${style.bg} ${style.text} ${style.border}`}
               >
                 <div className="flex items-center gap-2">
                   <Icon className="w-4 h-4" />
@@ -55,12 +57,10 @@ export function PaymentBreakdownCard({
         )}
       </div>
 
-      <div className="pt-4 border-t-2 border-gray-300">
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-semibold text-gray-700">
-            Total do Caixa
-          </span>
-          <span className="text-2xl font-bold text-orange-600">
+      <div className="mt-6 pt-6 border-t border-gray-200">
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-medium text-gray-700">Total</span>
+          <span className="text-xl font-bold text-orange-600">
             R$ {total.toFixed(2)}
           </span>
         </div>
