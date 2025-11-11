@@ -30,7 +30,8 @@ public sealed class UpdateOrderStatusEndpointTests(OrdersWebApplicationFactory f
 
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.AddRangeAsync(product, order);
+        await dbContext.Products.AddAsync(product);
+        await dbContext.Orders.AddAsync(order);
         await dbContext.SaveChangesAsync();
 
         var patch = new { Status = "preparing" };

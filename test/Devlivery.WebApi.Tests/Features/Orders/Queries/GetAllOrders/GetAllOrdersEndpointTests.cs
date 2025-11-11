@@ -31,7 +31,8 @@ public sealed class GetAllOrdersEndpointTests(OrdersWebApplicationFactory factor
 
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.AddRangeAsync(product, order);
+        await dbContext.Products.AddAsync(product);
+        await dbContext.Orders.AddAsync(order);
         await dbContext.SaveChangesAsync();
 
         // Act
