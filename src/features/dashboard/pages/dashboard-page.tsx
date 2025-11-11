@@ -118,7 +118,6 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Bottom Sheet de Filtros (fora do container space-y) */}
       <BottomSheet
         isOpen={isFiltersOpen}
         onClose={() => setIsFiltersOpen(false)}
