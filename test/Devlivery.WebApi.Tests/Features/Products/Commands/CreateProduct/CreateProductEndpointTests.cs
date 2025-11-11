@@ -17,8 +17,6 @@ public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        await ResetDatabaseAsync();
-
         var accessToken = await GetAccessTokenAsync();
         var name = Faker.Commerce.ProductName();
         var description = Faker.Commerce.ProductDescription();
@@ -43,8 +41,6 @@ public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory fac
     public async Task CreateProduct_WithInvalidData_ReturnsValidationProblem()
     {
         // Arrange
-        await ResetDatabaseAsync();
-
         await ResetDatabaseAsync();
 
         var accessToken = await GetAccessTokenAsync();

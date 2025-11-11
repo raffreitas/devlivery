@@ -18,15 +18,14 @@ public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext)
         if (order is null)
             return Result.Fail("Pedido não encontrado");
 
-        var productIds = order?.Items
+        var productIds = order.Items
             .Select(i => i.ProductId)
-            .ToHashSet() ?? [];
+            .ToHashSet();
         var products = await dbContext.Products
             .AsNoTracking()
             .Where(p => productIds.Contains(p.Id))
             .ToListAsync(cancellationToken);
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
-
 
         var response = new GetOrderByIdResponse(
             order.Id,
