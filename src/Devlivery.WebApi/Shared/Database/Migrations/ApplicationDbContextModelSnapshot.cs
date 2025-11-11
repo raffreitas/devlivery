@@ -94,10 +94,6 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("notes");
 
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("order_id");
-
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid")
                         .HasColumnName("product_id");
@@ -106,14 +102,23 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("unit_price");
+
+                    b.Property<Guid>("order_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
                     b.HasKey("Id")
                         .HasName("pk_order_items");
 
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_order_items_order_id");
-
                     b.HasIndex("ProductId")
                         .HasDatabaseName("ix_order_items_product_id");
+
+                    b.HasIndex("order_id")
+                        .HasDatabaseName("ix_order_items_order_id");
 
                     b.ToTable("order_items", (string)null);
                 });
@@ -197,23 +202,19 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
 
             modelBuilder.Entity("Devlivery.WebApi.Features.Orders.Domain.OrderItem", b =>
                 {
-                    b.HasOne("Devlivery.WebApi.Features.Orders.Domain.Order", "Order")
-                        .WithMany("Items")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_items_orders_order_id");
-
-                    b.HasOne("Devlivery.WebApi.Features.Products.Domain.Product", "Product")
+                    b.HasOne("Devlivery.WebApi.Features.Products.Domain.Product", null)
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_order_items_products_product_id");
 
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
+                    b.HasOne("Devlivery.WebApi.Features.Orders.Domain.Order", null)
+                        .WithMany("Items")
+                        .HasForeignKey("order_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_order_items_orders_order_id");
                 });
 
             modelBuilder.Entity("Devlivery.WebApi.Features.Orders.Domain.Order", b =>

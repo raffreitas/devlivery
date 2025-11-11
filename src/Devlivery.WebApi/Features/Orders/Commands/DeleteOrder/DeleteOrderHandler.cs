@@ -6,7 +6,7 @@ namespace Devlivery.WebApi.Features.Orders.Commands.DeleteOrder;
 
 public sealed class DeleteOrderHandler(ApplicationDbContext dbContext)
 {
-    public async Task<Result<DeleteOrderResponse>> HandleAsync(
+    public async Task<Result> HandleAsync(
         DeleteOrderCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -21,6 +21,6 @@ public sealed class DeleteOrderHandler(ApplicationDbContext dbContext)
         dbContext.Orders.Remove(order);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return Result.Ok(new DeleteOrderResponse());
+        return Result.Ok();
     }
 }

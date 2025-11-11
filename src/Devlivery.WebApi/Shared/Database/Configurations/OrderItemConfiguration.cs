@@ -1,4 +1,5 @@
 ﻿using Devlivery.WebApi.Features.Orders.Domain;
+using Devlivery.WebApi.Features.Products.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,9 +11,11 @@ public sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
     {
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Quantity).IsRequired();
+        builder.Property(e => e.UnitPrice).HasPrecision(18, 2)
+            .IsRequired();
         builder.Property(e => e.Notes).HasMaxLength(500);
 
-        builder.HasOne(e => e.Product)
+        builder.HasOne<Product>()
             .WithMany()
             .HasForeignKey(e => e.ProductId)
             .OnDelete(DeleteBehavior.Restrict);

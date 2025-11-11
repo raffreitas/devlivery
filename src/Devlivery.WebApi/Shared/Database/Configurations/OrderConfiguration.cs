@@ -18,8 +18,8 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(e => e.PaymentMethod).HasConversion<string>().HasMaxLength(20);
 
         builder.HasMany(e => e.Items)
-            .WithOne(e => e.Order)
-            .HasForeignKey(e => e.OrderId)
+            .WithOne()
+            .HasForeignKey("order_id").IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -253,7 +253,6 @@ app.MapMyFeatureEndpoints();
 - `Features/Products/Commands/CreateProduct/*` — complete Command pattern
 - `Features/Orders/` — complex entity with relationships (OrderItems)
 - `Features/Auth/` — JWT authentication with Identity
-- `Features/Dashboard/` — simple read-only query
 
 **Infrastructure**:
 - `Shared/Extensions/ResultExtensions.cs` — ToOk, ToCreated, ToBadRequestProblem helpers

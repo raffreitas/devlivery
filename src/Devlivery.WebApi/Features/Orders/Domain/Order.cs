@@ -1,17 +1,50 @@
+using Devlivery.WebApi.Shared.Domain;
+
 namespace Devlivery.WebApi.Features.Orders.Domain;
 
-public class Order
+public sealed class Order : Entity
 {
-    public Guid Id { get; set; }
-    public string CustomerName { get; set; } = string.Empty;
-    public string? CustomerPhone { get; set; }
-    public string DeliveryAddress { get; set; } = string.Empty;
-    public PaymentMethod PaymentMethod { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public decimal Total { get; set; }
-    public decimal DeliveryFee { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public string CustomerName { get; private set; }
+    public string? CustomerPhone { get; private set; }
+    public string DeliveryAddress { get; private set; }
+    public PaymentMethod PaymentMethod { get; private set; }
+    public string Status { get; private set; }
+    public decimal Total { get; private set; }
+    public decimal DeliveryFee { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
 
-    public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
+    private readonly List<OrderItem> _items = [];
+    public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
+
+    public Order(
+        string customerName,
+        string? customerPhone,
+        string deliveryAddress,
+        PaymentMethod paymentMethod,
+        string status,
+        decimal deliveryFee)
+    {
+        CustomerName = customerName;
+        CustomerPhone = customerPhone;
+        DeliveryAddress = deliveryAddress;
+        PaymentMethod = paymentMethod;
+        Status = status;
+        DeliveryFee = deliveryFee;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddItem(OrderItem item)
+    {
+        _items.Add(item);
+        Total = _items.Sum(i => i.TotalPrice) + DeliveryFee;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateStatus(string status)
+    {
+        Status = status;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

@@ -10,31 +10,18 @@ public sealed class CreateProductHandler(ApplicationDbContext dbContext)
         CreateProductCommand command,
         CancellationToken cancellationToken = default)
     {
-        var now = DateTime.UtcNow;
-        var product = new Product
-        {
-            Id = Guid.NewGuid(),
-            Name = command.Name,
-            Description = command.Description,
-            Price = command.Price,
-            Category = command.Category,
-            Available = command.Available,
-            CreatedAt = now,
-            UpdatedAt = now
-        };
+        var product = new Product(
+            command.Name,
+            command.Description,
+            command.Price,
+            command.Category,
+            command.Available
+        );
 
         dbContext.Products.Add(product);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var response = new CreateProductResponse(
-            product.Id,
-            product.Name,
-            product.Description,
-            product.Price,
-            product.Category,
-            product.Available,
-            product.CreatedAt,
-            product.UpdatedAt);
+        var response = new CreateProductResponse(product.Id);
 
         return Result.Ok(response);
     }

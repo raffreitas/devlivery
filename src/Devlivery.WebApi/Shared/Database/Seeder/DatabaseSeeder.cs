@@ -15,13 +15,10 @@ public static class DatabaseSeeder
             return;
 
         // Seed User
-        var user = new User
-        {
-            Id = Guid.CreateVersion7(),
-            Name = "Atendente",
-            Email = "admin@pizza.com",
-            CreatedAt = DateTime.UtcNow,
-        };
+        var user = new User(
+            name: "Atendente",
+            email: "admin@pizza.com"
+        );
 
         var identityResult = await userManager.CreateAsync(new ApplicationUser
         {
@@ -39,39 +36,27 @@ public static class DatabaseSeeder
         // Seed Products
         var products = new List<Product>
         {
-            new()
-            {
-                Id = Guid.CreateVersion7(),
-                Name = "Pizza Margherita",
-                Description = "Molho de tomate, mussarela e manjericão",
-                Price = 35.00m,
-                Category = "Pizza",
-                Available = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            },
-            new()
-            {
-                Id = Guid.CreateVersion7(),
-                Name = "Pizza Calabresa",
-                Description = "Molho de tomate, mussarela, calabresa e cebola",
-                Price = 38.00m,
-                Category = "Pizza",
-                Available = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            },
-            new()
-            {
-                Id = Guid.CreateVersion7(),
-                Name = "Refrigerante 2L",
-                Description = "Coca-Cola, Guaraná ou Fanta",
-                Price = 10.00m,
-                Category = "Bebida",
-                Available = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            }
+            new(
+                name: "Pizza Margherita",
+                description: "Molho de tomate, mussarela e manjericão",
+                price: 35.00m,
+                category: "Pizza",
+                available: true
+            ),
+            new(
+                name: "Pizza Calabresa",
+                description: "Molho de tomate, mussarela, calabresa e cebola",
+                price: 38.00m,
+                category: "Pizza",
+                available: true
+            ),
+            new(
+                name: "Refrigerante 2L",
+                description: "Coca-Cola, Guaraná ou Fanta",
+                price: 10.00m,
+                category: "Bebida",
+                available: true
+            )
         };
 
         db.Products.AddRange(products);

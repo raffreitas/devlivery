@@ -16,75 +16,36 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
 
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
         var products = await dbContext.Products
+            .AsNoTracking()
             .Where(p => productIds.Contains(p.Id))
             .ToListAsync(cancellationToken);
+        var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
         if (products.Count != productIds.Count)
-        {
             return Result.Fail("Um ou mais produtos não foram encontrados");
+
+        var order = new Order(
+            customerName: command.CustomerName,
+            customerPhone: command.CustomerPhone,
+            deliveryAddress: command.DeliveryAddress,
+            paymentMethod: paymentMethod,
+            status: "pending",
+            deliveryFee: command.DeliveryFee
+        );
+        foreach (var item in command.Items)
+        {
+            var orderItem = new OrderItem(
+                productId: item.ProductId,
+                quantity: item.Quantity,
+                unitPrice: productsDictionary[item.ProductId].Price,
+                notes: item.Notes);
+
+            order.AddItem(orderItem);
         }
 
-        var itemsSubtotal = command.Items.Sum(item =>
-        {
-            var product = products.First(p => p.Id == item.ProductId);
-            return product.Price * item.Quantity;
-        });
-        var total = itemsSubtotal + command.DeliveryFee;
-
-        var now = DateTime.UtcNow;
-        var order = new Order
-        {
-            Id = Guid.CreateVersion7(),
-            CustomerName = command.CustomerName,
-            CustomerPhone = command.CustomerPhone,
-            DeliveryAddress = command.DeliveryAddress,
-            Status = "pending",
-            PaymentMethod = paymentMethod,
-            Total = total,
-            DeliveryFee = command.DeliveryFee,
-            CreatedAt = now,
-            UpdatedAt = now
-        };
-
-        var orderItems = command.Items.Select(item => new OrderItem
-        {
-            Id = Guid.CreateVersion7(),
-            OrderId = order.Id,
-            ProductId = item.ProductId,
-            Quantity = item.Quantity,
-            Notes = item.Notes
-        }).ToList();
-
-        order.Items = orderItems;
-
         dbContext.Orders.Add(order);
+
         await dbContext.SaveChangesAsync(cancellationToken);
-
-
-        var productsDict = products.ToDictionary(k => k.Id, v => v);
-        var orderItemsWithProducts = orderItems.Select(oi => new OrderItemResponseDto(
-            new ProductResponseDto(
-                productsDict[oi.ProductId].Id,
-                productsDict[oi.ProductId].Name,
-                productsDict[oi.ProductId].Description,
-                productsDict[oi.ProductId].Price,
-                productsDict[oi.ProductId].Category,
-                productsDict[oi.ProductId].CreatedAt,
-                productsDict[oi.ProductId].UpdatedAt),
-            oi.Quantity,
-            oi.Notes)).ToArray();
-
-        return new CreateOrderResponse(
-            order.Id,
-            orderItemsWithProducts,
-            order.CustomerName,
-            order.CustomerPhone,
-            order.DeliveryAddress,
-            order.PaymentMethod.ToString(),
-            order.Status,
-            order.Total,
-            order.DeliveryFee,
-            order.CreatedAt,
-            order.UpdatedAt);
+        return new CreateOrderResponse(order.Id);
     }
 }

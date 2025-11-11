@@ -105,9 +105,6 @@ Devlivery.WebApi/
 │   │   │   ├── Order.cs                         # Entidade de domínio
 │   │   │   └── OrderItem.cs                     # Entidade de domínio
 │   │   └── OrdersFeature.cs                     # Registros de DI e endpoints
-│   │
-│   └── Dashboard/                    # Dashboard e estatísticas
-│       └── GetDashboardStats.cs
 
 ```
 
@@ -148,11 +145,11 @@ Erros seguem o padrão RFC 7807:
 
 ```json
 {
-  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
   "title": "Um ou mais erros de validação ocorreram",
   "status": 400,
   "errors": {
-    "Name": ["O campo 'Name' é obrigatório."]
+    "name": ["O campo 'Name' é obrigatório."]
   }
 }
 ```
@@ -443,9 +440,6 @@ app.MapMinhaFeatureEndpoints();
 - `CreditCard` - Cartão de Crédito
 - `DebitCard` - Cartão de Débito
 - `Pix` - PIX
-
-### 📊 Dashboard
-- `GET /api/dashboard/stats` - Estatísticas gerais do dashboard
 
 ## 🧪 Testando a API
 

@@ -13,8 +13,8 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
         CancellationToken cancellationToken = default)
     {
         var ordersQuery = dbContext.Orders
+            .AsNoTracking()
             .Include(o => o.Items)
-            .ThenInclude(i => i.Product)
             .AsQueryable();
 
         // Date filtering: Convert local Brazil time (BRT/BRST) to UTC before querying
@@ -41,18 +41,29 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
 
+        var productIds = orders
+            .SelectMany(o => o.Items)
+            .Select(i => i.ProductId)
+            .ToHashSet();
+        var products = await dbContext.Products
+            .AsNoTracking()
+            .Where(p => productIds.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+
+        var productsDictionary = products.ToDictionary(p => p.Id, p => p);
+
         var response = orders.Select(o => new GetAllOrdersResponse(
             o.Id,
             o.Items.Select(i => new OrderItemDto(
                 new ProductDto(
-                    i.Product.Id,
-                    i.Product.Name,
-                    i.Product.Description,
-                    i.Product.Price,
-                    i.Product.Category,
-                    i.Product.Available,
-                    i.Product.CreatedAt,
-                    i.Product.UpdatedAt),
+                    productsDictionary[i.ProductId].Id,
+                    productsDictionary[i.ProductId].Name,
+                    productsDictionary[i.ProductId].Description,
+                    productsDictionary[i.ProductId].Price,
+                    productsDictionary[i.ProductId].Category,
+                    productsDictionary[i.ProductId].Available,
+                    productsDictionary[i.ProductId].CreatedAt,
+                    productsDictionary[i.ProductId].UpdatedAt),
                 i.Quantity,
                 i.Notes)).ToList(),
             o.CustomerName,

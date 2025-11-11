@@ -31,7 +31,7 @@ public static class CreateProductEndpoint
         var result = await handler.HandleAsync(request, ct);
 
         return result.IsSuccess
-            ? result.ToCreated($"/api/products/{result.Value.Id}", "Product created successfully")
+            ? result.ToCreated($"/api/products/{result.Value.ProductId}", "Product created successfully")
             : result.ToBadRequestProblem();
     }
 }

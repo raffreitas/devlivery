@@ -1,0 +1,82 @@
+﻿using Bogus;
+using Devlivery.WebApi.Features.Orders.Domain;
+
+namespace Devlivery.WebApi.Tests.Common.Builders;
+
+public class OrderBuilder
+{
+    private readonly Faker _faker = new();
+
+    private string _customerName;
+    private string _customerPhone;
+    private string _deliveryAddress;
+    private PaymentMethod _paymentMethod;
+    private decimal _deliveryFee;
+    private OrderItem[] _orderItems;
+
+    public OrderBuilder()
+    {
+        _customerName = _faker.Name.FirstName();
+        _customerPhone = _faker.Phone.PhoneNumber("## #####-####");
+        _deliveryAddress = _faker.Address.FullAddress();
+        _paymentMethod = _faker.PickRandom<PaymentMethod>();
+        _deliveryFee = _faker.Random.Decimal(0.0m, 20.0m);
+        _orderItems = [];
+    }
+
+    public OrderBuilder WithCustomerName(string customerName)
+    {
+        _customerName = customerName;
+        return this;
+    }
+
+    public OrderBuilder WithCustomerPhone(string customerPhone)
+    {
+        _customerPhone = customerPhone;
+        return this;
+    }
+
+    public OrderBuilder WithDeliveryAddress(string deliveryAddress)
+    {
+        _deliveryAddress = deliveryAddress;
+        return this;
+    }
+
+    public OrderBuilder WithPaymentMethod(PaymentMethod paymentMethod)
+    {
+        _paymentMethod = paymentMethod;
+        return this;
+    }
+
+    public OrderBuilder WithDeliveryFee(decimal deliveryFee)
+    {
+        _deliveryFee = deliveryFee;
+        return this;
+    }
+
+    public OrderBuilder WithItems(params OrderItem[] items)
+    {
+        _orderItems = items;
+        return this;
+    }
+
+    public Order Build()
+    {
+        if (_orderItems.Length == 0)
+            throw new InvalidOperationException("No order items have been added");
+
+        var order = new Order(
+            customerName: _customerName,
+            customerPhone: _customerPhone,
+            deliveryAddress: _deliveryAddress,
+            paymentMethod: _paymentMethod,
+            status: "pending",
+            deliveryFee: _deliveryFee
+        );
+
+        foreach (var orderItem in _orderItems)
+            order.AddItem(orderItem);
+
+        return order;
+    }
+}
