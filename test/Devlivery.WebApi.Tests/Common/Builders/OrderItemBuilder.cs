@@ -10,7 +10,7 @@ public class OrderItemBuilder
     private Product _product;
     private int _quantity;
     private string _notes;
-
+    private Guid _establishmentId;
 
     public OrderItemBuilder()
     {
@@ -37,11 +37,21 @@ public class OrderItemBuilder
         return this;
     }
 
+    public OrderItemBuilder WithEstablishmentId(Guid establishmentId)
+    {
+        _establishmentId = establishmentId;
+        return this;
+    }
+
 
     public OrderItem Build()
     {
+        if (_establishmentId == Guid.Empty)
+            throw new InvalidOperationException("No establishment id has been added");
+
         return new OrderItem(
             productId: _product.Id,
+            establishmentId: _establishmentId,
             quantity: _quantity,
             unitPrice: _product.Price,
             notes: _notes);

@@ -18,7 +18,8 @@ public sealed class DeleteOrderEndpointTests(OrdersWebApplicationFactory factory
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var product = new ProductBuilder().Build();
         var orderItem = new OrderItemBuilder()
             .WithProduct(product)
@@ -46,7 +47,8 @@ public sealed class DeleteOrderEndpointTests(OrdersWebApplicationFactory factory
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var nonExisting = Guid.NewGuid();
 
         // Act

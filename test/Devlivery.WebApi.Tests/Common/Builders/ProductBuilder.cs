@@ -12,6 +12,7 @@ public sealed class ProductBuilder
     private decimal _productPrice;
     private string _productCategory;
     private bool _productAvailable;
+    private Guid _establishmentId;
 
     public ProductBuilder()
     {
@@ -52,13 +53,24 @@ public sealed class ProductBuilder
         return this;
     }
 
+    public ProductBuilder WithEstablishmentId(Guid establishmentId)
+    {
+        _establishmentId = establishmentId;
+        return this;
+    }
+
     public Product Build()
     {
+        if (_establishmentId == Guid.Empty)
+            throw new InvalidOperationException("No establishment id has been added");
+
+
         return new Product(
             name: _productName,
             description: _productDescription,
             price: _productPrice,
             category: _productCategory,
-            available: _productAvailable);
+            available: _productAvailable,
+            establishmentId: _establishmentId);
     }
 }

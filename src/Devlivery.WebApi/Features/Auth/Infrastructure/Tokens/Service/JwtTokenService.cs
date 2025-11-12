@@ -2,6 +2,7 @@
 using System.Text;
 using Devlivery.WebApi.Features.Auth.Abstractions;
 using Devlivery.WebApi.Features.Auth.Infrastructure.Tokens.Settings;
+using Devlivery.WebApi.Shared.Tenancy;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +22,7 @@ internal sealed class JwtTokenService(IOptions<JwtTokenSettings> options) : ITok
         [
             new(JwtRegisteredClaimNames.Sub, tokenRequest.SubjectId),
             new(JwtRegisteredClaimNames.Email, tokenRequest.Email),
+            new(TenantConstants.TenantIdClaimType, tokenRequest.TenantId)
         ];
 
         var tokenDescriptor = new SecurityTokenDescriptor

@@ -18,7 +18,8 @@ public sealed class UpdateProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
 
         var product = new ProductBuilder().Build();
 
@@ -49,7 +50,8 @@ public sealed class UpdateProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var product = new ProductBuilder().Build();
         var nonExistingId = Guid.NewGuid();
 

@@ -24,7 +24,6 @@ public sealed class LoginHandler(
         if (user is null)
         {
             logger.LogInformation("Failed login attempt.");
-            logger.LogDebug("Failed login attempt for email: {Email}", request.Email);
             return Result.Fail("Credenciais inválidas");
         }
 
@@ -32,7 +31,6 @@ public sealed class LoginHandler(
         if (identityUser is null)
         {
             logger.LogInformation("Failed login attempt.");
-            logger.LogDebug("Failed login attempt for email: {Email}", request.Email);
             return Result.Fail("Credenciais inválidas");
         }
 
@@ -40,11 +38,10 @@ public sealed class LoginHandler(
         if (!signInResult.Succeeded)
         {
             logger.LogInformation("Failed login attempt.");
-            logger.LogDebug("Failed login attempt for email: {Email}", request.Email);
             return Result.Fail("Credenciais inválidas");
         }
 
-        var tokenRequest = new TokenRequest(user.Id.ToString(), user.Email);
+        var tokenRequest = new TokenRequest(user.Id.ToString(), user.EstablishmentId.ToString(), user.Email);
         var token = await tokenService.GenerateTokenAsync(tokenRequest, cancellationToken);
 
         return new LoginResponse(user.Id, user.Name, token);

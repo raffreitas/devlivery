@@ -83,15 +83,20 @@ public abstract class WebApiBaseFixture<TFactory>(TFactory factory)
         await Factory.ResetDatabaseAsync();
     }
 
-    protected async Task<User> CreateUserAsync(string? name = null, string? email = null, string? password = null)
+    protected async Task<User> CreateUserAsync(
+        string? name = null,
+        string? email = null,
+        string? password = null,
+        Guid? establishmentId = null)
     {
         name ??= Faker.Name.FullName();
         email ??= Faker.Internet.Email();
         password ??= Faker.Internet.Password(length: 5, prefix: "P@ssw0rd1");
+        establishmentId ??= Faker.Random.Guid();
 
         using var scope = Factory.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var user = new User(name, email);
+        var user = new User(name, email, establishmentId.Value);
 
         var identityResult = await userManager.CreateAsync(new ApplicationUser
         {
@@ -111,13 +116,17 @@ public abstract class WebApiBaseFixture<TFactory>(TFactory factory)
         return user;
     }
 
-    protected async Task<string> GetAccessTokenAsync(User? user = null)
+    protected async Task<string> GetAccessTokenAsync(User? user = null, Guid? establishmentId = null)
     {
-        user ??= await CreateUserAsync();
+        user ??= await CreateUserAsync(establishmentId: establishmentId);
 
         using var scope = Factory.Services.CreateScope();
         var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
-        var tokenRequest = new TokenRequest(user.Id.ToString(), user.Email);
+        var tokenRequest = new TokenRequest(
+            user.Id.ToString(),
+            user.EstablishmentId.ToString(),
+            user.Email
+        );
         var token = await tokenService.GenerateTokenAsync(tokenRequest);
         return token;
     }

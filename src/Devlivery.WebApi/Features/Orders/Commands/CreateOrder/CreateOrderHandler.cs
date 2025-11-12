@@ -1,11 +1,12 @@
 ﻿using Devlivery.WebApi.Features.Orders.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
+using Devlivery.WebApi.Shared.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Features.Orders.Commands.CreateOrder;
 
-public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
+public sealed class CreateOrderHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
 {
     public async Task<Result<CreateOrderResponse>> HandleAsync(
         CreateOrderCommand command,
@@ -30,12 +31,14 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext)
             deliveryAddress: command.DeliveryAddress,
             paymentMethod: paymentMethod,
             status: "pending",
-            deliveryFee: command.DeliveryFee
+            deliveryFee: command.DeliveryFee,
+            establishmentId: tenantAccessor.Tenant.Id
         );
         foreach (var item in command.Items)
         {
             var orderItem = new OrderItem(
                 productId: item.ProductId,
+                establishmentId: order.EstablishmentId,
                 quantity: item.Quantity,
                 unitPrice: productsDictionary[item.ProductId].Price,
                 notes: item.Notes);

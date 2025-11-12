@@ -1,10 +1,11 @@
 using Devlivery.WebApi.Features.Products.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
+using Devlivery.WebApi.Shared.Tenancy;
 using FluentResults;
 
 namespace Devlivery.WebApi.Features.Products.Commands.CreateProduct;
 
-public sealed class CreateProductHandler(ApplicationDbContext dbContext)
+public sealed class CreateProductHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
 {
     public async Task<Result<CreateProductResponse>> HandleAsync(
         CreateProductCommand command,
@@ -15,7 +16,8 @@ public sealed class CreateProductHandler(ApplicationDbContext dbContext)
             command.Description,
             command.Price,
             command.Category,
-            command.Available
+            command.Available,
+            tenantAccessor.Tenant.Id
         );
 
         dbContext.Products.Add(product);

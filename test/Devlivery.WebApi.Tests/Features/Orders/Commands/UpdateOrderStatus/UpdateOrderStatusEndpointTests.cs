@@ -18,7 +18,8 @@ public sealed class UpdateOrderStatusEndpointTests(OrdersWebApplicationFactory f
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var product = new ProductBuilder().Build();
         var orderItem = new OrderItemBuilder()
             .WithProduct(product)
@@ -49,7 +50,8 @@ public sealed class UpdateOrderStatusEndpointTests(OrdersWebApplicationFactory f
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var nonExisting = Guid.NewGuid();
         var patch = new { Status = "ready" };
 

@@ -19,7 +19,8 @@ public sealed class GetAllOrdersEndpointTests(OrdersWebApplicationFactory factor
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var product = new ProductBuilder().Build();
         var orderItem = new OrderItemBuilder()
             .WithProduct(product)

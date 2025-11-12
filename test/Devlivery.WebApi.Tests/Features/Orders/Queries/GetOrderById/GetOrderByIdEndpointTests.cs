@@ -19,7 +19,8 @@ public sealed class GetOrderByIdEndpointTests(OrdersWebApplicationFactory factor
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var product = new ProductBuilder().Build();
         var orderItem = new OrderItemBuilder()
             .WithProduct(product)
@@ -50,7 +51,8 @@ public sealed class GetOrderByIdEndpointTests(OrdersWebApplicationFactory factor
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var nonExisting = Guid.NewGuid();
 
         // Act

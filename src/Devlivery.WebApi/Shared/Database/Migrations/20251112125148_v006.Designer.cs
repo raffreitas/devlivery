@@ -3,17 +3,20 @@ using System;
 using Devlivery.WebApi.Shared.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
+namespace Devlivery.WebApi.Shared.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251112125148_v006")]
+    partial class v006
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,7 +89,9 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                         .HasColumnName("delivery_fee");
 
                     b.Property<Guid>("EstablishmentId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
+                        .HasDefaultValue(new Guid("00000000-0000-0000-0000-000000000000"))
                         .HasColumnName("establishment_id");
 
                     b.Property<string>("PaymentMethod")
@@ -113,9 +118,6 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                     b.HasKey("Id")
                         .HasName("pk_orders");
 
-                    b.HasIndex("EstablishmentId")
-                        .HasDatabaseName("ix_orders_establishment_id");
-
                     b.ToTable("orders", (string)null);
                 });
 
@@ -127,7 +129,9 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                         .HasColumnName("id");
 
                     b.Property<Guid>("EstablishmentId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
+                        .HasDefaultValue(new Guid("00000000-0000-0000-0000-000000000000"))
                         .HasColumnName("establishment_id");
 
                     b.Property<string>("Notes")
@@ -154,9 +158,6 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_order_items");
-
-                    b.HasIndex("EstablishmentId")
-                        .HasDatabaseName("ix_order_items_establishment_id");
 
                     b.HasIndex("ProductId")
                         .HasDatabaseName("ix_order_items_product_id");
@@ -195,7 +196,9 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                         .HasColumnName("description");
 
                     b.Property<Guid>("EstablishmentId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
+                        .HasDefaultValue(new Guid("00000000-0000-0000-0000-000000000000"))
                         .HasColumnName("establishment_id");
 
                     b.Property<string>("Name")
@@ -215,9 +218,6 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_products");
-
-                    b.HasIndex("EstablishmentId")
-                        .HasDatabaseName("ix_products_establishment_id");
 
                     b.ToTable("products", (string)null);
                 });
@@ -240,7 +240,9 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                         .HasColumnName("email");
 
                     b.Property<Guid>("EstablishmentId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
+                        .HasDefaultValue(new Guid("00000000-0000-0000-0000-000000000000"))
                         .HasColumnName("establishment_id");
 
                     b.Property<string>("Name")
@@ -252,32 +254,11 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                     b.HasKey("Id")
                         .HasName("pk_users");
 
-                    b.HasIndex("EstablishmentId", "Email")
-                        .IsUnique()
-                        .HasDatabaseName("ix_users_establishment_id_email");
-
                     b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("Devlivery.WebApi.Features.Orders.Domain.Order", b =>
-                {
-                    b.HasOne("Devlivery.WebApi.Features.Establishments.Domain.Establishment", null)
-                        .WithMany()
-                        .HasForeignKey("EstablishmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_orders_establishments_establishment_id");
                 });
 
             modelBuilder.Entity("Devlivery.WebApi.Features.Orders.Domain.OrderItem", b =>
                 {
-                    b.HasOne("Devlivery.WebApi.Features.Establishments.Domain.Establishment", null)
-                        .WithMany()
-                        .HasForeignKey("EstablishmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_items_establishments_establishment_id");
-
                     b.HasOne("Devlivery.WebApi.Features.Products.Domain.Product", null)
                         .WithMany()
                         .HasForeignKey("ProductId")
@@ -291,26 +272,6 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_order_items_orders_order_id");
-                });
-
-            modelBuilder.Entity("Devlivery.WebApi.Features.Products.Domain.Product", b =>
-                {
-                    b.HasOne("Devlivery.WebApi.Features.Establishments.Domain.Establishment", null)
-                        .WithMany()
-                        .HasForeignKey("EstablishmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_products_establishments_establishment_id");
-                });
-
-            modelBuilder.Entity("Devlivery.WebApi.Features.Users.Domain.User", b =>
-                {
-                    b.HasOne("Devlivery.WebApi.Features.Establishments.Domain.Establishment", null)
-                        .WithMany()
-                        .HasForeignKey("EstablishmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_users_establishments_establishment_id");
                 });
 
             modelBuilder.Entity("Devlivery.WebApi.Features.Orders.Domain.Order", b =>

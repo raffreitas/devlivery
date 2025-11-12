@@ -19,8 +19,8 @@ public sealed class CreateOrderEndpointTests(OrdersWebApplicationFactory factory
     {
         // Arrange
         await ResetDatabaseAsync();
-
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var product = new ProductBuilder().Build();
 
         using var scope = Factory.Services.CreateScope();
@@ -63,7 +63,9 @@ public sealed class CreateOrderEndpointTests(OrdersWebApplicationFactory factory
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var user = await CreateUserAsync(establishmentId: establishmentId);
+        var token = await GetAccessTokenAsync(user);
 
         // invalid: empty items
         var orderCommand = new

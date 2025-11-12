@@ -13,6 +13,7 @@ public class OrderBuilder
     private PaymentMethod _paymentMethod;
     private decimal _deliveryFee;
     private OrderItem[] _orderItems;
+    private Guid _establishmentId;
 
     public OrderBuilder()
     {
@@ -60,10 +61,19 @@ public class OrderBuilder
         return this;
     }
 
+    public OrderBuilder WithEstablishmentId(Guid establishmentId)
+    {
+        _establishmentId = establishmentId;
+        return this;
+    }
+
     public Order Build()
     {
         if (_orderItems.Length == 0)
             throw new InvalidOperationException("No order items have been added");
+
+        if (_establishmentId == Guid.Empty)
+            throw new InvalidOperationException("No establishment id has been added");
 
         var order = new Order(
             customerName: _customerName,
@@ -71,7 +81,8 @@ public class OrderBuilder
             deliveryAddress: _deliveryAddress,
             paymentMethod: _paymentMethod,
             status: "pending",
-            deliveryFee: _deliveryFee
+            deliveryFee: _deliveryFee,
+            establishmentId: _establishmentId
         );
 
         foreach (var orderItem in _orderItems)

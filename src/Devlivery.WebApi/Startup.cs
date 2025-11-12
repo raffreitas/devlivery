@@ -8,6 +8,7 @@ using Devlivery.WebApi.Shared.Identity;
 using Devlivery.WebApi.Shared.Identity.Models;
 using Devlivery.WebApi.Shared.Observability;
 using Devlivery.WebApi.Shared.Presentation;
+using Devlivery.WebApi.Shared.Tenancy;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,7 @@ public static class Startup
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
         services.AddHealthChecksConfiguration();
+        services.AddHttpContextAccessor();
 
         // OpenAPI/Swagger
         services.AddOpenApiConfiguration();
@@ -34,6 +36,7 @@ public static class Startup
         // Shared Infrastructure
         services.AddIdentityFeature(configuration);
         services.AddDatabaseFeature(configuration);
+        services.AddTenancyFeature();
 
         // Features
         services.AddAuthFeature(configuration);

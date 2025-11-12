@@ -18,7 +18,8 @@ public sealed class DeleteProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var product = new ProductBuilder().Build();
 
         using var scope = Factory.Services.CreateScope();
@@ -39,7 +40,8 @@ public sealed class DeleteProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var establishmentId = Guid.NewGuid();
+        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
         var nonExistingId = Guid.NewGuid();
 
         // Act
