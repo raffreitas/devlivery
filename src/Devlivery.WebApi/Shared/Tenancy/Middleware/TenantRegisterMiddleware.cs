@@ -9,8 +9,12 @@ public class TenantRegisterMiddleware(
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        if (context.Request.Path.Value == null || context.Request.Path.Value.Contains("scalar") ||
-            context.Request.Path.Value.Contains("health"))
+        if (
+            context.Request.Path.Value == null ||
+            context.Request.Path.Value.Contains("scalar") ||
+            context.Request.Path.Value.Contains("openapi") ||
+            context.Request.Path.Value.Contains("health") ||
+            context.Request.Path.Value.Contains("login"))
         {
             await next(context);
             return;

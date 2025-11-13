@@ -1,16 +1,16 @@
 # Devlivery WebAPI
 
-Backend desenvolvido com .NET 10 seguindo as melhores práticas de desenvolvimento e arquitetura limpa.
+Backend desenvolvido com .NET 9 seguindo as melhores práticas de desenvolvimento e arquitetura limpa.
 
 ## 🏗️ Arquitetura
 
-Este projeto implementa **Vertical Slice Architecture** (VSA), onde cada feature é completamente auto-contida com sua própria lógica de negócio, validação, handlers e endpoints.
+Este projeto implementa **Vertical Slice Architecture** (VSA), onde cada feature é completamente autocontida com sua própria lógica de negócio, validação, handlers e endpoints.
 
 ### Características principais:
 
 - **Vertical Slice Architecture**: Organização por funcionalidade ao invés de camadas técnicas
 - **CQRS Pattern**: Separação clara entre Commands (escrita) e Queries (leitura)
-- **Minimal APIs**: APIs leves, performáticas e modernas do .NET 10
+- **Minimal APIs**: APIs leves, performáticas e modernas do .NET 9
 - **Typed Results**: Respostas HTTP tipadas e explícitas seguindo RFC 7807
 - **FluentValidation**: Validação robusta e declarativa
 - **FluentResults**: Tratamento de erros tipado e funcional
@@ -161,7 +161,7 @@ Erros seguem o padrão RFC 7807:
 
 ### Pré-requisitos
 
-- .NET 10 SDK
+- .NET 9 SDK
 - PostgreSQL
 - Docker (opcional)
 
@@ -554,7 +554,7 @@ O projeto está preparado para observabilidade com:
 
 ## 🛠️ Tecnologias
 
-- .NET 10
+- .NET 9
 - PostgreSQL 16
 - Entity Framework Core 9
 - ASP.NET Core Minimal APIs
@@ -578,4 +578,4 @@ O projeto está preparado para observabilidade com:
 
 ---
 
-**Desenvolvido com ❤️ usando .NET 10 e boas práticas de arquitetura**
+**Desenvolvido com ❤️ usando .NET 9**

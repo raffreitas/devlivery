@@ -9,6 +9,7 @@ public static class TenancyFeature
         services.AddHttpContextAccessor();
         services.AddScoped<ITenantAccessor, TenantAccessor>();
         services.AddScoped<ITenantLocator, TenantLocator>();
+        services.AddScoped<TenantRegisterMiddleware>();
         return services;
     }
 
