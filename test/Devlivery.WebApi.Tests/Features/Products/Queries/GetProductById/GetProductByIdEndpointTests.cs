@@ -19,9 +19,11 @@ public sealed class GetProductByIdEndpointTests(ProductsWebApplicationFactory fa
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var (_, establishment, accessToken) = await Prepare();
 
-        var existingProduct = new ProductBuilder().Build();
+        var existingProduct = new ProductBuilder()
+            .WithEstablishmentId(establishment.Id)
+            .Build();
 
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -29,7 +31,7 @@ public sealed class GetProductByIdEndpointTests(ProductsWebApplicationFactory fa
         await dbContext.SaveChangesAsync();
 
         // Act
-        var response = await GetAsync($"/api/products/{existingProduct.Id}", token);
+        var response = await GetAsync($"/api/products/{existingProduct.Id}", accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);

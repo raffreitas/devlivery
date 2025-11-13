@@ -1,10 +1,12 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Bogus;
+using Devlivery.WebApi.Features.Establishments.Domain;
 using Devlivery.WebApi.Features.Users.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
 using Devlivery.WebApi.Shared.Identity.Abstractions;
 using Devlivery.WebApi.Shared.Identity.Users.Models;
+using Devlivery.WebApi.Tests.Common.Builders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -83,20 +85,22 @@ public abstract class WebApiBaseFixture<TFactory>(TFactory factory)
         await Factory.ResetDatabaseAsync();
     }
 
-    protected async Task<User> CreateUserAsync(
-        string? name = null,
-        string? email = null,
-        string? password = null,
-        Guid? establishmentId = null)
+    protected async Task<(User user, Establishment establishment, string accessToken)> Prepare(
+        User? user = null,
+        Establishment? establishment = null,
+        string? password = null)
     {
-        name ??= Faker.Name.FullName();
-        email ??= Faker.Internet.Email();
+        establishment ??= new EstablishmentBuilder().Build();
+        user ??= new UserBuilder()
+            .WithEstablishmentId(establishment.Id)
+            .Build();
         password ??= Faker.Internet.Password(length: 5, prefix: "P@ssw0rd1");
-        establishmentId ??= Faker.Random.Guid();
 
         using var scope = Factory.Services.CreateScope();
+
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var user = new User(name, email, establishmentId.Value);
+        var appDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
 
         var identityResult = await userManager.CreateAsync(new ApplicationUser
         {
@@ -109,24 +113,14 @@ public abstract class WebApiBaseFixture<TFactory>(TFactory factory)
         if (!identityResult.Succeeded)
             throw new InvalidOperationException("Failed to create user in identity store.");
 
-        var appDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await appDbContext.Establishments.AddAsync(establishment);
         await appDbContext.Users.AddAsync(user);
         await appDbContext.SaveChangesAsync();
 
-        return user;
-    }
-
-    protected async Task<string> GetAccessTokenAsync(User? user = null, Guid? establishmentId = null)
-    {
-        user ??= await CreateUserAsync(establishmentId: establishmentId);
-
-        using var scope = Factory.Services.CreateScope();
-        var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
-        var tokenRequest = new TokenRequest(
+        var token = await tokenService.GenerateTokenAsync(new TokenRequest(
             user.Id.ToString(),
-            user.EstablishmentId.ToString()
-        );
-        var token = await tokenService.GenerateTokenAsync(tokenRequest);
-        return token;
+            user.EstablishmentId.ToString()));
+
+        return (user, establishment, token);
     }
 }

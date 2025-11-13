@@ -64,7 +64,6 @@ public sealed class ProductBuilder
         if (_establishmentId == Guid.Empty)
             throw new InvalidOperationException("No establishment id has been added");
 
-
         return new Product(
             name: _productName,
             description: _productDescription,

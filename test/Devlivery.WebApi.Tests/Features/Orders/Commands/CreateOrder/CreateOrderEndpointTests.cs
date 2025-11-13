@@ -19,9 +19,10 @@ public sealed class CreateOrderEndpointTests(OrdersWebApplicationFactory factory
     {
         // Arrange
         await ResetDatabaseAsync();
-        var establishmentId = Guid.NewGuid();
-        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
-        var product = new ProductBuilder().Build();
+        var (_, establishment, accessToken) = await Prepare();
+        var product = new ProductBuilder()
+            .WithEstablishmentId(establishment.Id)
+            .Build();
 
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -47,7 +48,7 @@ public sealed class CreateOrderEndpointTests(OrdersWebApplicationFactory factory
         };
 
         // Act
-        var response = await PostAsync("/api/orders", request, token);
+        var response = await PostAsync("/api/orders", request, accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
@@ -62,10 +63,7 @@ public sealed class CreateOrderEndpointTests(OrdersWebApplicationFactory factory
     {
         // Arrange
         await ResetDatabaseAsync();
-
-        var establishmentId = Guid.NewGuid();
-        var user = await CreateUserAsync(establishmentId: establishmentId);
-        var token = await GetAccessTokenAsync(user);
+        var (_, _, accessToken) = await Prepare();
 
         // invalid: empty items
         var orderCommand = new
@@ -79,7 +77,7 @@ public sealed class CreateOrderEndpointTests(OrdersWebApplicationFactory factory
         };
 
         // Act
-        var response = await PostAsync("/api/orders", orderCommand, token);
+        var response = await PostAsync("/api/orders", orderCommand, accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);

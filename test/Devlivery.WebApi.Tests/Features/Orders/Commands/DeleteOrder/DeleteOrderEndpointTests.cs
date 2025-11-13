@@ -18,13 +18,16 @@ public sealed class DeleteOrderEndpointTests(OrdersWebApplicationFactory factory
         // Arrange
         await ResetDatabaseAsync();
 
-        var establishmentId = Guid.NewGuid();
-        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
-        var product = new ProductBuilder().Build();
+        var (_, establishment, accessToken) = await Prepare();
+        var product = new ProductBuilder()
+            .WithEstablishmentId(establishment.Id)
+            .Build();
         var orderItem = new OrderItemBuilder()
+            .WithEstablishmentId(establishment.Id)
             .WithProduct(product)
             .Build();
         var order = new OrderBuilder()
+            .WithEstablishmentId(establishment.Id)
             .WithItems(orderItem)
             .WithDeliveryFee(0m)
             .Build();
@@ -35,7 +38,7 @@ public sealed class DeleteOrderEndpointTests(OrdersWebApplicationFactory factory
         await dbContext.SaveChangesAsync();
 
         // Act
-        var response = await DeleteAsync($"/api/orders/{order.Id}", token);
+        var response = await DeleteAsync($"/api/orders/{order.Id}", accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
@@ -47,12 +50,11 @@ public sealed class DeleteOrderEndpointTests(OrdersWebApplicationFactory factory
         // Arrange
         await ResetDatabaseAsync();
 
-        var establishmentId = Guid.NewGuid();
-        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
+        var (_, _, accessToken) = await Prepare();
         var nonExisting = Guid.NewGuid();
 
         // Act
-        var response = await DeleteAsync($"/api/orders/{nonExisting}", token);
+        var response = await DeleteAsync($"/api/orders/{nonExisting}", accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);

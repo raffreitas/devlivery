@@ -17,8 +17,7 @@ public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        var establishmentId = Guid.NewGuid();
-        var accessToken = await GetAccessTokenAsync(establishmentId: establishmentId);
+        var (_, _, accessToken) = await Prepare();
         var name = Faker.Commerce.ProductName();
         var description = Faker.Commerce.ProductDescription();
         var price = Faker.Random.Decimal(1.0m, 999.99m);
@@ -44,8 +43,7 @@ public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        var establishmentId = Guid.NewGuid();
-        var accessToken = await GetAccessTokenAsync(establishmentId: establishmentId);
+        var (_, _, accessToken) = await Prepare();
         var command = new CreateProductCommand("", "", 0m, "", false);
 
         // Act

@@ -7,7 +7,7 @@ namespace Devlivery.WebApi.Tests.Common.Builders;
 public class OrderItemBuilder
 {
     private readonly Faker _faker = new();
-    private Product _product;
+    private Product? _product;
     private int _quantity;
     private string _notes;
     private Guid _establishmentId;
@@ -16,7 +16,6 @@ public class OrderItemBuilder
     {
         _quantity = _faker.Random.Int(min: 1);
         _notes = _faker.Lorem.Sentence();
-        _product = new ProductBuilder().Build();
     }
 
     public OrderItemBuilder WithProduct(Product product)
@@ -48,6 +47,9 @@ public class OrderItemBuilder
     {
         if (_establishmentId == Guid.Empty)
             throw new InvalidOperationException("No establishment id has been added");
+
+        if (_product == null)
+            throw new InvalidOperationException("No product has been added");
 
         return new OrderItem(
             productId: _product.Id,

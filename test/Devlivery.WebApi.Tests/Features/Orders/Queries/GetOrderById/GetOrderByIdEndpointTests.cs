@@ -19,13 +19,16 @@ public sealed class GetOrderByIdEndpointTests(OrdersWebApplicationFactory factor
         // Arrange
         await ResetDatabaseAsync();
 
-        var establishmentId = Guid.NewGuid();
-        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
-        var product = new ProductBuilder().Build();
+        var (_, establishment, accessToken) = await Prepare();
+        var product = new ProductBuilder()
+            .WithEstablishmentId(establishment.Id)
+            .Build();
         var orderItem = new OrderItemBuilder()
+            .WithEstablishmentId(establishment.Id)
             .WithProduct(product)
             .Build();
         var order = new OrderBuilder()
+            .WithEstablishmentId(establishment.Id)
             .WithItems(orderItem)
             .WithDeliveryFee(0m)
             .Build();
@@ -36,7 +39,7 @@ public sealed class GetOrderByIdEndpointTests(OrdersWebApplicationFactory factor
         await dbContext.SaveChangesAsync();
 
         // Act
-        var response = await GetAsync($"/api/orders/{order.Id}", token);
+        var response = await GetAsync($"/api/orders/{order.Id}", accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -51,12 +54,11 @@ public sealed class GetOrderByIdEndpointTests(OrdersWebApplicationFactory factor
         // Arrange
         await ResetDatabaseAsync();
 
-        var establishmentId = Guid.NewGuid();
-        var token = await GetAccessTokenAsync(establishmentId: establishmentId);
+        var (_, _, accessToken) = await Prepare();
         var nonExisting = Guid.NewGuid();
 
         // Act
-        var response = await GetAsync($"/api/orders/{nonExisting}", token);
+        var response = await GetAsync($"/api/orders/{nonExisting}", accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
