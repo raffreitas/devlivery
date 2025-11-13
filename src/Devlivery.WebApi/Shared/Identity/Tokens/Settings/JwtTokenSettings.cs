@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Devlivery.WebApi.Features.Auth.Infrastructure.Tokens.Settings;
+namespace Devlivery.WebApi.Shared.Identity.Tokens.Settings;
 
 public sealed record JwtTokenSettings
 {

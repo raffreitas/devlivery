@@ -2,7 +2,7 @@ using Devlivery.WebApi.Features.Establishments.Domain;
 using Devlivery.WebApi.Features.Products.Domain;
 using Devlivery.WebApi.Features.Users.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Identity.Models;
+using Devlivery.WebApi.Shared.Identity.Users.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

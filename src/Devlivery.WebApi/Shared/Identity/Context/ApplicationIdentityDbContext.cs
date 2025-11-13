@@ -1,4 +1,4 @@
-﻿using Devlivery.WebApi.Shared.Identity.Models;
+﻿using Devlivery.WebApi.Shared.Identity.Users.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

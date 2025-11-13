@@ -6,7 +6,7 @@ public interface ITenantAccessor
     void Register(Tenant tenant);
 }
 
-public sealed class TenantAccessor(IHttpContextAccessor httpContextAccessor) : ITenantAccessor
+public sealed class TenantAccessor : ITenantAccessor
 {
     public Tenant Tenant { get; private set; }
 

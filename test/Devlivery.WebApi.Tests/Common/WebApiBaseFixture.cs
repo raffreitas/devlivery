@@ -1,10 +1,10 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Bogus;
-using Devlivery.WebApi.Features.Auth.Abstractions;
 using Devlivery.WebApi.Features.Users.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Identity.Models;
+using Devlivery.WebApi.Shared.Identity.Abstractions;
+using Devlivery.WebApi.Shared.Identity.Users.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -124,8 +124,7 @@ public abstract class WebApiBaseFixture<TFactory>(TFactory factory)
         var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
         var tokenRequest = new TokenRequest(
             user.Id.ToString(),
-            user.EstablishmentId.ToString(),
-            user.Email
+            user.EstablishmentId.ToString()
         );
         var token = await tokenService.GenerateTokenAsync(tokenRequest);
         return token;
