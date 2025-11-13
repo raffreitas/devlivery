@@ -9,12 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Shared.Database.Context;
 
-public sealed class ApplicationDbContext(
-    DbContextOptions<ApplicationDbContext> options,
-    ITenantAccessor tenantAccessor) : DbContext(options)
+public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    private readonly Guid _establishmentId = tenantAccessor.Tenant.Id;
-
     public DbSet<User> Users => Set<User>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Order> Orders => Set<Order>();
@@ -31,9 +27,5 @@ public sealed class ApplicationDbContext(
         modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
 
         modelBuilder.UseUtcDateTimeConverter();
-
-        modelBuilder.Entity<Order>().HasQueryFilter(x => x.EstablishmentId == _establishmentId);
-        modelBuilder.Entity<User>().HasQueryFilter(x => x.EstablishmentId == _establishmentId);
-        modelBuilder.Entity<Product>().HasQueryFilter(x => x.EstablishmentId == _establishmentId);
     }
 }
