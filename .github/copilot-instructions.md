@@ -23,7 +23,45 @@ Features/[FeatureName]/
 
 ## Critical Patterns (Do NOT Deviate)
 
-### 1. API Response Pattern
+### 1. Multi-Tenancy Pattern
+**All entities MUST have an `EstablishmentId`** for tenant isolation:
+
+`csharp
+// Entity definition
+public sealed class Product : Entity
+{
+    public Guid EstablishmentId { get; private set; }
+    // ... other properties
+}
+
+// In Handlers - inject ITenantAccessor and use tenant ID
+public sealed class CreateProductHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+{
+    public async Task<Result<CreateProductResponse>> HandleAsync(CreateProductCommand command, ...)
+    {
+        var product = new Product(..., tenantAccessor.Tenant.Id);  // Always pass tenant ID
+    }
+}
+
+// In Queries - ALWAYS use .ForTenant() extension
+var products = await dbContext.Products
+    .ForTenant(tenantAccessor.Tenant.Id)  // Filters by EstablishmentId
+    .AsNoTracking()
+    .ToListAsync();
+`
+
+**How it works:**
+- JWT token contains `establishment_id` claim (added during login via `ITokenService`)
+- `TenantRegisterMiddleware` extracts tenant from JWT → stores in `ITenantAccessor`
+- All handlers inject `ITenantAccessor` to get current tenant
+- `.ForTenant()` extension uses `EF.Property<Guid>(e, "EstablishmentId")` for filtering
+
+**Critical rules:**
+- Commands: Pass `tenantAccessor.Tenant.Id` when creating entities
+- Queries: ALWAYS use `.ForTenant(tenantAccessor.Tenant.Id)` before any filtering
+- Login bypassed: Middleware skips `/login`, `/health`, `/scalar`, `/openapi` paths
+
+### 2. API Response Pattern
 All endpoints use **ASP.NET Core Typed Results** + **RFC 7807 Problem Details**:
 
 `csharp
@@ -43,7 +81,7 @@ return result.ToNotFoundProblem();              // 404 not found
 
 See `docs/API-RESPONSE-PATTERN.md` for complete examples.
 
-### 2. Validation Pattern
+### 3. Validation Pattern
 Validators are **explicitly called** in endpoints (not automatic):
 
 `csharp
@@ -65,7 +103,7 @@ if (!validationResult.IsValid)
 
 **All validation messages MUST be in Portuguese (PT-BR)** — use `.WithMessage(...)` with placeholders like `{PropertyName}`, `{MaxLength}`.
 
-### 3. Error Handling Pattern
+### 4. Error Handling Pattern
 Use **FluentResults** — never throw business exceptions:
 
 `csharp
@@ -76,7 +114,7 @@ if (product is null)
 return Result.Ok(response);
 `
 
-### 4. Primary Constructors
+### 5. Primary Constructors
 Always use C# primary constructors for dependency injection:
 
 `csharp
@@ -86,7 +124,7 @@ public sealed class CreateProductHandler(ApplicationDbContext dbContext, ILogger
 }
 `
 
-### 5. Query Filtering Pattern
+### 6. Query Filtering Pattern
 For list queries with optional filters, use nullable parameters in the Query record:
 
 `csharp
@@ -171,13 +209,15 @@ public sealed class Validator : AbstractValidator<DoSomethingCommand>
 // DoSomethingHandler.cs
 using FluentResults;
 
-public sealed class DoSomethingHandler(ApplicationDbContext dbContext)
+public sealed class DoSomethingHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
 {
     public async Task<Result<DoSomethingResponse>> HandleAsync(
         DoSomethingCommand command,
         CancellationToken cancellationToken = default)
     {
-        // Business logic here
+        // Business logic here - always pass tenant ID when creating entities
+        var entity = new MyEntity(..., tenantAccessor.Tenant.Id);
+        
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Ok(new DoSomethingResponse());
     }
@@ -277,9 +317,44 @@ app.MapMyFeatureEndpoints();
 8. **UTC timestamps**: Always use `DateTime.UtcNow` for `CreatedAt`/`UpdatedAt`
 9. **CancellationToken**: Always pass through to async DB operations
 10. **Query filtering**: Use nullable parameters in Query records for optional filters, apply conditionally in Handler
+11. **Multi-tenancy**: ALL entities must have `EstablishmentId`; always inject `ITenantAccessor` in handlers; use `.ForTenant()` in queries
+12. **Integration tests**: Always call `await ResetDatabaseAsync()` first; use `Prepare()` helper for auth setup
 
 ## Testing
 
+### Integration Tests
+Use **Testcontainers + Respawn** pattern with **Collections per Feature**:
+
+`csharp
+[Collection("Products Tests")]  // Shares PostgreSQL container with all Products tests
+[Trait("Category", "Integration Tests")]
+public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory factory)
+    : WebApiBaseFixture<ProductsWebApplicationFactory>(factory)
+{
+    [Fact]
+    public async Task Test()
+    {
+        await ResetDatabaseAsync();  // ALWAYS call first - clears data in ~50-100ms
+        
+        var (user, establishment, token) = await Prepare();  // Creates test user + establishment
+        var command = new CreateProductCommand(...);
+        
+        var response = await PostAsync("/api/products", command, token);
+        
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
+    }
+}
+`
+
+**Critical rules:**
+- ALWAYS call `await ResetDatabaseAsync()` at the start of each test
+- Each feature has its own `WebApplicationFactory` + Collection (e.g., `ProductsWebApplicationFactory`)
+- Use `Prepare()` helper to create authenticated users with establishment context
+- Respawn cleans data 50x faster than recreating the database (~50-100ms vs 2-5s)
+
+See `docs/INTEGRATION-TESTS.md` for complete guide.
+
+### Manual Testing
 Use `Devlivery.WebApi.http` (root of project) with REST Client extension in VS Code or Rider.
 
 **Test credentials**:
