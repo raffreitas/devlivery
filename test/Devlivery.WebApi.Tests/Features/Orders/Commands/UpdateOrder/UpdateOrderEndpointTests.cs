@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Text.Json;
 using Devlivery.WebApi.Features.Orders.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
 using Devlivery.WebApi.Tests.Common;
@@ -65,11 +64,7 @@ public sealed class UpdateOrderEndpointTests(OrdersWebApplicationFactory factory
         var response = await PutAsync($"/api/orders/{order.Id}", request, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        await using var responseBody = await response.Content.ReadAsStreamAsync();
-        var responseData = await JsonDocument.ParseAsync(responseBody);
-        var data = responseData.RootElement.GetProperty("data");
-        data.GetProperty("id").GetGuid().ShouldBe(order.Id);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
         using var scope2 = Factory.Services.CreateScope();
         var dbContext2 = scope2.ServiceProvider.GetRequiredService<ApplicationDbContext>();
