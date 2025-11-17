@@ -1,0 +1,55 @@
+﻿using Devlivery.WebApi.Features.Orders.Domain;
+using FluentValidation;
+
+namespace Devlivery.WebApi.Features.Orders.Commands.UpdateOrder;
+
+public sealed record UpdateOrderCommand(
+    Guid Id,
+    OrderItemDto[] Items,
+    string CustomerName,
+    string? CustomerPhone,
+    string DeliveryAddress,
+    string PaymentMethod,
+    decimal DeliveryFee = 0);
+
+public sealed record OrderItemDto(Guid ProductId, int Quantity, string? Notes);
+
+public sealed class Validator : AbstractValidator<UpdateOrderCommand>
+{
+    public Validator()
+    {
+        RuleFor(x => x.Id).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
+
+        RuleFor(x => x.Items).NotEmpty().WithMessage("O campo '{PropertyName}' não pode estar vazio.");
+
+        RuleForEach(x => x.Items).ChildRules(item =>
+        {
+            item.RuleFor(x => x.ProductId).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
+            item.RuleFor(x => x.Quantity).GreaterThan(0)
+                .WithMessage("O campo '{PropertyName}' deve ser maior que {ComparisonValue}.");
+        });
+
+        RuleFor(x => x.CustomerName)
+            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
+            .MaximumLength(200).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+
+        When(x => !string.IsNullOrWhiteSpace(x.CustomerPhone), () =>
+        {
+            RuleFor(x => x.CustomerPhone)
+                .MaximumLength(20).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+        });
+
+        RuleFor(x => x.PaymentMethod)
+            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
+            .IsEnumName(typeof(PaymentMethod), caseSensitive: false)
+            .WithMessage("O campo '{PropertyName}' deve ser um método de pagamento válido.");
+
+        RuleFor(x => x.DeliveryAddress)
+            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
+            .MaximumLength(500).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+
+        RuleFor(x => x.DeliveryFee)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("O campo '{PropertyName}' deve ser maior ou igual a {ComparisonValue}.");
+    }
+}

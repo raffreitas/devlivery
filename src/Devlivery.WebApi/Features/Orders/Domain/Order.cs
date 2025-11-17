@@ -51,4 +51,20 @@ public sealed class Order : Entity
         Status = status;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void UpdateDetails(
+        string customerName,
+        string? customerPhone,
+        string deliveryAddress,
+        PaymentMethod paymentMethod,
+        decimal deliveryFee)
+    {
+        CustomerName = customerName;
+        CustomerPhone = customerPhone;
+        DeliveryAddress = deliveryAddress;
+        PaymentMethod = paymentMethod;
+        DeliveryFee = deliveryFee;
+        Total = _items.Sum(i => i.TotalPrice) + DeliveryFee;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
