@@ -121,6 +121,7 @@ export const orderService = {
 
   update: async (id: string, data: OrderFormData): Promise<void> => {
     const payload = {
+      id,
       items: data.items.map((i) => ({
         productId: i.product.id,
         quantity: i.quantity,
