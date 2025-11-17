@@ -1,4 +1,4 @@
-using Devlivery.WebApi.Shared.Models;
+using Devlivery.WebApi.Shared.Presentation.Models;
 using FluentResults;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

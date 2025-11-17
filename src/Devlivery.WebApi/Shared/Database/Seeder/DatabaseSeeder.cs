@@ -1,7 +1,8 @@
+using Devlivery.WebApi.Features.Establishments.Domain;
 using Devlivery.WebApi.Features.Products.Domain;
 using Devlivery.WebApi.Features.Users.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Identity.Models;
+using Devlivery.WebApi.Shared.Identity.Users.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,10 +15,16 @@ public static class DatabaseSeeder
         if (await db.Users.AnyAsync())
             return;
 
+        var establishment = new Establishment(
+            tradeName: "Pizza Devlivery",
+            isActive: true
+        );
+
         // Seed User
         var user = new User(
             name: "Atendente",
-            email: "admin@pizza.com"
+            email: "admin@pizza.com",
+            establishmentId: establishment.Id
         );
 
         var identityResult = await userManager.CreateAsync(new ApplicationUser
@@ -41,21 +48,24 @@ public static class DatabaseSeeder
                 description: "Molho de tomate, mussarela e manjericão",
                 price: 35.00m,
                 category: "Pizza",
-                available: true
+                available: true,
+                establishmentId: establishment.Id
             ),
             new(
                 name: "Pizza Calabresa",
                 description: "Molho de tomate, mussarela, calabresa e cebola",
                 price: 38.00m,
                 category: "Pizza",
-                available: true
+                available: true,
+                establishmentId: establishment.Id
             ),
             new(
                 name: "Refrigerante 2L",
                 description: "Coca-Cola, Guaraná ou Fanta",
                 price: 10.00m,
                 category: "Bebida",
-                available: true
+                available: true,
+                establishmentId: establishment.Id
             )
         };
 

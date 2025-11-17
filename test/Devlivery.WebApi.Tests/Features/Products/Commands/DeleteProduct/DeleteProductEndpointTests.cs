@@ -18,8 +18,10 @@ public sealed class DeleteProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
-        var product = new ProductBuilder().Build();
+        var (_, establishment, accessToken) = await Prepare();
+        var product = new ProductBuilder()
+            .WithEstablishmentId(establishment.Id)
+            .Build();
 
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -27,7 +29,7 @@ public sealed class DeleteProductEndpointTests(ProductsWebApplicationFactory fac
         await dbContext.SaveChangesAsync();
 
         // Act
-        var response = await DeleteAsync($"/api/products/{product.Id}", token);
+        var response = await DeleteAsync($"/api/products/{product.Id}", accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
@@ -39,11 +41,11 @@ public sealed class DeleteProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var (_, _, accessToken) = await Prepare();
         var nonExistingId = Guid.NewGuid();
 
         // Act
-        var response = await DeleteAsync($"/api/products/{nonExistingId}", token);
+        var response = await DeleteAsync($"/api/products/{nonExistingId}", accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);

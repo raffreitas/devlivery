@@ -17,12 +17,11 @@ public sealed class LoginEndpointTests(AuthWebApplicationFactory factory)
         // Arrange
         await ResetDatabaseAsync();
 
-        var email = Faker.Internet.Email();
         const string password = "P@ssw0rd!";
-        await CreateUserAsync(email: email, password: password);
+        var (user, _, _) = await Prepare(password: password);
 
         // Act
-        var response = await PostAsync("/api/auth/login", new LoginCommand(email, password));
+        var response = await PostAsync("/api/auth/login", new LoginCommand(user.Email, password));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -39,13 +38,12 @@ public sealed class LoginEndpointTests(AuthWebApplicationFactory factory)
         // Arrange
         await ResetDatabaseAsync();
 
-        var email = Faker.Internet.Email();
         const string password = "P@ssw0rd!";
-        await CreateUserAsync(email: email, password: password);
         const string invalidPassword = "WrongP@ssw0rd!";
+        var (user, _, _) = await Prepare(password: password);
 
         // Act
-        var response = await PostAsync("/api/auth/login", new LoginCommand(email, invalidPassword));
+        var response = await PostAsync("/api/auth/login", new LoginCommand(user.Email, invalidPassword));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);

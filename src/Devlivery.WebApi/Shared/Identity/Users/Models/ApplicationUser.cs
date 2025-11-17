@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Devlivery.WebApi.Shared.Identity.Models;
+namespace Devlivery.WebApi.Shared.Identity.Users.Models;
 
 public sealed class ApplicationUser : IdentityUser
 {

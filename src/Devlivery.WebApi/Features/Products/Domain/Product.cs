@@ -9,16 +9,19 @@ public sealed class Product : Entity
     public decimal Price { get; private set; }
     public string Category { get; private set; }
     public bool Available { get; private set; }
+    public Guid EstablishmentId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    public Product(string name, string description, decimal price, string category, bool available)
+    public Product(string name, string description, decimal price, string category, bool available,
+        Guid establishmentId)
     {
         Name = name;
         Description = description;
         Price = price;
         Category = category;
         Available = available;
+        EstablishmentId = establishmentId;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }

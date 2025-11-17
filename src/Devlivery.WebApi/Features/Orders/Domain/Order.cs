@@ -11,6 +11,7 @@ public sealed class Order : Entity
     public string Status { get; private set; }
     public decimal Total { get; private set; }
     public decimal DeliveryFee { get; private set; }
+    public Guid EstablishmentId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
@@ -23,7 +24,9 @@ public sealed class Order : Entity
         string deliveryAddress,
         PaymentMethod paymentMethod,
         string status,
-        decimal deliveryFee)
+        decimal deliveryFee,
+        Guid establishmentId
+    )
     {
         CustomerName = customerName;
         CustomerPhone = customerPhone;
@@ -31,6 +34,7 @@ public sealed class Order : Entity
         PaymentMethod = paymentMethod;
         Status = status;
         DeliveryFee = deliveryFee;
+        EstablishmentId = establishmentId;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }

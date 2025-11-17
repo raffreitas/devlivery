@@ -1,4 +1,4 @@
-namespace Devlivery.WebApi.Shared.Models;
+namespace Devlivery.WebApi.Shared.Presentation.Models;
 
 /// <summary>
 /// Standardized API response wrapper for successful operations

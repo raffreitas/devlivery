@@ -1,4 +1,5 @@
-﻿using Devlivery.WebApi.Features.Orders.Domain;
+﻿using Devlivery.WebApi.Features.Establishments.Domain;
+using Devlivery.WebApi.Features.Orders.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -16,10 +17,18 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(e => e.Total).HasPrecision(18, 2);
         builder.Property(e => e.DeliveryFee).HasPrecision(18, 2);
         builder.Property(e => e.PaymentMethod).HasConversion<string>().HasMaxLength(20);
+        builder.Property(x => x.EstablishmentId).IsRequired();
 
         builder.HasMany(e => e.Items)
             .WithOne()
             .HasForeignKey("order_id").IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne<Establishment>()
+            .WithMany()
+            .HasForeignKey(e => e.EstablishmentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(x => x.EstablishmentId);
     }
 }

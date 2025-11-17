@@ -1,5 +1,5 @@
 ﻿using Devlivery.WebApi.Shared.Extensions;
-using Devlivery.WebApi.Shared.Models;
+using Devlivery.WebApi.Shared.Presentation.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

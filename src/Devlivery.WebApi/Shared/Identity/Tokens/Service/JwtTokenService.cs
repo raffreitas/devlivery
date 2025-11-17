@@ -1,12 +1,13 @@
 ﻿using System.Security.Claims;
 using System.Text;
-using Devlivery.WebApi.Features.Auth.Abstractions;
-using Devlivery.WebApi.Features.Auth.Infrastructure.Tokens.Settings;
+using Devlivery.WebApi.Shared.Identity.Abstractions;
+using Devlivery.WebApi.Shared.Identity.Tokens.Settings;
+using Devlivery.WebApi.Shared.Tenancy;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Devlivery.WebApi.Features.Auth.Infrastructure.Tokens.Service;
+namespace Devlivery.WebApi.Shared.Identity.Tokens.Service;
 
 internal sealed class JwtTokenService(IOptions<JwtTokenSettings> options) : ITokenService
 {
@@ -20,7 +21,7 @@ internal sealed class JwtTokenService(IOptions<JwtTokenSettings> options) : ITok
         List<Claim> claims =
         [
             new(JwtRegisteredClaimNames.Sub, tokenRequest.SubjectId),
-            new(JwtRegisteredClaimNames.Email, tokenRequest.Email),
+            new(TenantConstants.TenantIdClaimType, tokenRequest.TenantId)
         ];
 
         var tokenDescriptor = new SecurityTokenDescriptor

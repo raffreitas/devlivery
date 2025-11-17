@@ -4,7 +4,7 @@ Backend desenvolvido com .NET 9 seguindo as melhores práticas de desenvolviment
 
 ## 🏗️ Arquitetura
 
-Este projeto implementa **Vertical Slice Architecture** (VSA), onde cada feature é completamente auto-contida com sua própria lógica de negócio, validação, handlers e endpoints.
+Este projeto implementa **Vertical Slice Architecture** (VSA), onde cada feature é completamente autocontida com sua própria lógica de negócio, validação, handlers e endpoints.
 
 ### Características principais:
 
@@ -578,4 +578,4 @@ O projeto está preparado para observabilidade com:
 
 ---
 
-**Desenvolvido com ❤️ usando .NET 9 e boas práticas de arquitetura**
+**Desenvolvido com ❤️ usando .NET 9**

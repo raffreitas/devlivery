@@ -18,9 +18,11 @@ public sealed class UpdateProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
+        var (_, establishment, accessToken) = await Prepare();
 
-        var product = new ProductBuilder().Build();
+        var product = new ProductBuilder()
+            .WithEstablishmentId(establishment.Id)
+            .Build();
 
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -37,7 +39,7 @@ public sealed class UpdateProductEndpointTests(ProductsWebApplicationFactory fac
         };
 
         // Act
-        var response = await PutAsync($"/api/products/{product.Id}", updateRequest, token);
+        var response = await PutAsync($"/api/products/{product.Id}", updateRequest, accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
@@ -49,8 +51,10 @@ public sealed class UpdateProductEndpointTests(ProductsWebApplicationFactory fac
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
-        var product = new ProductBuilder().Build();
+        var (_, establishment, accessToken) = await Prepare();
+        var product = new ProductBuilder()
+            .WithEstablishmentId(establishment.Id)
+            .Build();
         var nonExistingId = Guid.NewGuid();
 
         var updateRequest = new
@@ -63,7 +67,7 @@ public sealed class UpdateProductEndpointTests(ProductsWebApplicationFactory fac
         };
 
         // Act
-        var response = await PutAsync($"/api/products/{nonExistingId}", updateRequest, token);
+        var response = await PutAsync($"/api/products/{nonExistingId}", updateRequest, accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);

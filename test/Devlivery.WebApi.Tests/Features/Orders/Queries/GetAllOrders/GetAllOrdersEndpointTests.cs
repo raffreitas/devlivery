@@ -19,12 +19,16 @@ public sealed class GetAllOrdersEndpointTests(OrdersWebApplicationFactory factor
         // Arrange
         await ResetDatabaseAsync();
 
-        var token = await GetAccessTokenAsync();
-        var product = new ProductBuilder().Build();
+        var (_, establishment, accessToken) = await Prepare();
+        var product = new ProductBuilder()
+            .WithEstablishmentId(establishment.Id)
+            .Build();
         var orderItem = new OrderItemBuilder()
+            .WithEstablishmentId(establishment.Id)
             .WithProduct(product)
             .Build();
         var order = new OrderBuilder()
+            .WithEstablishmentId(establishment.Id)
             .WithItems(orderItem)
             .WithDeliveryFee(0m)
             .Build();
@@ -36,7 +40,7 @@ public sealed class GetAllOrdersEndpointTests(OrdersWebApplicationFactory factor
         await dbContext.SaveChangesAsync();
 
         // Act
-        var response = await GetAsync("/api/orders", token);
+        var response = await GetAsync("/api/orders", accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);

@@ -1,4 +1,5 @@
-﻿using Devlivery.WebApi.Features.Products.Domain;
+﻿using Devlivery.WebApi.Features.Establishments.Domain;
+using Devlivery.WebApi.Features.Products.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,5 +15,13 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(e => e.Price).HasPrecision(18, 2);
         builder.Property(e => e.Category).IsRequired().HasMaxLength(100);
         builder.Property(e => e.Available).IsRequired();
+        builder.Property(x => x.EstablishmentId).IsRequired();
+
+        builder.HasOne<Establishment>()
+            .WithMany()
+            .HasForeignKey(e => e.EstablishmentId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.HasIndex(x => x.EstablishmentId);
     }
 }

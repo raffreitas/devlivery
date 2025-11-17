@@ -1,13 +1,15 @@
 ﻿using Devlivery.WebApi.Features.Auth;
 using Devlivery.WebApi.Features.Orders;
 using Devlivery.WebApi.Features.Products;
+using Devlivery.WebApi.Shared.Authorization;
 using Devlivery.WebApi.Shared.Database;
 using Devlivery.WebApi.Shared.Database.Context;
 using Devlivery.WebApi.Shared.Database.Seeder;
 using Devlivery.WebApi.Shared.Identity;
-using Devlivery.WebApi.Shared.Identity.Models;
+using Devlivery.WebApi.Shared.Identity.Users.Models;
 using Devlivery.WebApi.Shared.Observability;
 using Devlivery.WebApi.Shared.Presentation;
+using Devlivery.WebApi.Shared.Tenancy;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,13 +29,16 @@ public static class Startup
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
         services.AddHealthChecksConfiguration();
+        services.AddHttpContextAccessor();
 
         // OpenAPI/Swagger
         services.AddOpenApiConfiguration();
 
-        // Shared Infrastructure
+        // Shared Features
         services.AddIdentityFeature(configuration);
         services.AddDatabaseFeature(configuration);
+        services.AddAuthorizationFeature();
+        services.AddTenancyFeature();
 
         // Features
         services.AddAuthFeature(configuration);
@@ -73,10 +78,8 @@ public static class Startup
 
         app.UseHttpsRedirection();
 
-        // Authentication & Authorization
-        app.UseAuthentication();
-        app.UseAuthorization();
-
+        app.UseAuthorizationFeature();
+        app.UseTenancyFeature();
         app.UseObservabilityFeature();
 
         // Endpoints
