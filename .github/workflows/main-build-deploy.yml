@@ -68,7 +68,7 @@ jobs:
             ${{ runner.os }}-dotnet-tools-
 
       - name: Install EF Core tools
-        run: dotnet tool install --global dotnet-ef || dotnet tool update --global dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version 9.* || dotnet tool update --global dotnet-ef --version 9.*
 
       - name: Generate version tag
         if: false  # Disabled for now
@@ -161,7 +161,7 @@ jobs:
             ${{ runner.os }}-dotnet-tools-
 
       - name: Install EF Core tools
-        run: dotnet tool install --global dotnet-ef || dotnet tool update --global dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version 9.* || dotnet tool update --global dotnet-ef --version 9.*
 
       - name: Apply ApplicationDbContext migrations
         env:
