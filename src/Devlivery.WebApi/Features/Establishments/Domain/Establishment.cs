@@ -17,7 +17,7 @@ public sealed class Establishment : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Update(string? tradeName = null, decimal? defaultDeliveryFee = null)
+    public void Update(string? tradeName = null)
     {
         if (!string.IsNullOrWhiteSpace(tradeName))
             TradeName = tradeName;

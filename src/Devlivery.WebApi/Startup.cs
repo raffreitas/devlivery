@@ -37,7 +37,7 @@ public static class Startup
         // Shared Features
         services.AddIdentityFeature(configuration);
         services.AddDatabaseFeature(configuration);
-        services.AddAuthorizationFeature(configuration);
+        services.AddAuthorizationFeature();
         services.AddTenancyFeature();
 
         // Features

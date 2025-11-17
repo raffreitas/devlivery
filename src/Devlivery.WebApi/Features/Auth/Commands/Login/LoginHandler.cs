@@ -24,7 +24,6 @@ public sealed class LoginHandler(
             return Result.Fail("Credenciais inválidas");
         }
 
-
         var signInResult = await identityService.SignInAsync(user.Email, request.Password, cancellationToken);
         if (signInResult.IsFailed)
         {

@@ -4,8 +4,7 @@ namespace Devlivery.WebApi.Shared.Authorization;
 
 public static class AuthorizationFeature
 {
-    public static IServiceCollection AddAuthorizationFeature(this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddAuthorizationFeature(this IServiceCollection services)
     {
         services.AddAuthorizationBuilder()
             .SetFallbackPolicy(new AuthorizationPolicyBuilder()
