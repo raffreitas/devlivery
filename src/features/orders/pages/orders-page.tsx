@@ -15,11 +15,11 @@ import type { Order, OrderFormData } from "../types";
 
 const statusOptions: AutocompleteOption<Order["status"] | "all">[] = [
   { value: "all", label: "Todos" },
-  { value: "pending", label: "Pendente" },
-  { value: "preparing", label: "Em Preparo" },
-  { value: "ready", label: "Pronto" },
-  { value: "delivered", label: "Entregue" },
-  { value: "cancelled", label: "Cancelado" },
+  { value: "Pending", label: "Pendente" },
+  { value: "Preparing", label: "Em Preparo" },
+  { value: "Ready", label: "Pronto" },
+  { value: "Delivered", label: "Entregue" },
+  { value: "Canceled", label: "Cancelado" },
 ];
 
 const paymentOptions: AutocompleteOption<Order["paymentMethod"] | "all">[] = [

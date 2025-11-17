@@ -60,7 +60,7 @@ export function DashboardPage() {
   const paymentBreakdown = dashboardService.getPaymentBreakdown(todayOrders);
 
   const activeOrders = todayOrders
-    .filter((o) => o.status !== "delivered" && o.status !== "cancelled")
+    .filter((o) => o.status !== "Delivered" && o.status !== "Canceled")
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
