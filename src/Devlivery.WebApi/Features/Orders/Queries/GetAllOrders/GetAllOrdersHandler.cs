@@ -72,7 +72,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext, ITenantA
             o.CustomerName,
             o.CustomerPhone,
             o.DeliveryAddress,
-            o.Status,
+            o.Status.ToString(),
             o.Total,
             o.DeliveryFee,
             o.PaymentMethod.ToString(),

@@ -96,8 +96,8 @@ public sealed class UpdateOrderEndpointTests(OrdersWebApplicationFactory factory
             .WithDeliveryFee(0m)
             .Build();
 
-        // mark as cancelled
-        order.UpdateStatus("cancelled");
+        // mark as canceled
+        order.UpdateStatus(OrderStatus.Canceled);
 
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

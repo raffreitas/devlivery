@@ -32,7 +32,7 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext, ITenantAc
             customerPhone: command.CustomerPhone,
             deliveryAddress: command.DeliveryAddress,
             paymentMethod: paymentMethod,
-            status: "pending",
+            status: OrderStatus.Pending,
             deliveryFee: command.DeliveryFee,
             establishmentId: tenantAccessor.Tenant.Id
         );

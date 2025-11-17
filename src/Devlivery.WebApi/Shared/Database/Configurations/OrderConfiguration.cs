@@ -13,7 +13,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(e => e.CustomerName).IsRequired().HasMaxLength(200);
         builder.Property(e => e.CustomerPhone).IsRequired(false).HasMaxLength(20);
         builder.Property(e => e.DeliveryAddress).IsRequired().HasMaxLength(500);
-        builder.Property(e => e.Status).IsRequired().HasMaxLength(20);
+        builder.Property(e => e.Status).IsRequired().HasMaxLength(20).HasConversion<string>();
         builder.Property(e => e.Total).HasPrecision(18, 2);
         builder.Property(e => e.DeliveryFee).HasPrecision(18, 2);
         builder.Property(e => e.PaymentMethod).HasConversion<string>().HasMaxLength(20);

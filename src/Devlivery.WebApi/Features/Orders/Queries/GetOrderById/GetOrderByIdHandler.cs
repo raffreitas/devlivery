@@ -48,7 +48,7 @@ public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext, ITenantA
             order.CustomerName,
             order.CustomerPhone,
             order.DeliveryAddress,
-            order.Status,
+            order.Status.ToString(),
             order.Total,
             order.DeliveryFee,
             order.PaymentMethod.ToString(),

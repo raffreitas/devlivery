@@ -80,7 +80,7 @@ public class OrderBuilder
             customerPhone: _customerPhone,
             deliveryAddress: _deliveryAddress,
             paymentMethod: _paymentMethod,
-            status: "pending",
+            status: OrderStatus.Pending,
             deliveryFee: _deliveryFee,
             establishmentId: _establishmentId
         );

@@ -8,7 +8,7 @@ public sealed class Order : Entity
     public string? CustomerPhone { get; private set; }
     public string DeliveryAddress { get; private set; }
     public PaymentMethod PaymentMethod { get; private set; }
-    public string Status { get; private set; }
+    public OrderStatus Status { get; private set; }
     public decimal Total { get; private set; }
     public decimal DeliveryFee { get; private set; }
     public Guid EstablishmentId { get; private set; }
@@ -23,7 +23,7 @@ public sealed class Order : Entity
         string? customerPhone,
         string deliveryAddress,
         PaymentMethod paymentMethod,
-        string status,
+        OrderStatus status,
         decimal deliveryFee,
         Guid establishmentId
     )
@@ -46,7 +46,7 @@ public sealed class Order : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateStatus(string status)
+    public void UpdateStatus(OrderStatus status)
     {
         Status = status;
         UpdatedAt = DateTime.UtcNow;

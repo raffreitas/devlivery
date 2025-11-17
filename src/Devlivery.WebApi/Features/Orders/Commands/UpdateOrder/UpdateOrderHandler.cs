@@ -21,7 +21,7 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext, ITenantAc
         if (order is null)
             return Result.Fail("Pedido não encontrado");
 
-        if (order.Status is "cancelled" or "delivered")
+        if (order.Status is OrderStatus.Canceled or OrderStatus.Delivered)
             return Result.Fail(
                 "Pedido não pode ser atualizado pois está cancelado ou já foi entregue");
 
