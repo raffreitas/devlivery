@@ -7,19 +7,24 @@ import { OrderItemsTable } from "./order-form-items-table";
 import { ProductSelector } from "./order-form-product-selector";
 
 interface OrderFormProps {
+  initialData?: OrderFormData & { id?: string };
   onSubmit: (data: OrderFormData) => void;
   onCancel: () => void;
 }
 
-export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
+export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
   const { products } = useProducts();
-  const [customerName, setCustomerName] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(
-    null,
+  const [customerName, setCustomerName] = useState(
+    initialData?.customerName || "",
   );
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [deliveryFee, setDeliveryFee] = useState(0);
-  const [items, setItems] = useState<OrderItem[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(
+    initialData?.paymentMethod || null,
+  );
+  const [deliveryAddress, setDeliveryAddress] = useState(
+    initialData?.deliveryAddress || "",
+  );
+  const [deliveryFee, setDeliveryFee] = useState(initialData?.deliveryFee || 0);
+  const [items, setItems] = useState<OrderItem[]>(initialData?.items || []);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null,
   );
@@ -128,7 +133,7 @@ export function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
           Cancelar
         </Button>
         <Button type="submit" variant="primary">
-          Criar Pedido
+          {initialData?.id ? "Atualizar" : "Criar"} Pedido
         </Button>
       </div>
     </form>

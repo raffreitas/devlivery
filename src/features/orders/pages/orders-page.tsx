@@ -49,6 +49,7 @@ export function OrdersPage() {
     loading,
     isFetching,
     createOrder,
+    updateOrder,
     updateOrderStatus,
     deleteOrder,
   } = useOrders(
@@ -57,14 +58,30 @@ export function OrdersPage() {
     paymentFilter === "all" ? undefined : paymentFilter,
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<Order["status"] | "all">(
     "all",
   );
 
-  const handleCreateOrder = (data: OrderFormData) => {
-    createOrder(data);
+  const handleCreateOrUpdateOrder = (data: OrderFormData) => {
+    if (editingOrder) {
+      updateOrder(editingOrder.id, data);
+    } else {
+      createOrder(data);
+    }
     setIsModalOpen(false);
+    setEditingOrder(null);
+  };
+
+  const handleEditOrder = (order: Order) => {
+    setEditingOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingOrder(null);
   };
 
   const filteredOrders =
@@ -130,6 +147,7 @@ export function OrdersPage() {
                 <OrderCard
                   key={order.id}
                   order={order}
+                  onEdit={handleEditOrder}
                   onUpdateStatus={updateOrderStatus}
                   onDelete={deleteOrder}
                 />
@@ -140,12 +158,25 @@ export function OrdersPage() {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Novo Pedido"
+        onClose={handleCloseModal}
+        title={editingOrder ? "Editar Pedido" : "Novo Pedido"}
       >
         <OrderForm
-          onSubmit={handleCreateOrder}
-          onCancel={() => setIsModalOpen(false)}
+          initialData={
+            editingOrder
+              ? {
+                  id: editingOrder.id,
+                  items: editingOrder.items,
+                  customerName: editingOrder.customerName,
+                  customerPhone: editingOrder.customerPhone,
+                  deliveryAddress: editingOrder.deliveryAddress,
+                  deliveryFee: editingOrder.deliveryFee,
+                  paymentMethod: editingOrder.paymentMethod,
+                }
+              : undefined
+          }
+          onSubmit={handleCreateOrUpdateOrder}
+          onCancel={handleCloseModal}
         />
       </Modal>
 

@@ -3,12 +3,14 @@ import type { Order } from "@/features/orders/types";
 
 interface ActiveOrdersSectionProps {
   orders: Order[];
+  onEdit: (order: Order) => void;
   onUpdateStatus: (orderId: string, status: Order["status"]) => Promise<void>;
   onDelete: (orderId: string) => Promise<void>;
 }
 
 export function ActiveOrdersSection({
   orders,
+  onEdit,
   onUpdateStatus,
   onDelete,
 }: ActiveOrdersSectionProps) {
@@ -28,6 +30,7 @@ export function ActiveOrdersSection({
             <OrderCard
               key={order.id}
               order={order}
+              onEdit={onEdit}
               onUpdateStatus={onUpdateStatus}
               onDelete={onDelete}
             />
