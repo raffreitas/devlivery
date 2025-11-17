@@ -4,7 +4,6 @@ using Devlivery.WebApi.Features.Products.Domain;
 using Devlivery.WebApi.Features.Users.Domain;
 using Devlivery.WebApi.Shared.Database.Configurations;
 using Devlivery.WebApi.Shared.Database.Extensions;
-using Devlivery.WebApi.Shared.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Shared.Database.Context;
