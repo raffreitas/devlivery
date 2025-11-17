@@ -8,6 +8,7 @@ import { OrderPrint } from "./order-print";
 
 interface OrderCardProps {
   order: Order;
+  onEdit: (order: Order) => void;
   onUpdateStatus: (id: string, status: Order["status"]) => void;
   onDelete: (id: string) => void;
 }
@@ -20,8 +21,17 @@ const NEXT_STATUS: Record<Order["status"], Order["status"] | null> = {
   cancelled: null,
 };
 
-export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
+export function OrderCard({
+  order,
+  onEdit,
+  onUpdateStatus,
+  onDelete,
+}: OrderCardProps) {
   const { contentRef, handlePrint } = usePrintOrder();
+
+  const handleEdit = () => {
+    onEdit(order);
+  };
 
   const handleNextStatus = () => {
     const next = NEXT_STATUS[order.status];
@@ -59,6 +69,7 @@ export function OrderCard({ order, onUpdateStatus, onDelete }: OrderCardProps) {
       <OrderCardActions
         order={order}
         onPrint={handlePrint}
+        onEdit={handleEdit}
         onCancel={handleCancel}
         onNextStatus={handleNextStatus}
         onDelete={handleDelete}

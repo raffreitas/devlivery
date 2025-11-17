@@ -21,6 +21,12 @@ export function useOrders(
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["orders"] }),
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: OrderFormData }) =>
+      orderService.update(id, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["orders"] }),
+  });
+
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: Order["status"] }) =>
       orderService.updateStatus(id, status),
@@ -38,6 +44,8 @@ export function useOrders(
     isFetching: ordersQuery.isFetching,
     refetch: ordersQuery.refetch,
     createOrder: (data: OrderFormData) => createMutation.mutateAsync(data),
+    updateOrder: (id: string, data: OrderFormData) =>
+      updateMutation.mutateAsync({ id, data }),
     updateOrderStatus: (id: string, status: Order["status"]) =>
       updateStatusMutation.mutateAsync({ id, status }),
     deleteOrder: (id: string) => deleteMutation.mutateAsync(id),

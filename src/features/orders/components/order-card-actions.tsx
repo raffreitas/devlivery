@@ -4,6 +4,7 @@ import type { Order } from "../types";
 interface OrderCardActionsProps {
   order: Order;
   onPrint: () => void;
+  onEdit: () => void;
   onCancel: () => void;
   onNextStatus: () => void;
   onDelete: () => void;
@@ -24,11 +25,13 @@ function getNextStatusLabel(status: Order["status"]): string {
 export function OrderCardActions({
   order,
   onPrint,
+  onEdit,
   onCancel,
   onNextStatus,
   onDelete,
   hasNextStatus,
 }: OrderCardActionsProps) {
+  const showEdit = order.status !== "cancelled" && order.status !== "delivered";
   const showCancel =
     order.status !== "cancelled" && order.status !== "delivered";
   const showDelete =
@@ -40,6 +43,11 @@ export function OrderCardActions({
         <Button size="sm" variant="secondary" onClick={onPrint}>
           Imprimir
         </Button>
+        {showEdit && (
+          <Button size="sm" variant="secondary" onClick={onEdit}>
+            Editar
+          </Button>
+        )}
         {showCancel && (
           <Button size="sm" variant="danger" onClick={onCancel}>
             Cancelar

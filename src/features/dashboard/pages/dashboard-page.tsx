@@ -1,9 +1,11 @@
 import { CheckCircle, ClipboardList, Clock, DollarSign } from "lucide-react";
 import { useEffect, useState } from "react";
+import { OrderForm } from "@/features/orders/components/order-form";
 import { useOrders } from "@/features/orders/hooks/use-orders";
-import type { Order } from "@/features/orders/types";
+import type { Order, OrderFormData } from "@/features/orders/types";
 import { BottomSheet } from "@/shared/components/bottom-sheet";
 import { Button } from "@/shared/components/button";
+import { Modal } from "@/shared/components/modal";
 import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
 import { ActiveOrdersSection } from "../components/active-orders-section";
 import { DashboardFiltersContent } from "../components/dashboard-filters-content";
@@ -24,17 +26,34 @@ export function DashboardPage() {
     resetToToday,
   } = useDateRangeFilter({ debounceMs: 500 });
 
-  const { orders, isFetching, updateOrderStatus, deleteOrder } = useOrders(
-    startDate,
-    endDate,
-  );
+  const { orders, isFetching, updateOrder, updateOrderStatus, deleteOrder } =
+    useOrders(startDate, endDate);
 
   const [todayOrders, setTodayOrders] = useState<Order[]>([]);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   useEffect(() => {
     setTodayOrders(orders);
   }, [orders]);
+
+  const handleEditOrder = (order: Order) => {
+    setEditingOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingOrder(null);
+  };
+
+  const handleUpdateOrder = (data: OrderFormData) => {
+    if (editingOrder) {
+      updateOrder(editingOrder.id, data);
+    }
+    handleCloseModal();
+  };
 
   const stats = dashboardService.calculateStats(todayOrders);
   const ordersByStatus = dashboardService.getOrdersByStatus(todayOrders);
@@ -102,6 +121,7 @@ export function DashboardPage() {
           <div className="lg:col-span-2">
             <ActiveOrdersSection
               orders={activeOrders}
+              onEdit={handleEditOrder}
               onUpdateStatus={updateOrderStatus}
               onDelete={deleteOrder}
             />
@@ -117,6 +137,30 @@ export function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title="Editar Pedido"
+      >
+        <OrderForm
+          initialData={
+            editingOrder
+              ? {
+                  id: editingOrder.id,
+                  items: editingOrder.items,
+                  customerName: editingOrder.customerName,
+                  customerPhone: editingOrder.customerPhone,
+                  deliveryAddress: editingOrder.deliveryAddress,
+                  deliveryFee: editingOrder.deliveryFee,
+                  paymentMethod: editingOrder.paymentMethod,
+                }
+              : undefined
+          }
+          onSubmit={handleUpdateOrder}
+          onCancel={handleCloseModal}
+        />
+      </Modal>
 
       <BottomSheet
         isOpen={isFiltersOpen}

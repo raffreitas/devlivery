@@ -119,6 +119,22 @@ export const orderService = {
     await api.post<void>("/api/orders", payload);
   },
 
+  update: async (id: string, data: OrderFormData): Promise<void> => {
+    const payload = {
+      items: data.items.map((i) => ({
+        productId: i.product.id,
+        quantity: i.quantity,
+        notes: i.notes ?? null,
+      })),
+      customerName: data.customerName,
+      customerPhone: data.customerPhone,
+      deliveryAddress: data.deliveryAddress,
+      deliveryFee: data.deliveryFee,
+      paymentMethod: data.paymentMethod,
+    };
+    await api.put<void>(`/api/orders/${id}`, payload);
+  },
+
   updateStatus: async (id: string, status: Order["status"]): Promise<void> => {
     await api.patch<void>(`/api/orders/${id}/status`, {
       status,
