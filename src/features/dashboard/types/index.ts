@@ -17,9 +17,9 @@ export interface PaymentBreakdown {
 }
 
 export interface OrdersByStatus {
-  pending: number;
-  preparing: number;
-  ready: number;
-  delivered: number;
-  cancelled: number;
+  Pending: number;
+  Preparing: number;
+  Ready: number;
+  Delivered: number;
+  Canceled: number;
 }

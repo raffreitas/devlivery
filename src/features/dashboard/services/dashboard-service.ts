@@ -6,18 +6,18 @@ export const dashboardService = {
   calculateStats: (orders: Order[]): DashboardStats => {
     const totalOrders = orders.length;
     const totalRevenue = orders
-      .filter((o) => o.status !== "cancelled")
+      .filter((o) => o.status !== "Canceled")
       .reduce((sum, order) => sum + order.total, 0);
 
     const pendingOrders = orders.filter(
       (o) =>
-        o.status === "pending" ||
-        o.status === "preparing" ||
-        o.status === "ready",
+        o.status === "Pending" ||
+        o.status === "Preparing" ||
+        o.status === "Ready",
     ).length;
 
     const deliveredOrders = orders.filter(
-      (o) => o.status === "delivered",
+      (o) => o.status === "Delivered",
     ).length;
 
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
@@ -33,16 +33,16 @@ export const dashboardService = {
 
   getOrdersByStatus: (orders: Order[]) => {
     return {
-      pending: orders.filter((o) => o.status === "pending").length,
-      preparing: orders.filter((o) => o.status === "preparing").length,
-      ready: orders.filter((o) => o.status === "ready").length,
-      delivered: orders.filter((o) => o.status === "delivered").length,
-      cancelled: orders.filter((o) => o.status === "cancelled").length,
+      Pending: orders.filter((o) => o.status === "Pending").length,
+      Preparing: orders.filter((o) => o.status === "Preparing").length,
+      Ready: orders.filter((o) => o.status === "Ready").length,
+      Delivered: orders.filter((o) => o.status === "Delivered").length,
+      Canceled: orders.filter((o) => o.status === "Canceled").length,
     };
   },
 
   getPaymentBreakdown: (orders: Order[]) => {
-    const validOrders = orders.filter((o) => o.status !== "cancelled");
+    const validOrders = orders.filter((o) => o.status !== "Canceled");
 
     const breakdown = validOrders.reduce(
       (acc, order) => {

@@ -14,11 +14,11 @@ interface OrderCardProps {
 }
 
 const NEXT_STATUS: Record<Order["status"], Order["status"] | null> = {
-  pending: "preparing",
-  preparing: "ready",
-  ready: "delivered",
-  delivered: null,
-  cancelled: null,
+  Pending: "Preparing",
+  Preparing: "Ready",
+  Ready: "Delivered",
+  Delivered: null,
+  Canceled: null,
 };
 
 export function OrderCard({
@@ -42,7 +42,7 @@ export function OrderCard({
 
   const handleCancel = () => {
     if (window.confirm("Tem certeza que deseja cancelar este pedido?")) {
-      onUpdateStatus(order.id, "cancelled");
+      onUpdateStatus(order.id, "Canceled");
     }
   };
 

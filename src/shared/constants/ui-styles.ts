@@ -43,7 +43,7 @@ export function getPaymentMethodStyle(method: PaymentMethod) {
 
 // Order Status Colors (consistentes com o dashboard)
 export const ORDER_STATUS_STYLES = {
-  pending: {
+  Pending: {
     bg: "bg-yellow-50",
     text: "text-yellow-600",
     badgeBg: "bg-yellow-100",
@@ -51,7 +51,7 @@ export const ORDER_STATUS_STYLES = {
     icon: Clock,
     label: "Pendente",
   },
-  preparing: {
+  Preparing: {
     bg: "bg-blue-50",
     text: "text-blue-600",
     badgeBg: "bg-blue-100",
@@ -59,7 +59,7 @@ export const ORDER_STATUS_STYLES = {
     icon: Package,
     label: "Em Preparo",
   },
-  ready: {
+  Ready: {
     bg: "bg-purple-50",
     text: "text-purple-600",
     badgeBg: "bg-purple-100",
@@ -67,7 +67,7 @@ export const ORDER_STATUS_STYLES = {
     icon: CheckCircle,
     label: "Pronto",
   },
-  delivered: {
+  Delivered: {
     bg: "bg-green-50",
     text: "text-green-600",
     badgeBg: "bg-green-100",
@@ -75,7 +75,7 @@ export const ORDER_STATUS_STYLES = {
     icon: CheckCircle,
     label: "Entregue",
   },
-  cancelled: {
+  Canceled: {
     bg: "bg-red-50",
     text: "text-red-600",
     badgeBg: "bg-red-100",

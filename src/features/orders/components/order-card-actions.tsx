@@ -13,11 +13,11 @@ interface OrderCardActionsProps {
 
 function getNextStatusLabel(status: Order["status"]): string {
   const labels: Record<Order["status"], string> = {
-    pending: "Iniciar Preparo",
-    preparing: "Marcar como Pronto",
-    ready: "Marcar como Entregue",
-    delivered: "",
-    cancelled: "",
+    Pending: "Iniciar Preparo",
+    Preparing: "Marcar como Pronto",
+    Ready: "Marcar como Entregue",
+    Delivered: "",
+    Canceled: "",
   };
   return labels[status];
 }
@@ -31,12 +31,11 @@ export function OrderCardActions({
   onDelete,
   hasNextStatus,
 }: OrderCardActionsProps) {
-  const showEdit = order.status !== "cancelled" && order.status !== "delivered";
+  const showEdit = order.status !== "Canceled" && order.status !== "Delivered";
   const showCancel =
-    order.status !== "cancelled" && order.status !== "delivered";
+    order.status !== "Canceled" && order.status !== "Delivered";
   const showDelete =
-    order.status === "delivered" || order.status === "cancelled";
-
+    order.status === "Delivered" || order.status === "Canceled";
   return (
     <div className="border-t border-gray-200 pt-3 sm:pt-4 mt-auto">
       <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-end gap-2">
