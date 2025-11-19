@@ -13,6 +13,9 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext, ITenantAc
         UpdateOrderCommand command,
         CancellationToken cancellationToken = default)
     {
+        if (!Enum.TryParse<PaymentMethod>(command.PaymentMethod, ignoreCase: true, out var paymentMethod))
+            return Result.Fail("Método de pagamento inválido");
+
         var order = await dbContext.Orders
             .ForTenant(tenantAccessor.Tenant.Id)
             .Include(o => o.Items)
@@ -37,11 +40,7 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext, ITenantAc
 
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
-        var existingItems = order.Items.Select(i => i.Id).Distinct();
-        await dbContext.OrderItems
-            .ForTenant(tenantAccessor.Tenant.Id)
-            .Where(i => existingItems.Contains(i.Id))
-            .ExecuteDeleteAsync(cancellationToken);
+        order.ClearItems();
 
         foreach (var item in command.Items)
         {
@@ -55,9 +54,6 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext, ITenantAc
             order.AddItem(orderItem);
             dbContext.OrderItems.Add(orderItem);
         }
-
-        if (!Enum.TryParse<PaymentMethod>(command.PaymentMethod, ignoreCase: true, out var paymentMethod))
-            return Result.Fail("Método de pagamento inválido");
 
         order.UpdateDetails(
             customerName: command.CustomerName,

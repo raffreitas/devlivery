@@ -39,11 +39,18 @@ public sealed class Order : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void ClearItems()
+    {
+        _items.Clear();
+        UpdatedAt = DateTime.UtcNow;
+        CalculateTotal();
+    }
+
     public void AddItem(OrderItem item)
     {
         _items.Add(item);
-        Total = _items.Sum(i => i.TotalPrice) + DeliveryFee;
         UpdatedAt = DateTime.UtcNow;
+        CalculateTotal();
     }
 
     public void UpdateStatus(OrderStatus status)
@@ -64,7 +71,12 @@ public sealed class Order : Entity
         DeliveryAddress = deliveryAddress;
         PaymentMethod = paymentMethod;
         DeliveryFee = deliveryFee;
-        Total = _items.Sum(i => i.TotalPrice) + DeliveryFee;
         UpdatedAt = DateTime.UtcNow;
+        CalculateTotal();
+    }
+
+    private void CalculateTotal()
+    {
+        Total = _items.Sum(i => i.TotalPrice) + DeliveryFee;
     }
 }
