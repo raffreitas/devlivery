@@ -2,6 +2,13 @@ import { useState } from "react";
 import { Button } from "@/shared/components/button";
 import { LoadingSpinner } from "@/shared/components/loading-spinner";
 import { Modal } from "@/shared/components/modal";
+import { Input } from "@/shared/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/shared/components/ui/select";
 import { ProductCard } from "../components/product-card";
 import { ProductForm } from "../components/product-form";
 import { useProducts } from "../hooks/use-products";
@@ -75,26 +82,37 @@ export function ProductsPage() {
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
-          <input
+          <Input
             type="text"
             placeholder="Buscar produtos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="h-10"
           />
         </div>
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-        >
-          <option value="all">Todas as categorias</option>
-          {categories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
+        <Select onValueChange={setFilterCategory}>
+          <SelectTrigger>
+            <span>
+              {filterCategory === "all"
+                ? "Todas as categorias"
+                : filterCategory}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" onSelect={() => setFilterCategory("all")}>
+              Todas as categorias
+            </SelectItem>
+            {categories.map((category) => (
+              <SelectItem
+                key={category}
+                value={category}
+                onSelect={() => setFilterCategory(category)}
+              >
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {loading && products.length === 0 ? (
