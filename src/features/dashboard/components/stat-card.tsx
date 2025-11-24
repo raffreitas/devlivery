@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Card } from "@/shared/components/card";
+import { Card } from "@/shared/components/ui/card";
 
 interface StatCardProps {
   title: string;
@@ -22,7 +22,7 @@ export function StatCard({
   color = "orange",
 }: StatCardProps) {
   return (
-    <Card>
+    <Card className="p-6">
       <div className="flex items-center gap-3 sm:gap-4">
         <div className={`p-2 sm:p-3 rounded-full ${colorClasses[color]}`}>
           {icon}
