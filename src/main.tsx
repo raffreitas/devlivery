@@ -8,6 +8,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import { Toaster } from "sonner";
 import { App } from "./app.tsx";
 import { router } from "./app-routes.tsx";
 import { UnauthorizedError } from "./shared/services/api";
@@ -47,6 +48,7 @@ createRoot(container).render(
     <QueryClientProvider client={queryClient}>
       <App />
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
+      <Toaster richColors />
     </QueryClientProvider>
   </StrictMode>,
 );
