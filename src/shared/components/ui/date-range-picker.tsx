@@ -16,6 +16,8 @@ interface DateRangePickerProps extends ComponentProps<"div"> {
   onDateChange: (date: DateRange | undefined) => void;
 }
 
+const EMPTY_LABEL_TEXT = "Selecione um período";
+
 export function DateRangePicker({
   date,
   onDateChange,
@@ -44,13 +46,13 @@ export function DateRangePicker({
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span>Pick a date</span>
+              <span>{EMPTY_LABEL_TEXT}</span>
             )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
-            initialFocus
+            autoFocus
             mode="range"
             defaultMonth={date?.from}
             selected={date}

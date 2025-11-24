@@ -1,12 +1,12 @@
 import { CheckCircle, ClipboardList, Clock, DollarSign } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { DateRange } from "react-day-picker";
 import { OrderForm } from "@/features/orders/components/order-form";
 import { useOrders } from "@/features/orders/hooks/use-orders";
 import type { Order, OrderFormData } from "@/features/orders/types";
 import { BottomSheet } from "@/shared/components/bottom-sheet";
 import { Button } from "@/shared/components/button";
 import { Modal } from "@/shared/components/modal";
-import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
 import { ActiveOrdersSection } from "../components/active-orders-section";
 import { DashboardFiltersContent } from "../components/dashboard-filters-content";
 import { DashboardHeader } from "../components/dashboard-header";
@@ -16,18 +16,12 @@ import { StatsSidebar } from "../components/stats-sidebar";
 import { dashboardService } from "../services/dashboard-service";
 
 export function DashboardPage() {
-  const {
-    inputStartDate,
-    inputEndDate,
-    startDate,
-    endDate,
-    setStartDate,
-    setEndDate,
-    resetToToday,
-  } = useDateRangeFilter({ debounceMs: 500 });
-
+  const [period, setPeriod] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date(),
+  });
   const { orders, isFetching, updateOrder, updateOrderStatus, deleteOrder } =
-    useOrders(startDate, endDate);
+    useOrders(period?.from, period?.to);
 
   const [todayOrders, setTodayOrders] = useState<Order[]>([]);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
@@ -55,6 +49,17 @@ export function DashboardPage() {
     handleCloseModal();
   };
 
+  const handlePeriodFilterChange = (dateRange: DateRange | undefined) => {
+    if (!dateRange) {
+      setPeriod({
+        from: new Date(),
+        to: new Date(),
+      });
+    } else {
+      setPeriod(dateRange);
+    }
+  };
+
   const stats = dashboardService.calculateStats(todayOrders);
   const ordersByStatus = dashboardService.getOrdersByStatus(todayOrders);
   const paymentBreakdown = dashboardService.getPaymentBreakdown(todayOrders);
@@ -71,11 +76,8 @@ export function DashboardPage() {
       <div className="space-y-4 sm:space-y-6">
         <DashboardHeader
           isFetching={isFetching}
-          inputStartDate={inputStartDate}
-          inputEndDate={inputEndDate}
-          onStartChange={setStartDate}
-          onEndChange={setEndDate}
-          onReset={resetToToday}
+          period={period}
+          onDateChange={handlePeriodFilterChange}
           onOpenFilters={() => setIsFiltersOpen(true)}
         />
 
@@ -169,11 +171,8 @@ export function DashboardPage() {
       >
         <div className="space-y-4">
           <DashboardFiltersContent
-            inputStartDate={inputStartDate}
-            inputEndDate={inputEndDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            onResetDates={resetToToday}
+            period={period}
+            onDateChange={handlePeriodFilterChange}
           />
 
           <div className="pt-4 pb-2 border-t border-gray-200">

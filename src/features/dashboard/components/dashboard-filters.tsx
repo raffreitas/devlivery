@@ -1,22 +1,17 @@
 import { Filter } from "lucide-react";
-import { Button } from "@/shared/components/button";
+import type { DateRange } from "react-day-picker";
+import { Button } from "@/shared/components/ui/button";
 import { DashboardFiltersContent } from "./dashboard-filters-content";
 
 interface DashboardFiltersProps {
-  inputStartDate: string;
-  inputEndDate: string;
-  onStartDateChange: (value: string) => void;
-  onEndDateChange: (value: string) => void;
-  onResetDates: () => void;
+  period?: DateRange;
+  onDateChange: (date: DateRange | undefined) => void;
   onOpenFilters: () => void;
 }
 
 export function DashboardFilters({
-  inputStartDate,
-  inputEndDate,
-  onStartDateChange,
-  onEndDateChange,
-  onResetDates,
+  period,
+  onDateChange,
   onOpenFilters,
 }: DashboardFiltersProps) {
   return (
@@ -34,14 +29,8 @@ export function DashboardFilters({
       </div>
 
       {/* Desktop: Filtros inline */}
-      <div className="hidden lg:block">
-        <DashboardFiltersContent
-          inputStartDate={inputStartDate}
-          inputEndDate={inputEndDate}
-          onStartDateChange={onStartDateChange}
-          onEndDateChange={onEndDateChange}
-          onResetDates={onResetDates}
-        />
+      <div className="hidden lg:flex items-center gap-3">
+        <DashboardFiltersContent period={period} onDateChange={onDateChange} />
       </div>
     </>
   );

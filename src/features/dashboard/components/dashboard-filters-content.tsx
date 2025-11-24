@@ -1,27 +1,20 @@
-import { DateRangeFilter } from "@/shared/components/date-range-filter";
+import type { DateRange } from "react-day-picker";
+import { DateRangePicker } from "@/shared/components/ui/date-range-picker";
+import { Label } from "@/shared/components/ui/label";
 
 interface DashboardFiltersContentProps {
-  inputStartDate: string;
-  inputEndDate: string;
-  onStartDateChange: (value: string) => void;
-  onEndDateChange: (value: string) => void;
-  onResetDates: () => void;
+  period?: DateRange;
+  onDateChange: (date: DateRange | undefined) => void;
 }
 
 export function DashboardFiltersContent({
-  inputStartDate,
-  inputEndDate,
-  onStartDateChange,
-  onEndDateChange,
-  onResetDates,
+  period,
+  onDateChange,
 }: DashboardFiltersContentProps) {
   return (
-    <DateRangeFilter
-      startDate={inputStartDate}
-      endDate={inputEndDate}
-      onStartChange={onStartDateChange}
-      onEndChange={onEndDateChange}
-      onReset={onResetDates}
-    />
+    <>
+      <Label>Período</Label>
+      <DateRangePicker date={period} onDateChange={onDateChange} />
+    </>
   );
 }
