@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { AutocompleteSelect } from "@/shared/components/autocomplete-select";
-import { Button } from "@/shared/components/button";
-import { Input } from "@/shared/components/input";
+import { Button } from "@/shared/components/ui/button";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
 import type { ProductFormData } from "../types";
 
 interface ProductFormProps {
@@ -32,8 +35,8 @@ export function ProductForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <Label htmlFor="name">Nome do Produto</Label>
       <Input
-        label="Nome do Produto"
         type="text"
         value={formData.name}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -42,27 +45,20 @@ export function ProductForm({
         required
       />
 
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Descrição
-        </label>
-        <textarea
-          id="description"
-          value={formData.description}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-          rows={3}
-          required
-        />
-      </div>
+      <Label htmlFor="description">Descrição</Label>
+      <Textarea
+        id="description"
+        value={formData.description}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+          setFormData({ ...formData, description: e.target.value })
+        }
+        rows={3}
+        required
+      />
 
+      <Label htmlFor="price">Preço (R$)</Label>
       <Input
-        label="Preço (R$)"
+        id="price"
         type="number"
         step="0.01"
         value={formData.price}
@@ -84,26 +80,21 @@ export function ProductForm({
         required
       />
 
-      <div className="flex items-center">
-        <input
-          type="checkbox"
+      <div className="flex items-center gap-3">
+        <Checkbox
           id="available"
-          checked={formData.available}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormData({ ...formData, available: e.target.checked })
+          onCheckedChange={(e) =>
+            setFormData({ ...formData, available: e === true })
           }
-          className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
         />
-        <label htmlFor="available" className="ml-2 block text-sm text-gray-900">
-          Disponível
-        </label>
+        <Label>Disponível</Label>
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
         <Button type="button" variant="secondary" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" variant="primary">
+        <Button type="submit">
           {initialData?.id ? "Atualizar" : "Criar"} Produto
         </Button>
       </div>

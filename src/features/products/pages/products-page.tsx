@@ -1,7 +1,13 @@
+import { Plus } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/shared/components/button";
 import { LoadingSpinner } from "@/shared/components/loading-spinner";
-import { Modal } from "@/shared/components/modal";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
 import {
   Select,
@@ -9,6 +15,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/shared/components/ui/select";
+import { Separator } from "@/shared/components/ui/separator";
 import { ProductCard } from "../components/product-card";
 import { ProductForm } from "../components/product-form";
 import { useProducts } from "../hooks/use-products";
@@ -77,7 +84,10 @@ export function ProductsPage() {
             </div>
           )}
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>+ Novo Produto</Button>
+        <Button onClick={() => setIsModalOpen(true)}>
+          <Plus size={4} />
+          Novo Produto
+        </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -144,18 +154,32 @@ export function ProductsPage() {
         </div>
       )}
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title={editingProduct ? "Editar Produto" : "Novo Produto"}
+      <Dialog
+        defaultOpen={false}
+        open={isModalOpen}
+        onOpenChange={() => setEditingProduct(null)}
       >
-        <ProductForm
-          initialData={editingProduct || undefined}
-          onSubmit={handleCreateOrUpdate}
-          onCancel={handleCloseModal}
-          categoryOptions={categories.map((c) => ({ value: c, label: c }))}
-        />
-      </Modal>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingProduct ? "Editar Produto" : "Novo Produto"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <Separator />
+
+          <ProductForm
+            initialData={editingProduct || undefined}
+            onSubmit={handleCreateOrUpdate}
+            onCancel={handleCloseModal}
+            categoryOptions={categories.map((c) => ({ value: c, label: c }))}
+          />
+        </DialogContent>
+      </Dialog>
+      {/*
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+
+      </Modal> */}
     </div>
   );
 }
