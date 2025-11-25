@@ -1,6 +1,15 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { LoadingSpinner } from "@/shared/components/loading-spinner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -31,6 +40,10 @@ export function ProductsPage() {
     deleteProduct,
   } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [alert, setAlert] = useState({
+    open: false,
+    productId: null as string | null,
+  });
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
@@ -50,10 +63,11 @@ export function ProductsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Tem certeza que deseja excluir este produto?")) {
-      deleteProduct(id);
-    }
+  const handleDelete = async () => {
+    const id = alert.productId;
+    if (!id) return;
+    await deleteProduct(id);
+    setAlert({ open: false, productId: null });
   };
 
   const handleCloseModal = () => {
@@ -148,11 +162,33 @@ export function ProductsPage() {
               key={product.id}
               product={product}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={(productId) => setAlert({ open: true, productId })}
             />
           ))}
         </div>
       )}
+
+      <AlertDialog
+        open={alert.open}
+        onOpenChange={() => setAlert({ open: false, productId: null })}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Tem certeza que deseja excluir este produto?
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => handleDelete()}
+            >
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog
         defaultOpen={false}
