@@ -157,7 +157,7 @@ export function ProductsPage() {
       <Dialog
         defaultOpen={false}
         open={isModalOpen}
-        onOpenChange={() => setEditingProduct(null)}
+        onOpenChange={handleCloseModal}
       >
         <DialogContent>
           <DialogHeader>
@@ -176,10 +176,6 @@ export function ProductsPage() {
           />
         </DialogContent>
       </Dialog>
-      {/*
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-
-      </Modal> */}
     </div>
   );
 }
