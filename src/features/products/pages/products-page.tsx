@@ -194,6 +194,7 @@ export function ProductsPage() {
         defaultOpen={false}
         open={isModalOpen}
         onOpenChange={handleCloseModal}
+        modal={true}
       >
         <DialogContent>
           <DialogHeader>

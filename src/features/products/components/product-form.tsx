@@ -35,7 +35,7 @@ export function ProductForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <Label htmlFor="name">Nome do Produto</Label>
-      <Input type="text" id="name" {...register("name")} />
+      <Input type="text" id="name" required {...register("name")} />
 
       <Label htmlFor="description">Descrição</Label>
       <Textarea
@@ -50,6 +50,7 @@ export function ProductForm({
         id="price"
         type="number"
         step="0.01"
+        required
         {...register("price", { valueAsNumber: true })}
       />
 
