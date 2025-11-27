@@ -115,7 +115,7 @@ export function ProductsPage() {
           />
         </div>
         <Select onValueChange={setFilterCategory}>
-          <SelectTrigger size="lg" className="w-full sm:w-1/6">
+          <SelectTrigger size="lg" className="w-full sm:w-1/6 cursor-pointer">
             <span>
               {filterCategory === "all"
                 ? "Todas as categorias"
@@ -131,6 +131,7 @@ export function ProductsPage() {
                 key={category}
                 value={category}
                 onSelect={() => setFilterCategory(category)}
+                className="cursor-pointer"
               >
                 {category}
               </SelectItem>

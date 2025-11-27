@@ -49,7 +49,7 @@ export function ProductForm({
             <FormItem>
               <FormLabel>Nome do Produto</FormLabel>
               <FormControl>
-                <Input type="text" {...field} />
+                <Input type="text" required {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -63,7 +63,7 @@ export function ProductForm({
             <FormItem>
               <FormLabel>Descrição</FormLabel>
               <FormControl>
-                <Textarea rows={3} {...field} />
+                <Textarea rows={3} required {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -77,7 +77,7 @@ export function ProductForm({
             <FormItem>
               <FormLabel>Preço (R$)</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" required {...field} />
+                <Input type="text" step="0.01" required {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -96,7 +96,7 @@ export function ProductForm({
                   options={categoryOptions ?? []}
                   value={field.value}
                   onChange={field.onChange}
-                  allowCustomValue={true}
+                  allowCustomValue
                   className="max-w-full w-full"
                 />
               </FormControl>
