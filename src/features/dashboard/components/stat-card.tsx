@@ -9,7 +9,7 @@ interface StatCardProps {
 }
 
 const colorClasses = {
-  orange: "bg-orange-100 text-orange-600",
+  orange: "bg-orange-100 text-primary",
   blue: "bg-blue-100 text-blue-600",
   green: "bg-green-100 text-green-600",
   purple: "bg-purple-100 text-purple-600",
@@ -28,7 +28,7 @@ export function StatCard({
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm text-gray-600 truncate">{title}</p>
+          <p className="text-xs sm:text-sm text-secondary-foreground truncate">{title}</p>
           <p className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
             {value}
           </p>

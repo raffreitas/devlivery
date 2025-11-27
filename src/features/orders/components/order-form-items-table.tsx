@@ -47,7 +47,7 @@ export function OrderItemsTable({
                   ✕
                 </Button>
               </div>
-              <div className="flex justify-between text-xs text-gray-600">
+              <div className="flex justify-between text-xs text-secondary-foreground">
                 <span>Qtd: {item.quantity}</span>
                 <span>Unit: R$ {item.product.price.toFixed(2)}</span>
                 <span className="font-medium text-gray-900">
@@ -123,14 +123,14 @@ export function OrderItemsTable({
 
       <div className="bg-gray-50 px-3 sm:px-4 py-3">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-xs sm:text-sm text-gray-600">Subtotal</span>
+          <span className="text-xs sm:text-sm text-secondary-foreground">Subtotal</span>
           <span className="text-xs sm:text-sm font-medium text-gray-900">
             R$ {subtotal.toFixed(2)}
           </span>
         </div>
 
         <div className="flex justify-between items-center mb-1">
-          <span className="text-xs sm:text-sm text-gray-600">
+          <span className="text-xs sm:text-sm text-secondary-foreground">
             Taxa de Entrega
           </span>
           <span className="text-xs sm:text-sm font-medium text-gray-900">
@@ -142,7 +142,7 @@ export function OrderItemsTable({
           <span className="text-base sm:text-lg font-semibold text-gray-900">
             Total:
           </span>
-          <span className="text-xl sm:text-2xl font-bold text-orange-600">
+          <span className="text-xl sm:text-2xl font-bold text-primary">
             R$ {total.toFixed(2)}
           </span>
         </div>

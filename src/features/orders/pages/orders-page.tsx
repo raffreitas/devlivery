@@ -119,7 +119,7 @@ export function OrdersPage() {
 
         {loading && orders.length === 0 ? (
           <div className="flex justify-center items-center h-64">
-            <div className="text-base sm:text-xl text-gray-600">
+            <div className="text-base sm:text-xl text-secondary-foreground">
               Carregando...
             </div>
           </div>

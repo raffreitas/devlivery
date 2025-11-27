@@ -1,4 +1,4 @@
-import { Button } from "@/shared/components/button";
+import { Button } from "@/shared/components/ui/button";
 import type { Order } from "../types";
 
 interface OrderCardActionsProps {
@@ -37,18 +37,18 @@ export function OrderCardActions({
   const showDelete =
     order.status === "Delivered" || order.status === "Canceled";
   return (
-    <div className="border-t border-gray-200 pt-3 sm:pt-4 mt-auto">
+    <div className="mt-auto">
       <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-end gap-2">
-        <Button size="sm" variant="secondary" onClick={onPrint}>
+        <Button size="sm" variant="outline" onClick={onPrint}>
           Imprimir
         </Button>
         {showEdit && (
-          <Button size="sm" variant="secondary" onClick={onEdit}>
+          <Button size="sm" variant="outline" onClick={onEdit}>
             Editar
           </Button>
         )}
         {showCancel && (
-          <Button size="sm" variant="danger" onClick={onCancel}>
+          <Button size="sm" variant="destructive" onClick={onCancel}>
             Cancelar
           </Button>
         )}
@@ -61,7 +61,7 @@ export function OrderCardActions({
           </Button>
         )}
         {showDelete && (
-          <Button size="sm" variant="danger" onClick={onDelete}>
+          <Button size="sm" variant="destructive" onClick={onDelete}>
             Excluir
           </Button>
         )}

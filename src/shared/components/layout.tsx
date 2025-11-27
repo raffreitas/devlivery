@@ -28,7 +28,7 @@ export function Layout() {
             <div className="flex items-center flex-1">
               <div className="shrink-0 flex items-center">
                 <Link to="/">
-                  <h1 className="text-xl sm:text-2xl font-bold text-orange-600">
+                  <h1 className="text-xl sm:text-2xl font-bold text-primary">
                     🍕 Devlivery
                   </h1>
                 </Link>

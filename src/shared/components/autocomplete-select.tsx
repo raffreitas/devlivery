@@ -285,7 +285,7 @@ export function AutocompleteSelect<T extends string = string>({
           <button
             type="button"
             onClick={handleClear}
-            className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-secondary-foreground"
             aria-label="Limpar seleção"
           >
             <X className="w-4 h-4" />
@@ -327,7 +327,7 @@ export function AutocompleteSelect<T extends string = string>({
                   aria-selected={isSelected}
                   className={`w-full text-left px-3 py-2 cursor-pointer transition-colors ${
                     isHighlighted ? "bg-orange-50" : ""
-                  } ${isSelected ? "text-orange-600" : "text-gray-900"}`}
+                  } ${isSelected ? "text-primary" : "text-gray-900"}`}
                   onMouseEnter={() => setHighlightedIndex(index)}
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => handleSelect(option)}

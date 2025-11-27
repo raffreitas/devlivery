@@ -42,7 +42,7 @@ export function LoginPage() {
             <span className="text-5xl">🍕</span>
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Devlivery</h1>
-          {/* <p className="text-gray-600">Sistema de Gestão de Pedidos</p> */}
+          {/* <p className="text-secondary-foreground">Sistema de Gestão de Pedidos</p> */}
         </div>
 
         {/* Login Card */}

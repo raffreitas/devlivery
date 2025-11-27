@@ -34,7 +34,7 @@ export function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
       </p>
 
       <div className="flex justify-between items-center">
-        <span className="text-xl font-bold text-orange-600">
+        <span className="text-xl font-bold text-primary">
           R$ {product.price.toFixed(2)}
         </span>
 
