@@ -115,7 +115,7 @@ export function ProductsPage() {
           />
         </div>
         <Select onValueChange={setFilterCategory}>
-          <SelectTrigger size="lg">
+          <SelectTrigger size="lg" className="w-full sm:w-1/6">
             <span>
               {filterCategory === "all"
                 ? "Todas as categorias"
