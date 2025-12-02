@@ -98,24 +98,26 @@ export function Combobox({
           align="start"
         >
           <Command>
-            <CommandInput placeholder={placeholder} onValueChange={setSearch} />
+            <CommandInput
+              placeholder={placeholder}
+              onValueChange={setSearch}
+              value={search}
+            />
             <CommandList>
-              <CommandEmpty className="py-2">
-                <p className="text-muted-foreground text-center text-sm py-2">
-                  {emptyText}
-                </p>
-                {allowCustomValue && search.trim() && (
+              <CommandEmpty className="p-1">
+                {allowCustomValue ? (
                   <Button
+                    className="w-full justify-start p-1.5! px-2! font-normal text-accent-foreground h-8"
+                    onClick={() => handleAddCustomValue(search.trim())}
                     variant="ghost"
-                    className="w-full justify-start font-normal px-2 gap-2"
-                    onClick={() => handleAddCustomValue(search)}
                   >
-                    <PlusIcon
-                      className="size-4 opacity-60"
-                      aria-hidden="true"
-                    />
+                    <PlusIcon className="mr-2 size-4 text-muted-foreground" />
                     Adicionar "{search.trim()}"
                   </Button>
+                ) : (
+                  <p className="text-muted-foreground text-center text-sm py-2">
+                    {emptyText}
+                  </p>
                 )}
               </CommandEmpty>
               <CommandGroup>
@@ -136,24 +138,21 @@ export function Combobox({
                   </CommandItem>
                 ))}
               </CommandGroup>
-              {allowCustomValue && search.trim() && (
-                <>
-                  <CommandSeparator />
-                  <CommandGroup>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start font-normal px-2 gap-2"
-                      onClick={() => handleAddCustomValue(search)}
-                    >
-                      <PlusIcon
-                        className="size-4 opacity-60"
-                        aria-hidden="true"
-                      />
-                      Adicionar "{search.trim()}"
-                    </Button>
-                  </CommandGroup>
-                </>
-              )}
+              {allowCustomValue &&
+                search.trim() &&
+                !allOptions.map((o) => o.value).includes(search.trim()) && (
+                  <>
+                    <CommandSeparator />
+                    <CommandGroup>
+                      <CommandItem
+                        onSelect={() => handleAddCustomValue(search)}
+                      >
+                        <PlusIcon className="mr-2 size-4" />
+                        Adicionar "{search.trim()}"
+                      </CommandItem>
+                    </CommandGroup>
+                  </>
+                )}
             </CommandList>
           </Command>
         </PopoverContent>
