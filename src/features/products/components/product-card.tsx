@@ -39,7 +39,7 @@ export function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
         </span>
 
         <div className="flex space-x-2">
-          <Button size="sm" variant="secondary" onClick={() => onEdit(product)}>
+          <Button size="sm" variant="outline" onClick={() => onEdit(product)}>
             Editar
           </Button>
           <Button

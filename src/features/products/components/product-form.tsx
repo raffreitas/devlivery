@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
+import { Spinner } from "@/shared/components/ui/spinner";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { type ProductFormData, productFormSchema } from "../types";
 
@@ -77,7 +78,13 @@ export function ProductForm({
             <FormItem>
               <FormLabel>Preço (R$)</FormLabel>
               <FormControl>
-                <Input type="text" step="0.01" required {...field} />
+                <Input
+                  type="number"
+                  step="0.01"
+                  required
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -109,27 +116,29 @@ export function ProductForm({
           control={form.control}
           name="available"
           render={({ field }) => (
-            <FormItem className="flex items-center space-x-3 space-y-0">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
               <FormControl>
                 <Checkbox
-                  id="available"
-                  checked={!!field.value}
-                  onCheckedChange={(v) => field.onChange(v === true)}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
                 />
               </FormControl>
-              <FormLabel htmlFor="available" className="mb-0">
-                Disponível
-              </FormLabel>
-              <FormMessage />
+              <div className="space-y-1 leading-none">
+                <FormLabel>Disponível</FormLabel>
+                <p className="text-sm text-muted-foreground">
+                  Este produto estará visível para registro de pedidos.
+                </p>
+              </div>
             </FormItem>
           )}
         />
 
-        <div className="flex justify-end space-x-3 pt-4">
-          <Button type="button" variant="secondary" onClick={onCancel}>
+        <div className="flex justify-end space-x-3">
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
           <Button type="submit">
+            {form.formState.isSubmitting && <Spinner />}
             {initialData?.id ? "Atualizar" : "Criar"} Produto
           </Button>
         </div>

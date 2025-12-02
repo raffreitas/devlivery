@@ -111,11 +111,10 @@ export function ProductsPage() {
             placeholder="Buscar produtos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-10"
           />
         </div>
         <Select onValueChange={setFilterCategory}>
-          <SelectTrigger size="lg" className="w-full sm:w-1/6 cursor-pointer">
+          <SelectTrigger className="w-full sm:w-1/6 cursor-pointer">
             <span>
               {filterCategory === "all"
                 ? "Todas as categorias"
@@ -181,22 +180,14 @@ export function ProductsPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={() => handleDelete()}
-            >
+            <AlertDialogAction onClick={() => handleDelete()}>
               Confirmar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog
-        defaultOpen={false}
-        open={isModalOpen}
-        onOpenChange={handleCloseModal}
-        modal={true}
-      >
+      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
