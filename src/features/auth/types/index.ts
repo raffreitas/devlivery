@@ -18,9 +18,7 @@ export interface AuthState {
 
 export const authFormSchema = z.object({
   email: z.email("E-mail inválido"),
-  password: z
-    .string({ error: "Deve ser informado um valor válido." })
-    .min(6, "A senha deve ter no mínimo 6 caracteres"),
+  password: z.string().min(1, "Senha é obrigatória"),
 });
 
 export type AuthFormData = z.infer<typeof authFormSchema>;

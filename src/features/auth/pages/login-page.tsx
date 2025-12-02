@@ -4,8 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { type AuthFormData, authFormSchema } from "../types";
@@ -16,7 +23,7 @@ export function LoginPage() {
 
   const currentYear = new Date().getFullYear();
 
-  const { register, handleSubmit } = useForm<AuthFormData>({
+  const form = useForm<AuthFormData>({
     resolver: zodResolver(authFormSchema),
     defaultValues: {
       email: "",
@@ -47,41 +54,60 @@ export function LoginPage() {
 
         {/* Login Card */}
         <Card className="p-8">
-          <form
-            onSubmit={handleSubmit(handleAuthenticate)}
-            className="space-y-5"
-          >
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="seu@email.com"
-              {...register("email")}
-            />
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleAuthenticate)}
+              className="space-y-5"
+            >
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="seu@email.com"
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Label htmlFor="password">Senha</Label>
-            <Input
-              id="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              placeholder="••••••••"
-              {...register("password")}
-            />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Button type="submit" disabled={loading} className="w-full mt-6">
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Spinner />
-                  Entrando...
-                </span>
-              ) : (
-                "Entrar"
-              )}
-            </Button>
-          </form>
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner />
+                    Entrando...
+                  </span>
+                ) : (
+                  "Entrar"
+                )}
+              </Button>
+            </form>
+          </Form>
         </Card>
 
         {/* Footer */}
