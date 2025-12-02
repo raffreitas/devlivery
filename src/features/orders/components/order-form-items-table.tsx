@@ -123,7 +123,9 @@ export function OrderItemsTable({
 
       <div className="bg-gray-50 px-3 sm:px-4 py-3">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-xs sm:text-sm text-secondary-foreground">Subtotal</span>
+          <span className="text-xs sm:text-sm text-secondary-foreground">
+            Subtotal
+          </span>
           <span className="text-xs sm:text-sm font-medium text-gray-900">
             R$ {subtotal.toFixed(2)}
           </span>
