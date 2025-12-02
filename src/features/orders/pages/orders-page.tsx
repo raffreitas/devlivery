@@ -1,45 +1,32 @@
 import { useState } from "react";
-import type { AutocompleteOption } from "@/shared/components/autocomplete-select";
+import type { DateRange } from "react-day-picker";
 import { BottomSheet } from "@/shared/components/bottom-sheet";
-import { Button } from "@/shared/components/button";
 import { Modal } from "@/shared/components/modal";
-import { useDateRangeFilter } from "@/shared/hooks/use-date-range-filter";
+import { Button } from "@/shared/components/ui/button";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
 import { OrdersFilters } from "../components/orders-filters";
 import { OrdersFiltersContent } from "../components/orders-filters-content";
 import { OrdersHeader } from "../components/orders-header";
+import { getOrderStatusOptions } from "../constants/order-status";
 import { getPaymentOptions } from "../constants/payment-methods";
 import { useOrders } from "../hooks/use-orders";
 import type { Order, OrderFormData } from "../types";
 
-const statusOptions: AutocompleteOption<Order["status"] | "all">[] = [
-  { value: "all", label: "Todos" },
-  { value: "Pending", label: "Pendente" },
-  { value: "Preparing", label: "Em Preparo" },
-  { value: "Ready", label: "Pronto" },
-  { value: "Delivered", label: "Entregue" },
-  { value: "Canceled", label: "Cancelado" },
+const statusOptions: Array<Order["status"]> = [
+  ...getOrderStatusOptions().map((s) => s.value),
 ];
 
-const paymentOptions: AutocompleteOption<Order["paymentMethod"] | "all">[] = [
-  { value: "all", label: "Todos" },
-  ...getPaymentOptions().map((o) => ({
-    value: o.value as Order["paymentMethod"],
-    label: o.label,
-  })),
+const paymentOptions: Array<Order["paymentMethod"]> = [
+  ...getPaymentOptions().map((o) => o.value),
 ];
 
 export function OrdersPage() {
-  const {
-    inputStartDate,
-    inputEndDate,
-    startDate,
-    endDate,
-    setStartDate,
-    setEndDate,
-    resetToToday,
-  } = useDateRangeFilter({ defaultDaysBack: 2, debounceMs: 500 });
+  const [period, setPeriod] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date(),
+  });
+
   const [paymentFilter, setPaymentFilter] = useState<
     Order["paymentMethod"] | "all"
   >("all");
@@ -53,8 +40,8 @@ export function OrdersPage() {
     updateOrderStatus,
     deleteOrder,
   } = useOrders(
-    startDate,
-    endDate,
+    period?.from,
+    period?.to,
     paymentFilter === "all" ? undefined : paymentFilter,
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -84,6 +71,17 @@ export function OrdersPage() {
     setEditingOrder(null);
   };
 
+  const handlePeriodFilterChange = (dateRange: DateRange | undefined) => {
+    if (!dateRange) {
+      setPeriod({
+        from: new Date(),
+        to: new Date(),
+      });
+    } else {
+      setPeriod(dateRange);
+    }
+  };
+
   const filteredOrders =
     statusFilter === "all"
       ? orders
@@ -107,13 +105,10 @@ export function OrdersPage() {
           paymentFilter={paymentFilter}
           statusOptions={statusOptions}
           paymentOptions={paymentOptions}
-          inputStartDate={inputStartDate}
-          inputEndDate={inputEndDate}
+          period={period}
+          onDateChange={handlePeriodFilterChange}
           onStatusChange={setStatusFilter}
           onPaymentChange={setPaymentFilter}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
-          onResetDates={resetToToday}
           onOpenFilters={() => setIsFiltersOpen(true)}
         />
 
@@ -191,13 +186,10 @@ export function OrdersPage() {
             paymentFilter={paymentFilter}
             statusOptions={statusOptions}
             paymentOptions={paymentOptions}
-            inputStartDate={inputStartDate}
-            inputEndDate={inputEndDate}
+            period={period}
             onStatusChange={setStatusFilter}
             onPaymentChange={setPaymentFilter}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            onResetDates={resetToToday}
+            onDateChange={handlePeriodFilterChange}
           />
 
           <div className="pt-4 pb-2 border-t border-gray-200">
