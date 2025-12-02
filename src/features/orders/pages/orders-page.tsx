@@ -1,8 +1,14 @@
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { BottomSheet } from "@/shared/components/bottom-sheet";
-import { Modal } from "@/shared/components/modal";
 import { Button } from "@/shared/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Separator } from "@/shared/components/ui/separator";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
 import { OrdersFilters } from "../components/orders-filters";
@@ -151,29 +157,35 @@ export function OrdersPage() {
         )}
       </div>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title={editingOrder ? "Editar Pedido" : "Novo Pedido"}
-      >
-        <OrderForm
-          initialData={
-            editingOrder
-              ? {
-                  id: editingOrder.id,
-                  items: editingOrder.items,
-                  customerName: editingOrder.customerName,
-                  customerPhone: editingOrder.customerPhone,
-                  deliveryAddress: editingOrder.deliveryAddress,
-                  deliveryFee: editingOrder.deliveryFee,
-                  paymentMethod: editingOrder.paymentMethod,
-                }
-              : undefined
-          }
-          onSubmit={handleCreateOrUpdateOrder}
-          onCancel={handleCloseModal}
-        />
-      </Modal>
+      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingOrder ? "Editar Pedido" : "Novo Pedido"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <Separator />
+
+          <OrderForm
+            initialData={
+              editingOrder
+                ? {
+                    id: editingOrder.id,
+                    items: editingOrder.items,
+                    customerName: editingOrder.customerName,
+                    customerPhone: editingOrder.customerPhone,
+                    deliveryAddress: editingOrder.deliveryAddress,
+                    deliveryFee: editingOrder.deliveryFee,
+                    paymentMethod: editingOrder.paymentMethod,
+                  }
+                : undefined
+            }
+            onSubmit={handleCreateOrUpdateOrder}
+            onCancel={handleCloseModal}
+          />
+        </DialogContent>
+      </Dialog>
 
       <BottomSheet
         isOpen={isFiltersOpen}

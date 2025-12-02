@@ -1,5 +1,6 @@
-import { Button } from "@/shared/components/button";
-import { LoadingSpinner } from "@/shared/components/loading-spinner";
+import { PlusIcon } from "lucide-react";
+import { Button } from "@/shared/components/ui/button";
+import { Spinner } from "@/shared/components/ui/spinner";
 
 interface OrdersHeaderProps {
   isFetching: boolean;
@@ -15,13 +16,13 @@ export function OrdersHeader({ isFetching, onNewOrder }: OrdersHeaderProps) {
         </h1>
         {isFetching && (
           <div className="flex items-center gap-2 text-sm text-gray-500">
-            <LoadingSpinner size="sm" className="text-orange-500" />
+            <Spinner />
             <span className="hidden sm:inline">Atualizando...</span>
           </div>
         )}
       </div>
-      <Button onClick={onNewOrder} className="w-full sm:w-auto">
-        + Novo Pedido
+      <Button onClick={onNewOrder}>
+        <PlusIcon /> Novo Pedido
       </Button>
     </div>
   );
