@@ -53,7 +53,7 @@ export function OrderCardActions({
           </Button>
         )}
         {hasNextStatus && (
-          <Button size="sm" variant="success" onClick={onNextStatus}>
+          <Button size="sm" onClick={onNextStatus}>
             <span className="hidden sm:inline">
               {getNextStatusLabel(order.status)}
             </span>

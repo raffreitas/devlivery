@@ -1,6 +1,6 @@
 import { Filter } from "lucide-react";
 import type { DateRange } from "react-day-picker";
-import { Button } from "@/shared/components/button";
+import { Button } from "@/shared/components/ui/button";
 import { DateRangePicker } from "@/shared/components/ui/date-range-picker";
 import { Label } from "@/shared/components/ui/label";
 import {
@@ -44,12 +44,7 @@ export function OrdersFilters({
     <>
       {/* Mobile: Botão Filtros */}
       <div className="sm:hidden">
-        <Button
-          variant="secondary"
-          onClick={onOpenFilters}
-          size="md"
-          className="w-full"
-        >
+        <Button variant="secondary" onClick={onOpenFilters} className="w-full">
           <Filter className="w-4 h-4" />
           <span className="ml-2">Filtros</span>
           {activeFiltersCount > 0 && (
