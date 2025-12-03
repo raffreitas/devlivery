@@ -158,7 +158,7 @@ export function OrdersPage() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>
               {editingOrder ? "Editar Pedido" : "Novo Pedido"}
