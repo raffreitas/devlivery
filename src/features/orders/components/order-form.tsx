@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { getPaymentOptions } from "../constants/payment-methods";
-import { type OrderFormData, type OrderItem, orderFormSchema } from "../types";
+import { type OrderFormData, orderFormSchema } from "../types";
 import { OrderItemsTable } from "./order-form-items-table";
 import { ProductSelector } from "./order-form-product-selector";
 
@@ -64,23 +64,25 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
       (item) => item.product.id === selectedProductId,
     );
 
+    const productData = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      description: product.description,
+      category: product.category,
+      available: product.available,
+    };
+
     if (existingItemIndex >= 0) {
       const existingItem = fields[existingItemIndex];
       update(existingItemIndex, {
-        ...existingItem,
+        product: productData,
         quantity: existingItem.quantity + quantity,
         notes: notes || existingItem.notes,
       });
     } else {
       append({
-        product: {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          description: product.description,
-          category: product.category,
-          available: product.available,
-        },
+        product: productData,
         quantity,
         notes: notes || undefined,
       });
@@ -95,10 +97,9 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
     onSubmit(data);
   };
 
-  const items = form.watch("items");
   const deliveryFee = form.watch("deliveryFee");
 
-  const subtotal = items.reduce(
+  const subtotal = fields.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0,
   );
@@ -212,15 +213,15 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
           />
 
           <OrderItemsTable
-            items={items as OrderItem[]}
+            items={fields.map((field) => ({
+              ...field,
+              fieldId: field.id,
+            }))}
             subtotal={subtotal}
             deliveryFee={deliveryFee}
             total={total}
-            onRemoveItem={(productId) => {
-              const index = fields.findIndex(
-                (item) => item.product.id === productId,
-              );
-              if (index >= 0) remove(index);
+            onRemoveItem={(index) => {
+              remove(index);
             }}
           />
           {form.formState.errors.items && (
