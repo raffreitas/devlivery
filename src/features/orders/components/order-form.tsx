@@ -40,12 +40,13 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
 
   const form = useForm<OrderFormData>({
     resolver: zodResolver(orderFormSchema),
-    defaultValues: initialData || {
-      customerName: "",
-      deliveryAddress: "",
-      deliveryFee: 0,
-      paymentMethod: "Cash",
-      items: [],
+    defaultValues: {
+      customerName: initialData?.customerName ?? "",
+      customerPhone: initialData?.customerPhone ?? "",
+      deliveryAddress: initialData?.deliveryAddress ?? "",
+      deliveryFee: initialData?.deliveryFee ?? 0,
+      paymentMethod: initialData?.paymentMethod ?? "Cash",
+      items: initialData?.items ?? [],
     },
   });
 
