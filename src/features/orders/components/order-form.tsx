@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { Separator } from "@/shared/components/ui/separator";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { getPaymentOptions } from "../constants/payment-methods";
 import { type OrderFormData, orderFormSchema } from "../types";
 import { OrderItemsTable } from "./order-form-items-table";
@@ -48,6 +49,7 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
       deliveryAddress: initialData?.deliveryAddress ?? "",
       deliveryFee: initialData?.deliveryFee ?? 0,
       paymentMethod: initialData?.paymentMethod ?? "Cash",
+      notes: initialData?.notes ?? "",
       items: initialData?.items ?? [],
     },
   });
@@ -192,6 +194,25 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Observações do Pedido</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Ex: Troco necessário, preferências do cliente, etc."
+                      className="resize-none"
+                      rows={2}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <div className="space-y-3 sm:space-y-4">

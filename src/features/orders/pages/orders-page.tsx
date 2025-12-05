@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+import { toast } from "sonner";
 import { BottomSheet } from "@/shared/components/bottom-sheet";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -65,6 +66,9 @@ export function OrdersPage() {
     }
     setIsModalOpen(false);
     setEditingOrder(null);
+    toast.success(
+      `Pedido ${editingOrder ? "atualizado" : "criado"} com sucesso!`,
+    );
   };
 
   const handleEditOrder = (order: Order) => {
@@ -168,19 +172,7 @@ export function OrdersPage() {
           <Separator />
 
           <OrderForm
-            initialData={
-              editingOrder
-                ? {
-                    id: editingOrder.id,
-                    items: editingOrder.items,
-                    customerName: editingOrder.customerName,
-                    customerPhone: editingOrder.customerPhone,
-                    deliveryAddress: editingOrder.deliveryAddress,
-                    deliveryFee: editingOrder.deliveryFee,
-                    paymentMethod: editingOrder.paymentMethod,
-                  }
-                : undefined
-            }
+            initialData={editingOrder ? { ...editingOrder } : undefined}
             onSubmit={handleCreateOrUpdateOrder}
             onCancel={handleCloseModal}
           />

@@ -70,7 +70,7 @@ export function ProductSelector({
             type="text"
             value={notes}
             onChange={(e) => onNotesChange(e.target.value)}
-            placeholder="Ex: sem cebola"
+            placeholder="Ex: Sem cebola"
           />
         </div>
       </div>

@@ -25,6 +25,7 @@ export interface Order {
   paymentMethod: PaymentMethod;
   total: number;
   deliveryFee: number;
+  notes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,6 +36,7 @@ export const orderFormSchema = z.object({
   deliveryAddress: z.string().min(1, "Endereço de entrega é obrigatório"),
   deliveryFee: z.number().min(0, "Taxa de entrega deve ser maior ou igual a 0"),
   paymentMethod: z.enum(["CreditCard", "DebitCard", "Cash", "Pix"]),
+  notes: z.string().optional(),
   items: z
     .array(
       z.object({

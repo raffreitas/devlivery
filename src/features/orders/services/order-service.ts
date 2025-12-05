@@ -29,6 +29,7 @@ interface OrderDto {
   paymentMethod: string;
   total: number;
   deliveryFee: number;
+  notes?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -61,6 +62,7 @@ function mapOrder(dto: OrderDto): Order {
     paymentMethod: dto.paymentMethod as PaymentMethod,
     total: dto.total,
     deliveryFee: dto.deliveryFee,
+    notes: dto.notes ?? undefined,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };
@@ -115,6 +117,7 @@ export const orderService = {
       deliveryAddress: data.deliveryAddress,
       deliveryFee: data.deliveryFee,
       paymentMethod: data.paymentMethod,
+      notes: data.notes ?? null,
     };
     await api.post<void>("/api/orders", payload);
   },
@@ -132,6 +135,7 @@ export const orderService = {
       deliveryAddress: data.deliveryAddress,
       deliveryFee: data.deliveryFee,
       paymentMethod: data.paymentMethod,
+      notes: data.notes ?? null,
     };
     await api.put<void>(`/api/orders/${id}`, payload);
   },

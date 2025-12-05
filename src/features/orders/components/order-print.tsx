@@ -37,6 +37,13 @@ export function OrderPrint({ order }: OrderPrintProps) {
         ))}
       </div>
 
+      {order.notes && (
+        <div className="border-t-2 border-dashed border-gray-800 py-2 mb-3">
+          <p className="font-semibold text-sm">OBSERVAÇÕES:</p>
+          <p className="text-sm whitespace-pre-wrap">{order.notes}</p>
+        </div>
+      )}
+
       <div className="border-t-2 border-dashed border-gray-800 pt-2 mb-3">
         {(() => {
           const subtotal = order.items.reduce(
