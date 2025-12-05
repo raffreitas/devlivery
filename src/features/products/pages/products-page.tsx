@@ -198,7 +198,7 @@ export function ProductsPage() {
           <Separator />
 
           <ProductForm
-            initialData={editingProduct || undefined}
+            initialData={editingProduct}
             onSubmit={handleCreateOrUpdate}
             onCancel={handleCloseModal}
             categoryOptions={categories.map((c) => ({ value: c, label: c }))}

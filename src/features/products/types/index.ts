@@ -20,11 +20,11 @@ export const productFormSchema = z.object({
     .min(1, "A descrição é obrigatória"),
   price: z
     .number({ error: "Deve ser informado um preço válido" })
-    .min(1, "O preço deve ser maior que a zero"),
+    .min(0.01, "O preço deve ser maior que a zero"),
   category: z
     .string({ error: "Deve ser informado um categoria válida." })
     .min(1, "A categoria é obrigatória"),
   available: z.boolean(),
 });
 
-export interface ProductFormData extends z.infer<typeof productFormSchema> {}
+export type ProductFormData = z.infer<typeof productFormSchema>;

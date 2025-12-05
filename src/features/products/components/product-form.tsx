@@ -12,12 +12,13 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
+import { InputMoney } from "@/shared/components/ui/input-money";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { type ProductFormData, productFormSchema } from "../types";
 
 interface ProductFormProps {
-  initialData?: ProductFormData & { id?: string };
+  initialData: (ProductFormData & { id?: string }) | null;
   onSubmit: (data: ProductFormData) => void;
   onCancel: () => void;
   categoryOptions?: { value: string; label: string }[];
@@ -33,10 +34,10 @@ export function ProductForm({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       available: initialData?.available ?? true,
-      name: initialData?.name || "",
-      description: initialData?.description || "",
-      price: initialData?.price || 0,
-      category: initialData?.category || "",
+      name: initialData?.name ?? "",
+      description: initialData?.description ?? "",
+      price: initialData?.price ?? 0,
+      category: initialData?.category ?? "",
     },
   });
 
@@ -78,13 +79,7 @@ export function ProductForm({
             <FormItem>
               <FormLabel>Preço (R$)</FormLabel>
               <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  required
-                  value={field.value}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
+                <InputMoney {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

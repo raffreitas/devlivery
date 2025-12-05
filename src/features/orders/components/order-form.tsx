@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
+import { InputMoney } from "@/shared/components/ui/input-money";
 import {
   Select,
   SelectContent,
@@ -156,13 +157,7 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
                   <FormItem>
                     <FormLabel>Taxa de Entrega</FormLabel>
                     <FormControl className="w-full">
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
+                      <InputMoney {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
