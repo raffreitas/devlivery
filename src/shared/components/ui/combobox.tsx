@@ -70,7 +70,7 @@ export function Combobox({
     allOptions.find((option) => option.value === value)?.label ?? value;
 
   return (
-    <div className={cn("w-full max-w-xs space-y-2", className)}>
+    <div className={cn("w-full space-y-2", className)}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

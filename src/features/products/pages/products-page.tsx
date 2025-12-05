@@ -1,6 +1,5 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { LoadingSpinner } from "@/shared/components/loading-spinner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +24,7 @@ import {
   SelectTrigger,
 } from "@/shared/components/ui/select";
 import { Separator } from "@/shared/components/ui/separator";
+import { Spinner } from "@/shared/components/ui/spinner";
 import { ProductCard } from "../components/product-card";
 import { ProductForm } from "../components/product-form";
 import { useProducts } from "../hooks/use-products";
@@ -93,7 +93,7 @@ export function ProductsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Produtos</h1>
           {isFetching && (
             <div className="flex items-center gap-2 text-sm text-gray-500">
-              <LoadingSpinner size="sm" className="text-orange-500" />
+              <Spinner />
               <span>Atualizando...</span>
             </div>
           )}

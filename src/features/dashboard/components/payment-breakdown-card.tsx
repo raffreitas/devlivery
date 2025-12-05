@@ -1,6 +1,10 @@
 import { PAYMENT_METHODS } from "@/features/orders/constants/payment-methods";
-import { Card } from "@/shared/components/ui/card";
-import { Separator } from "@/shared/components/ui/separator";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { PAYMENT_METHOD_STYLES } from "@/shared/constants/ui-styles";
 import type { PaymentBreakdown } from "../types";
 
@@ -21,12 +25,12 @@ export function PaymentBreakdownCard({
   };
 
   return (
-    <Card className="p-4 sm:p-6">
-      <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-        Resumo de Vendas
-      </h4>
+    <Card>
+      <CardHeader>
+        <CardTitle>Resumo de Vendas</CardTitle>
+      </CardHeader>
 
-      <div className="space-y-3">
+      <CardContent className="space-y-3">
         {entries.map((method) => {
           const style = PAYMENT_METHOD_STYLES[method];
           const Icon = style.icon;
@@ -55,18 +59,7 @@ export function PaymentBreakdownCard({
             </div>
           );
         })}
-      </div>
-
-      <Separator />
-
-      <div className="flex justify-between items-center">
-        <span className="text-sm font-medium text-secondary-foreground">
-          Total
-        </span>
-        <span className="text-lg sm:text-xl font-bold text-primary">
-          R$ {total.toFixed(2)}
-        </span>
-      </div>
+      </CardContent>
     </Card>
   );
 }

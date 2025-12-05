@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { Separator } from "@/shared/components/ui/separator";
 import { getPaymentOptions } from "../constants/payment-methods";
 import { type OrderFormData, orderFormSchema } from "../types";
 import { OrderItemsTable } from "./order-form-items-table";
@@ -113,54 +114,20 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handlePlaceOrder)}
-        className="space-y-4 sm:space-y-6"
+        className="flex flex-col max-h-[calc(100vh-140px)]"
       >
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Dados do Cliente</h3>
+        <div className="flex-1 overflow-y-auto px-2 space-y-4">
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold">Dados do Cliente</h3>
 
-          <FormField
-            control={form.control}
-            name="customerName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome do Cliente</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nome do cliente" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="deliveryAddress"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Endereço de Entrega</FormLabel>
-                <FormControl>
-                  <Input placeholder="Endereço completo" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="flex flex-col gap-4 sm:flex-row">
             <FormField
               control={form.control}
-              name="deliveryFee"
+              name="customerName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Taxa de Entrega</FormLabel>
-                  <FormControl className="w-full">
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
+                  <FormLabel>Nome do Cliente</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nome do cliente" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -169,70 +136,107 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
 
             <FormField
               control={form.control}
-              name="paymentMethod"
+              name="deliveryAddress"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Método de Pagamento</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecione um método de pagamento" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {getPaymentOptions().map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Endereço de Entrega</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Endereço completo" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <FormField
+                control={form.control}
+                name="deliveryFee"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Taxa de Entrega</FormLabel>
+                    <FormControl className="w-full">
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="paymentMethod"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Método de Pagamento</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione um método de pagamento" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {getPaymentOptions().map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
+
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-base sm:text-lg font-semibold">
+              Itens do Pedido
+            </h3>
+
+            <ProductSelector
+              products={availableProducts}
+              selectedProductId={selectedProductId}
+              quantity={quantity}
+              notes={notes}
+              onProductChange={setSelectedProductId}
+              onQuantityChange={setQuantity}
+              onNotesChange={setNotes}
+              onAddItem={handleAddItem}
+            />
+
+            <OrderItemsTable
+              items={fields.map((field) => ({
+                ...field,
+                fieldId: field.id,
+              }))}
+              subtotal={subtotal}
+              deliveryFee={deliveryFee}
+              total={total}
+              onRemoveItem={(index) => {
+                remove(index);
+              }}
+            />
+            {form.formState.errors.items && (
+              <p className="text-sm font-medium text-destructive">
+                {form.formState.errors.items.message}
+              </p>
+            )}
+          </div>
+          <Separator />
         </div>
 
-        <div className="space-y-3 sm:space-y-4">
-          <h3 className="text-base sm:text-lg font-semibold">
-            Itens do Pedido
-          </h3>
-
-          <ProductSelector
-            products={availableProducts}
-            selectedProductId={selectedProductId}
-            quantity={quantity}
-            notes={notes}
-            onProductChange={setSelectedProductId}
-            onQuantityChange={setQuantity}
-            onNotesChange={setNotes}
-            onAddItem={handleAddItem}
-          />
-
-          <OrderItemsTable
-            items={fields.map((field) => ({
-              ...field,
-              fieldId: field.id,
-            }))}
-            subtotal={subtotal}
-            deliveryFee={deliveryFee}
-            total={total}
-            onRemoveItem={(index) => {
-              remove(index);
-            }}
-          />
-          {form.formState.errors.items && (
-            <p className="text-sm font-medium text-destructive">
-              {form.formState.errors.items.message}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>

@@ -46,6 +46,7 @@ export function ProductSelector({
             onChange={onProductChange}
             options={productOptions}
             placeholder="Selecione ou pesquise"
+            className="w-full"
           />
         </div>
 
