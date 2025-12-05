@@ -14,6 +14,7 @@ public class OrderBuilder
     private decimal _deliveryFee;
     private OrderItem[] _orderItems;
     private Guid _establishmentId;
+    private string? _notes;
 
     public OrderBuilder()
     {
@@ -23,6 +24,7 @@ public class OrderBuilder
         _paymentMethod = _faker.PickRandom<PaymentMethod>();
         _deliveryFee = _faker.Random.Decimal(0.0m, 20.0m);
         _orderItems = [];
+        _notes = null;
     }
 
     public OrderBuilder WithCustomerName(string customerName)
@@ -67,6 +69,12 @@ public class OrderBuilder
         return this;
     }
 
+    public OrderBuilder WithNotes(string? notes)
+    {
+        _notes = notes;
+        return this;
+    }
+
     public Order Build()
     {
         if (_orderItems.Length == 0)
@@ -82,7 +90,8 @@ public class OrderBuilder
             paymentMethod: _paymentMethod,
             status: OrderStatus.Pending,
             deliveryFee: _deliveryFee,
-            establishmentId: _establishmentId
+            establishmentId: _establishmentId,
+            notes: _notes
         );
 
         foreach (var orderItem in _orderItems)

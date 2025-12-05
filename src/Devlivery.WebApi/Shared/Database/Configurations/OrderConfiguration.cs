@@ -18,6 +18,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(e => e.DeliveryFee).HasPrecision(18, 2);
         builder.Property(e => e.PaymentMethod).HasConversion<string>().HasMaxLength(20);
         builder.Property(x => x.EstablishmentId).IsRequired();
+        builder.Property(e => e.Notes).HasMaxLength(500).IsRequired(false);
 
         builder.HasMany(e => e.Items)
             .WithOne()

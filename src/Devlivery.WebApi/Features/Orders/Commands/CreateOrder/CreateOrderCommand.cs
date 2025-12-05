@@ -9,7 +9,8 @@ public sealed record CreateOrderCommand(
     string? CustomerPhone,
     string DeliveryAddress,
     string PaymentMethod,
-    decimal DeliveryFee = 0);
+    decimal DeliveryFee = 0,
+    string? Notes = null);
 
 public sealed record OrderItemDto(Guid ProductId, int Quantity, string? Notes);
 
@@ -48,5 +49,11 @@ public sealed class Validator : AbstractValidator<CreateOrderCommand>
         RuleFor(x => x.DeliveryFee)
             .GreaterThanOrEqualTo(0)
             .WithMessage("O campo '{PropertyName}' deve ser maior ou igual a {ComparisonValue}.");
+
+        When(x => !string.IsNullOrWhiteSpace(x.Notes), () =>
+        {
+            RuleFor(x => x.Notes).MaximumLength(500)
+                .WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+        });
     }
 }

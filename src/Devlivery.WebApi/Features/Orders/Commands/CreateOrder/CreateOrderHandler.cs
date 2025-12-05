@@ -34,7 +34,8 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext, ITenantAc
             paymentMethod: paymentMethod,
             status: OrderStatus.Pending,
             deliveryFee: command.DeliveryFee,
-            establishmentId: tenantAccessor.Tenant.Id
+            establishmentId: tenantAccessor.Tenant.Id,
+            notes: command.Notes
         );
         foreach (var item in command.Items)
         {
