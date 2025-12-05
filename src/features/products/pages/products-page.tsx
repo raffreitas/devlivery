@@ -1,4 +1,4 @@
-import { PlusIcon } from "lucide-react";
+import { Filter, PlusIcon, Search } from "lucide-react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -88,55 +88,73 @@ export function ProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold text-gray-900">Produtos</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+            Produtos
+          </h1>
+          <p className="text-muted-foreground">
+            Gerencie seu catálogo de produtos
+          </p>
+        </div>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           {isFetching && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Spinner />
-              <span>Atualizando...</span>
+            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground mr-2">
+              <Spinner className="w-4 h-4" />
+              <span>Sincronizando...</span>
             </div>
           )}
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            className="w-full sm:w-auto"
+          >
+            <PlusIcon className="w-4 h-4 mr-2" />
+            Novo Produto
+          </Button>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <PlusIcon />
-          Novo Produto
-        </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
+      <div className="bg-card p-4 rounded-lg border border-border shadow-sm flex flex-col sm:flex-row gap-4 items-center">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Buscar produtos..."
+            placeholder="Buscar produtos por nome..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9 transition-colors"
           />
         </div>
-        <Select onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-full sm:w-1/6 cursor-pointer">
-            <span>
-              {filterCategory === "all"
-                ? "Todas as categorias"
-                : filterCategory}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all" onSelect={() => setFilterCategory("all")}>
-              Todas as categorias
-            </SelectItem>
-            {categories.map((category) => (
-              <SelectItem
-                key={category}
-                value={category}
-                onSelect={() => setFilterCategory(category)}
-                className="cursor-pointer"
-              >
-                {category}
+
+        <div className="w-full sm:w-[200px]">
+          <Select onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-full">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Filter className="w-4 h-4" />
+                <span className="truncate text-foreground">
+                  {filterCategory === "all"
+                    ? "Todas Categorias"
+                    : filterCategory}
+                </span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" onSelect={() => setFilterCategory("all")}>
+                Todas as categorias
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              {categories.map((category) => (
+                <SelectItem
+                  key={category}
+                  value={category}
+                  onSelect={() => setFilterCategory(category)}
+                  className="cursor-pointer"
+                >
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {loading && products.length === 0 ? (
@@ -153,7 +171,7 @@ export function ProductsPage() {
         </div>
       ) : (
         <div
-          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-200 ${
+          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 transition-opacity duration-200 ${
             isFetching ? "opacity-60" : "opacity-100"
           }`}
         >

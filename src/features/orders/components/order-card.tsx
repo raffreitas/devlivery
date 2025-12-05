@@ -57,17 +57,17 @@ export function OrderCard({
   return (
     <Card className="p-4 sm:p-6 hover:shadow-lg transition-shadow flex flex-col h-full gap-2">
       <OrderCardHeader order={order} />
-      <Separator />
+      <Separator className="bg-gray-100" />
 
-      <CardContent className="p-0 flex-1 flex flex-col justify-between gap-2">
+      <CardContent className="p-0 flex-1 flex flex-col justify-between gap-3">
         <OrderCardItems items={order.items} />
 
-        <Separator />
+        <Separator className="bg-gray-100" />
 
         <OrderCardTotal order={order} />
       </CardContent>
 
-      <Separator />
+      <Separator className="bg-gray-100" />
 
       <OrderCardActions
         order={order}

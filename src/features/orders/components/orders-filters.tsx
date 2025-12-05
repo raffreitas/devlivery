@@ -56,21 +56,23 @@ export function OrdersFilters({
       </div>
 
       {/* Desktop: Inline Filters */}
-      <div className="hidden sm:block bg-white rounded-lg shadow-md p-3 sm:p-4">
-        <div className="flex flex-row flex-wrap items-end gap-4">
-          <div className="flex-1 flex flex-col gap-2 min-w-[200px]">
-            <Label>Status</Label>
+      <div className="hidden sm:block bg-card rounded-lg border border-border shadow-sm p-4">
+        <div className="flex items-end gap-4 pb-2 sm:pb-1 px-1">
+          <div className="flex-1 min-w-[200px] flex flex-col gap-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Status do Pedido
+            </Label>
             <Select onValueChange={onStatusChange}>
-              <SelectTrigger className="w-full cursor-pointer">
+              <SelectTrigger className="w-full">
                 <span>
                   {statusFilter === "all"
-                    ? "Todos"
+                    ? "Todos os status"
                     : getOrderStatusOptionLabel(statusFilter)}
                 </span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all" onSelect={() => onStatusChange("all")}>
-                  Todos
+                  Todos os status
                 </SelectItem>
                 {statusOptions.map((option) => (
                   <SelectItem
@@ -86,19 +88,21 @@ export function OrdersFilters({
             </Select>
           </div>
 
-          <div className="flex-1 flex flex-col gap-2 min-w-[200px]">
-            <Label>Pagamento</Label>
+          <div className="flex-1 min-w-[200px] flex flex-col gap-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Forma de Pagamento
+            </Label>
             <Select onValueChange={onPaymentChange}>
-              <SelectTrigger className="w-full  cursor-pointer">
+              <SelectTrigger className="w-full">
                 <span>
                   {paymentFilter === "all"
-                    ? "Todos"
+                    ? "Todas as formas"
                     : getPaymentOptionLabel(paymentFilter)}
                 </span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all" onSelect={() => onPaymentChange("all")}>
-                  Todos
+                  Todas as formas
                 </SelectItem>
                 {paymentOptions.map((option) => (
                   <SelectItem
@@ -114,8 +118,10 @@ export function OrdersFilters({
             </Select>
           </div>
 
-          <div className="w-auto flex flex-col gap-2">
-            <Label>Período</Label>
+          <div className="flex flex-col gap-1.5 min-w-60">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Período
+            </Label>
             <DateRangePicker date={period} onDateChange={onDateChange} />
           </div>
         </div>
