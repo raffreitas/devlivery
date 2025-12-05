@@ -94,7 +94,7 @@ export function ProductForm({
               <FormLabel>Categoria</FormLabel>
               <FormControl>
                 <Combobox
-                  placeholder="Pesquise ou criar uma categoria"
+                  placeholder="Pesquisar ou criar uma categoria"
                   options={categoryOptions ?? []}
                   value={field.value}
                   onChange={field.onChange}
