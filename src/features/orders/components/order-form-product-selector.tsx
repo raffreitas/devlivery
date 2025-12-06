@@ -38,8 +38,8 @@ export function ProductSelector({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <div className="sm:col-span-2 lg:col-span-1 space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-10 gap-3">
+        <div className="sm:col-span-2 lg:col-span-5 space-y-2">
           <Label htmlFor="product-select">Produto</Label>
           <Combobox
             value={selectedProductId}
@@ -50,7 +50,7 @@ export function ProductSelector({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="sm:col-span-2 lg:col-span-2 space-y-2">
           <Label htmlFor="quantity">Quantidade</Label>
           <Input
             id="quantity"
@@ -63,7 +63,7 @@ export function ProductSelector({
           />
         </div>
 
-        <div className="sm:col-span-2 lg:col-span-1 space-y-2">
+        <div className="sm:col-span-2 lg:col-span-3 space-y-2">
           <Label htmlFor="notes">Observações</Label>
           <Input
             id="notes"
