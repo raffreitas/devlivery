@@ -115,7 +115,7 @@ export function usePrintOrder() {
         border-color: #333;
       }
 
-      .text-gray-600 {
+      .text-secondary-foreground {
         color: #666;
       }
 

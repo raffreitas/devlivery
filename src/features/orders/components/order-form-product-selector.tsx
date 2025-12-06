@@ -1,15 +1,17 @@
+import { PlusIcon } from "lucide-react";
 import { useMemo } from "react";
 import type { Product } from "@/features/products/types";
-import { AutocompleteSelect } from "@/shared/components/autocomplete-select";
-import { Button } from "@/shared/components/button";
-import { Input } from "@/shared/components/input";
+import { Button } from "@/shared/components/ui/button";
+import { Combobox } from "@/shared/components/ui/combobox";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 
 interface ProductSelectorProps {
   products: Product[];
-  selectedProductId: string | null;
+  selectedProductId: string | undefined;
   quantity: number;
   notes: string;
-  onProductChange: (productId: string | null) => void;
+  onProductChange: (productId: string | undefined) => void;
   onQuantityChange: (quantity: number) => void;
   onNotesChange: (notes: string) => void;
   onAddItem: () => void;
@@ -36,39 +38,39 @@ export function ProductSelector({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <div className="sm:col-span-2 lg:col-span-1">
-          <AutocompleteSelect
-            id="product-select"
-            label="Produto"
-            placeholder="Selecione ou pesquise"
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-10 gap-3">
+        <div className="sm:col-span-2 lg:col-span-5 space-y-2">
+          <Label htmlFor="product-select">Produto</Label>
+          <Combobox
             value={selectedProductId}
             onChange={onProductChange}
             options={productOptions}
+            placeholder="Selecione ou pesquise"
+            className="w-full"
           />
         </div>
 
-        <div>
+        <div className="sm:col-span-2 lg:col-span-2 space-y-2">
+          <Label htmlFor="quantity">Quantidade</Label>
           <Input
-            label="Quantidade"
+            id="quantity"
             type="number"
             min="1"
             value={quantity}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange={(e) =>
               onQuantityChange(Number.parseInt(e.target.value || "", 10) || 1)
             }
           />
         </div>
 
-        <div className="sm:col-span-2 lg:col-span-1">
+        <div className="sm:col-span-2 lg:col-span-3 space-y-2">
+          <Label htmlFor="notes">Observações</Label>
           <Input
-            label="Observações"
+            id="notes"
             type="text"
             value={notes}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              onNotesChange(e.target.value)
-            }
-            placeholder="Ex: sem cebola"
+            onChange={(e) => onNotesChange(e.target.value)}
+            placeholder="Ex: Sem cebola"
           />
         </div>
       </div>
@@ -78,9 +80,9 @@ export function ProductSelector({
         variant="secondary"
         onClick={onAddItem}
         disabled={!selectedProductId}
-        className="w-full sm:w-auto"
+        className="w-full sm:w-auto cursor-pointer"
       >
-        + Adicionar Item
+        <PlusIcon /> Adicionar Item
       </Button>
     </div>
   );

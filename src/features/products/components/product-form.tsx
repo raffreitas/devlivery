@@ -1,11 +1,24 @@
-import { useState } from "react";
-import { AutocompleteSelect } from "@/shared/components/autocomplete-select";
-import { Button } from "@/shared/components/button";
-import { Input } from "@/shared/components/input";
-import type { ProductFormData } from "../types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Button } from "@/shared/components/ui/button";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Combobox } from "@/shared/components/ui/combobox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
+import { InputMoney } from "@/shared/components/ui/input-money";
+import { Spinner } from "@/shared/components/ui/spinner";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { type ProductFormData, productFormSchema } from "../types";
 
 interface ProductFormProps {
-  initialData?: ProductFormData & { id?: string };
+  initialData: (ProductFormData & { id?: string }) | null;
   onSubmit: (data: ProductFormData) => void;
   onCancel: () => void;
   categoryOptions?: { value: string; label: string }[];
@@ -17,96 +30,114 @@ export function ProductForm({
   onCancel,
   categoryOptions,
 }: ProductFormProps) {
-  const [formData, setFormData] = useState<ProductFormData>({
-    name: initialData?.name || "",
-    description: initialData?.description || "",
-    price: initialData?.price || 0,
-    category: initialData?.category || "",
-    available: initialData?.available ?? true,
+  const form = useForm<ProductFormData>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues: {
+      available: initialData?.available ?? true,
+      name: initialData?.name ?? "",
+      description: initialData?.description ?? "",
+      price: initialData?.price ?? 0,
+      category: initialData?.category ?? "",
+    },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <Input
-        label="Nome do Produto"
-        type="text"
-        value={formData.name}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setFormData({ ...formData, name: e.target.value })
-        }
-        required
-      />
-
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Descrição
-        </label>
-        <textarea
-          id="description"
-          value={formData.description}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-          rows={3}
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do Produto</FormLabel>
+              <FormControl>
+                <Input type="text" required {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <Input
-        label="Preço (R$)"
-        type="number"
-        step="0.01"
-        value={formData.price}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setFormData({ ...formData, price: Number.parseFloat(e.target.value) })
-        }
-        required
-      />
-
-      <AutocompleteSelect
-        id="category"
-        name="category"
-        label="Categoria"
-        placeholder="Ex: Pizza, Bebida, Sobremesa"
-        options={categoryOptions ?? []}
-        value={formData.category || null}
-        allowCustomValue={true}
-        onChange={(v) => setFormData({ ...formData, category: v ?? "" })}
-        required
-      />
-
-      <div className="flex items-center">
-        <input
-          type="checkbox"
-          id="available"
-          checked={formData.available}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormData({ ...formData, available: e.target.checked })
-          }
-          className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição</FormLabel>
+              <FormControl>
+                <Textarea rows={3} required {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <label htmlFor="available" className="ml-2 block text-sm text-gray-900">
-          Disponível
-        </label>
-      </div>
 
-      <div className="flex justify-end space-x-3 pt-4">
-        <Button type="button" variant="secondary" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button type="submit" variant="primary">
-          {initialData?.id ? "Atualizar" : "Criar"} Produto
-        </Button>
-      </div>
-    </form>
+        <FormField
+          control={form.control}
+          name="price"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Preço (R$)</FormLabel>
+              <FormControl>
+                <InputMoney {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoria</FormLabel>
+              <FormControl>
+                <Combobox
+                  placeholder="Pesquisar ou criar uma categoria"
+                  options={categoryOptions ?? []}
+                  value={field.value}
+                  onChange={field.onChange}
+                  allowCustomValue
+                  className="max-w-full w-full"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="available"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Disponível</FormLabel>
+                <p className="text-sm text-muted-foreground">
+                  Este produto estará visível para registro de pedidos.
+                </p>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end space-x-3">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button type="submit">
+            {form.formState.isSubmitting && <Spinner />}
+            {initialData?.id ? "Atualizar" : "Criar"} Produto
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

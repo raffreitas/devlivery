@@ -6,8 +6,8 @@ interface OrderCardItemsProps {
 
 export function OrderCardItems({ items }: OrderCardItemsProps) {
   return (
-    <div className="border-t border-gray-200 pt-3 sm:pt-4 mb-3 sm:mb-4">
-      <h4 className="text-xs sm:text-sm font-medium text-gray-900 mb-2">
+    <div>
+      <h4 className="text-xs sm:text-sm font-medium text-secondary-foreground mb-2">
         Itens:
       </h4>
       <ul className="space-y-2">

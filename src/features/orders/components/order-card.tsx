@@ -1,3 +1,5 @@
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Separator } from "@/shared/components/ui/separator";
 import { usePrintOrder } from "../hooks/use-print-order";
 import type { Order } from "../types";
 import { OrderCardActions } from "./order-card-actions";
@@ -53,18 +55,19 @@ export function OrderCard({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow flex flex-col h-full">
+    <Card className="p-4 sm:p-6 hover:shadow-lg transition-shadow flex flex-col h-full gap-2">
       <OrderCardHeader order={order} />
+      <Separator className="bg-gray-100" />
 
-      <div className="flex-1 flex flex-col justify-between">
-        <div>
-          <OrderCardItems items={order.items} />
-        </div>
+      <CardContent className="p-0 flex-1 flex flex-col justify-between gap-3">
+        <OrderCardItems items={order.items} />
 
-        <div className="pt-3 sm:pt-4 border-t border-gray-200">
-          <OrderCardTotal order={order} />
-        </div>
-      </div>
+        <Separator className="bg-gray-100" />
+
+        <OrderCardTotal order={order} />
+      </CardContent>
+
+      <Separator className="bg-gray-100" />
 
       <OrderCardActions
         order={order}
@@ -81,6 +84,6 @@ export function OrderCard({
           <OrderPrint order={order} />
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

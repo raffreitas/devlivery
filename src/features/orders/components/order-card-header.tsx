@@ -1,3 +1,4 @@
+import { CardHeader } from "@/shared/components/ui/card";
 import {
   ORDER_STATUS_STYLES,
   PAYMENT_METHOD_STYLES,
@@ -15,7 +16,7 @@ export function OrderCardHeader({ order }: OrderCardHeaderProps) {
   const statusStyle = ORDER_STATUS_STYLES[order.status];
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start mb-3 sm:mb-4">
+    <CardHeader className="p-0 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
@@ -31,11 +32,11 @@ export function OrderCardHeader({ order }: OrderCardHeaderProps) {
           </span>
         </div>
         {order.customerPhone && (
-          <p className="text-xs sm:text-sm text-gray-600 truncate">
+          <p className="text-xs sm:text-sm text-secondary-foreground truncate">
             {order.customerPhone}
           </p>
         )}
-        <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
+        <p className="text-xs sm:text-sm text-secondary-foreground line-clamp-2">
           {order.deliveryAddress}
         </p>
       </div>
@@ -44,6 +45,6 @@ export function OrderCardHeader({ order }: OrderCardHeaderProps) {
       >
         {statusStyle.label}
       </span>
-    </div>
+    </CardHeader>
   );
 }

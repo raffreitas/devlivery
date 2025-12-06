@@ -84,4 +84,47 @@ export const dashboardService = {
     }
     return res.data;
   },
+
+  getSalesOverTime: (orders: Order[]) => {
+    const salesByDate = orders
+      .filter((o) => o.status !== "Canceled")
+      .reduce(
+        (acc, order) => {
+          const date = new Date(order.createdAt).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+          });
+          acc[date] = (acc[date] || 0) + order.total;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+    return Object.entries(salesByDate)
+      .map(([date, total]) => ({ date, total }))
+      .sort((a, b) => {
+        const [dayA, monthA] = a.date.split("/").map(Number);
+        const [dayB, monthB] = b.date.split("/").map(Number);
+        return monthA - monthB || dayA - dayB;
+      });
+  },
+
+  getTopProducts: (orders: Order[]) => {
+    const productSales = orders
+      .filter((o) => o.status !== "Canceled")
+      .flatMap((o) => o.items)
+      .reduce(
+        (acc, item) => {
+          acc[item.product.name] =
+            (acc[item.product.name] || 0) + item.quantity;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+    return Object.entries(productSales)
+      .map(([name, quantity]) => ({ name, quantity }))
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 5);
+  },
 };

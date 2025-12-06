@@ -1,50 +1,39 @@
-import { LoadingSpinner } from "@/shared/components/loading-spinner";
+import type { DateRange } from "react-day-picker";
+import { Spinner } from "@/shared/components/ui/spinner";
 import { DashboardFilters } from "./dashboard-filters";
 
 interface DashboardHeaderProps {
   isFetching: boolean;
-  inputStartDate: string;
-  inputEndDate: string;
-  onStartChange: (value: string) => void;
-  onEndChange: (value: string) => void;
-  onReset: () => void;
+  period?: DateRange;
+  onDateChange: (date: DateRange | undefined) => void;
   onOpenFilters: () => void;
 }
 
 export function DashboardHeader({
   isFetching,
-  inputStartDate,
-  inputEndDate,
-  onStartChange,
-  onEndChange,
-  onReset,
+  period,
+  onDateChange,
   onOpenFilters,
 }: DashboardHeaderProps) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
       <div>
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            Dashboard
-          </h1>
-          {isFetching && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <LoadingSpinner size="sm" className="text-orange-500" />
-              <span className="hidden sm:inline">Atualizando...</span>
-            </div>
-          )}
-        </div>
-        <p className="text-sm sm:text-base text-gray-600 mt-1">
-          Visão geral dos pedidos
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">
+          Visão geral dos pedidos e métricas
         </p>
       </div>
 
+      {isFetching && (
+        <div className="fixed top-4 right-4 z-50 bg-white/80 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-gray-100 flex items-center gap-2 text-sm text-muted-foreground">
+          <Spinner className="w-4 h-4" />
+          <span>Atualizando...</span>
+        </div>
+      )}
+
       <DashboardFilters
-        inputStartDate={inputStartDate}
-        inputEndDate={inputEndDate}
-        onStartDateChange={onStartChange}
-        onEndDateChange={onEndChange}
-        onResetDates={onReset}
+        period={period}
+        onDateChange={onDateChange}
         onOpenFilters={onOpenFilters}
       />
     </div>

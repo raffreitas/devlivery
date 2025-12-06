@@ -1,24 +1,27 @@
 import { Filter } from "lucide-react";
+import type { DateRange } from "react-day-picker";
+import { Button } from "@/shared/components/ui/button";
+import { DateRangePicker } from "@/shared/components/ui/date-range-picker";
+import { Label } from "@/shared/components/ui/label";
 import {
-  type AutocompleteOption,
-  AutocompleteSelect,
-} from "@/shared/components/autocomplete-select";
-import { Button } from "@/shared/components/button";
-import { DateRangeFilter } from "@/shared/components/date-range-filter";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/shared/components/ui/select";
+import { getOrderStatusOptionLabel } from "../constants/order-status";
+import { getPaymentOptionLabel } from "../constants/payment-methods";
 import type { Order } from "../types";
 
 interface OrdersFiltersProps {
   statusFilter: Order["status"] | "all";
   paymentFilter: Order["paymentMethod"] | "all";
-  statusOptions: AutocompleteOption<Order["status"] | "all">[];
-  paymentOptions: AutocompleteOption<Order["paymentMethod"] | "all">[];
-  inputStartDate: string;
-  inputEndDate: string;
+  statusOptions: Array<Order["status"] | "all">;
+  paymentOptions: Array<Order["paymentMethod"] | "all">;
+  period?: DateRange;
+  onDateChange: (date: DateRange | undefined) => void;
   onStatusChange: (status: Order["status"] | "all") => void;
   onPaymentChange: (payment: Order["paymentMethod"] | "all") => void;
-  onStartDateChange: (date: string) => void;
-  onEndDateChange: (date: string) => void;
-  onResetDates: () => void;
   onOpenFilters: () => void;
 }
 
@@ -27,13 +30,10 @@ export function OrdersFilters({
   paymentFilter,
   statusOptions,
   paymentOptions,
-  inputStartDate,
-  inputEndDate,
+  period,
   onStatusChange,
   onPaymentChange,
-  onStartDateChange,
-  onEndDateChange,
-  onResetDates,
+  onDateChange,
   onOpenFilters,
 }: OrdersFiltersProps) {
   // Contagem de filtros ativos
@@ -44,12 +44,7 @@ export function OrdersFilters({
     <>
       {/* Mobile: Botão Filtros */}
       <div className="sm:hidden">
-        <Button
-          variant="secondary"
-          onClick={onOpenFilters}
-          size="md"
-          className="w-full"
-        >
+        <Button variant="secondary" onClick={onOpenFilters} className="w-full">
           <Filter className="w-4 h-4" />
           <span className="ml-2">Filtros</span>
           {activeFiltersCount > 0 && (
@@ -61,38 +56,73 @@ export function OrdersFilters({
       </div>
 
       {/* Desktop: Inline Filters */}
-      <div className="hidden sm:block bg-white rounded-lg shadow-md p-3 sm:p-4">
-        <div className="flex flex-row flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[200px]">
-            <AutocompleteSelect
-              label="Status"
-              value={statusFilter}
-              options={statusOptions}
-              onChange={(value) => onStatusChange(value ?? "all")}
-              placeholder="Selecione um status"
-              autocomplete={false}
-            />
+      <div className="hidden sm:block bg-card rounded-lg border border-border shadow-sm p-4">
+        <div className="flex items-end gap-4 pb-2 sm:pb-1 px-1">
+          <div className="flex-1 min-w-[200px] flex flex-col gap-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Status do Pedido
+            </Label>
+            <Select onValueChange={onStatusChange}>
+              <SelectTrigger className="w-full">
+                <span>
+                  {statusFilter === "all"
+                    ? "Todos os status"
+                    : getOrderStatusOptionLabel(statusFilter)}
+                </span>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" onSelect={() => onStatusChange("all")}>
+                  Todos os status
+                </SelectItem>
+                {statusOptions.map((option) => (
+                  <SelectItem
+                    key={option}
+                    value={option}
+                    onSelect={() => onStatusChange(option)}
+                    className="cursor-pointer"
+                  >
+                    {getOrderStatusOptionLabel(option)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="flex-1 min-w-[200px]">
-            <AutocompleteSelect
-              label="Pagamento"
-              value={paymentFilter}
-              options={paymentOptions}
-              onChange={(value) => onPaymentChange(value ?? "all")}
-              placeholder="Selecione método"
-              autocomplete={false}
-            />
+          <div className="flex-1 min-w-[200px] flex flex-col gap-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Forma de Pagamento
+            </Label>
+            <Select onValueChange={onPaymentChange}>
+              <SelectTrigger className="w-full">
+                <span>
+                  {paymentFilter === "all"
+                    ? "Todas as formas"
+                    : getPaymentOptionLabel(paymentFilter)}
+                </span>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" onSelect={() => onPaymentChange("all")}>
+                  Todas as formas
+                </SelectItem>
+                {paymentOptions.map((option) => (
+                  <SelectItem
+                    key={option}
+                    value={option}
+                    onSelect={() => onPaymentChange(option)}
+                    className="cursor-pointer"
+                  >
+                    {getPaymentOptionLabel(option)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="w-auto">
-            <DateRangeFilter
-              startDate={inputStartDate}
-              endDate={inputEndDate}
-              onStartChange={onStartDateChange}
-              onEndChange={onEndDateChange}
-              onReset={onResetDates}
-            />
+          <div className="flex flex-col gap-1.5 min-w-60">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Período
+            </Label>
+            <DateRangePicker date={period} onDateChange={onDateChange} />
           </div>
         </div>
       </div>

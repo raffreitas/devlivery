@@ -1,31 +1,42 @@
-import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Button } from "@/shared/components/button";
-import { Input } from "@/shared/components/input";
-import { LoadingSpinner } from "@/shared/components/loading-spinner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
+import { Spinner } from "@/shared/components/ui/spinner";
 import { useAuth } from "@/shared/contexts/auth-context";
+import { type AuthFormData, authFormSchema } from "../types";
 
 export function LoginPage() {
   const { login, loading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation() as {
-    state?: { from?: { pathname?: string } };
-  };
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const currentYear = new Date().getFullYear();
 
-  const from = location.state?.from?.pathname || "/";
+  const form = useForm<AuthFormData>({
+    resolver: zodResolver(authFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const handleAuthenticate = async ({ email, password }: AuthFormData) => {
     try {
       await login({ email, password });
-      navigate(from, { replace: true });
+      navigate("/", { replace: true });
     } catch {
-      setError("Credenciais inválidas");
+      toast.error("Credenciais inválidas");
     }
   };
 
@@ -38,63 +49,70 @@ export function LoginPage() {
             <span className="text-5xl">🍕</span>
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Devlivery</h1>
-          {/* <p className="text-gray-600">Sistema de Gestão de Pedidos</p> */}
+          {/* <p className="text-secondary-foreground">Sistema de Gestão de Pedidos</p> */}
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Entrar</h2>
+        <Card className="p-8">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleAuthenticate)}
+              className="space-y-5"
+            >
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="seu@email.com"
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {error && (
-            <div className="mb-6 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm flex items-center gap-2">
-              <span className="text-base">⚠️</span>
-              <span>{error}</span>
-            </div>
-          )}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <Input
-              id="email"
-              label="E-mail"
-              type="email"
-              value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setEmail(e.target.value)
-              }
-              required
-              autoComplete="email"
-              placeholder="seu@email.com"
-            />
-
-            <Input
-              id="password"
-              label="Senha"
-              type="password"
-              value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setPassword(e.target.value)
-              }
-              required
-              autoComplete="current-password"
-              placeholder="••••••••"
-            />
-
-            <Button type="submit" disabled={loading} className="w-full mt-6">
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <LoadingSpinner size="sm" className="text-white" />
-                  Entrando...
-                </span>
-              ) : (
-                "Entrar"
-              )}
-            </Button>
-          </form>
-        </div>
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner />
+                    Entrando...
+                  </span>
+                ) : (
+                  "Entrar"
+                )}
+              </Button>
+            </form>
+          </Form>
+        </Card>
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
-          © 2025 Devlivery. Todos os direitos reservados.
+          © {currentYear} Devlivery. Todos os direitos reservados.
         </p>
       </div>
     </div>

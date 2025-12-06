@@ -1,59 +1,58 @@
-import { useState } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context";
-import { NavbarDesktop } from "./navbar-desktop";
-import { NavbarMobile } from "./navbar-mobile";
+import { NavbarBottom } from "./navbar-bottom";
 import { NavbarUserSection } from "./navbar-user-section";
+import { Sidebar } from "./sidebar";
 
 export function Layout() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const { logout } = useAuth();
 
   const onLogout = async () => {
     await logout();
-    setMobileOpen(false);
     navigate("/login", { replace: true });
   };
 
-  const isLogin = location.pathname === "/login";
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-lg relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo e navegação */}
-            <div className="flex items-center flex-1">
-              <div className="shrink-0 flex items-center">
-                <Link to="/">
-                  <h1 className="text-xl sm:text-2xl font-bold text-orange-600">
-                    🍕 Devlivery
-                  </h1>
-                </Link>
-              </div>
-              {!isLogin && <NavbarDesktop />}
-            </div>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar for Desktop */}
+      <Sidebar />
 
-            {/* Seção do usuário e menu mobile */}
-            <div className="flex items-center gap-2">
-              <NavbarUserSection onLogout={onLogout} />
-              {!isLogin && (
-                <NavbarMobile
-                  isOpen={mobileOpen}
-                  onToggle={() => setMobileOpen((v) => !v)}
-                  onClose={() => setMobileOpen(false)}
-                />
-              )}
-            </div>
+      <div className="flex-1 flex flex-col min-h-screen relative">
+        {/* Mobile Header */}
+        <header className="sm:hidden bg-white border-b border-gray-200 h-16 px-4 flex items-center justify-between sticky top-0 z-40">
+          <h1 className="text-xl font-bold text-primary">🍕 Devlivery</h1>
+          <NavbarUserSection onLogout={onLogout} />
+        </header>
+
+        {/* Desktop Header (Minimal - mainly for user profile if not in sidebar, but we put generic actions here if needed) */}
+        {/* For now, Sidebar handles most, but we can keep a top bar for Profile if we want.
+             In this design, let's put Profile in Sidebar?
+             Actually, let's keep a top bar on desktop for "Search" or "Notifications" in future,
+             but for now let's just keep the content area clean.
+             Wait, where is the User Profile on Desktop? The Sidebar has "Logout" but maybe not the full User Menu.
+             Let's put the User Section in the top right of the main content area for Desktop as well.
+         */}
+        <header className="hidden sm:flex bg-white border-b border-gray-100 h-16 px-6 items-center justify-between sticky top-0 z-40">
+          <h2 className="text-lg font-semibold text-gray-800">
+            {/* Contextual Title could go here, leveraging a context or route matching.
+                   For now, let's leave it empty or show Breadcrumbs. */}
+            Bem-vindo
+          </h2>
+          <div className="flex items-center gap-4">
+            <NavbarUserSection onLogout={onLogout} />
           </div>
-        </div>
-      </nav>
+        </header>
 
-      <main className="max-w-7xl mx-auto py-4 px-4 sm:py-6 sm:px-6 lg:px-8">
-        <Outlet />
-      </main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto pb-24 sm:pb-8">
+          <div className="max-w-screen-2xl mx-auto">
+            <Outlet />
+          </div>
+        </main>
+
+        {/* Bottom Nav for Mobile */}
+        <NavbarBottom />
+      </div>
     </div>
   );
 }

@@ -25,7 +25,7 @@ export function NavbarUserSection({ onLogout }: NavbarUserSectionProps) {
           <button
             type="button"
             onClick={onLogout}
-            className="inline-flex text-xs sm:text-sm text-gray-600 hover:text-gray-900 items-center gap-1 cursor-pointer"
+            className="inline-flex text-xs sm:text-sm text-secondary-foreground hover:text-gray-900 items-center gap-1 cursor-pointer"
             title="Sair"
           >
             <LogOut className="w-4 h-4" />
@@ -35,7 +35,7 @@ export function NavbarUserSection({ onLogout }: NavbarUserSectionProps) {
       ) : (
         <Link
           to="/login"
-          className="text-xs sm:text-sm text-gray-600 hover:text-gray-900"
+          className="text-xs sm:text-sm text-secondary-foreground hover:text-gray-900"
         >
           Entrar
         </Link>

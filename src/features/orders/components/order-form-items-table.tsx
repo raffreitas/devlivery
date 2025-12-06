@@ -1,12 +1,26 @@
-import { Button } from "@/shared/components/button";
-import type { OrderItem } from "../types";
+import { TrashIcon, XIcon } from "lucide-react";
+import { Button } from "@/shared/components/ui/button";
+
+interface OrderItemsTableItem {
+  fieldId: string;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    description?: string;
+    category?: string;
+    available?: boolean;
+  };
+  quantity: number;
+  notes?: string;
+}
 
 interface OrderItemsTableProps {
-  items: OrderItem[];
+  items: OrderItemsTableItem[];
   subtotal: number;
   deliveryFee: number;
   total: number;
-  onRemoveItem: (productId: string) => void;
+  onRemoveItem: (index: number) => void;
 }
 
 export function OrderItemsTable({
@@ -25,8 +39,8 @@ export function OrderItemsTable({
       {/* Mobile view */}
       <div className="sm:hidden">
         <div className="divide-y divide-gray-200">
-          {items.map((item) => (
-            <div key={item.product.id} className="p-3 bg-white">
+          {items.map((item, index) => (
+            <div key={item.fieldId} className="p-3 bg-white">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex-1">
                   <div className="font-medium text-gray-900 text-sm">
@@ -40,14 +54,14 @@ export function OrderItemsTable({
                 </div>
                 <Button
                   type="button"
-                  size="sm"
-                  variant="danger"
-                  onClick={() => onRemoveItem(item.product.id)}
+                  size="icon"
+                  variant="destructive"
+                  onClick={() => onRemoveItem(index)}
                 >
-                  ✕
+                  <XIcon />
                 </Button>
               </div>
-              <div className="flex justify-between text-xs text-gray-600">
+              <div className="flex justify-between text-xs text-secondary-foreground">
                 <span>Qtd: {item.quantity}</span>
                 <span>Unit: R$ {item.product.price.toFixed(2)}</span>
                 <span className="font-medium text-gray-900">
@@ -82,8 +96,8 @@ export function OrderItemsTable({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {items.map((item) => (
-              <tr key={item.product.id}>
+            {items.map((item, index) => (
+              <tr key={item.fieldId}>
                 <td className="px-4 py-3 text-sm">
                   <div>
                     <div className="font-medium text-gray-900">
@@ -108,11 +122,11 @@ export function OrderItemsTable({
                 <td className="px-4 py-3 text-sm">
                   <Button
                     type="button"
-                    size="sm"
-                    variant="danger"
-                    onClick={() => onRemoveItem(item.product.id)}
+                    size="icon"
+                    variant="destructive"
+                    onClick={() => onRemoveItem(index)}
                   >
-                    Remover
+                    <TrashIcon />
                   </Button>
                 </td>
               </tr>
@@ -123,14 +137,16 @@ export function OrderItemsTable({
 
       <div className="bg-gray-50 px-3 sm:px-4 py-3">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-xs sm:text-sm text-gray-600">Subtotal</span>
+          <span className="text-xs sm:text-sm text-secondary-foreground">
+            Subtotal
+          </span>
           <span className="text-xs sm:text-sm font-medium text-gray-900">
             R$ {subtotal.toFixed(2)}
           </span>
         </div>
 
         <div className="flex justify-between items-center mb-1">
-          <span className="text-xs sm:text-sm text-gray-600">
+          <span className="text-xs sm:text-sm text-secondary-foreground">
             Taxa de Entrega
           </span>
           <span className="text-xs sm:text-sm font-medium text-gray-900">
@@ -142,7 +158,7 @@ export function OrderItemsTable({
           <span className="text-base sm:text-lg font-semibold text-gray-900">
             Total:
           </span>
-          <span className="text-xl sm:text-2xl font-bold text-orange-600">
+          <span className="text-xl sm:text-2xl font-bold text-primary">
             R$ {total.toFixed(2)}
           </span>
         </div>
