@@ -6,6 +6,7 @@ public sealed record GetOrderByIdResponse(
     string CustomerName,
     string? CustomerPhone,
     string DeliveryAddress,
+    string? Notes,
     string Status,
     decimal Total,
     decimal DeliveryFee,

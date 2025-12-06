@@ -14,6 +14,7 @@ public sealed class Order : Entity
     public Guid EstablishmentId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    public string? Notes { get; private set; }
 
     private readonly List<OrderItem> _items = [];
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
@@ -25,7 +26,8 @@ public sealed class Order : Entity
         PaymentMethod paymentMethod,
         OrderStatus status,
         decimal deliveryFee,
-        Guid establishmentId
+        Guid establishmentId,
+        string? notes = null
     )
     {
         CustomerName = customerName;
@@ -37,6 +39,7 @@ public sealed class Order : Entity
         EstablishmentId = establishmentId;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+        Notes = notes;
     }
 
     public void ClearItems()
@@ -64,7 +67,8 @@ public sealed class Order : Entity
         string? customerPhone,
         string deliveryAddress,
         PaymentMethod paymentMethod,
-        decimal deliveryFee)
+        decimal deliveryFee,
+        string? notes = null)
     {
         CustomerName = customerName;
         CustomerPhone = customerPhone;
@@ -72,6 +76,7 @@ public sealed class Order : Entity
         PaymentMethod = paymentMethod;
         DeliveryFee = deliveryFee;
         UpdatedAt = DateTime.UtcNow;
+        Notes = notes;
         CalculateTotal();
     }
 

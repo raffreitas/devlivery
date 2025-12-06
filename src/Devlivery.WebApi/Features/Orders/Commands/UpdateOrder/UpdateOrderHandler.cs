@@ -60,7 +60,8 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext, ITenantAc
             customerPhone: command.CustomerPhone,
             deliveryAddress: command.DeliveryAddress,
             paymentMethod: paymentMethod,
-            deliveryFee: command.DeliveryFee
+            deliveryFee: command.DeliveryFee,
+            notes: command.Notes
         );
 
         await dbContext.SaveChangesAsync(cancellationToken);
