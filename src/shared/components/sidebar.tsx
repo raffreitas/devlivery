@@ -2,7 +2,6 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
-  LogOut,
   Package,
   ShoppingCart,
 } from "lucide-react";
@@ -11,11 +10,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 
-interface SidebarProps {
-  onLogout: () => void;
-}
-
-export function Sidebar({ onLogout }: SidebarProps) {
+export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
 
@@ -104,7 +99,7 @@ export function Sidebar({ onLogout }: SidebarProps) {
         </div>
       </div>
 
-      <div className="p-4 border-t border-gray-100">
+      {/* <div className="p-4 border-t border-gray-100">
         <nav className="space-y-1">
           <button
             type="button"
@@ -119,7 +114,7 @@ export function Sidebar({ onLogout }: SidebarProps) {
             {!isCollapsed && <span>Sair</span>}
           </button>
         </nav>
-      </div>
+      </div> */}
     </aside>
   );
 }

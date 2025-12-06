@@ -16,7 +16,7 @@ export function Layout() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar for Desktop */}
-      <Sidebar onLogout={onLogout} />
+      <Sidebar />
 
       <div className="flex-1 flex flex-col min-h-screen relative">
         {/* Mobile Header */}
@@ -26,16 +26,16 @@ export function Layout() {
         </header>
 
         {/* Desktop Header (Minimal - mainly for user profile if not in sidebar, but we put generic actions here if needed) */}
-        {/* For now, Sidebar handles most, but we can keep a top bar for Profile if we want. 
-             In this design, let's put Profile in Sidebar? 
-             Actually, let's keep a top bar on desktop for "Search" or "Notifications" in future, 
-             but for now let's just keep the content area clean. 
+        {/* For now, Sidebar handles most, but we can keep a top bar for Profile if we want.
+             In this design, let's put Profile in Sidebar?
+             Actually, let's keep a top bar on desktop for "Search" or "Notifications" in future,
+             but for now let's just keep the content area clean.
              Wait, where is the User Profile on Desktop? The Sidebar has "Logout" but maybe not the full User Menu.
              Let's put the User Section in the top right of the main content area for Desktop as well.
          */}
         <header className="hidden sm:flex bg-white border-b border-gray-100 h-16 px-6 items-center justify-between sticky top-0 z-40">
           <h2 className="text-lg font-semibold text-gray-800">
-            {/* Contextual Title could go here, leveraging a context or route matching. 
+            {/* Contextual Title could go here, leveraging a context or route matching.
                    For now, let's leave it empty or show Breadcrumbs. */}
             Bem-vindo
           </h2>
