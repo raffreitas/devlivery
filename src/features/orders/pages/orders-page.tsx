@@ -105,10 +105,12 @@ export function OrdersPage() {
   return (
     <>
       <div className="space-y-4 sm:space-y-6">
-        <OrdersHeader
-          isFetching={isFetching}
-          onNewOrder={() => setIsModalOpen(true)}
-        />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <OrdersHeader
+            isFetching={isFetching}
+            onNewOrder={() => setIsModalOpen(true)}
+          />
+        </div>
 
         <OrdersFilters
           statusFilter={statusFilter}

@@ -1,5 +1,5 @@
 import { subDays } from "date-fns";
-import { ClipboardList, DollarSign } from "lucide-react";
+import { ClipboardListIcon, DollarSignIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { useOrders } from "@/features/orders/hooks/use-orders";
@@ -62,21 +62,21 @@ export function DashboardPage() {
           <StatCard
             title="Total de Pedidos"
             value={stats.totalOrders}
-            icon={<ClipboardList className="w-5 h-5 sm:w-6 sm:h-6" />}
+            icon={<ClipboardListIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
             color="orange"
           />
 
           <StatCard
             title="Receita Total"
             value={`R$ ${stats.totalRevenue.toFixed(2)}`}
-            icon={<DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />}
+            icon={<DollarSignIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
             color="green"
           />
 
           <StatCard
             title="Ticket Médio"
             value={`R$ ${stats.averageOrderValue.toFixed(2)}`}
-            icon={<DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />}
+            icon={<DollarSignIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
             color="green"
           />
         </div>
