@@ -117,15 +117,9 @@ export function CloseCashForm({
           name="closingAmount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base font-semibold">
-                Valor Real no Caixa
-              </FormLabel>
+              <FormLabel>Valor Real no Caixa</FormLabel>
               <FormControl>
-                <InputMoney
-                  {...field}
-                  className="text-lg h-12 font-semibold"
-                  placeholder="0,00"
-                />
+                <InputMoney {...field} placeholder="0,00" />
               </FormControl>
               <p className="text-xs text-gray-500 flex items-start gap-1">
                 <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" />

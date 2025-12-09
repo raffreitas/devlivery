@@ -10,6 +10,7 @@ import {
   Unlock,
   User,
 } from "lucide-react";
+import { getPaymentOptionLabel } from "@/features/orders/constants/payment-methods";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { formatMoney } from "@/shared/utils/formatters";
@@ -59,7 +60,7 @@ export function CashSummaryCard({
   );
 
   return (
-    <Card className="p-4 sm:p-6">
+    <Card className="p-4 sm:p-6 gap-1">
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -132,7 +133,7 @@ export function CashSummaryCard({
       <div className="mb-4 p-3 rounded-lg bg-orange-50 border border-orange-200">
         <p className="text-xs text-orange-800 leading-relaxed">
           <strong>Dinheiro Esperado no Caixa:</strong> Valor de abertura +
-          vendas em dinheiro apenas
+          aportes + vendas em dinheiro apenas
         </p>
       </div>
 
@@ -175,9 +176,6 @@ export function CashSummaryCard({
               <div>
                 <div className="text-xs text-orange-700 font-medium mb-0.5">
                   Dinheiro Esperado no Caixa
-                </div>
-                <div className="text-xs text-orange-600">
-                  Conte o dinheiro físico no fechamento
                 </div>
               </div>
               <span className="text-xl font-bold text-orange-700">
@@ -328,7 +326,9 @@ export function CashSummaryCard({
                         key={payment.method}
                         className="flex items-center justify-between py-1"
                       >
-                        <span className="text-gray-600">{payment.method}</span>
+                        <span className="text-gray-600">
+                          {getPaymentOptionLabel(payment.method)}
+                        </span>
                         <span className="font-medium text-gray-900">
                           {formatMoney(payment.amount)}
                         </span>
