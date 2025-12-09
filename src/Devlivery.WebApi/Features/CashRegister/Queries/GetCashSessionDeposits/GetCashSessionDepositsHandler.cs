@@ -16,6 +16,7 @@ public sealed class GetCashSessionDepositsHandler(ApplicationDbContext dbContext
         var tenantId = tenantAccessor.Tenant.Id;
 
         var deposits = await dbContext.CashDeposits
+            .ForTenant(tenantId)
             .Where(cd => cd.CashSessionId == query.CashSessionId && cd.EstablishmentId == tenantId)
             .OrderBy(cd => cd.DepositedAt)
             .AsNoTracking()

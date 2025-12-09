@@ -58,6 +58,7 @@ public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext, 
 
         // Get deposits made during the session
         var totalDeposits = await dbContext.CashDeposits
+            .ForTenant(tenantId)
             .Where(cd => cd.CashSessionId == cashSession.Id)
             .SumAsync(cd => cd.Amount, cancellationToken);
 

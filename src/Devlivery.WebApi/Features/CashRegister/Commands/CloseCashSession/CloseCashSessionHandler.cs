@@ -59,6 +59,7 @@ public sealed class CloseCashSessionHandler(ApplicationDbContext dbContext, ITen
         // Formula: Opening + Deposits + CashSales
         // Motivo: PaymentBreakdown só é disponível aqui no fechamento
         var totalDeposits = await dbContext.CashDeposits
+            .ForTenant(tenantId)
             .Where(cd => cd.CashSessionId == cashSession.Id)
             .SumAsync(cd => cd.Amount, cancellationToken);
 
