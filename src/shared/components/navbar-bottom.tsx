@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, ShoppingCart } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Wallet } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/shared/lib/utils";
 
@@ -17,6 +17,11 @@ export function NavbarBottom() {
       label: "Pedidos",
       icon: ShoppingCart,
       path: "/orders",
+    },
+    {
+      label: "Caixa",
+      icon: Wallet,
+      path: "/cash",
     },
     {
       label: "Produtos",

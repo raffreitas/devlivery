@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Package,
   ShoppingCart,
+  Wallet,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -26,6 +27,11 @@ export function Sidebar() {
       label: "Pedidos",
       icon: ShoppingCart,
       path: "/orders",
+    },
+    {
+      label: "Caixa",
+      icon: Wallet,
+      path: "/cash",
     },
     {
       label: "Produtos",

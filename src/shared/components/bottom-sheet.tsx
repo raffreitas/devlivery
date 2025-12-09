@@ -34,7 +34,7 @@ export function BottomSheet({
       {/* Backdrop */}
       <button
         type="button"
-        className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 cursor-default"
+        className="fixed inset-0 bg-black/50 z-9998 transition-opacity duration-300 cursor-default"
         onClick={onClose}
         aria-label="Fechar filtros"
         tabIndex={-1}
@@ -44,7 +44,7 @@ export function BottomSheet({
       <div
         role="dialog"
         aria-modal="true"
-        className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-2xl max-h-[90vh] flex flex-col animate-slide-up"
+        className="fixed inset-x-0 bottom-0 z-9999 bg-white rounded-t-2xl shadow-2xl max-h-[90vh] flex flex-col animate-slide-up"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         {/* Handle bar */}

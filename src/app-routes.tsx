@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { LoginPage } from "./features/auth/pages/login-page";
+import { CashPage } from "./features/cash/pages/cash-page";
 import { DashboardPage } from "./features/dashboard/pages/dashboard-page";
 import { OrdersPage } from "./features/orders/pages/orders-page";
 import { ProductsPage } from "./features/products/pages/products-page";
@@ -19,8 +20,9 @@ const router = createBrowserRouter([
         element: <Layout />,
         children: [
           { index: true, element: <DashboardPage /> },
-          { path: "products", element: <ProductsPage /> },
           { path: "orders", element: <OrdersPage /> },
+          { path: "cash", element: <CashPage /> },
+          { path: "products", element: <ProductsPage /> },
         ],
       },
     ],
