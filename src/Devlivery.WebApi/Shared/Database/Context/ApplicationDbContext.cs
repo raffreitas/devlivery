@@ -1,4 +1,5 @@
 using Devlivery.WebApi.Features.Establishments.Domain;
+using Devlivery.WebApi.Features.CashRegister.Domain;
 using Devlivery.WebApi.Features.Orders.Domain;
 using Devlivery.WebApi.Features.Products.Domain;
 using Devlivery.WebApi.Features.Users.Domain;
@@ -15,6 +16,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<Establishment> Establishments => Set<Establishment>();
+    public DbSet<CashSession> CashSessions => Set<CashSession>();
+    public DbSet<CashDeposit> CashDeposits => Set<CashDeposit>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,6 +27,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         modelBuilder.ApplyConfiguration(new ProductConfiguration());
         modelBuilder.ApplyConfiguration(new OrderConfiguration());
         modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
+        modelBuilder.ApplyConfiguration(new CashSessionConfiguration());
+        modelBuilder.ApplyConfiguration(new CashDepositConfiguration());
 
         modelBuilder.UseUtcDateTimeConverter();
     }

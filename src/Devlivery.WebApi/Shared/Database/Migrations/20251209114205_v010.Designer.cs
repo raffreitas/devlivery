@@ -3,17 +3,20 @@ using System;
 using Devlivery.WebApi.Shared.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
+namespace Devlivery.WebApi.Shared.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251209114205_v010")]
+    partial class v010
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,67 +24,6 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Devlivery.WebApi.Features.CashRegister.Domain.CashDeposit", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("amount");
-
-                    b.Property<Guid>("AttendantId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("attendant_id");
-
-                    b.Property<string>("AttendantName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("attendant_name");
-
-                    b.Property<Guid>("CashSessionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("cash_session_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTime>("DepositedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deposited_at");
-
-                    b.Property<Guid>("EstablishmentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("establishment_id");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("notes");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_cash_deposits");
-
-                    b.HasIndex("CashSessionId")
-                        .HasDatabaseName("ix_cash_deposits_cash_session_id");
-
-                    b.HasIndex("DepositedAt")
-                        .HasDatabaseName("ix_cash_deposits_deposited_at");
-
-                    b.HasIndex("EstablishmentId")
-                        .HasDatabaseName("ix_cash_deposits_establishment_id");
-
-                    b.ToTable("cash_deposits", (string)null);
-                });
 
             modelBuilder.Entity("Devlivery.WebApi.Features.CashRegister.Domain.CashSession", b =>
                 {
@@ -117,11 +59,6 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("establishment_id");
 
-                    b.Property<decimal>("ExpectedCashAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("expected_cash_amount");
-
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)")
@@ -134,7 +71,7 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
 
                     b.Property<string>("PaymentBreakdown")
                         .IsRequired()
-                        .HasColumnType("jsonb")
+                        .HasColumnType("text")
                         .HasColumnName("payment_breakdown");
 
                     b.Property<DateTime>("StartAt")
@@ -418,23 +355,6 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("Devlivery.WebApi.Features.CashRegister.Domain.CashDeposit", b =>
-                {
-                    b.HasOne("Devlivery.WebApi.Features.CashRegister.Domain.CashSession", null)
-                        .WithMany("Deposits")
-                        .HasForeignKey("CashSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_cash_deposits_cash_sessions_cash_session_id");
-
-                    b.HasOne("Devlivery.WebApi.Features.Establishments.Domain.Establishment", null)
-                        .WithMany()
-                        .HasForeignKey("EstablishmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_cash_deposits_establishments_establishment_id");
-                });
-
             modelBuilder.Entity("Devlivery.WebApi.Features.CashRegister.Domain.CashSession", b =>
                 {
                     b.HasOne("Devlivery.WebApi.Features.Establishments.Domain.Establishment", null)
@@ -497,11 +417,6 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_users_establishments_establishment_id");
-                });
-
-            modelBuilder.Entity("Devlivery.WebApi.Features.CashRegister.Domain.CashSession", b =>
-                {
-                    b.Navigation("Deposits");
                 });
 
             modelBuilder.Entity("Devlivery.WebApi.Features.Orders.Domain.Order", b =>
