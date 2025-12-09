@@ -87,13 +87,6 @@ export function CashDepositForm({
 
         <div className="flex gap-2 pt-2">
           <Button
-            type="submit"
-            disabled={isLoading}
-            className="flex-1 bg-green-600 hover:bg-green-700"
-          >
-            {isLoading ? "Adicionando..." : "Adicionar Aporte"}
-          </Button>
-          <Button
             type="button"
             variant="outline"
             disabled={isLoading}
@@ -101,6 +94,13 @@ export function CashDepositForm({
             className="flex-1"
           >
             Limpar
+          </Button>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="flex-1 bg-green-600 hover:bg-green-700"
+          >
+            {isLoading ? "Adicionando..." : "Adicionar Aporte"}
           </Button>
         </div>
       </form>

@@ -95,7 +95,7 @@ export function CashPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Nenhum caixa aberto
               </h3>
-              <p className="text-sm text-text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 Abra um novo caixa para começar a registrar vendas e controlar o
                 fluxo de caixa
               </p>
