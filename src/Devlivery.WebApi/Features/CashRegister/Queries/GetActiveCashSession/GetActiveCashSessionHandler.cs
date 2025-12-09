@@ -56,7 +56,12 @@ public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext, 
             .Where(o => o.PaymentMethod == PaymentMethod.Cash)
             .Sum(o => o.Total);
 
-        var expectedCashAmount = cashSession.OpeningAmount + cashSales;
+        // Get deposits made during the session
+        var totalDeposits = await dbContext.CashDeposits
+            .Where(cd => cd.CashSessionId == cashSession.Id)
+            .SumAsync(cd => cd.Amount, cancellationToken);
+
+        var expectedCashAmount = cashSession.OpeningAmount + totalDeposits + cashSales;
 
         return Result.Ok(new CashSessionResponse(
             cashSession.Id,

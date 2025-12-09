@@ -55,6 +55,20 @@ public sealed class CloseCashSessionHandler(ApplicationDbContext dbContext, ITen
                 g.Count()))
             .ToList();
 
+        // ✅ IMPORTANTE: Recalcular ExpectedCashAmount ANTES de fechar
+        // Formula: Opening + Deposits + CashSales
+        // Motivo: PaymentBreakdown só é disponível aqui no fechamento
+        var totalDeposits = await dbContext.CashDeposits
+            .Where(cd => cd.CashSessionId == cashSession.Id)
+            .SumAsync(cd => cd.Amount, cancellationToken);
+
+        var cashSales = paymentBreakdown
+            .Where(pb => pb.Method.Equals("cash", StringComparison.OrdinalIgnoreCase))
+            .Sum(pb => pb.Amount);
+
+        var expectedCashAmount = cashSession.OpeningAmount + totalDeposits + cashSales;
+        cashSession.UpdateExpectedCashAmount(expectedCashAmount);
+
         // Update session with calculated totals
         cashSession.UpdateTotals(totalRevenue, totalOrders, paymentBreakdown);
         cashSession.Close(command.ClosingAmount, command.Notes);

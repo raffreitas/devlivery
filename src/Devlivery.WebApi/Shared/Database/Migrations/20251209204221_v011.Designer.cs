@@ -3,17 +3,20 @@ using System;
 using Devlivery.WebApi.Shared.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
+namespace Devlivery.WebApi.Shared.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251209204221_v011")]
+    partial class v011
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,6 +28,7 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
             modelBuilder.Entity("Devlivery.WebApi.Features.CashRegister.Domain.CashDeposit", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -118,8 +122,7 @@ namespace Devlivery.WebApi.Shared.Infrastructure.Database.Migrations
                         .HasColumnName("establishment_id");
 
                     b.Property<decimal>("ExpectedCashAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
+                        .HasColumnType("numeric")
                         .HasColumnName("expected_cash_amount");
 
                     b.Property<string>("Notes")

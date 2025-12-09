@@ -22,6 +22,7 @@ public sealed class CashSessionConfiguration : IEntityTypeConfiguration<CashSess
         builder.Property(x => x.Notes).HasMaxLength(1000).IsRequired(false);
         builder.Property(x => x.TotalRevenue).HasPrecision(18, 2).HasDefaultValue(0);
         builder.Property(x => x.TotalOrders).HasDefaultValue(0);
+        builder.Property(x => x.ExpectedCashAmount).HasPrecision(18, 2).IsRequired();
 
         builder.Property(x => x.PaymentBreakdown)
             .HasColumnName("payment_breakdown")
@@ -39,6 +40,14 @@ public sealed class CashSessionConfiguration : IEntityTypeConfiguration<CashSess
             .WithMany()
             .HasForeignKey(x => x.EstablishmentId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany<CashDeposit>(x => x.Deposits)
+            .WithOne()
+            .HasForeignKey(d => d.CashSessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(a => a.Deposits)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(x => x.EstablishmentId);
         builder.HasIndex(x => x.Status);

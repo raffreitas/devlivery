@@ -8,6 +8,7 @@ public sealed class CashSession : Entity
     public Guid AttendantId { get; private set; }
     public string AttendantName { get; private set; } = string.Empty;
     public decimal OpeningAmount { get; private set; }
+    public decimal ExpectedCashAmount { get; private set; }
     public decimal? ClosingAmount { get; private set; }
     public DateTime StartAt { get; private set; }
     public DateTime? EndAt { get; private set; }
@@ -18,6 +19,8 @@ public sealed class CashSession : Entity
     public List<PaymentBreakdownItem> PaymentBreakdown { get; private set; } = [];
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    private readonly List<CashDeposit> _deposits = [];
+    public IReadOnlyCollection<CashDeposit> Deposits => _deposits.AsReadOnly();
 
     private CashSession()
     {
@@ -34,6 +37,7 @@ public sealed class CashSession : Entity
         AttendantId = attendantId;
         AttendantName = attendantName;
         OpeningAmount = openingAmount;
+        ExpectedCashAmount = openingAmount;
         Notes = notes;
         Status = CashSessionStatus.Open;
         StartAt = DateTime.UtcNow;
@@ -46,6 +50,20 @@ public sealed class CashSession : Entity
         TotalRevenue = totalRevenue;
         TotalOrders = totalOrders;
         PaymentBreakdown = breakdown;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateExpectedCashAmount(decimal expectedAmount)
+    {
+        ExpectedCashAmount = expectedAmount;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddDeposit(CashDeposit deposit)
+    {
+        _deposits.Add(deposit);
+        var totalDeposits = Deposits.Sum(cd => cd.Amount);
+        UpdateExpectedCashAmount(OpeningAmount + totalDeposits);
         UpdatedAt = DateTime.UtcNow;
     }
 
