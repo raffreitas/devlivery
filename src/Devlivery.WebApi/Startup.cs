@@ -1,4 +1,5 @@
 ﻿using Devlivery.WebApi.Features.Auth;
+using Devlivery.WebApi.Features.CashRegister;
 using Devlivery.WebApi.Features.Orders;
 using Devlivery.WebApi.Features.Products;
 using Devlivery.WebApi.Shared.Authorization;
@@ -44,6 +45,7 @@ public static class Startup
         services.AddAuthFeature(configuration);
         services.AddOrderFeature();
         services.AddProductFeature();
+        services.AddCashRegisterFeature();
 
         // CORS
         services.AddCorsConfiguration();
@@ -87,5 +89,6 @@ public static class Startup
         app.MapAuthEndpoints();
         app.MapProductEndpoints();
         app.MapOrderEndpoints();
+        app.MapCashRegisterEndpoints();
     }
 }

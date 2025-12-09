@@ -19,6 +19,8 @@ public static class DatabaseSeeder
             tradeName: "Pizza Devlivery",
             isActive: true
         );
+        
+        db.Establishments.Add(establishment);
 
         // Seed User
         var user = new User(
