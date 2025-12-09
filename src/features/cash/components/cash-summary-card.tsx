@@ -9,6 +9,7 @@ import {
   Unlock,
   User,
 } from "lucide-react";
+import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import type { CashSession } from "../types";
 
@@ -69,13 +70,13 @@ export function CashSummaryCard({
           </p>
         </div>
         {isOpen && onOpenClose && (
-          <button
+          <Button
             type="button"
             onClick={onOpenClose}
             className="px-3 py-1 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
           >
             Fechar
-          </button>
+          </Button>
         )}
       </div>
 

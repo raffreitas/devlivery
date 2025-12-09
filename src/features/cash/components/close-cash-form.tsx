@@ -75,11 +75,7 @@ export function CloseCashForm({
             <FormItem>
               <FormLabel>Valor Real no Caixa</FormLabel>
               <FormControl>
-                <InputMoney
-                  placeholder="seu@email.com"
-                  autoComplete="email"
-                  {...field}
-                />
+                <InputMoney {...field} />
               </FormControl>
               <p className="text-xs text-gray-500">
                 Conte o dinheiro físico no caixa e informe o valor total

@@ -59,11 +59,7 @@ export function OpenCashForm({
             <FormItem>
               <FormLabel>Valor de Abertura</FormLabel>
               <FormControl>
-                <InputMoney
-                  placeholder="seu@email.com"
-                  autoComplete="email"
-                  {...field}
-                />
+                <InputMoney {...field} />
               </FormControl>
               <p className="text-xs text-gray-500">
                 Informe o valor inicial em dinheiro no caixa
