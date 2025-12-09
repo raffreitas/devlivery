@@ -46,3 +46,24 @@ export const closeCashSessionFormSchema = z.object({
 export type CloseCashSessionFormData = z.infer<
   typeof closeCashSessionFormSchema
 >;
+
+// Cash Deposit Types
+export interface CashDeposit {
+  id: string;
+  cashSessionId: string;
+  amount: number;
+  depositedAt: string; // ISO date string
+  attendant: string; // Attendant who made the deposit
+  notes?: string;
+}
+
+export const createCashDepositFormSchema = z.object({
+  amount: z
+    .number({ error: "O valor do aporte deve ser um número" })
+    .min(0.01, "O valor do aporte deve ser maior que zero"),
+  notes: z.string().optional(),
+});
+
+export type CreateCashDepositFormData = z.infer<
+  typeof createCashDepositFormSchema
+>;

@@ -5,22 +5,28 @@ import {
   Calendar,
   Clock,
   Lock,
+  PlusIcon,
   TrendingUp,
   Unlock,
   User,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
-import type { CashSession } from "../types";
+import { formatMoney } from "@/shared/utils/formatters";
+import type { CashDeposit, CashSession } from "../types";
 
 interface CashSummaryCardProps {
   session: CashSession;
+  deposits: CashDeposit[];
   onOpenClose?: () => void;
+  onAddDeposit?: () => void;
 }
 
 export function CashSummaryCard({
   session,
+  deposits,
   onOpenClose,
+  onAddDeposit,
 }: CashSummaryCardProps) {
   const isOpen = session.status === "open";
   const expectedCashAmount = session.expectedCashAmount;
@@ -47,6 +53,11 @@ export function CashSummaryCard({
     return durationMs > 24 * 60 * 60 * 1000;
   };
 
+  const totalDeposits = deposits?.reduce(
+    (sum, deposit) => sum + deposit.amount,
+    0,
+  );
+
   return (
     <Card className="p-4 sm:p-6">
       <div className="flex items-start justify-between mb-4">
@@ -69,15 +80,26 @@ export function CashSummaryCard({
             {session.attendant}
           </p>
         </div>
-        {isOpen && onOpenClose && (
-          <Button
-            type="button"
-            onClick={onOpenClose}
-            className="px-3 py-1 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-          >
-            Fechar
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {isOpen && onAddDeposit && (
+            <Button
+              type="button"
+              onClick={onAddDeposit}
+              className="px-3 py-1 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+            >
+              Adicionar Aporte
+            </Button>
+          )}
+          {isOpen && onOpenClose && (
+            <Button
+              type="button"
+              onClick={onOpenClose}
+              className="px-3 py-1 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+            >
+              Fechar
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Session period */}
@@ -106,64 +128,101 @@ export function CashSummaryCard({
         </div>
       )}
 
+      {/* Cash flow explanation */}
+      <div className="mb-4 p-3 rounded-lg bg-orange-50 border border-orange-200">
+        <p className="text-xs text-orange-800 leading-relaxed">
+          <strong>Dinheiro Esperado no Caixa:</strong> Valor de abertura +
+          vendas em dinheiro apenas
+        </p>
+      </div>
+
       {/* Cash amounts */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Abertura</span>
-          <span className="text-base font-semibold text-gray-900">
-            R$ {session.openingAmount?.toFixed(2)}
+          <span className="text-base font-medium text-gray-900">
+            {formatMoney(session.openingAmount)}
           </span>
         </div>
+
+        {deposits && deposits.length > 0 && (
+          <div className="flex items-center justify-between text-orange-600">
+            <span className="text-sm flex items-center gap-1">
+              <PlusIcon className="w-4 h-4" />
+              Aportes
+            </span>
+            <span className="text-base font-medium">
+              {formatMoney(totalDeposits)}
+            </span>
+          </div>
+        )}
 
         <div className="flex items-center justify-between text-green-600">
           <span className="text-sm flex items-center gap-1">
             <TrendingUp className="w-4 h-4" />
-            Vendas Totais ({session.salesTotals.totalOrders} pedidos)
+            Vendas em Dinheiro
           </span>
-          <span className="text-base font-semibold">
-            R$ {session.salesTotals.totalRevenue?.toFixed(2)}
+          <span className="text-base font-medium">
+            {formatMoney(
+              expectedCashAmount - session.openingAmount - totalDeposits,
+            )}
           </span>
         </div>
 
-        <div className="pt-3 border-t border-gray-200">
+        <div className="pt-3 mt-3 border-t-2 border-gray-300">
           {isOpen ? (
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">
-                Dinheiro Esperado no Caixa
-              </span>
-              <span className="text-lg font-bold text-blue-600">
-                R$ {expectedCashAmount.toFixed(2)}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-orange-50">
+              <div>
+                <div className="text-xs text-orange-700 font-medium mb-0.5">
+                  Dinheiro Esperado no Caixa
+                </div>
+                <div className="text-xs text-orange-600">
+                  Conte o dinheiro físico no fechamento
+                </div>
+              </div>
+              <span className="text-xl font-bold text-orange-700">
+                {formatMoney(expectedCashAmount)}
               </span>
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">
-                  Fechamento Real
-                </span>
-                <span className="text-lg font-bold text-gray-900">
-                  R$ {session.closingAmount?.toFixed(2) ?? "0.00"}
-                </span>
+              <div className="flex items-center justify-between mb-3 p-3 rounded-lg bg-gray-50">
+                <div>
+                  <div className="text-xs text-gray-600 mb-0.5">
+                    Dinheiro Esperado
+                  </div>
+                  <div className="text-base font-semibold text-gray-900">
+                    {formatMoney(expectedCashAmount)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-600 mb-0.5 text-right">
+                    Dinheiro Contado
+                  </div>
+                  <div className="text-base font-semibold text-gray-900">
+                    {formatMoney(session.closingAmount ?? 0)}
+                  </div>
+                </div>
               </div>
               {session.closingAmount !== undefined && (
                 <div
-                  className={`flex items-center justify-between p-2 rounded-lg ${
+                  className={`flex items-center justify-between p-3 rounded-lg ${
                     difference === 0
-                      ? "bg-green-50"
+                      ? "bg-green-50 border border-green-200"
                       : difference > 0
-                        ? "bg-yellow-50"
-                        : "bg-red-50"
+                        ? "bg-yellow-50 border border-yellow-200"
+                        : "bg-red-50 border border-red-200"
                   }`}
                 >
-                  <span className="text-xs font-medium text-gray-700">
+                  <span className="text-sm font-semibold text-gray-700">
                     {difference === 0
-                      ? "✓ Confere"
+                      ? "✓ Caixa Conferido"
                       : difference > 0
-                        ? "Sobra"
-                        : "Falta"}
+                        ? "Sobra de Caixa"
+                        : "Falta no Caixa"}
                   </span>
                   <span
-                    className={`text-sm font-bold ${
+                    className={`text-lg font-bold ${
                       difference === 0
                         ? "text-green-600"
                         : difference > 0
@@ -171,12 +230,114 @@ export function CashSummaryCard({
                           : "text-red-600"
                     }`}
                   >
-                    {difference >= 0 ? "+" : ""}R$ {difference.toFixed(2)}
+                    {difference >= 0 ? "+" : ""}
+                    {formatMoney(Math.abs(difference))}
                   </span>
                 </div>
               )}
             </>
           )}
+        </div>
+
+        {/* Deposits list - if any */}
+        {deposits && deposits.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <details className="group">
+              <summary className="flex items-center justify-between cursor-pointer text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <span className="flex items-center gap-2">
+                  <PlusIcon className="w-4 h-4" />
+                  Ver aportes realizados
+                </span>
+                <span className="text-xs text-gray-500 group-open:hidden">
+                  {deposits.length}{" "}
+                  {deposits.length === 1 ? "aporte" : "aportes"}
+                </span>
+              </summary>
+              <div className="mt-3 space-y-2">
+                {deposits.map((deposit) => {
+                  const depositDate = new Date(deposit.depositedAt);
+                  const time = depositDate.toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  return (
+                    <div
+                      key={deposit.id}
+                      className="flex items-start justify-between p-2 rounded-lg bg-orange-50 border border-orange-100"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-semibold text-orange-900">
+                            {formatMoney(deposit.amount)}
+                          </span>
+                          <span className="text-xs text-orange-600">
+                            • {time}
+                          </span>
+                        </div>
+                        <div className="text-xs text-orange-700 mt-0.5">
+                          {deposit.attendant}
+                        </div>
+                        {deposit.notes && (
+                          <div className="text-xs text-orange-600 mt-1 italic">
+                            {deposit.notes}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
+          </div>
+        )}
+
+        {/* Sales summary - collapsed, secondary info */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer text-sm text-gray-600 hover:text-gray-900 transition-colors">
+              <span className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Ver resumo completo de vendas
+              </span>
+              <span className="text-xs text-gray-500 group-open:hidden">
+                {session.salesTotals.totalOrders} pedidos •{" "}
+                {formatMoney(session.salesTotals.totalRevenue)}
+              </span>
+            </summary>
+            <div className="mt-3 space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Total de Pedidos</span>
+                <span className="font-medium text-gray-900">
+                  {session.salesTotals.totalOrders}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Faturamento Total</span>
+                <span className="font-medium text-gray-900">
+                  {formatMoney(session.salesTotals.totalRevenue)}
+                </span>
+              </div>
+              {session.paymentBreakdown &&
+                session.paymentBreakdown.length > 0 && (
+                  <div className="pt-2 mt-2 border-t border-gray-100">
+                    <div className="text-xs text-gray-500 mb-2">
+                      Por forma de pagamento:
+                    </div>
+                    {session.paymentBreakdown.map((payment) => (
+                      <div
+                        key={payment.method}
+                        className="flex items-center justify-between py-1"
+                      >
+                        <span className="text-gray-600">{payment.method}</span>
+                        <span className="font-medium text-gray-900">
+                          {formatMoney(payment.amount)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+            </div>
+          </details>
         </div>
       </div>
 

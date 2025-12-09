@@ -18,18 +18,18 @@ export function CashPaymentBreakdown({
   totalRevenue,
 }: CashPaymentBreakdownProps) {
   const getPercentage = (value: number) => {
-    if (totalRevenue === 0) return "0.0";
-    return ((value / totalRevenue) * 100).toFixed(1);
+    if (totalRevenue === 0) return 0;
+    return (value / totalRevenue) * 100;
   };
 
   if (paymentBreakdown.length === 0) {
     return (
-      <Card>
+      <Card className="h-full">
         <CardHeader>
-          <CardTitle>Vendas por Forma de Pagamento</CardTitle>
+          <CardTitle className="text-lg">Formas de Pagamento</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-500 text-center py-4">
+          <p className="text-sm text-gray-500 text-center py-8">
             Nenhuma venda registrada neste período
           </p>
         </CardContent>
@@ -38,12 +38,15 @@ export function CashPaymentBreakdown({
   }
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle>Vendas por Forma de Pagamento</CardTitle>
+        <CardTitle className="text-lg">Formas de Pagamento</CardTitle>
+        <p className="text-sm text-gray-500 mt-1">
+          Distribuição das vendas por método de pagamento.
+        </p>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
         {paymentBreakdown.map((item) => {
           const style =
             PAYMENT_METHOD_STYLES[
@@ -56,28 +59,36 @@ export function CashPaymentBreakdown({
             item.method;
 
           return (
-            <div
-              key={item.method}
-              className={`flex items-center justify-between p-2 sm:p-3 rounded-lg ${style.bg} ${style.text} ${style.border}`}
-            >
-              <div className="flex items-center gap-2">
-                <Icon className="w-4 h-4" />
-                <div className="flex flex-col">
-                  <span className="text-xs sm:text-sm font-medium">
+            <div key={item.method} className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`p-1.5 rounded-lg ${style.bg}`}>
+                    <Icon className={`w-4 h-4 ${style.text}`} />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">
                     {methodLabel}
                   </span>
-                  <span className="text-xs opacity-75">
+                </div>
+                <div className="text-right">
+                  <div className="text-base font-bold text-gray-900">
+                    R$ {item.amount?.toFixed(2)}
+                  </div>
+                  <div className="text-xs text-gray-500">
                     {item.count} {item.count === 1 ? "pedido" : "pedidos"}
-                  </span>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <span className="text-xs font-medium opacity-75">
-                  {percentage}%
-                </span>
-                <span className="text-sm sm:text-base font-bold">
-                  R$ {item.amount?.toFixed(2)}
-                </span>
+
+              {/* Progress bar */}
+              <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${style.bg.replace("bg-", "bg-").replace("-50", "-400")}`}
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+
+              <div className="text-xs text-gray-500 text-right">
+                {percentage.toFixed(1)}% do faturamento
               </div>
             </div>
           );

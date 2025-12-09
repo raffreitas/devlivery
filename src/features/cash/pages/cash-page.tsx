@@ -1,23 +1,29 @@
 import { WalletIcon } from "lucide-react";
 import { useState } from "react";
+import { CashDepositForm } from "@/features/cash/components/cash-deposit-form";
 import { CashPaymentBreakdown } from "@/features/cash/components/cash-payment-breakdown";
 import { CashSummaryCard } from "@/features/cash/components/cash-summary-card";
 import { CloseCashForm } from "@/features/cash/components/close-cash-form";
 import { OpenCashForm } from "@/features/cash/components/open-cash-form";
 import { useCashSessions } from "@/features/cash/hooks/use-cash-sessions";
+import type { CreateCashDepositFormData } from "@/features/cash/types";
 import { CashModal } from "@/shared/components/cash-modal";
 import { Button } from "@/shared/components/ui/button";
 
 export function CashPage() {
   const [isOpenCashModalOpen, setIsOpenCashModalOpen] = useState(false);
   const [isCloseCashModalOpen, setIsCloseCashModalOpen] = useState(false);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
 
   const {
     currentSession,
+    deposits,
     openCashSession,
     closeCashSession,
+    createDeposit,
     isOpening,
     isClosing,
+    isCreatingDeposit,
   } = useCashSessions();
 
   const handleOpenCash = async (dto: {
@@ -41,7 +47,19 @@ export function CashPage() {
     setIsCloseCashModalOpen(false);
   };
 
+  const handleCreateDeposit = async (dto: CreateCashDepositFormData) => {
+    if (!currentSession) return;
+    await createDeposit({
+      sessionId: currentSession.id,
+      dto,
+    });
+    setIsDepositModalOpen(false);
+  };
+
   const expectedCashAmount = currentSession?.expectedCashAmount ?? 0;
+  const depositsTotal = deposits?.reduce((sum, d) => sum + d.amount, 0) ?? 0;
+  const cashSales =
+    expectedCashAmount - (currentSession?.openingAmount ?? 0) - depositsTotal;
 
   return (
     <>
@@ -61,8 +79,11 @@ export function CashPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <CashSummaryCard
                 session={currentSession}
+                deposits={deposits}
                 onOpenClose={() => setIsCloseCashModalOpen(true)}
+                onAddDeposit={() => setIsDepositModalOpen(true)}
               />
+
               <CashPaymentBreakdown
                 paymentBreakdown={currentSession.paymentBreakdown}
                 totalRevenue={currentSession.salesTotals.totalRevenue}
@@ -109,11 +130,28 @@ export function CashPage() {
         onClose={() => setIsCloseCashModalOpen(false)}
         title="Fechar Caixa"
       >
-        <CloseCashForm
-          expectedCashAmount={expectedCashAmount}
-          onSubmit={handleCloseCash}
-          isSubmitting={isClosing}
-          onCancel={() => setIsCloseCashModalOpen(false)}
+        {currentSession && (
+          <CloseCashForm
+            expectedCashAmount={expectedCashAmount}
+            openingAmount={currentSession.openingAmount}
+            depositsTotal={depositsTotal}
+            cashSales={cashSales}
+            onSubmit={handleCloseCash}
+            isSubmitting={isClosing}
+            onCancel={() => setIsCloseCashModalOpen(false)}
+          />
+        )}
+      </CashModal>
+
+      {/* Deposit Cash Modal */}
+      <CashModal
+        isOpen={isDepositModalOpen}
+        onClose={() => setIsDepositModalOpen(false)}
+        title="Adicionar Aporte de Caixa"
+      >
+        <CashDepositForm
+          onSubmit={handleCreateDeposit}
+          isLoading={isCreatingDeposit}
         />
       </CashModal>
     </>

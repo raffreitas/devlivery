@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cashService } from "../services/cash-service";
 import type {
   CloseCashSessionFormData,
+  CreateCashDepositFormData,
   CreateCashSessionFormData,
 } from "../types";
 
@@ -58,26 +59,66 @@ export function useCashSessions() {
     },
   });
 
+  // Query for deposits of current session
+  const depositsQuery = useQuery({
+    queryKey: [
+      ...CASH_SESSIONS_QUERY_KEY,
+      "deposits",
+      currentSessionQuery.data?.id,
+    ],
+    queryFn: () => {
+      if (!currentSessionQuery.data?.id) return Promise.resolve([]);
+      return cashService.getDeposits(currentSessionQuery.data.id);
+    },
+    enabled: !!currentSessionQuery.data?.id,
+    staleTime: 20_000,
+    placeholderData: (previousData) => previousData,
+  });
+
+  // Create deposit for current session
+  const depositMutation = useMutation({
+    mutationFn: ({
+      sessionId,
+      dto,
+    }: {
+      sessionId: string;
+      dto: CreateCashDepositFormData;
+    }) => cashService.createDeposit(sessionId, dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CASH_SESSIONS_QUERY_KEY });
+    },
+  });
+
   return {
     // Queries
     sessions: sessionsQuery.data ?? [],
     currentSession: currentSessionQuery.data ?? null,
-    isLoading: sessionsQuery.isLoading || currentSessionQuery.isLoading,
-    isFetching: sessionsQuery.isFetching || currentSessionQuery.isFetching,
+    deposits: depositsQuery.data ?? [],
+    isLoading:
+      sessionsQuery.isLoading ||
+      currentSessionQuery.isLoading ||
+      depositsQuery.isLoading,
+    isFetching:
+      sessionsQuery.isFetching ||
+      currentSessionQuery.isFetching ||
+      depositsQuery.isFetching,
 
     // Mutations
     openCashSession: createMutation.mutateAsync,
     closeCashSession: closeMutation.mutateAsync,
     deleteCashSession: deleteMutation.mutateAsync,
+    createDeposit: depositMutation.mutateAsync,
 
     // Mutation states
     isOpening: createMutation.isPending,
     isClosing: closeMutation.isPending,
     isDeleting: deleteMutation.isPending,
+    isCreatingDeposit: depositMutation.isPending,
 
     // Errors
     openError: createMutation.error,
     closeError: closeMutation.error,
     deleteError: deleteMutation.error,
+    depositError: depositMutation.error,
   };
 }

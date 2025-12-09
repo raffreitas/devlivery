@@ -2,23 +2,27 @@
 
 ## Descrição
 
-POC (Proof of Concept) de um sistema de controle de caixa que permite ao atendente:
+Sistema de controle de caixa que permite ao atendente:
 - **Abrir caixa** informando valor inicial em dinheiro
+- **Adicionar aportes** quando o caixa precisa de dinheiro (para troco, etc.)
 - **Acompanhar vendas** do período em tempo real, agrupadas por forma de pagamento
 - **Fechar caixa** informando o valor real contado e validando se há sobra/falta
 
 O sistema calcula automaticamente:
-- **Saldo esperado**: Valor de abertura + Vendas do período
+- **Saldo esperado**: Valor de abertura + Aportes + Vendas do período
 - **Diferença**: Valor real - Saldo esperado
 - **Resumo por pagamento**: Total de vendas em dinheiro, crédito, débito, Pix, etc.
+- **Histórico de aportes**: Lista completa com valores, horários e motivos
 
 ### Características
 
-✅ **Suporte a turnos noturnos**: Permite abrir às 18:00 e fechar às 01:00 do dia seguinte  
-✅ **Persistência local**: Dados salvos em `localStorage` (POC)  
-✅ **Cálculo automático**: Vendas filtradas pelo intervalo da sessão (não por dia civil)  
-✅ **Validação**: Garante apenas 1 caixa aberto por vez  
-✅ **UI responsiva**: Funciona em mobile e desktop  
+✅ **Suporte a turnos noturnos**: Permite abrir às 18:00 e fechar às 01:00 do dia seguinte
+✅ **Aportes de caixa**: Permite adicionar dinheiro durante a sessão aberta
+✅ **Histórico de transações**: Lista completa de aportes com motivos
+✅ **Cálculo automático**: Vendas + Aportes filtrados pelo intervalo da sessão
+✅ **Validação**: Garante apenas 1 caixa aberto por vez
+✅ **UI responsiva**: Funciona em mobile e desktop
+✅ **Persistência**: Integração com backend via API RESTful
 
 ---
 
@@ -29,14 +33,18 @@ src/features/cash/
 ├── components/
 │   ├── cash-payment-breakdown.tsx      # Card com resumo por forma de pagamento
 │   ├── cash-summary-card.tsx           # Card principal com abertura, vendas e fechamento
+│   ├── cash-deposit-form.tsx           # Formulário para adicionar aporte
+│   ├── cash-deposits-list.tsx          # Lista/histórico de aportes
 │   ├── close-cash-form.tsx             # Formulário para fechar caixa
 │   └── open-cash-form.tsx              # Formulário para abrir caixa
 ├── hooks/
 │   └── use-cash-sessions.ts            # React Query hooks (queries + mutations)
+├── pages/
+│   └── cash-page.tsx                   # Página principal com modais
 ├── services/
-│   └── local-cash-store.ts             # CRUD em localStorage (POC)
+│   └── cash-service.ts                 # API client com DTO mapping
 ├── types/
-│   └── index.ts                        # Tipos TypeScript
+│   └── index.ts                        # Tipos TypeScript e Zod schemas
 └── README.md                           # Este arquivo
 ```
 
@@ -74,6 +82,19 @@ interface PaymentMethodTotal {
 }
 ```
 
+### `CashDeposit`
+
+```typescript
+interface CashDeposit {
+  id: string;                           // UUID do aporte
+  cashSessionId: string;                // ID da sessão
+  amount: number;                       // Valor do aporte (R$)
+  depositedAt: string;                  // ISO date/time
+  attendant: string;                    // Quem fez o aporte
+  notes?: string;                       // Motivo (ex: "Troco", "Falta de dinheiro")
+}
+```
+
 ---
 
 ## Uso
@@ -84,9 +105,32 @@ interface PaymentMethodTotal {
 const { openCashSession, isOpening } = useCashSessions();
 
 await openCashSession({
-  attendant: "João Silva",
   openingAmount: 100.00,
   notes: "Abertura turno noite"
+});
+```
+
+### Adicionar Aporte
+
+```tsx
+const { createDeposit, isCreatingDeposit, currentSession } = useCashSessions();
+
+await createDeposit({
+  sessionId: currentSession.id,
+  dto: {
+    amount: 200.00,
+    notes: "Troco insuficiente"
+  }
+});
+```
+
+### Consultar Aportes da Sessão
+
+```tsx
+const { deposits, isLoading } = useCashSessions();
+
+deposits.forEach(deposit => {
+  console.log(`${deposit.amount} adicionado por ${deposit.attendant} - ${deposit.notes}`);
 });
 ```
 
@@ -258,5 +302,5 @@ Quando implementar a API, consulte `docs/cash-register-backend.md` para:
 
 ---
 
-**Última atualização:** 08/12/2025  
+**Última atualização:** 08/12/2025
 **Status:** POC com localStorage (pronto para migração backend)

@@ -1,8 +1,10 @@
 import { authService } from "@/features/auth/services/auth-service";
 import { type ApiResponse, api } from "@/shared/services/api";
 import type {
+  CashDeposit,
   CashSession,
   CloseCashSessionFormData,
+  CreateCashDepositFormData,
   CreateCashSessionFormData,
   PaymentMethodTotal,
 } from "../types";
@@ -40,6 +42,23 @@ interface CloseCashSessionPayload {
   notes?: string;
 }
 
+interface CashDepositDto {
+  id: string;
+  cashSessionId: string;
+  attendantId: string;
+  attendantName: string;
+  amount: number;
+  depositedAt: string;
+  notes: string | null;
+}
+
+interface CreateCashDepositPayload {
+  attendantId: string;
+  attendantName: string;
+  amount: number;
+  notes?: string;
+}
+
 function mapDtoToDomain(dto: CashSessionDto): CashSession {
   return {
     id: dto.id,
@@ -63,6 +82,17 @@ function mapDtoToDomain(dto: CashSessionDto): CashSession {
           count: pb.count,
         }),
       ) ?? [],
+  };
+}
+
+function mapDepositDtoToDomain(dto: CashDepositDto): CashDeposit {
+  return {
+    id: dto.id,
+    cashSessionId: dto.cashSessionId,
+    amount: dto.amount,
+    depositedAt: dto.depositedAt,
+    attendant: dto.attendantName,
+    notes: dto.notes ?? undefined,
   };
 }
 
@@ -139,5 +169,42 @@ export const cashService = {
       throw new Error(response.message || "Falha ao fechar sessão de caixa");
     }
     return mapDtoToDomain(response.data ?? ({} as CashSessionDto));
+  },
+
+  async createDeposit(
+    sessionId: string,
+    dto: CreateCashDepositFormData,
+  ): Promise<CashDeposit> {
+    const authData = authService.getAuth();
+    if (!authData.user || !authData.token) {
+      throw new Error("Usuário não autenticado");
+    }
+
+    const { id, name } = authData.user;
+
+    const payload: CreateCashDepositPayload = {
+      attendantId: id,
+      attendantName: name,
+      amount: dto.amount,
+      notes: dto.notes,
+    };
+
+    const response = await api.post<ApiResponse<CashDepositDto>>(
+      `/api/cash-sessions/${sessionId}/deposits`,
+      payload,
+    );
+
+    if (!response.success || !response.data) {
+      throw new Error(response.message || "Falha ao criar aporte de caixa");
+    }
+
+    return mapDepositDtoToDomain(response.data);
+  },
+
+  async getDeposits(sessionId: string): Promise<CashDeposit[]> {
+    const response = await api.get<ApiResponse<CashDepositDto[]>>(
+      `/api/cash-sessions/${sessionId}/deposits`,
+    );
+    return response.data?.map(mapDepositDtoToDomain) ?? [];
   },
 };
