@@ -10,6 +10,8 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
     public void Configure(EntityTypeBuilder<Order> builder)
     {
         builder.HasKey(e => e.Id);
+
+        builder.Property(x => x.Id).ValueGeneratedNever();
         builder.Property(e => e.CustomerName).IsRequired().HasMaxLength(200);
         builder.Property(e => e.CustomerPhone).IsRequired(false).HasMaxLength(20);
         builder.Property(e => e.DeliveryAddress).IsRequired().HasMaxLength(500);
@@ -24,6 +26,9 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             .WithOne()
             .HasForeignKey("order_id").IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(a => a.Items)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasOne<Establishment>()
             .WithMany()

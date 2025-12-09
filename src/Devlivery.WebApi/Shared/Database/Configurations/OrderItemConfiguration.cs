@@ -11,6 +11,8 @@ public sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
     public void Configure(EntityTypeBuilder<OrderItem> builder)
     {
         builder.HasKey(e => e.Id);
+
+        builder.Property(x => x.Id).ValueGeneratedNever();
         builder.Property(e => e.Quantity).IsRequired();
         builder.Property(e => e.UnitPrice).HasPrecision(18, 2)
             .IsRequired();

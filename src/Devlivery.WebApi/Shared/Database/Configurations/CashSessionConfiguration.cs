@@ -14,6 +14,8 @@ public sealed class CashSessionConfiguration : IEntityTypeConfiguration<CashSess
         builder.ToTable("cash_sessions");
 
         builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id).ValueGeneratedNever();
         builder.Property(x => x.EstablishmentId).IsRequired();
         builder.Property(x => x.AttendantId).IsRequired();
         builder.Property(x => x.AttendantName).IsRequired().HasMaxLength(200);
