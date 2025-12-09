@@ -40,20 +40,14 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext, ITenantAc
 
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
-        order.ClearItems();
+        var newItens = command.Items.Select(item => new OrderItem(
+            productId: item.ProductId,
+            establishmentId: order.EstablishmentId,
+            quantity: item.Quantity,
+            unitPrice: productsDictionary[item.ProductId].Price,
+            notes: item.Notes));
 
-        foreach (var item in command.Items)
-        {
-            var orderItem = new OrderItem(
-                productId: item.ProductId,
-                establishmentId: order.EstablishmentId,
-                quantity: item.Quantity,
-                unitPrice: productsDictionary[item.ProductId].Price,
-                notes: item.Notes);
-
-            order.AddItem(orderItem);
-            dbContext.OrderItems.Add(orderItem);
-        }
+        order.ReplaceItems(newItens);
 
         order.UpdateDetails(
             customerName: command.CustomerName,

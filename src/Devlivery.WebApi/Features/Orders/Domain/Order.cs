@@ -42,9 +42,10 @@ public sealed class Order : Entity
         Notes = notes;
     }
 
-    public void ClearItems()
+    public void ReplaceItems(IEnumerable<OrderItem> items)
     {
         _items.Clear();
+        _items.AddRange(items);
         UpdatedAt = DateTime.UtcNow;
         CalculateTotal();
     }
