@@ -2,6 +2,7 @@ using System.Text.Json;
 using Devlivery.WebApi.Features.CashRegister.Domain;
 using Devlivery.WebApi.Features.Establishments.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Devlivery.WebApi.Shared.Database.Configurations;
@@ -26,10 +27,20 @@ public sealed class CashSessionConfiguration : IEntityTypeConfiguration<CashSess
 
         builder.Property(x => x.PaymentBreakdown)
             .HasColumnName("payment_breakdown")
+            .HasColumnType("jsonb")
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                 v => JsonSerializer.Deserialize<List<PaymentBreakdownItem>>(v, (JsonSerializerOptions?)null) ??
-                     new List<PaymentBreakdownItem>());
+                     new List<PaymentBreakdownItem>()
+            )
+            .Metadata
+            .SetValueComparer(
+                new ValueComparer<List<PaymentBreakdownItem>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()
+                )
+            );
 
         builder.Property(x => x.StartAt).IsRequired();
         builder.Property(x => x.EndAt).IsRequired(false);
