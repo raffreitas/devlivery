@@ -82,7 +82,7 @@ export function CashPaymentBreakdown({
               {/* Progress bar */}
               <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-300 ${style.bg.replace("bg-", "bg-").replace("-50", "-400")}`}
+                  className={`h-full rounded-full transition-all duration-300 ${style.bg.replace("-50", "-400")}`}
                   style={{ width: `${percentage}%` }}
                 />
               </div>
