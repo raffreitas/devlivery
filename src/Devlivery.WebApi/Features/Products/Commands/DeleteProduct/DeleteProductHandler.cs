@@ -18,6 +18,15 @@ public sealed class DeleteProductHandler(ApplicationDbContext dbContext)
             return Result.Fail("Produto não encontrado");
         }
 
+        var productInUse = await dbContext.OrderItems
+            .Where(i => i.ProductId == product.Id)
+            .AnyAsync(cancellationToken: cancellationToken);
+
+        if (productInUse)
+        {
+            return Result.Fail("Não é possível excluir um produto que já foi atribuido a um pedido.");
+        }
+
         dbContext.Products.Remove(product);
         await dbContext.SaveChangesAsync(cancellationToken);
 
