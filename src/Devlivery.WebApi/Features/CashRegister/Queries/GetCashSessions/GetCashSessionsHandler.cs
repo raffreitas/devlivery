@@ -1,24 +1,19 @@
 using Devlivery.WebApi.Features.CashRegister.Domain;
 using Devlivery.WebApi.Features.CashRegister.DTOs;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Database.Extensions;
 using Devlivery.WebApi.Shared.Extensions;
-using Devlivery.WebApi.Shared.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Features.CashRegister.Queries.GetCashSessions;
 
-public sealed class GetCashSessionsHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+public sealed class GetCashSessionsHandler(ApplicationDbContext dbContext)
 {
     public async Task<Result<List<CashSessionResponse>>> HandleAsync(
         GetCashSessionsQuery query,
         CancellationToken cancellationToken = default)
     {
-        var tenantId = tenantAccessor.Tenant.Id;
-
         var sessionsQuery = dbContext.CashSessions
-            .ForTenant(tenantId)
             .AsNoTracking()
             .AsQueryable();
 

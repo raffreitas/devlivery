@@ -3,23 +3,18 @@ using Devlivery.WebApi.Features.CashRegister.DTOs;
 using Devlivery.WebApi.Features.CashRegister.Errors;
 using Devlivery.WebApi.Features.Orders.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Database.Extensions;
-using Devlivery.WebApi.Shared.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Features.CashRegister.Commands.CloseCashSession;
 
-public sealed class CloseCashSessionHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+public sealed class CloseCashSessionHandler(ApplicationDbContext dbContext)
 {
     public async Task<Result<CashSessionResponse>> HandleAsync(
         CloseCashSessionCommand command,
         CancellationToken cancellationToken = default)
     {
-        var tenantId = tenantAccessor.Tenant.Id;
-
         var cashSession = await dbContext.CashSessions
-            .ForTenant(tenantId)
             .FirstOrDefaultAsync(cs => cs.Id == command.Id, cancellationToken);
 
         if (cashSession is null)
@@ -37,7 +32,6 @@ public sealed class CloseCashSessionHandler(ApplicationDbContext dbContext, ITen
         var sessionEnd = DateTime.UtcNow;
 
         var sessionOrders = await dbContext.Orders
-            .ForTenant(tenantId)
             .AsNoTracking()
             .Where(o => o.CreatedAt >= sessionStart && o.CreatedAt <= sessionEnd && o.Status != OrderStatus.Canceled)
             .ToListAsync(cancellationToken);
@@ -59,12 +53,11 @@ public sealed class CloseCashSessionHandler(ApplicationDbContext dbContext, ITen
         // Formula: Opening + Deposits + CashSales
         // Motivo: PaymentBreakdown só é disponível aqui no fechamento
         var totalDeposits = await dbContext.CashDeposits
-            .ForTenant(tenantId)
             .Where(cd => cd.CashSessionId == cashSession.Id)
             .SumAsync(cd => cd.Amount, cancellationToken);
 
         var cashSales = paymentBreakdown
-            .Where(pb => pb.Method.Equals("cash", StringComparison.OrdinalIgnoreCase))
+            .Where(pb => pb.Method.Equals(nameof(PaymentMethod.Cash), StringComparison.OrdinalIgnoreCase))
             .Sum(pb => pb.Amount);
 
         var expectedCashAmount = cashSession.OpeningAmount + totalDeposits + cashSales;

@@ -3,23 +3,18 @@ using Devlivery.WebApi.Features.CashRegister.DTOs;
 using Devlivery.WebApi.Features.CashRegister.Errors;
 using Devlivery.WebApi.Features.Orders.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Database.Extensions;
-using Devlivery.WebApi.Shared.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Features.CashRegister.Queries.GetActiveCashSession;
 
-public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext)
 {
     public async Task<Result<CashSessionResponse>> HandleAsync(
         GetActiveCashSessionQuery query,
         CancellationToken cancellationToken = default)
     {
-        var tenantId = tenantAccessor.Tenant.Id;
-
         var cashSession = await dbContext.CashSessions
-            .ForTenant(tenantId)
             .AsNoTracking()
             .Where(cs => cs.Status == CashSessionStatus.Open)
             .OrderByDescending(cs => cs.StartAt)
@@ -32,7 +27,6 @@ public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext, 
 
         // Calculate sales within session period
         var sessionOrders = await dbContext.Orders
-            .ForTenant(tenantId)
             .AsNoTracking()
             .Where(o => o.CreatedAt >= cashSession.StartAt &&
                         o.Status != OrderStatus.Canceled)
@@ -58,7 +52,6 @@ public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext, 
 
         // Get deposits made during the session
         var totalDeposits = await dbContext.CashDeposits
-            .ForTenant(tenantId)
             .Where(cd => cd.CashSessionId == cashSession.Id)
             .SumAsync(cd => cd.Amount, cancellationToken);
 

@@ -1,7 +1,6 @@
 using Devlivery.WebApi.Features.CashRegister.Domain;
 using Devlivery.WebApi.Features.CashRegister.Errors;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Database.Extensions;
 using Devlivery.WebApi.Shared.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +16,6 @@ public sealed class CreateCashSessionHandler(ApplicationDbContext dbContext, ITe
         var tenantId = tenantAccessor.Tenant.Id;
 
         var existingOpen = await dbContext.CashSessions
-            .ForTenant(tenantId)
             .Where(cs => cs.Status == CashSessionStatus.Open)
             .AnyAsync(cancellationToken);
 

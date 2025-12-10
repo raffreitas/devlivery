@@ -1,21 +1,18 @@
 using Devlivery.WebApi.Features.Orders.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Database.Extensions;
 using Devlivery.WebApi.Shared.Extensions;
-using Devlivery.WebApi.Shared.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Features.Orders.Queries.GetAllOrders;
 
-public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
 {
     public async Task<Result<List<GetAllOrdersResponse>>> HandleAsync(
         GetAllOrdersQuery query,
         CancellationToken cancellationToken = default)
     {
         var ordersQuery = dbContext.Orders
-            .ForTenant(tenantAccessor.Tenant.Id)
             .AsNoTracking()
             .Include(o => o.Items)
             .AsQueryable();

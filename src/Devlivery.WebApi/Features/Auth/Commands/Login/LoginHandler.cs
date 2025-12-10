@@ -15,6 +15,7 @@ public sealed class LoginHandler(
         CancellationToken cancellationToken = default)
     {
         var user = await dbContext.Users
+            .IgnoreQueryFilters()
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
 

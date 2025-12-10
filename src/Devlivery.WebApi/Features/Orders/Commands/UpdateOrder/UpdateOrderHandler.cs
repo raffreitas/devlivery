@@ -1,13 +1,11 @@
 ﻿using Devlivery.WebApi.Features.Orders.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Database.Extensions;
-using Devlivery.WebApi.Shared.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Features.Orders.Commands.UpdateOrder;
 
-public sealed class UpdateOrderHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+public sealed class UpdateOrderHandler(ApplicationDbContext dbContext)
 {
     public async Task<Result> HandleAsync(
         UpdateOrderCommand command,
@@ -17,7 +15,6 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext, ITenantAc
             return Result.Fail("Método de pagamento inválido");
 
         var order = await dbContext.Orders
-            .ForTenant(tenantAccessor.Tenant.Id)
             .Include(o => o.Items)
             .FirstOrDefaultAsync(o => o.Id == command.Id, cancellationToken);
 
@@ -30,7 +27,6 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext, ITenantAc
 
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
         var products = await dbContext.Products
-            .ForTenant(tenantAccessor.Tenant.Id)
             .AsNoTracking()
             .Where(p => productIds.Contains(p.Id))
             .ToListAsync(cancellationToken);

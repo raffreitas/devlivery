@@ -1,19 +1,16 @@
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Database.Extensions;
-using Devlivery.WebApi.Shared.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.WebApi.Features.Orders.Queries.GetOrderById;
 
-public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext)
 {
     public async Task<Result<GetOrderByIdResponse>> HandleAsync(
         GetOrderByIdQuery query,
         CancellationToken cancellationToken = default)
     {
         var order = await dbContext.Orders
-            .ForTenant(tenantAccessor.Tenant.Id)
             .AsNoTracking()
             .Include(o => o.Items)
             .FirstOrDefaultAsync(o => o.Id == query.Id, cancellationToken);
@@ -25,7 +22,6 @@ public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext, ITenantA
             .Select(i => i.ProductId)
             .ToHashSet();
         var products = await dbContext.Products
-            .ForTenant(tenantAccessor.Tenant.Id)
             .AsNoTracking()
             .Where(p => productIds.Contains(p.Id))
             .ToListAsync(cancellationToken);

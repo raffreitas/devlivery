@@ -1,9 +1,7 @@
 using Devlivery.WebApi.Features.CashRegister.Domain;
 using Devlivery.WebApi.Features.CashRegister.DTOs;
 using Devlivery.WebApi.Features.CashRegister.Errors;
-using Devlivery.WebApi.Features.Orders.Domain;
 using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Database.Extensions;
 using Devlivery.WebApi.Shared.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +18,6 @@ public sealed class CreateCashDepositHandler(ApplicationDbContext dbContext, ITe
 
         // Verify that the cash session exists and is open
         var cashSession = await dbContext.CashSessions
-            .ForTenant(tenantId)
             .Include(x => x.Deposits)
             .FirstOrDefaultAsync(cs => cs.Id == command.CashSessionId, cancellationToken);
 
