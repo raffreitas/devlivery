@@ -17,17 +17,8 @@ public sealed class GetCashSessionsHandler(ApplicationDbContext dbContext)
             .AsNoTracking()
             .AsQueryable();
 
-        if (query.StartDate.HasValue)
-        {
-            var startUtc = query.StartDate.Value.ToBrazilStartOfDayUtc();
-            sessionsQuery = sessionsQuery.Where(cs => cs.StartAt >= startUtc);
-        }
-
-        if (query.EndDate.HasValue)
-        {
-            var endExclusiveUtc = query.EndDate.Value.ToBrazilEndOfDayExclusiveUtc();
-            sessionsQuery = sessionsQuery.Where(cs => cs.StartAt < endExclusiveUtc);
-        }
+        sessionsQuery = sessionsQuery
+            .WhereDateInRange(cs => cs.StartAt, query.StartDate, query.EndDate);
 
         if (!string.IsNullOrWhiteSpace(query.Status) && Enum.TryParse(query.Status, true, out CashSessionStatus status))
         {

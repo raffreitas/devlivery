@@ -19,17 +19,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
 
         // Date filtering: Convert local Brazil time (BRT/BRST) to UTC before querying
         // Database stores all dates in UTC, but filters are expected in local time (America/Sao_Paulo)
-        if (query.StartDate.HasValue)
-        {
-            var startUtc = query.StartDate.Value.ToBrazilStartOfDayUtc();
-            ordersQuery = ordersQuery.Where(o => o.CreatedAt >= startUtc);
-        }
-
-        if (query.EndDate.HasValue)
-        {
-            var endExclusiveUtc = query.EndDate.Value.ToBrazilEndOfDayExclusiveUtc();
-            ordersQuery = ordersQuery.Where(o => o.CreatedAt < endExclusiveUtc);
-        }
+        ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
 
         if (!string.IsNullOrWhiteSpace(query.PaymentMethod) &&
             Enum.TryParse<PaymentMethod>(query.PaymentMethod, out var paymentMethod))
