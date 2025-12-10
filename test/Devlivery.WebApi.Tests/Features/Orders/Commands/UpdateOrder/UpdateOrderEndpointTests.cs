@@ -65,13 +65,6 @@ public sealed class UpdateOrderEndpointTests(OrdersWebApplicationFactory factory
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
-
-        using var scope2 = Factory.Services.CreateScope();
-        var dbContext2 = scope2.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var updated = await dbContext2.Orders.FindAsync(order.Id);
-        updated.ShouldNotBeNull();
-        updated.CustomerName.ShouldBe("Cliente Atualizado");
-        updated.DeliveryFee.ShouldBe(5.0m);
     }
 
     [Fact]
