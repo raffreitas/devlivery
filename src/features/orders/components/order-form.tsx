@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useProducts } from "@/features/products/hooks/use-products";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -102,7 +102,11 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
     onSubmit(data);
   };
 
-  const deliveryFee = form.watch("deliveryFee");
+  const deliveryFee = useWatch({
+    control: form.control,
+    name: "deliveryFee",
+    defaultValue: 0,
+  });
 
   const subtotal = fields.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
@@ -111,7 +115,7 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
 
   const availableProducts = products.filter((p) => p.available);
 
-  const total = subtotal + (deliveryFee || 0);
+  const total = subtotal + deliveryFee;
 
   return (
     <Form {...form}>

@@ -1,6 +1,7 @@
 import { Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
+import { formatMoney } from "@/shared/utils/formatters";
 import type { Product } from "../types";
 
 interface ProductCardProps {
@@ -65,7 +66,7 @@ export function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
 
         <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-2">
           <span className="text-lg font-bold text-primary">
-            R$ {product.price.toFixed(2)}
+            {formatMoney(product.price)}
           </span>
 
           <div className="flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">

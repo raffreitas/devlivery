@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { PAYMENT_METHOD_STYLES } from "@/shared/constants/ui-styles";
+import { formatMoney } from "@/shared/utils/formatters";
 import type { PaymentMethodTotal } from "../types";
 
 interface CashPaymentBreakdownProps {
@@ -71,7 +72,7 @@ export function CashPaymentBreakdown({
                 </div>
                 <div className="text-right">
                   <div className="text-base font-bold text-gray-900">
-                    R$ {item.amount?.toFixed(2)}
+                    {formatMoney(item.amount)}
                   </div>
                   <div className="text-xs text-gray-500">
                     {item.count} {item.count === 1 ? "pedido" : "pedidos"}

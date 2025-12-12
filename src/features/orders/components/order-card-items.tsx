@@ -1,3 +1,4 @@
+import { formatMoney } from "@/shared/utils/formatters";
 import type { Order } from "../types";
 
 interface OrderCardItemsProps {
@@ -26,7 +27,7 @@ export function OrderCardItems({ items }: OrderCardItemsProps) {
               )}
             </span>
             <span className="text-gray-900 font-medium shrink-0">
-              R$ {(item.product.price * item.quantity).toFixed(2)}
+              {formatMoney(item.product.price * item.quantity)}
             </span>
           </li>
         ))}
