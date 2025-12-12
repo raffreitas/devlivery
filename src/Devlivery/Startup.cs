@@ -1,17 +1,16 @@
-﻿using Devlivery.Shared.Identity.Users.Models;
-using Devlivery.Shared.Presentation;
-using Devlivery.Features.Auth;
+﻿using Devlivery.Features.Auth;
 using Devlivery.Features.CashRegister;
 using Devlivery.Features.Orders;
 using Devlivery.Features.Products;
-using Devlivery.Shared.Authorization;
-using Devlivery.Shared.Database;
-using Devlivery.Shared.Identity;
-using Devlivery.Shared.Observability;
-using Devlivery.Shared.Persistence;
-using Devlivery.Shared.Persistence.Context;
-using Devlivery.Shared.Persistence.Seeder;
-using Devlivery.Shared.Tenancy;
+using Devlivery.Shared.Infrastructure.Authorization;
+using Devlivery.Shared.Infrastructure.Identity;
+using Devlivery.Shared.Infrastructure.Identity.Users.Models;
+using Devlivery.Shared.Infrastructure.Observability;
+using Devlivery.Shared.Infrastructure.Persistence;
+using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Shared.Infrastructure.Persistence.Seeder;
+using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Shared.Infrastructure.WebServer;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +26,8 @@ public static class Startup
 
         // Validators
         services.AddValidatorsFromAssemblyContaining<Program>();
+
+        services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();

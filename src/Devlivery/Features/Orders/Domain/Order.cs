@@ -1,3 +1,4 @@
+using Devlivery.Features.Orders.Domain.Events;
 using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Features.Orders.Domain;
@@ -42,12 +43,28 @@ public sealed class Order : Entity
         Notes = notes;
     }
 
+    /// <summary>
+    /// Call this after the order is fully constructed and saved to raise the created event.
+    /// </summary>
+    public void RaiseCreatedEvent()
+    {
+        AddDomainEvent(new OrderCreatedEvent(
+            Id,
+            EstablishmentId,
+            CustomerName,
+            Total,
+            PaymentMethod.ToString(),
+            CreatedAt));
+    }
+
     public void ReplaceItems(IEnumerable<OrderItem> items)
     {
         _items.Clear();
         _items.AddRange(items);
         UpdatedAt = DateTime.UtcNow;
         CalculateTotal();
+        
+        AddDomainEvent(new OrderUpdatedEvent(Id, EstablishmentId, Total, UpdatedAt));
     }
 
     public void AddItem(OrderItem item)
@@ -57,10 +74,18 @@ public sealed class Order : Entity
         CalculateTotal();
     }
 
-    public void UpdateStatus(OrderStatus status)
+    public void UpdateStatus(OrderStatus newStatus)
     {
-        Status = status;
+        var oldStatus = Status;
+        Status = newStatus;
         UpdatedAt = DateTime.UtcNow;
+        
+        AddDomainEvent(new OrderStatusChangedEvent(
+            Id,
+            EstablishmentId,
+            oldStatus.ToString(),
+            newStatus.ToString(),
+            UpdatedAt));
     }
 
     public void UpdateDetails(
@@ -79,6 +104,8 @@ public sealed class Order : Entity
         UpdatedAt = DateTime.UtcNow;
         Notes = notes;
         CalculateTotal();
+        
+        AddDomainEvent(new OrderUpdatedEvent(Id, EstablishmentId, Total, UpdatedAt));
     }
 
     private void CalculateTotal()

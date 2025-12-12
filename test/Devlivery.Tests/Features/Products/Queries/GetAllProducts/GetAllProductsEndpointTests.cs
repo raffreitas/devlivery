@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text.Json;
-using Devlivery.Shared.Persistence.Context;
+using Devlivery.Shared.Infrastructure.Persistence.Context;
 using Devlivery.Tests.Common;
 using Devlivery.Tests.Common.Builders;
 using Microsoft.Extensions.DependencyInjection;

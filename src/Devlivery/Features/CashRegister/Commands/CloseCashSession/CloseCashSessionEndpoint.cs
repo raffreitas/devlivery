@@ -1,6 +1,6 @@
 using Devlivery.Features.CashRegister.DTOs;
-using Devlivery.Shared.Presentation.Models;
 using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Models;
 using Devlivery.Shared.SeedWork.Errors;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;

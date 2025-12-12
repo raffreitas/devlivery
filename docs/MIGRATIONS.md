@@ -30,13 +30,6 @@ make migration-remove-db
 make migration-remove-identity
 ```
 
-### Script PowerShell (Windows)
-
-```powershell
-# Aplicar todas as migrations localmente
-.\scripts\apply-migrations.ps1
-```
-
 ## 🚀 Estratégias por Ambiente
 
 ### 1. **Desenvolvimento Local** ⚙️
@@ -244,16 +237,6 @@ git push origin main
 #   ✅ Build & Push Docker image
 #   ✅ Create Release
 ```
-
-### 🔄 Fluxo Alternativo (Manual)
-
-Se preferir controle manual, você pode:
-1. Comentar o job `apply-migrations` no workflow
-2. Aplicar migrations manualmente via SSH:
-   ```bash
-   export DATABASE_CONNECTION_STRING="..."
-   ./scripts/apply-migrations.sh
-   ```
 
 ## � Troubleshooting
 

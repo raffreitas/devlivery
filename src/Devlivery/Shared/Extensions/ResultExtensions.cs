@@ -1,4 +1,4 @@
-using Devlivery.Shared.Presentation.Models;
+using Devlivery.Shared.Infrastructure.WebServer.Models;
 using FluentResults;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

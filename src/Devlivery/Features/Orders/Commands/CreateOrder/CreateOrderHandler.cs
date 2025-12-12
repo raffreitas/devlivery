@@ -1,6 +1,6 @@
 ﻿using Devlivery.Features.Orders.Domain;
-using Devlivery.Shared.Persistence.Context;
-using Devlivery.Shared.Tenancy;
+using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Shared.Infrastructure.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
@@ -48,6 +48,9 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext, ITenantAc
         }
 
         dbContext.Orders.Add(order);
+        
+        // Raise domain event after order is fully constructed
+        order.RaiseCreatedEvent();
 
         await dbContext.SaveChangesAsync(cancellationToken);
         return new CreateOrderResponse(order.Id);

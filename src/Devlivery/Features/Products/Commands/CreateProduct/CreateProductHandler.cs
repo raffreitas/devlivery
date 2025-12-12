@@ -1,6 +1,6 @@
 using Devlivery.Features.Products.Domain;
-using Devlivery.Shared.Persistence.Context;
-using Devlivery.Shared.Tenancy;
+using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Shared.Infrastructure.Tenancy;
 using FluentResults;
 
 namespace Devlivery.Features.Products.Commands.CreateProduct;

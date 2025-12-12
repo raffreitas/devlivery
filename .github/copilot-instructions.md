@@ -43,22 +43,13 @@ public sealed class CreateProductHandler(ApplicationDbContext dbContext, ITenant
     }
 }
 
-// In Queries - ALWAYS use .ForTenant() extension
-var products = await dbContext.Products
-    .ForTenant(tenantAccessor.Tenant.Id)  // Filters by EstablishmentId
-    .AsNoTracking()
-    .ToListAsync();
-`
-
 **How it works:**
 - JWT token contains `establishment_id` claim (added during login via `ITokenService`)
 - `TenantRegisterMiddleware` extracts tenant from JWT → stores in `ITenantAccessor`
 - All handlers inject `ITenantAccessor` to get current tenant
-- `.ForTenant()` extension uses `EF.Property<Guid>(e, "EstablishmentId")` for filtering
 
 **Critical rules:**
 - Commands: Pass `tenantAccessor.Tenant.Id` when creating entities
-- Queries: ALWAYS use `.ForTenant(tenantAccessor.Tenant.Id)` before any filtering
 - Login bypassed: Middleware skips `/login`, `/health`, `/scalar`, `/openapi` paths
 
 ### 2. API Response Pattern
@@ -317,7 +308,7 @@ app.MapMyFeatureEndpoints();
 8. **UTC timestamps**: Always use `DateTime.UtcNow` for `CreatedAt`/`UpdatedAt`
 9. **CancellationToken**: Always pass through to async DB operations
 10. **Query filtering**: Use nullable parameters in Query records for optional filters, apply conditionally in Handler
-11. **Multi-tenancy**: ALL entities must have `EstablishmentId`; always inject `ITenantAccessor` in handlers; use `.ForTenant()` in queries
+11. **Multi-tenancy**: ALL entities must have `EstablishmentId`; always inject `ITenantAccessor` in handlers;
 12. **Integration tests**: Always call `await ResetDatabaseAsync()` first; use `Prepare()` helper for auth setup
 
 ## Testing

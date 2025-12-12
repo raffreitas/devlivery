@@ -1,5 +1,5 @@
 using Devlivery.Features.CashRegister.DTOs;
-using Devlivery.Shared.Persistence.Context;
+using Devlivery.Shared.Infrastructure.Persistence.Context;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
