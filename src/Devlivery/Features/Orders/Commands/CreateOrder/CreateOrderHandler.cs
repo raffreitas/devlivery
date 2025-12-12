@@ -8,9 +8,9 @@ using FluentResults;
 namespace Devlivery.Features.Orders.Commands.CreateOrder;
 
 public sealed class CreateOrderHandler(
-    OrderRepository orderRepository,
-    ProductRepository productRepository,
-    UnitOfWork unitOfWork,
+    IOrderRepository orderRepository,
+    IProductRepository productRepository,
+    IUnitOfWork unitOfWork,
     ITenantAccessor tenantAccessor)
 {
     public async Task<Result<CreateOrderResponse>> HandleAsync(

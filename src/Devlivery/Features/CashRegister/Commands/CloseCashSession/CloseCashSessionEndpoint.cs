@@ -1,4 +1,4 @@
-using Devlivery.Features.CashRegister.DTOs;
+using Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 using Devlivery.Shared.SeedWork.Errors;
@@ -13,13 +13,13 @@ public static class CloseCashSessionEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("{id:guid}/close", Handle)
-            .Produces<ApiResponse<CashSessionResponse>>()
+            .Produces<ApiResponse<GetCashSessionByIdResponse>>()
             .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Ok<ApiResponse<CashSessionResponse>>, ValidationProblem, NotFound<ProblemDetails>,
+    private static async Task<Results<Ok<ApiResponse<GetCashSessionByIdResponse>>, ValidationProblem, NotFound<ProblemDetails>,
         BadRequest<ProblemDetails>>> Handle(
         Guid id,
         CloseCashSessionCommand request,
@@ -44,7 +44,7 @@ public static class CloseCashSessionEndpoint
         }
 
         return result.IsSuccess
-            ? result.ToOk("Caixa fechado com sucesso")
+            ? result.ToOk()
             : result.ToBadRequestProblem();
     }
 }

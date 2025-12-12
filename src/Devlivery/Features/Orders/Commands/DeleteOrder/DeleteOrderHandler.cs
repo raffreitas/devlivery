@@ -5,8 +5,8 @@ using FluentResults;
 namespace Devlivery.Features.Orders.Commands.DeleteOrder;
 
 public sealed class DeleteOrderHandler(
-    OrderRepository orderRepository,
-    UnitOfWork unitOfWork)
+    IOrderRepository orderRepository,
+    IUnitOfWork unitOfWork)
 {
     public async Task<Result> HandleAsync(
         DeleteOrderCommand command,

@@ -5,8 +5,8 @@ using FluentResults;
 namespace Devlivery.Features.Products.Commands.UpdateProduct;
 
 public sealed class UpdateProductHandler(
-    ProductRepository productRepository,
-    UnitOfWork unitOfWork)
+    IProductRepository productRepository,
+    IUnitOfWork unitOfWork)
 {
     public async Task<Result> HandleAsync(UpdateProductCommand command, CancellationToken cancellationToken = default)
     {

@@ -22,7 +22,7 @@ public static class GetAllProductsEndpoint
         var result = await handler.HandleAsync(query, ct);
 
         return result.IsSuccess
-            ? result.ToOk("Products retrieved successfully")
+            ? result.ToOk()
             : result.ToBadRequestProblem();
     }
 }

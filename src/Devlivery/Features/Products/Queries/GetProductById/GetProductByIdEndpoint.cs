@@ -33,7 +33,7 @@ public static class GetProductByIdEndpoint
         var result = await handler.HandleAsync(query, ct);
 
         return result.IsSuccess
-            ? result.ToOk("Product retrieved successfully")
+            ? result.ToOk()
             : result.ToNotFoundProblem();
     }
 }

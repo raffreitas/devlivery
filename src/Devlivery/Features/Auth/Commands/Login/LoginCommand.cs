@@ -1,8 +1,14 @@
-﻿using FluentValidation;
+﻿using FluentResults;
+using FluentValidation;
+using FluentValidation.Results;
+using Mediator;
 
 namespace Devlivery.Features.Auth.Commands.Login;
 
-public sealed record LoginCommand(string Email, string Password);
+public sealed record LoginCommand(string Email, string Password) : ICommand<Result<LoginResponse>>
+{
+    public ValidationResult Validate() => new Validator().Validate(this);
+};
 
 public sealed class Validator : AbstractValidator<LoginCommand>
 {

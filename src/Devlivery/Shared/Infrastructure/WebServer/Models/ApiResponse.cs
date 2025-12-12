@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Devlivery.Shared.Infrastructure.WebServer.Models;
 
 /// <summary>
@@ -9,42 +11,34 @@ public sealed record ApiResponse<T>
     /// <summary>
     /// Indicates if the operation was successful
     /// </summary>
-    public bool Success { get; init; }
+    [JsonPropertyName("success")]
+    public bool IsSuccess { get; init; }
 
     /// <summary>
     /// The actual data returned by the operation
     /// </summary>
+    [JsonPropertyName("data")]
     public T? Data { get; init; }
 
-    /// <summary>
-    /// Optional message providing additional context
-    /// </summary>
-    public string? Message { get; init; }
-
-    /// <summary>
-    /// Timestamp when the response was generated
-    /// </summary>
-    public DateTime Timestamp { get; init; }
-
-    private ApiResponse(bool success, T? data, string? message)
+    private ApiResponse(bool success, T? data)
     {
-        Success = success;
+        IsSuccess = success;
         Data = data;
-        Message = message;
-        Timestamp = DateTime.UtcNow;
     }
 
     /// <summary>
     /// Creates a successful response with data
     /// </summary>
-    public static ApiResponse<T> Ok(T data, string? message = null)
-        => new(true, data, message);
+    public static ApiResponse<T> Success(T data)
+    {
+        return new(true, data);
+    }
 
     /// <summary>
-    /// Creates a successful response without data
+    /// Creates a failed response without data
     /// </summary>
-    public static ApiResponse<T> Ok(string message)
-        => new(true, default, message);
+    public static ApiResponse<T> Failure()
+        => new(false, default);
 }
 
 /// <summary>
@@ -55,28 +49,18 @@ public sealed record ApiResponse
     /// <summary>
     /// Indicates if the operation was successful
     /// </summary>
-    public bool Success { get; init; }
+    [JsonPropertyName("success")]
+    public bool IsSuccess { get; init; }
 
-    /// <summary>
-    /// Message providing context about the operation
-    /// </summary>
-    public string Message { get; init; }
-
-    /// <summary>
-    /// Timestamp when the response was generated
-    /// </summary>
-    public DateTime Timestamp { get; init; }
-
-    private ApiResponse(bool success, string message)
+    private ApiResponse(bool success)
     {
-        Success = success;
-        Message = message;
-        Timestamp = DateTime.UtcNow;
+        IsSuccess = success;
     }
 
     /// <summary>
-    /// Creates a successful response with a message
+    /// Creates a successful response
     /// </summary>
-    public static ApiResponse Ok(string message)
-        => new(true, message);
+    /// 
+    public static ApiResponse Success()
+        => new(true);
 }

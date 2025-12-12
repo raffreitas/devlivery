@@ -1,5 +1,4 @@
-using Devlivery.Features.CashRegister.DTOs;
-using Devlivery.Features.CashRegister.Errors;
+using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +7,7 @@ namespace Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 
 public sealed class GetCashSessionByIdHandler(ApplicationDbContext dbContext)
 {
-    public async Task<Result<CashSessionResponse>> HandleAsync(
+    public async Task<Result<GetCashSessionByIdResponse>> HandleAsync(
         GetCashSessionByIdQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -17,7 +16,7 @@ public sealed class GetCashSessionByIdHandler(ApplicationDbContext dbContext)
             .FirstOrDefaultAsync(cs => cs.Id == query.Id, cancellationToken);
 
         return cashSession is null
-            ? Result.Fail<CashSessionResponse>(CashRegisterErrors.CashSessionNotFound)
-            : Result.Ok(CashSessionResponse.FromDomain(cashSession));
+            ? Result.Fail<GetCashSessionByIdResponse>(CashRegisterErrors.CashSessionNotFound)
+            : Result.Ok(GetCashSessionByIdResponse.FromDomain(cashSession));
     }
 }

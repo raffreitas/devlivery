@@ -44,7 +44,7 @@ public static class Startup
         services.AddTenancyFeature();
 
         // Features
-        services.AddAuthFeature(configuration);
+        services.AddAuthFeature();
         services.AddOrderFeature();
         services.AddProductFeature();
         services.AddCashRegisterFeature();

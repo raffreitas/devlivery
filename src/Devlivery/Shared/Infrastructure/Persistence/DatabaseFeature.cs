@@ -30,7 +30,7 @@ public static class DatabaseFeature
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
         
         // Register UnitOfWork
-        services.AddScoped<UnitOfWork>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

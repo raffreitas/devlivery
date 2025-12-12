@@ -1,7 +1,6 @@
 using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.DTOs;
-using Devlivery.Features.CashRegister.Errors;
 using Devlivery.Features.CashRegister.Infrastructure;
+using Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using FluentResults;
@@ -9,11 +8,11 @@ using FluentResults;
 namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
 public sealed class CreateCashDepositHandler(
-    CashSessionRepository cashSessionRepository,
-    UnitOfWork unitOfWork,
+    ICashSessionRepository cashSessionRepository,
+    IUnitOfWork unitOfWork,
     ITenantAccessor tenantAccessor)
 {
-    public async Task<Result<CashDepositResponse>> HandleAsync(
+    public async Task<Result<GetCashSessionDepositsResponse>> HandleAsync(
         CreateCashDepositCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -24,12 +23,12 @@ public sealed class CreateCashDepositHandler(
 
         if (cashSession is null)
         {
-            return Result.Fail<CashDepositResponse>(CashRegisterErrors.CashSessionNotFound);
+            return Result.Fail<GetCashSessionDepositsResponse>(CashRegisterErrors.CashSessionNotFound);
         }
 
         if (cashSession.Status != CashSessionStatus.Open)
         {
-            return Result.Fail<CashDepositResponse>(
+            return Result.Fail<GetCashSessionDepositsResponse>(
                 new Error("CashSessionNotOpen")
                     .WithMetadata("message", "Não é possível adicionar aporte a um caixa fechado."));
         }
@@ -48,7 +47,7 @@ public sealed class CreateCashDepositHandler(
         cashSessionRepository.Update(cashSession);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var response = CashDepositResponse.FromDomain(deposit);
+        var response = GetCashSessionDepositsResponse.FromDomain(deposit);
         return Result.Ok(response);
     }
 }

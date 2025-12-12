@@ -7,9 +7,9 @@ using FluentResults;
 namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
 public sealed class UpdateOrderHandler(
-    OrderRepository orderRepository,
-    ProductRepository productRepository,
-    UnitOfWork unitOfWork)
+    IOrderRepository orderRepository,
+    IProductRepository productRepository,
+    IUnitOfWork unitOfWork)
 {
     public async Task<Result> HandleAsync(
         UpdateOrderCommand command,

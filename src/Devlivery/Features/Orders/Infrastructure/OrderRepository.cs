@@ -8,7 +8,7 @@ namespace Devlivery.Features.Orders.Infrastructure;
 /// Repository for Order aggregate.
 /// Handles write operations and complex queries for Orders.
 /// </summary>
-public sealed class OrderRepository(ApplicationDbContext dbContext)
+public sealed class OrderRepository(ApplicationDbContext dbContext) : IOrderRepository
 {
     /// <summary>
     /// Gets an order by ID, including its items.

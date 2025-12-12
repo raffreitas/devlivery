@@ -7,8 +7,8 @@ using FluentResults;
 namespace Devlivery.Features.Products.Commands.CreateProduct;
 
 public sealed class CreateProductHandler(
-    ProductRepository productRepository,
-    UnitOfWork unitOfWork,
+    IProductRepository productRepository,
+    IUnitOfWork unitOfWork,
     ITenantAccessor tenantAccessor)
 {
     public async Task<Result<CreateProductResponse>> HandleAsync(

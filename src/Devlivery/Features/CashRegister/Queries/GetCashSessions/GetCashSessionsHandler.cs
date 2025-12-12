@@ -1,5 +1,4 @@
 using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.DTOs;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using FluentResults;
@@ -9,7 +8,7 @@ namespace Devlivery.Features.CashRegister.Queries.GetCashSessions;
 
 public sealed class GetCashSessionsHandler(ApplicationDbContext dbContext)
 {
-    public async Task<Result<List<CashSessionResponse>>> HandleAsync(
+    public async Task<Result<List<GetCashSessionsResponse>>> HandleAsync(
         GetCashSessionsQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -30,7 +29,7 @@ public sealed class GetCashSessionsHandler(ApplicationDbContext dbContext)
             .ToListAsync(cancellationToken);
 
         var response = sessions
-            .Select(s => CashSessionResponse.FromDomain(s))
+            .Select(s => GetCashSessionsResponse.FromDomain(s))
             .ToList();
 
         return Result.Ok(response);

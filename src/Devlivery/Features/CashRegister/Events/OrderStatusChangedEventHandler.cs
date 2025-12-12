@@ -1,7 +1,7 @@
 using Devlivery.Features.Orders.Domain.Events;
 using Mediator;
 
-namespace Devlivery.Features.CashRegister.EventHandlers;
+namespace Devlivery.Features.CashRegister.Events;
 
 /// <summary>
 /// Handles OrderStatusChangedEvent to track order lifecycle in cash register.

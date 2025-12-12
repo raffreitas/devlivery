@@ -1,4 +1,4 @@
-using Devlivery.Features.CashRegister.DTOs;
+using Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 using Devlivery.Shared.SeedWork.Errors;
@@ -13,13 +13,13 @@ public static class CreateCashDepositEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("{cashSessionId:guid}/deposits", Handle)
-            .Produces<ApiResponse<CashDepositResponse>>(StatusCodes.Status201Created)
+            .Produces<ApiResponse<GetCashSessionDepositsResponse>>(StatusCodes.Status201Created)
             .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<Created<ApiResponse<CashDepositResponse>>, ValidationProblem,
+    private static async Task<Results<Created<ApiResponse<GetCashSessionDepositsResponse>>, ValidationProblem,
         BadRequest<ProblemDetails>, NotFound<ProblemDetails>>> Handle(
         Guid cashSessionId,
         CreateCashDepositCommand request,
@@ -49,7 +49,6 @@ public static class CreateCashDepositEndpoint
             return result.ToBadRequestProblem();
         }
 
-        return result.ToCreated($"/api/cash-sessions/{cashSessionId}/deposits/{result.Value.Id}",
-            "Aporte adicionado com sucesso");
+        return result.ToCreated($"/api/cash-sessions/{cashSessionId}/deposits/{result.Value.Id}");
     }
 }

@@ -1,4 +1,3 @@
-using Devlivery.Features.CashRegister.DTOs;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 using FluentValidation;
@@ -12,12 +11,12 @@ public static class GetCashSessionsEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("", Handle)
-            .Produces<ApiResponse<List<CashSessionResponse>>>()
+            .Produces<ApiResponse<List<GetCashSessionsResponse>>>()
             .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Ok<ApiResponse<List<CashSessionResponse>>>, ValidationProblem, BadRequest<ProblemDetails>>> Handle(
+    private static async Task<Results<Ok<ApiResponse<List<GetCashSessionsResponse>>>, ValidationProblem, BadRequest<ProblemDetails>>> Handle(
         DateTime? start,
         DateTime? end,
         string? status,
@@ -36,7 +35,7 @@ public static class GetCashSessionsEndpoint
         var result = await handler.HandleAsync(query, ct);
 
         return result.IsSuccess
-            ? result.ToOk("Caixas recuperados com sucesso")
+            ? result.ToOk()
             : result.ToBadRequestProblem();
     }
 }

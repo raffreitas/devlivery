@@ -4,11 +4,8 @@ namespace Devlivery.Features.Auth;
 
 public static class AuthFeature
 {
-    public static IServiceCollection AddAuthFeature(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAuthFeature(this IServiceCollection services)
     {
-        // Handlers
-        services.AddScoped<LoginHandler>();
-
         return services;
     }
 

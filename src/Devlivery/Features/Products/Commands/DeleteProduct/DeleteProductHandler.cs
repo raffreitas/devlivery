@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Devlivery.Features.Products.Commands.DeleteProduct;
 
 public sealed class DeleteProductHandler(
-    ProductRepository productRepository,
-    UnitOfWork unitOfWork,
+    IProductRepository productRepository,
+    IUnitOfWork unitOfWork,
     ApplicationDbContext dbContext)
 {
     public async Task<Result<DeleteProductResponse>> HandleAsync(

@@ -13,7 +13,7 @@ public static class OrdersFeature
     public static IServiceCollection AddOrderFeature(this IServiceCollection services)
     {
         // Register Repository
-        services.AddScoped<OrderRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
         
         // Register Handlers
         services.AddScoped<CreateOrderHandler>();

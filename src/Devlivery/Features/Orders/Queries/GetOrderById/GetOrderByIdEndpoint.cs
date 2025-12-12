@@ -33,7 +33,7 @@ public static class GetOrderByIdEndpoint
         var result = await handler.HandleAsync(query, ct);
 
         return result.IsSuccess
-            ? result.ToOk("Order retrieved successfully")
+            ? result.ToOk()
             : result.ToNotFoundProblem();
     }
 }

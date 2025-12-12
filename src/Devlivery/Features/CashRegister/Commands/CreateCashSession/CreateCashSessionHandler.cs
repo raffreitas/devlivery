@@ -1,5 +1,4 @@
 using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.Errors;
 using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
@@ -8,8 +7,8 @@ using FluentResults;
 namespace Devlivery.Features.CashRegister.Commands.CreateCashSession;
 
 public sealed class CreateCashSessionHandler(
-    CashSessionRepository cashSessionRepository,
-    UnitOfWork unitOfWork,
+    ICashSessionRepository cashSessionRepository,
+    IUnitOfWork unitOfWork,
     ITenantAccessor tenantAccessor)
 {
     public async Task<Result<CreateCashSessionResponse>> HandleAsync(

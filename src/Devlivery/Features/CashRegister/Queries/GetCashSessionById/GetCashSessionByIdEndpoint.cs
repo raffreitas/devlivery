@@ -1,4 +1,3 @@
-using Devlivery.Features.CashRegister.DTOs;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 using FluentValidation;
@@ -12,13 +11,13 @@ public static class GetCashSessionByIdEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("{id:guid}", Handle)
-            .Produces<ApiResponse<CashSessionResponse>>()
+            .Produces<ApiResponse<GetCashSessionByIdResponse>>()
             .ProducesValidationProblem()
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Ok<ApiResponse<CashSessionResponse>>, ValidationProblem, NotFound<ProblemDetails>>> Handle(
+    private static async Task<Results<Ok<ApiResponse<GetCashSessionByIdResponse>>, ValidationProblem, NotFound<ProblemDetails>>> Handle(
         Guid id,
         IValidator<GetCashSessionByIdQuery> validator,
         GetCashSessionByIdHandler handler,
@@ -40,7 +39,7 @@ public static class GetCashSessionByIdEndpoint
         }
 
         return result.IsSuccess
-            ? result.ToOk("Caixa recuperado com sucesso")
+            ? result.ToOk()
             : result.ToNotFoundProblem();
     }
 }

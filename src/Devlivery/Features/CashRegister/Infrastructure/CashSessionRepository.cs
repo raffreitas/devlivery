@@ -8,7 +8,7 @@ namespace Devlivery.Features.CashRegister.Infrastructure;
 /// Repository for CashSession aggregate.
 /// Handles write operations and complex queries for Cash Sessions.
 /// </summary>
-public sealed class CashSessionRepository(ApplicationDbContext dbContext)
+public sealed class CashSessionRepository(ApplicationDbContext dbContext) : ICashSessionRepository
 {
     /// <summary>
     /// Gets a cash session by ID, including deposits.

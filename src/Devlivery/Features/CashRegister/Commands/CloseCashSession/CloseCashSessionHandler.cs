@@ -1,7 +1,6 @@
 using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.DTOs;
-using Devlivery.Features.CashRegister.Errors;
 using Devlivery.Features.CashRegister.Infrastructure;
+using Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
@@ -12,12 +11,12 @@ using Microsoft.EntityFrameworkCore;
 namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
 
 public sealed class CloseCashSessionHandler(
-    CashSessionRepository cashSessionRepository,
-    OrderRepository orderRepository,
-    UnitOfWork unitOfWork,
+    ICashSessionRepository cashSessionRepository,
+    IOrderRepository orderRepository,
+    IUnitOfWork unitOfWork,
     ApplicationDbContext dbContext)
 {
-    public async Task<Result<CashSessionResponse>> HandleAsync(
+    public async Task<Result<GetCashSessionByIdResponse>> HandleAsync(
         CloseCashSessionCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -25,12 +24,12 @@ public sealed class CloseCashSessionHandler(
 
         if (cashSession is null)
         {
-            return Result.Fail<CashSessionResponse>(CashRegisterErrors.CashSessionNotFound);
+            return Result.Fail<GetCashSessionByIdResponse>(CashRegisterErrors.CashSessionNotFound);
         }
 
         if (cashSession.Status == CashSessionStatus.Closed)
         {
-            return Result.Fail<CashSessionResponse>(CashRegisterErrors.CashSessionAlreadyClosed);
+            return Result.Fail<GetCashSessionByIdResponse>(CashRegisterErrors.CashSessionAlreadyClosed);
         }
 
         // Get all orders within the cash session period (exclude canceled)
@@ -76,6 +75,6 @@ public sealed class CloseCashSessionHandler(
         cashSessionRepository.Update(cashSession);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Ok(CashSessionResponse.FromDomain(cashSession));
+        return Result.Ok(GetCashSessionByIdResponse.FromDomain(cashSession, expectedCashAmount));
     }
 }

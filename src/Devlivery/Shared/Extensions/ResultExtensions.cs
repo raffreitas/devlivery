@@ -18,17 +18,17 @@ public static class ResultExtensions
     /// <summary>
     /// Converts a Result to an Ok (ApiResponse of T) response (200)
     /// </summary>
-    public static Ok<ApiResponse<T>> ToOk<T>(this Result<T> result, string? message = null)
+    public static Ok<ApiResponse<T>> ToOk<T>(this Result<T> result)
     {
-        return TypedResults.Ok(ApiResponse<T>.Ok(result.Value, message));
+        return TypedResults.Ok(ApiResponse<T>.Success(result.Value));
     }
 
     /// <summary>
     /// Converts a Result to a Created (ApiResponse of T) response (201)
     /// </summary>
-    public static Created<ApiResponse<T>> ToCreated<T>(this Result<T> result, string uri, string? message = null)
+    public static Created<ApiResponse<T>> ToCreated<T>(this Result<T> result, string uri)
     {
-        return TypedResults.Created(uri, ApiResponse<T>.Ok(result.Value, message));
+        return TypedResults.Created(uri, ApiResponse<T>.Success(result.Value));
     }
 
     /// <summary>

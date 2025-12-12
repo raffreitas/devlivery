@@ -7,7 +7,7 @@ namespace Devlivery.Shared.Infrastructure.Persistence;
 /// Encapsulates ApplicationDbContext and manages transactions.
 /// Ensures Domain Events are dispatched via the DispatchDomainEventsInterceptor.
 /// </summary>
-public sealed class UnitOfWork(ApplicationDbContext dbContext)
+public sealed class UnitOfWork(ApplicationDbContext dbContext) : IUnitOfWork
 {
     /// <summary>
     /// Saves all changes to the database.

@@ -1,6 +1,6 @@
-﻿using Devlivery.Shared.SeedWork.Errors;
+using Devlivery.Shared.SeedWork.Errors;
 
-namespace Devlivery.Features.CashRegister.Errors;
+namespace Devlivery.Features.CashRegister.Domain;
 
 public static class CashRegisterErrors
 {
@@ -13,3 +13,4 @@ public static class CashRegisterErrors
     public static NotFoundError CashSessionNotFound =>
         new("Caixa não encontrado.");
 }
+

@@ -1,6 +1,8 @@
-namespace Devlivery.Features.CashRegister.DTOs;
+using Devlivery.Features.CashRegister.Domain;
 
-public sealed record CashDepositResponse(
+namespace Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
+
+public sealed record GetCashSessionDepositsResponse(
     Guid Id,
     Guid CashSessionId,
     Guid AttendantId,
@@ -9,9 +11,9 @@ public sealed record CashDepositResponse(
     DateTime DepositedAt,
     string? Notes)
 {
-    public static CashDepositResponse FromDomain(Domain.CashDeposit deposit)
+    public static GetCashSessionDepositsResponse FromDomain(CashDeposit deposit)
     {
-        return new CashDepositResponse(
+        return new GetCashSessionDepositsResponse(
             deposit.Id,
             deposit.CashSessionId,
             deposit.AttendantId,
@@ -21,3 +23,4 @@ public sealed record CashDepositResponse(
             deposit.Notes);
     }
 }
+

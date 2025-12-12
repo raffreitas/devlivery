@@ -1,4 +1,3 @@
-using Devlivery.Features.CashRegister.DTOs;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -11,11 +10,11 @@ public static class GetActiveCashSessionEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("active", Handle)
-            .Produces<ApiResponse<CashSessionResponse>>()
+            .Produces<ApiResponse<GetActiveCashSessionResponse>>()
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<Ok<ApiResponse<CashSessionResponse>>, NotFound<ProblemDetails>>> Handle(
+    private static async Task<Results<Ok<ApiResponse<GetActiveCashSessionResponse>>, NotFound<ProblemDetails>>> Handle(
         GetActiveCashSessionHandler handler,
         CancellationToken ct)
     {
@@ -23,7 +22,7 @@ public static class GetActiveCashSessionEndpoint
         var result = await handler.HandleAsync(query, ct);
 
         return result.IsSuccess
-            ? result.ToOk("Caixa recuperado com sucesso")
+            ? result.ToOk()
             : result.ToNotFoundProblem();
     }
 }

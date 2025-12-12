@@ -27,7 +27,7 @@ public static class GetAllOrdersEndpoint
         var result = await handler.HandleAsync(query, ct);
 
         return result.IsSuccess
-            ? result.ToOk("Orders retrieved successfully")
+            ? result.ToOk()
             : result.ToBadRequestProblem();
     }
 }

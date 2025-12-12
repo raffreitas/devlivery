@@ -32,7 +32,7 @@ public static class CreateCashSessionEndpoint
         var result = await handler.HandleAsync(request, ct);
 
         return result.IsSuccess
-            ? result.ToCreated($"/api/cash-sessions/{result.Value.Id}", "Caixa aberto com sucesso")
+            ? result.ToCreated($"/api/cash-sessions/{result.Value.Id}")
             : result.ToBadRequestProblem();
     }
 }

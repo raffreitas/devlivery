@@ -14,7 +14,7 @@ public static class CashRegisterFeature
     public static IServiceCollection AddCashRegisterFeature(this IServiceCollection services)
     {
         // Register Repository
-        services.AddScoped<CashSessionRepository>();
+        services.AddScoped<ICashSessionRepository, CashSessionRepository>();
         
         // Register Handlers
         services.AddScoped<CreateCashSessionHandler>();

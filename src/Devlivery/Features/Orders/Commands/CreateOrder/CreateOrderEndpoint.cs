@@ -31,7 +31,7 @@ public static class CreateOrderEndpoint
         var result = await handler.HandleAsync(request, ct);
 
         return result.IsSuccess
-            ? result.ToCreated("/api/orders", "Order created successfully")
+            ? result.ToCreated("/api/orders")
             : result.ToBadRequestProblem();
     }
 }

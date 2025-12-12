@@ -1,6 +1,7 @@
 ﻿using Devlivery.Shared.Infrastructure.Identity.Abstractions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using FluentResults;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Auth.Commands.Login;
@@ -9,15 +10,14 @@ public sealed class LoginHandler(
     ILogger<LoginHandler> logger,
     ApplicationDbContext dbContext,
     IIdentityService identityService,
-    ITokenService tokenService)
+    ITokenService tokenService) : ICommandHandler<LoginCommand, Result<LoginResponse>>
 {
-    public async Task<Result<LoginResponse>> HandleAsync(LoginCommand request,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<Result<LoginResponse>> Handle(LoginCommand command, CancellationToken cancellationToken)
     {
         var user = await dbContext.Users
             .IgnoreQueryFilters()
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Email == command.Email, cancellationToken);
 
         if (user is null)
         {
@@ -25,7 +25,7 @@ public sealed class LoginHandler(
             return Result.Fail("Credenciais inválidas");
         }
 
-        var signInResult = await identityService.SignInAsync(user.Email, request.Password, cancellationToken);
+        var signInResult = await identityService.SignInAsync(user.Email, command.Password, cancellationToken);
         if (signInResult.IsFailed)
         {
             logger.LogInformation("Failed login attempt.");

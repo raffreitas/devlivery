@@ -1,7 +1,7 @@
 using Devlivery.Features.Orders.Domain.Events;
 using Mediator;
 
-namespace Devlivery.Features.CashRegister.EventHandlers;
+namespace Devlivery.Features.CashRegister.Events;
 
 /// <summary>
 /// Handles OrderCreatedEvent to track orders in cash register sessions.

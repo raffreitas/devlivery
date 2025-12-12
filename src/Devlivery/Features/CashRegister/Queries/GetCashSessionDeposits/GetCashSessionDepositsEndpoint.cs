@@ -1,4 +1,3 @@
-using Devlivery.Features.CashRegister.DTOs;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -10,11 +9,11 @@ public static class GetCashSessionDepositsEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("{cashSessionId}/deposits", Handle)
-            .Produces<ApiResponse<IEnumerable<CashDepositResponse>>>()
-            .Produces<ApiResponse<IEnumerable<CashDepositResponse>>>(StatusCodes.Status200OK);
+            .Produces<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>()
+            .Produces<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>(StatusCodes.Status200OK);
     }
 
-    private static async Task<Ok<ApiResponse<IEnumerable<CashDepositResponse>>>> Handle(
+    private static async Task<Ok<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>> Handle(
         Guid cashSessionId,
         GetCashSessionDepositsHandler handler,
         CancellationToken ct)
@@ -22,6 +21,6 @@ public static class GetCashSessionDepositsEndpoint
         var query = new GetCashSessionDepositsQuery(cashSessionId);
         var result = await handler.HandleAsync(query, ct);
 
-        return result.ToOk("Aportes recuperados com sucesso");
+        return result.ToOk();
     }
 }

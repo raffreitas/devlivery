@@ -1,8 +1,9 @@
 using System.Collections.ObjectModel;
+using Devlivery.Features.CashRegister.Domain;
 
-namespace Devlivery.Features.CashRegister.DTOs;
+namespace Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 
-public sealed record CashSessionResponse(
+public sealed record GetCashSessionByIdResponse(
     Guid Id,
     Guid AttendantId,
     string AttendantName,
@@ -17,8 +18,8 @@ public sealed record CashSessionResponse(
     string Status,
     string? Notes)
 {
-    public static CashSessionResponse FromDomain(
-        Domain.CashSession cashSession,
+    public static GetCashSessionByIdResponse FromDomain(
+        CashSession cashSession,
         decimal? expectedCashAmount = null)
     {
         var payments = cashSession.PaymentBreakdown
@@ -31,7 +32,7 @@ public sealed record CashSessionResponse(
                                          .Where(pb => pb.Method.Equals("cash", StringComparison.OrdinalIgnoreCase))
                                          .Sum(pb => pb.Amount);
 
-        return new CashSessionResponse(
+        return new GetCashSessionByIdResponse(
             cashSession.Id,
             cashSession.AttendantId,
             cashSession.AttendantName,
@@ -47,3 +48,4 @@ public sealed record CashSessionResponse(
             cashSession.Notes);
     }
 }
+

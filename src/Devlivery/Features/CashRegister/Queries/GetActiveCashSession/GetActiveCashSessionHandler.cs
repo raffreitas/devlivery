@@ -1,6 +1,4 @@
 using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.DTOs;
-using Devlivery.Features.CashRegister.Errors;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using FluentResults;
@@ -10,7 +8,7 @@ namespace Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
 
 public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext)
 {
-    public async Task<Result<CashSessionResponse>> HandleAsync(
+    public async Task<Result<GetActiveCashSessionResponse>> HandleAsync(
         GetActiveCashSessionQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -22,7 +20,7 @@ public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext)
 
         if (cashSession is null)
         {
-            return Result.Fail<CashSessionResponse>(CashRegisterErrors.CashSessionNotFound);
+            return Result.Fail<GetActiveCashSessionResponse>(CashRegisterErrors.CashSessionNotFound);
         }
 
         // Calculate sales within session period
@@ -39,7 +37,7 @@ public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext)
         // Calculate payment breakdown
         var paymentBreakdown = sessionOrders
             .GroupBy(o => o.PaymentMethod)
-            .Select(g => new PaymentBreakdownDto(
+            .Select(g => new PaymentBreakdownItem(
                 g.Key.ToString(),
                 g.Sum(o => o.Total),
                 g.Count()))
@@ -57,19 +55,6 @@ public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext)
 
         var expectedCashAmount = cashSession.OpeningAmount + totalDeposits + cashSales;
 
-        return Result.Ok(new CashSessionResponse(
-            cashSession.Id,
-            cashSession.AttendantId,
-            cashSession.AttendantName,
-            cashSession.OpeningAmount,
-            cashSession.ClosingAmount,
-            expectedCashAmount,
-            totalRevenue,
-            totalOrders,
-            paymentBreakdown,
-            cashSession.StartAt,
-            cashSession.EndAt,
-            cashSession.Status.ToString().ToLowerInvariant(),
-            cashSession.Notes));
+        return Result.Ok(GetActiveCashSessionResponse.FromDomain(cashSession, expectedCashAmount));
     }
 }

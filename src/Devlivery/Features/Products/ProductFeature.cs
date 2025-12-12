@@ -12,7 +12,7 @@ public static class ProductFeature
     public static IServiceCollection AddProductFeature(this IServiceCollection services)
     {
         // Register Repository
-        services.AddScoped<ProductRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
         
         // Register Handlers
         services.AddScoped<CreateProductHandler>();

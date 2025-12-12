@@ -8,7 +8,7 @@ namespace Devlivery.Features.Products.Infrastructure;
 /// Repository for Product aggregate.
 /// Handles write operations and complex queries for Products.
 /// </summary>
-public sealed class ProductRepository(ApplicationDbContext dbContext)
+public sealed class ProductRepository(ApplicationDbContext dbContext) : IProductRepository
 {
     /// <summary>
     /// Gets a product by ID.
