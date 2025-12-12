@@ -1,25 +1,26 @@
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Features.Orders.Infrastructure;
+using Devlivery.Shared.Infrastructure.Persistence;
 using FluentResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Orders.Commands.DeleteOrder;
 
-public sealed class DeleteOrderHandler(ApplicationDbContext dbContext)
+public sealed class DeleteOrderHandler(
+    OrderRepository orderRepository,
+    UnitOfWork unitOfWork)
 {
     public async Task<Result> HandleAsync(
         DeleteOrderCommand command,
         CancellationToken cancellationToken = default)
     {
-        var order = await dbContext.Orders
-            .FirstOrDefaultAsync(o => o.Id == command.Id, cancellationToken);
+        var order = await orderRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (order is null)
         {
             return Result.Fail("Pedido não encontrado");
         }
 
-        dbContext.Orders.Remove(order);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        orderRepository.Remove(order);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

@@ -1,21 +1,27 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.DTOs;
 using Devlivery.Features.CashRegister.Errors;
+using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Infrastructure;
+using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
 
-public sealed class CloseCashSessionHandler(ApplicationDbContext dbContext)
+public sealed class CloseCashSessionHandler(
+    CashSessionRepository cashSessionRepository,
+    OrderRepository orderRepository,
+    UnitOfWork unitOfWork,
+    ApplicationDbContext dbContext)
 {
     public async Task<Result<CashSessionResponse>> HandleAsync(
         CloseCashSessionCommand command,
         CancellationToken cancellationToken = default)
     {
-        var cashSession = await dbContext.CashSessions
-            .FirstOrDefaultAsync(cs => cs.Id == command.Id, cancellationToken);
+        var cashSession = await cashSessionRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (cashSession is null)
         {
@@ -31,10 +37,10 @@ public sealed class CloseCashSessionHandler(ApplicationDbContext dbContext)
         var sessionStart = cashSession.StartAt;
         var sessionEnd = DateTime.UtcNow;
 
-        var sessionOrders = await dbContext.Orders
-            .AsNoTracking()
-            .Where(o => o.CreatedAt >= sessionStart && o.CreatedAt <= sessionEnd && o.Status != OrderStatus.Canceled)
-            .ToListAsync(cancellationToken);
+        var sessionOrders = await orderRepository.GetOrdersInPeriodAsync(
+            sessionStart,
+            sessionEnd,
+            cancellationToken);
 
         // Calculate totals
         var totalRevenue = sessionOrders.Sum(o => o.Total);
@@ -67,7 +73,8 @@ public sealed class CloseCashSessionHandler(ApplicationDbContext dbContext)
         cashSession.UpdateTotals(totalRevenue, totalOrders, paymentBreakdown);
         cashSession.Close(command.ClosingAmount, command.Notes);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        cashSessionRepository.Update(cashSession);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok(CashSessionResponse.FromDomain(cashSession));
     }

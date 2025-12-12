@@ -1,13 +1,16 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Errors;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Features.CashRegister.Infrastructure;
+using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using FluentResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashSession;
 
-public sealed class CreateCashSessionHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+public sealed class CreateCashSessionHandler(
+    CashSessionRepository cashSessionRepository,
+    UnitOfWork unitOfWork,
+    ITenantAccessor tenantAccessor)
 {
     public async Task<Result<CreateCashSessionResponse>> HandleAsync(
         CreateCashSessionCommand command,
@@ -15,11 +18,9 @@ public sealed class CreateCashSessionHandler(ApplicationDbContext dbContext, ITe
     {
         var tenantId = tenantAccessor.Tenant.Id;
 
-        var existingOpen = await dbContext.CashSessions
-            .Where(cs => cs.Status == CashSessionStatus.Open)
-            .AnyAsync(cancellationToken);
+        var existingOpen = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
 
-        if (existingOpen)
+        if (existingOpen is not null)
         {
             return Result.Fail<CreateCashSessionResponse>(CashRegisterErrors.CashSessionAlreadyOpen);
         }
@@ -31,8 +32,8 @@ public sealed class CreateCashSessionHandler(ApplicationDbContext dbContext, ITe
             openingAmount: command.OpeningAmount,
             notes: command.Notes);
 
-        dbContext.CashSessions.Add(cashSession);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await cashSessionRepository.AddAsync(cashSession, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var response = new CreateCashSessionResponse(
             cashSession.Id,

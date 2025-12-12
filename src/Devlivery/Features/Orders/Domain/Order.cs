@@ -63,7 +63,7 @@ public sealed class Order : Entity
         _items.AddRange(items);
         UpdatedAt = DateTime.UtcNow;
         CalculateTotal();
-        
+
         AddDomainEvent(new OrderUpdatedEvent(Id, EstablishmentId, Total, UpdatedAt));
     }
 
@@ -79,7 +79,7 @@ public sealed class Order : Entity
         var oldStatus = Status;
         Status = newStatus;
         UpdatedAt = DateTime.UtcNow;
-        
+
         AddDomainEvent(new OrderStatusChangedEvent(
             Id,
             EstablishmentId,
@@ -104,7 +104,7 @@ public sealed class Order : Entity
         UpdatedAt = DateTime.UtcNow;
         Notes = notes;
         CalculateTotal();
-        
+
         AddDomainEvent(new OrderUpdatedEvent(Id, EstablishmentId, Total, UpdatedAt));
     }
 

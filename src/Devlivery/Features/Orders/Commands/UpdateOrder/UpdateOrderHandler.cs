@@ -1,11 +1,15 @@
 ﻿using Devlivery.Features.Orders.Domain;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Features.Orders.Infrastructure;
+using Devlivery.Features.Products.Infrastructure;
+using Devlivery.Shared.Infrastructure.Persistence;
 using FluentResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
-public sealed class UpdateOrderHandler(ApplicationDbContext dbContext)
+public sealed class UpdateOrderHandler(
+    OrderRepository orderRepository,
+    ProductRepository productRepository,
+    UnitOfWork unitOfWork)
 {
     public async Task<Result> HandleAsync(
         UpdateOrderCommand command,
@@ -14,9 +18,7 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext)
         if (!Enum.TryParse<PaymentMethod>(command.PaymentMethod, ignoreCase: true, out var paymentMethod))
             return Result.Fail("Método de pagamento inválido");
 
-        var order = await dbContext.Orders
-            .Include(o => o.Items)
-            .FirstOrDefaultAsync(o => o.Id == command.Id, cancellationToken);
+        var order = await orderRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (order is null)
             return Result.Fail("Pedido não encontrado");
@@ -26,10 +28,7 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext)
                 "Pedido não pode ser atualizado pois está cancelado ou já foi entregue");
 
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
-        var products = await dbContext.Products
-            .AsNoTracking()
-            .Where(p => productIds.Contains(p.Id))
-            .ToListAsync(cancellationToken);
+        var products = await productRepository.GetByIdsAsync(productIds, cancellationToken);
 
         if (products.Count != productIds.Count)
             return Result.Fail("Um ou mais produtos não foram encontrados");
@@ -54,7 +53,8 @@ public sealed class UpdateOrderHandler(ApplicationDbContext dbContext)
             notes: command.Notes
         );
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        orderRepository.Update(order);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

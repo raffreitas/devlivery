@@ -1,19 +1,19 @@
 using Devlivery.Features.Orders.Domain;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Features.Orders.Infrastructure;
+using Devlivery.Shared.Infrastructure.Persistence;
 using FluentResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
-public sealed class UpdateOrderStatusHandler(ApplicationDbContext dbContext)
+public sealed class UpdateOrderStatusHandler(
+    OrderRepository orderRepository,
+    UnitOfWork unitOfWork)
 {
     public async Task<Result> HandleAsync(
         UpdateOrderStatusCommand command,
         CancellationToken cancellationToken = default)
     {
-        var order = await dbContext.Orders
-            .Include(o => o.Items)
-            .FirstOrDefaultAsync(o => o.Id == command.Id, cancellationToken);
+        var order = await orderRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (order is null)
             return Result.Fail("Pedido não encontrado");
@@ -22,8 +22,9 @@ public sealed class UpdateOrderStatusHandler(ApplicationDbContext dbContext)
             return Result.Fail("Status inválido");
 
         order.UpdateStatus(status);
+        orderRepository.Update(order);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Ok();
     }
 }

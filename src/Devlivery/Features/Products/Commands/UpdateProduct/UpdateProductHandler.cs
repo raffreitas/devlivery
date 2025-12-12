@@ -1,15 +1,16 @@
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Features.Products.Infrastructure;
+using Devlivery.Shared.Infrastructure.Persistence;
 using FluentResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Products.Commands.UpdateProduct;
 
-public sealed class UpdateProductHandler(ApplicationDbContext dbContext)
+public sealed class UpdateProductHandler(
+    ProductRepository productRepository,
+    UnitOfWork unitOfWork)
 {
     public async Task<Result> HandleAsync(UpdateProductCommand command, CancellationToken cancellationToken = default)
     {
-        var product = await dbContext.Products
-            .FirstOrDefaultAsync(p => p.Id == command.Id, cancellationToken);
+        var product = await productRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (product is null)
             return Result.Fail("Produto não encontrado");
@@ -26,7 +27,8 @@ public sealed class UpdateProductHandler(ApplicationDbContext dbContext)
         else
             product.SetAsUnavailable();
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        productRepository.Update(product);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

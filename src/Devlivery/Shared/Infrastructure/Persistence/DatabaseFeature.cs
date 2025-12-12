@@ -28,6 +28,9 @@ public static class DatabaseFeature
 
         services.AddSingleton(new NpgsqlDataSourceBuilder(connectionString).Build());
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
+        
+        // Register UnitOfWork
+        services.AddScoped<UnitOfWork>();
 
         return services;
     }

@@ -1,12 +1,17 @@
 ﻿using Devlivery.Features.Orders.Domain;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Features.Orders.Infrastructure;
+using Devlivery.Features.Products.Infrastructure;
+using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using FluentResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Orders.Commands.CreateOrder;
 
-public sealed class CreateOrderHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+public sealed class CreateOrderHandler(
+    OrderRepository orderRepository,
+    ProductRepository productRepository,
+    UnitOfWork unitOfWork,
+    ITenantAccessor tenantAccessor)
 {
     public async Task<Result<CreateOrderResponse>> HandleAsync(
         CreateOrderCommand command,
@@ -15,16 +20,15 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext, ITenantAc
         if (!Enum.TryParse<PaymentMethod>(command.PaymentMethod, ignoreCase: true, out var paymentMethod))
             return Result.Fail("Método de pagamento inválido");
 
+        // Buscar produtos usando Repository
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
-        var products = await dbContext.Products
-            .AsNoTracking()
-            .Where(p => productIds.Contains(p.Id))
-            .ToListAsync(cancellationToken);
+        var products = await productRepository.GetByIdsAsync(productIds, cancellationToken);
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
         if (products.Count != productIds.Count)
             return Result.Fail("Um ou mais produtos não foram encontrados");
 
+        // Criar Order (domain logic)
         var order = new Order(
             customerName: command.CustomerName,
             customerPhone: command.CustomerPhone,
@@ -35,6 +39,7 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext, ITenantAc
             establishmentId: tenantAccessor.Tenant.Id,
             notes: command.Notes
         );
+        
         foreach (var item in command.Items)
         {
             var orderItem = new OrderItem(
@@ -47,12 +52,15 @@ public sealed class CreateOrderHandler(ApplicationDbContext dbContext, ITenantAc
             order.AddItem(orderItem);
         }
 
-        dbContext.Orders.Add(order);
+        // Persistir usando Repository
+        await orderRepository.AddAsync(order, cancellationToken);
         
-        // Raise domain event after order is fully constructed
+        // Disparar domain event
         order.RaiseCreatedEvent();
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        // Salvar via UnitOfWork (dispara eventos automaticamente via interceptor)
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        
         return new CreateOrderResponse(order.Id);
     }
 }

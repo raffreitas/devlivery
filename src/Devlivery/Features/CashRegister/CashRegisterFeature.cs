@@ -1,6 +1,7 @@
 using Devlivery.Features.CashRegister.Commands.CloseCashSession;
 using Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 using Devlivery.Features.CashRegister.Commands.CreateCashSession;
+using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
 using Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 using Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
@@ -12,6 +13,10 @@ public static class CashRegisterFeature
 {
     public static IServiceCollection AddCashRegisterFeature(this IServiceCollection services)
     {
+        // Register Repository
+        services.AddScoped<CashSessionRepository>();
+        
+        // Register Handlers
         services.AddScoped<CreateCashSessionHandler>();
         services.AddScoped<CloseCashSessionHandler>();
         services.AddScoped<CreateCashDepositHandler>();

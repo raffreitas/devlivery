@@ -1,14 +1,17 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.DTOs;
 using Devlivery.Features.CashRegister.Errors;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Features.CashRegister.Infrastructure;
+using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using FluentResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
-public sealed class CreateCashDepositHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+public sealed class CreateCashDepositHandler(
+    CashSessionRepository cashSessionRepository,
+    UnitOfWork unitOfWork,
+    ITenantAccessor tenantAccessor)
 {
     public async Task<Result<CashDepositResponse>> HandleAsync(
         CreateCashDepositCommand command,
@@ -17,9 +20,7 @@ public sealed class CreateCashDepositHandler(ApplicationDbContext dbContext, ITe
         var tenantId = tenantAccessor.Tenant.Id;
 
         // Verify that the cash session exists and is open
-        var cashSession = await dbContext.CashSessions
-            .Include(x => x.Deposits)
-            .FirstOrDefaultAsync(cs => cs.Id == command.CashSessionId, cancellationToken);
+        var cashSession = await cashSessionRepository.GetByIdAsync(command.CashSessionId, cancellationToken);
 
         if (cashSession is null)
         {
@@ -44,7 +45,8 @@ public sealed class CreateCashDepositHandler(ApplicationDbContext dbContext, ITe
 
         cashSession.AddDeposit(deposit);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        cashSessionRepository.Update(cashSession);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var response = CashDepositResponse.FromDomain(deposit);
         return Result.Ok(response);

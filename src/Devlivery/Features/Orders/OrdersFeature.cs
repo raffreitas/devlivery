@@ -2,6 +2,7 @@
 using Devlivery.Features.Orders.Commands.DeleteOrder;
 using Devlivery.Features.Orders.Commands.UpdateOrder;
 using Devlivery.Features.Orders.Commands.UpdateOrderStatus;
+using Devlivery.Features.Orders.Infrastructure;
 using Devlivery.Features.Orders.Queries.GetAllOrders;
 using Devlivery.Features.Orders.Queries.GetOrderById;
 
@@ -11,6 +12,10 @@ public static class OrdersFeature
 {
     public static IServiceCollection AddOrderFeature(this IServiceCollection services)
     {
+        // Register Repository
+        services.AddScoped<OrderRepository>();
+        
+        // Register Handlers
         services.AddScoped<CreateOrderHandler>();
         services.AddScoped<DeleteOrderHandler>();
         services.AddScoped<UpdateOrderStatusHandler>();

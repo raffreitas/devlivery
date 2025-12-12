@@ -1,6 +1,7 @@
 using Devlivery.Features.Products.Commands.CreateProduct;
 using Devlivery.Features.Products.Commands.DeleteProduct;
 using Devlivery.Features.Products.Commands.UpdateProduct;
+using Devlivery.Features.Products.Infrastructure;
 using Devlivery.Features.Products.Queries.GetAllProducts;
 using Devlivery.Features.Products.Queries.GetProductById;
 
@@ -10,6 +11,10 @@ public static class ProductFeature
 {
     public static IServiceCollection AddProductFeature(this IServiceCollection services)
     {
+        // Register Repository
+        services.AddScoped<ProductRepository>();
+        
+        // Register Handlers
         services.AddScoped<CreateProductHandler>();
         services.AddScoped<DeleteProductHandler>();
         services.AddScoped<UpdateProductHandler>();

@@ -34,7 +34,7 @@ public sealed class DispatchDomainEventsInterceptor(IMediator mediator) : SaveCh
 
         var entitiesWithEvents = context.ChangeTracker
             .Entries<Entity>()
-            .Where(e => e.Entity.DomainEvents.Any())
+            .Where(e => e.Entity.DomainEvents.Count != 0)
             .Select(e => e.Entity)
             .ToList();
 
