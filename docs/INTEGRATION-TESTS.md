@@ -12,7 +12,7 @@ Os testes de integração usam **Testcontainers + Respawn** com **Collections po
 ## Architecture
 
 ```
-test/Devlivery.WebApi.Tests/
+test/Devlivery.Tests/
 ├── Common/
 │   ├── BaseWebApplicationFactory.cs     # Factory genérica com Respawn
 │   └── WebApiBaseFixture.cs             # Base class com helpers

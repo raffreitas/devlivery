@@ -7,17 +7,17 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["src/Devlivery.WebApi/Devlivery.WebApi.csproj", "src/Devlivery.WebApi/"]
-RUN dotnet restore "src/Devlivery.WebApi/Devlivery.WebApi.csproj"
+COPY ["src/Devlivery/Devlivery.csproj", "src/Devlivery/"]
+RUN dotnet restore "src/Devlivery/Devlivery.csproj"
 COPY . .
-WORKDIR "/src/src/Devlivery.WebApi"
-RUN dotnet build "./Devlivery.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/src/Devlivery"
+RUN dotnet build "./Devlivery.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Devlivery.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Devlivery.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Devlivery.WebApi.dll"]
+ENTRYPOINT ["dotnet", "Devlivery.dll"]

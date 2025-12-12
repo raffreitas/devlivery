@@ -27,7 +27,7 @@ Este projeto implementa **Vertical Slice Architecture** (VSA), onde cada feature
 ## 📁 Estrutura do Projeto
 
 ```
-Devlivery.WebApi/
+Devlivery/
 ├── Shared/                           # Componentes compartilhados
 │   ├── Abstractions/                 # Interfaces e contratos
 │   ├── Infrastructure/
@@ -290,7 +290,7 @@ Features/
 // MeuCommand.cs
 using FluentValidation;
 
-namespace Devlivery.WebApi.Features.MinhaFeature.Commands.MeuCommand;
+namespace Devlivery.Features.MinhaFeature.Commands.MeuCommand;
 
 public sealed record MeuCommand(string Propriedade);
 
@@ -308,9 +308,9 @@ public sealed class Validator : AbstractValidator<MeuCommand>
 ```csharp
 // MeuCommandHandler.cs
 using FluentResults;
-using Devlivery.WebApi.Shared.Database.Context;
+using Devlivery.Shared.Database.Context;
 
-namespace Devlivery.WebApi.Features.MinhaFeature.Commands.MeuCommand;
+namespace Devlivery.Features.MinhaFeature.Commands.MeuCommand;
 
 public sealed class MeuCommandHandler(ApplicationDbContext dbContext)
 {
@@ -331,13 +331,13 @@ public sealed class MeuCommandHandler(ApplicationDbContext dbContext)
 
 ```csharp
 // MeuCommandEndpoint.cs
-using Devlivery.WebApi.Shared.Extensions;
-using Devlivery.WebApi.Shared.Models;
+using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Devlivery.WebApi.Features.MinhaFeature.Commands.MeuCommand;
+namespace Devlivery.Features.MinhaFeature.Commands.MeuCommand;
 
 public static class MeuCommandEndpoint
 {
@@ -372,9 +372,9 @@ public static class MeuCommandEndpoint
 
 ```csharp
 // MinhaFeature.cs
-using Devlivery.WebApi.Features.MinhaFeature.Commands.MeuCommand;
+using Devlivery.Features.MinhaFeature.Commands.MeuCommand;
 
-namespace Devlivery.WebApi.Features.MinhaFeature;
+namespace Devlivery.Features.MinhaFeature;
 
 public static class MinhaFeature
 {

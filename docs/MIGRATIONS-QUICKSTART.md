@@ -52,7 +52,7 @@ Para casos especiais (rollback, troubleshooting, janela de manutenção):
 
 ```bash
 # Conecte via SSH no servidor e execute:
-cd src/Devlivery.WebApi
+cd src/Devlivery
 
 # Aplicar migrations
 dotnet ef database update -c ApplicationDbContext

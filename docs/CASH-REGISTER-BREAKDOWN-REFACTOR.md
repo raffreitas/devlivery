@@ -15,12 +15,12 @@ Implementar cálculo do `PaymentBreakdown` em tempo real, atualizando a sessão 
 **Arquivo:** `Features/CashRegister/Services/CashSessionBreakdownService.cs`
 
 ```csharp
-using Devlivery.WebApi.Features.CashRegister.Domain;
-using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Database.Extensions;
+using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Shared.Database.Context;
+using Devlivery.Shared.Database.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.WebApi.Features.CashRegister.Services;
+namespace Devlivery.Features.CashRegister.Services;
 
 public interface ICashSessionBreakdownService
 {
@@ -92,13 +92,13 @@ public static IServiceCollection AddCashRegisterFeature(this IServiceCollection 
 
 ```csharp
 using MediatR;
-using Devlivery.WebApi.Features.CashRegister.Domain;
-using Devlivery.WebApi.Features.CashRegister.Services;
-using Devlivery.WebApi.Features.Orders.Domain;
-using Devlivery.WebApi.Shared.Database.Context;
+using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Services;
+using Devlivery.Features.Orders.Domain;
+using Devlivery.Shared.Database.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.WebApi.Features.CashRegister.EventHandlers;
+namespace Devlivery.Features.CashRegister.EventHandlers;
 
 public sealed class UpdateCashSessionBreakdownOnOrderCompletedHandler(
     ICashSessionBreakdownService breakdownService,

@@ -142,7 +142,7 @@ if (request.StartDate.HasValue)
 ### Start App Locally
 `ash
 docker-compose up -d                    # Start PostgreSQL (port 5432)
-dotnet run --project src/Devlivery.WebApi  # Run API (auto-migrates in Dev)
+dotnet run --project src/Devlivery  # Run API (auto-migrates in Dev)
 `
 
 **Auto-migration**: In Development, `Startup.ConfigureApp()` runs migrations and seeds data automatically on startup.
@@ -227,7 +227,7 @@ public sealed class DoSomethingHandler(ApplicationDbContext dbContext, ITenantAc
 ### 4. Create Endpoint with Typed Results
 `csharp
 // DoSomethingEndpoint.cs
-using Devlivery.WebApi.Shared.Extensions;
+using Devlivery.Shared.Extensions;
 
 public static class DoSomethingEndpoint
 {
@@ -355,7 +355,7 @@ public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory fac
 See `docs/INTEGRATION-TESTS.md` for complete guide.
 
 ### Manual Testing
-Use `Devlivery.WebApi.http` (root of project) with REST Client extension in VS Code or Rider.
+Use `Devlivery.http` (root of project) with REST Client extension in VS Code or Rider.
 
 **Test credentials**:
 `

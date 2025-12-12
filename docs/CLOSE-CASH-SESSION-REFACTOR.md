@@ -74,17 +74,17 @@ public sealed class CloseCashSessionHandler(ApplicationDbContext dbContext, ...)
 ### 1. Refatorar Handler para Usar Serviço
 
 ```csharp
-using Devlivery.WebApi.Features.CashRegister.Domain;
-using Devlivery.WebApi.Features.CashRegister.DTOs;
-using Devlivery.WebApi.Features.CashRegister.Errors;
-using Devlivery.WebApi.Features.CashRegister.Services;
-using Devlivery.WebApi.Shared.Database.Context;
-using Devlivery.WebApi.Shared.Database.Extensions;
-using Devlivery.WebApi.Shared.Tenancy;
+using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.DTOs;
+using Devlivery.Features.CashRegister.Errors;
+using Devlivery.Features.CashRegister.Services;
+using Devlivery.Shared.Database.Context;
+using Devlivery.Shared.Database.Extensions;
+using Devlivery.Shared.Tenancy;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.WebApi.Features.CashRegister.Commands.CloseCashSession;
+namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
 
 public sealed class CloseCashSessionHandler(
     ApplicationDbContext dbContext,

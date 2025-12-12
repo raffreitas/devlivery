@@ -2,7 +2,7 @@
 # Versioning standard: vXXX (ex: v001, v002, v003)
 
 # Project directory
-PROJECT_DIR = src/Devlivery.WebApi
+PROJECT_DIR = src/Devlivery
 
 # Migrations paths
 MIGRATIONS_DB_PATH = ./Shared/Database/Migrations

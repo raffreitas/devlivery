@@ -82,7 +82,7 @@ apply-migrations:
       env:
         ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}
       run: |
-        cd src/Devlivery.WebApi
+        cd src/Devlivery
         dotnet ef database update -c ApplicationDbContext
 ```
 
@@ -144,7 +144,7 @@ Se precisar aplicar migrations manualmente ou fazer rollback:
 
 ```bash
 # Conecte via SSH ao servidor e execute:
-cd src/Devlivery.WebApi
+cd src/Devlivery
 
 # Aplicar migrations
 dotnet ef database update -c ApplicationDbContext
