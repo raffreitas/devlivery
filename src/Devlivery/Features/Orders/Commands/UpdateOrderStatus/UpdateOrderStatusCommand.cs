@@ -1,0 +1,18 @@
+using Devlivery.Features.Orders.Domain;
+using FluentValidation;
+
+namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
+
+public sealed record UpdateOrderStatusCommand(Guid Id, string Status);
+
+public sealed class Validator : AbstractValidator<UpdateOrderStatusCommand>
+{
+    public Validator()
+    {
+        RuleFor(x => x.Id).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
+        RuleFor(x => x.Status)
+            .NotEmpty()
+            .IsEnumName(typeof(OrderStatus), caseSensitive: false)
+            .WithMessage("Status inválido para o pedido.");
+    }
+}

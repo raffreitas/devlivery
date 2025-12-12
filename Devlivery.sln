@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devlivery.WebApi", "src\Devlivery.WebApi\Devlivery.WebApi.csproj", "{A9927372-038B-4A4F-805D-738A7142C00F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devlivery", "src\Devlivery\Devlivery.csproj", "{A9927372-038B-4A4F-805D-738A7142C00F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Itens", "Solution Itens", "{297A2D62-925A-43A2-BA32-7CA06406E895}"
 	ProjectSection(SolutionItems) = preProject
@@ -23,7 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github", "Github", "{6488CB
 		.github\copilot-instructions.md = .github\copilot-instructions.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devlivery.WebApi.Tests", "test\Devlivery.WebApi.Tests\Devlivery.WebApi.Tests.csproj", "{901952E3-6498-478A-B2DE-CD60B27BD3CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devlivery.Tests", "test\Devlivery.Tests\Devlivery.Tests.csproj", "{901952E3-6498-478A-B2DE-CD60B27BD3CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
