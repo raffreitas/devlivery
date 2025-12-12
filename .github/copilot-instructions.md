@@ -6,356 +6,249 @@ Quick reference for AI coding agents working in this .NET 9 Minimal API using Ve
 
 **Pattern**: Vertical Slice Architecture (VSA) with CQRS — each feature is self-contained with its Commands, Queries, Handlers, and Endpoints.
 
+**Write Side (Commands)**:
+- **Pattern**: Repository + Unit of Work (encapsulating EF Core).
+- **Goal**: Encapsulate persistence logic and ensure transactional consistency.
+- **Rule**: NEVER inject `DbContext` directly into Command Handlers. Use `I[Entity]Repository` and `IUnitOfWork`.
+
+**Read Side (Queries)**:
+- **Pattern**: Dapper with raw SQL.
+- **Goal**: High-performance reads, avoiding EF Core overhead for queries.
+- **Rule**: Queries utilize `IDbConnectionFactory` to execute raw SQL.
+
 **Structure**:
-`
+```
 Features/[FeatureName]/
 ├── Commands/[CommandName]/
 │   ├── [CommandName]Command.cs      # Input DTO + FluentValidation
-│   ├── [CommandName]Handler.cs      # Business logic, returns Result<T>
+│   ├── [CommandName]Handler.cs      # Business logic -> Repository -> UnitOfWork
 │   ├── [CommandName]Endpoint.cs     # HTTP endpoint with typed results
 │   └── [CommandName]Response.cs     # Output DTO
-├── Queries/[QueryName]/             # Read-only operations (same structure)
+├── Queries/[QueryName]/
+│   ├── [QueryName]Handler.cs        # Dapper Logic -> IDbConnectionFactory
+│   └── ...
+├── Infrastructure/                  # Feature-specific Repositories
+│   └── [Feature]Repository.cs
 ├── Domain/                          # Entities (if needed)
 └── [FeatureName]Feature.cs          # DI registration + endpoint mapping
-`
+```
 
-**Database**: Two DbContexts (`ApplicationDbContext` for app data, `ApplicationIdentityDbContext` for auth) using the same PostgreSQL connection string (`DefaultConnection`) with snake_case naming via `UseSnakeCaseNamingConvention()`.
+**Database**: PostgreSQL. EF Core for Writes (via Repositories), Dapper for Reads.
 
 ## Critical Patterns (Do NOT Deviate)
 
-### 1. Multi-Tenancy Pattern
-**All entities MUST have an `EstablishmentId`** for tenant isolation:
+### 1. Multi-Tenancy Pattern (CRITICAL)
+**All entities MUST have an `EstablishmentId`** for tenant isolation.
 
-`csharp
-// Entity definition
-public sealed class Product : Entity
-{
-    public Guid EstablishmentId { get; private set; }
-    // ... other properties
-}
+**Write Model (EF Core/Repository)**:
+- **Automatic Filtering**: EF Core Global Query Filters handle tenant isolation automatically.
+- **Creation**: Always pass `tenantAccessor.Tenant.Id` when creating new entities.
 
-// In Handlers - inject ITenantAccessor and use tenant ID
-public sealed class CreateProductHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+```csharp
+// In Handler
+var product = new Product(..., tenantAccessor.Tenant.Id);
+await repository.AddAsync(product, ct);
+```
+
+**Read Model (Dapper)**:
+- **MANUAL Filtering**: Dapper bypasses EF Core filters. You **MUST** manually add the tenant filter to every query.
+
+```sql
+SELECT * FROM products 
+WHERE establishment_id = @TenantId  -- CRITICAL: NEVER FORGET THIS
+```
+
+### 2. Command Pattern (Repository + UnitOfWork)
+Write operations must use the Repository pattern and UnitOfWork.
+
+```csharp
+public sealed class CreateProductHandler(
+    IProductRepository productRepository, // Inject specific repository
+    IUnitOfWork unitOfWork,               // Inject UnitOfWork
+    ITenantAccessor tenantAccessor)
 {
-    public async Task<Result<CreateProductResponse>> HandleAsync(CreateProductCommand command, ...)
+    public async Task<Result<CreateProductResponse>> HandleAsync(...)
     {
-        var product = new Product(..., tenantAccessor.Tenant.Id);  // Always pass tenant ID
+        var product = new Product(..., tenantAccessor.Tenant.Id);
+        
+        // Add to repository
+        await productRepository.AddAsync(product, ct);
+        
+        // Commit transaction
+        await unitOfWork.SaveChangesAsync(ct);
+        
+        return Result.Ok(new CreateProductResponse(product.Id));
     }
 }
+```
 
-**How it works:**
-- JWT token contains `establishment_id` claim (added during login via `ITokenService`)
-- `TenantRegisterMiddleware` extracts tenant from JWT → stores in `ITenantAccessor`
-- All handlers inject `ITenantAccessor` to get current tenant
+### 3. Query Pattern (Dapper)
+Read operations must use Dapper via `IDbConnectionFactory`.
 
-**Critical rules:**
-- Commands: Pass `tenantAccessor.Tenant.Id` when creating entities
-- Login bypassed: Middleware skips `/login`, `/health`, `/scalar`, `/openapi` paths
+```csharp
+public sealed class GetAllOrdersHandler(
+    IDbConnectionFactory dbConnectionFactory, // Inject factory
+    ITenantAccessor tenantAccessor)
+{
+    public async Task<Result<GetAllOrdersResponse>> HandleAsync(...)
+    {
+        using var connection = await dbConnectionFactory.OpenConnectionAsync(ct);
+        
+        const string sql = """
+            SELECT id, total, status 
+            FROM orders 
+            WHERE establishment_id = @TenantId -- Manual filter required
+            AND (@StartDate IS NULL OR created_at >= @StartDate)
+        """;
+        
+        var orders = await connection.QueryAsync<OrderDto>(sql, new 
+        { 
+            TenantId = tenantAccessor.Tenant.Id, // Pass tenant ID
+            StartDate = query.StartDate 
+        });
+        
+        return new GetAllOrdersResponse(orders.ToList());
+    }
+}
+```
 
-### 2. API Response Pattern
+### 4. API Response Pattern
 All endpoints use **ASP.NET Core Typed Results** + **RFC 7807 Problem Details**:
 
-`csharp
+```csharp
 // Endpoint signature example
 private static async Task<Results<Created<ApiResponse<ProductResponse>>, ValidationProblem, BadRequest<ProblemDetails>>> Handle(...)
 
-// Success responses (wrap in ApiResponse<T>)
+// Success
 return result.ToCreated($"/api/products/{result.Value.Id}", "Product created successfully");
-return result.ToOk("Operation successful");
-return result.ToNoContent();
 
-// Error responses (Problem Details)
-return validationResult.ToValidationProblem();  // 400 with validation errors
-return result.ToBadRequestProblem();            // 400 business error
-return result.ToNotFoundProblem();              // 404 not found
-`
+// Error
+return result.ToBadRequestProblem();
+```
 
 See `docs/API-RESPONSE-PATTERN.md` for complete examples.
 
-### 3. Validation Pattern
-Validators are **explicitly called** in endpoints (not automatic):
+### 5. Validation Pattern
+Validators are **explicitly called** in endpoints.
 
-`csharp
-public sealed class Validator : AbstractValidator<CreateProductCommand>
-{
-    public Validator()
-    {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .MaximumLength(200).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
-    }
-}
-
-// In endpoint
+```csharp
 var validationResult = await validator.ValidateAsync(request, ct);
 if (!validationResult.IsValid)
     return validationResult.ToValidationProblem();
-`
+```
 
-**All validation messages MUST be in Portuguese (PT-BR)** — use `.WithMessage(...)` with placeholders like `{PropertyName}`, `{MaxLength}`.
+**Validation Messages**: MUST be in Portuguese (PT-BR) using `.WithMessage(...)`.
 
-### 4. Error Handling Pattern
-Use **FluentResults** — never throw business exceptions:
+### 6. Error Handling Pattern
+Use **FluentResults** — never throw business exceptions.
 
-`csharp
-// In Handler
+```csharp
 if (product is null)
     return Result.Fail<ProductResponse>("Produto não foi encontrado");
-
-return Result.Ok(response);
-`
-
-### 5. Primary Constructors
-Always use C# primary constructors for dependency injection:
-
-`csharp
-public sealed class CreateProductHandler(ApplicationDbContext dbContext, ILogger<CreateProductHandler> logger)
-{
-    public async Task<Result<CreateProductResponse>> HandleAsync(...) { }
-}
-`
-
-### 6. Query Filtering Pattern
-For list queries with optional filters, use nullable parameters in the Query record:
-
-`csharp
-// Query with optional filters
-public sealed record GetAllOrdersQuery(DateTime? StartDate, DateTime? EndDate, string? PaymentMethod);
-
-// Handler applies filters conditionally
-var query = dbContext.Orders.AsQueryable();
-if (request.StartDate.HasValue)
-    query = query.Where(o => o.CreatedAt >= request.StartDate.Value);
-`
+```
 
 ## Development Workflow
 
 ### Start App Locally
-`ash
-docker-compose up -d                    # Start PostgreSQL (port 5432)
-dotnet run --project src/Devlivery  # Run API (auto-migrates in Dev)
-`
-
-**Auto-migration**: In Development, `Startup.ConfigureApp()` runs migrations and seeds data automatically on startup.
-
-### Database Migrations
-**Two contexts**: Always specify `-c ApplicationDbContext` or `-c ApplicationIdentityDbContext`.
-
-**Using Makefile** (preferred on Linux/macOS):
-`ash
-make migration-db VERSION=002              # Create application migration
-make migration-identity VERSION=002        # Create identity migration
-make migration-update-db                   # Apply application migrations
-make migration-update-identity             # Apply identity migrations
-`
-
-**Using PowerShell/Windows**:
-`ash
-.\scripts\apply-migrations.ps1             # Apply all migrations locally
-`
-
-**Using EF Core directly**:
 ```bash
-dotnet ef migrations add v002 -o ./Shared/Database/Migrations -c ApplicationDbContext
-dotnet ef database update -c ApplicationDbContext
+docker-compose up -d                    # Start PostgreSQL
+dotnet run --project src/Devlivery      # Run API
 ```
 
-**Migration naming**: Use `vXXX` format (v001, v002, v003).
+### Database Migrations
+**Contexts**: `ApplicationDbContext` and `ApplicationIdentityDbContext`.
+
+**Using Makefile**:
+```bash
+make migration-db VERSION=002              # Create application migration
+make migration-update-db                   # Apply application migrations
+```
+
+**Using PowerShell**:
+```powershell
+.\scripts\apply-migrations.ps1             # Apply all migrations locally
+```
 
 ### CI/CD
-GitHub Actions on `main` branch (`.github/workflows/main-build-deploy.yml`):
-1. Builds and tests solution
-2. **Applies migrations to production** using `DATABASE_CONNECTION_STRING` secret for both contexts
-
-**Important**: Migrations run automatically on main branch — no manual production migrations needed.
-
-**Note**: Docker image building and version tagging are currently disabled in the workflow (configured with `if: false`). To enable, remove the `if: false` conditions from the Docker-related steps in `.github/workflows/main-build-deploy.yml`.
+GitHub Actions builds and tests. Migrations are applied automatically on deploy.
 
 ## Adding a New Feature
 
-Follow this exact sequence:
+### 1. Create Repository Interface & Implementation
+Define `I[Feature]Repository` in core implementation in `Infrastructure`.
 
-### 1. Create folder structure
-`
-Features/MyFeature/Commands/DoSomething/
-`
-
-### 2. Create Command with validation
-`csharp
-// DoSomethingCommand.cs
-public sealed record DoSomethingCommand(string Name, decimal Value);
-
-public sealed class Validator : AbstractValidator<DoSomethingCommand>
+```csharp
+// IProductRepository.cs
+public interface IProductRepository
 {
-    public Validator()
-    {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
-    }
+    Task AddAsync(Product product, CancellationToken ct);
+    Task<Product?> GetByIdAsync(Guid id, CancellationToken ct);
 }
-`
 
-### 3. Create Handler
-`csharp
-// DoSomethingHandler.cs
-using FluentResults;
-
-public sealed class DoSomethingHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+// ProductRepository.cs
+public sealed class ProductRepository(ApplicationDbContext context) : IProductRepository
 {
-    public async Task<Result<DoSomethingResponse>> HandleAsync(
-        DoSomethingCommand command,
-        CancellationToken cancellationToken = default)
-    {
-        // Business logic here - always pass tenant ID when creating entities
-        var entity = new MyEntity(..., tenantAccessor.Tenant.Id);
+    public async Task AddAsync(Product product, CancellationToken ct) 
+        => await context.Products.AddAsync(product, ct);
         
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return Result.Ok(new DoSomethingResponse());
-    }
+    // EF Core Global Filters handle tenant automatically here
+    public async Task<Product?> GetByIdAsync(Guid id, CancellationToken ct)
+        => await context.Products.FirstOrDefaultAsync(x => x.Id == id, ct);
 }
-`
+```
 
-### 4. Create Endpoint with Typed Results
-`csharp
-// DoSomethingEndpoint.cs
-using Devlivery.Shared.Extensions;
+### 2. Create Handler (Write)
+Inject Repository and UnitOfWork.
 
-public static class DoSomethingEndpoint
+```csharp
+public sealed class CreateProductHandler(
+    IProductRepository repository,
+    IUnitOfWork unitOfWork,
+    ITenantAccessor tenantAccessor)
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
-    {
-        app.MapPost("", Handle)
-            .Produces<ApiResponse<DoSomethingResponse>>(StatusCodes.Status201Created)
-            .ProducesValidationProblem()
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
-    }
-
-    private static async Task<Results<Created<ApiResponse<DoSomethingResponse>>, ValidationProblem, BadRequest<ProblemDetails>>> Handle(
-        DoSomethingCommand request,
-        IValidator<DoSomethingCommand> validator,
-        DoSomethingHandler handler,
-        CancellationToken ct)
-    {
-        var validationResult = await validator.ValidateAsync(request, ct);
-        if (!validationResult.IsValid)
-            return validationResult.ToValidationProblem();
-
-        var result = await handler.HandleAsync(request, ct);
-
-        return result.IsSuccess
-            ? result.ToCreated($"/api/my-feature/{result.Value.Id}", "Resource created successfully")
-            : result.ToBadRequestProblem();
-    }
+    // ... logic uses repository and unitOfWork.SaveChangesAsync()
 }
-`
+```
 
-### 5. Create Feature registration
-`csharp
-// MyFeature.cs
-public static class MyFeature
+### 3. Create Handler (Read)
+Inject `IDbConnectionFactory`.
+
+```csharp
+public sealed class GetProductHandler(
+    IDbConnectionFactory connectionFactory,
+    ITenantAccessor tenantAccessor)
 {
-    public static IServiceCollection AddMyFeature(this IServiceCollection services)
-    {
-        services.AddScoped<DoSomethingHandler>();
-        return services;
-    }
-
-    public static IEndpointRouteBuilder MapMyFeatureEndpoints(this IEndpointRouteBuilder app)
-    {
-        var group = app.MapGroup("/api/my-feature").WithTags("MyFeature");
-        DoSomethingEndpoint.MapEndpoint(group);
-        return app;
-    }
+    // ... logic uses Dapper + SQL with WHERE establishment_id = @TenantId
 }
-`
+```
 
-### 6. Register in Startup.cs
-`csharp
-// In ConfigureBuilder:
-builder.Services.AddMyFeature();
+### 4. Register Services
+In `[Feature]Feature.cs`:
 
-// In ConfigureApp:
-app.MapMyFeatureEndpoints();
-`
+```csharp
+public static IServiceCollection AddMyFeature(this IServiceCollection services)
+{
+    services.AddScoped<IProductRepository, ProductRepository>();
+    services.AddScoped<CreateProductHandler>();
+    return services;
+}
+```
 
 ## Key Files to Reference
 
-**Examples**:
-- `Features/Products/Commands/CreateProduct/*` — complete Command pattern
-- `Features/Orders/` — complex entity with relationships (OrderItems)
-- `Features/Auth/` — JWT authentication with Identity
-
 **Infrastructure**:
-- `Shared/Extensions/ResultExtensions.cs` — ToOk, ToCreated, ToBadRequestProblem helpers
-- `Shared/Extensions/ValidationExtensions.cs` — ToValidationProblem
-- `Shared/Models/ApiResponse.cs` — response wrapper
-- `Shared/Presentation/GlobalExceptionHandler.cs` — unhandled exception handler
+- `Shared/Infrastructure/Persistence/UnitOfWork.cs` — Transaction management
+- `Shared/Infrastructure/Persistence/Factory/DbConnectionFactory.cs` — Dapper connection factory
+- `Shared/Models/ApiResponse.cs` — Response wrapper
 
-**Configuration**:
-- `Startup.cs` — app boot, feature registration, auto-migration
-- `Program.cs` — minimal entry point
-- `appsettings.json` — connection strings, JWT config
+**Docs**:
+- `docs/REPOSITORY-UNITOFWORK-IMPLEMENTATION.md` — Implementation details of Repos/UoW
+- `docs/API-RESPONSE-PATTERN.md` — API response guide
 
 ## Common Gotchas
 
-1. **Two DbContexts**: Always specify `-c ApplicationDbContext` or `-c ApplicationIdentityDbContext` in EF commands
-2. **Same connection string**: Both contexts use `DefaultConnection` — they share the same database
-3. **Manual validation**: Validation is NOT automatic — must call `validator.ValidateAsync()` in endpoints
-4. **FluentResults pattern**: Return `Result.Ok()` or `Result.Fail()`, never throw business exceptions
-5. **Typed Results**: Always use explicit typed results (e.g., `Results<Ok<T>, NotFound<P>>`)
-6. **Validation messages**: All validation messages must be in Portuguese PT-BR with `.WithMessage(...)`
-7. **Handler registration**: Each handler must be manually registered in Feature's `Add[Feature]Feature()` method
-8. **UTC timestamps**: Always use `DateTime.UtcNow` for `CreatedAt`/`UpdatedAt`
-9. **CancellationToken**: Always pass through to async DB operations
-10. **Query filtering**: Use nullable parameters in Query records for optional filters, apply conditionally in Handler
-11. **Multi-tenancy**: ALL entities must have `EstablishmentId`; always inject `ITenantAccessor` in handlers;
-12. **Integration tests**: Always call `await ResetDatabaseAsync()` first; use `Prepare()` helper for auth setup
-
-## Testing
-
-### Integration Tests
-Use **Testcontainers + Respawn** pattern with **Collections per Feature**:
-
-`csharp
-[Collection("Products Tests")]  // Shares PostgreSQL container with all Products tests
-[Trait("Category", "Integration Tests")]
-public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory factory)
-    : WebApiBaseFixture<ProductsWebApplicationFactory>(factory)
-{
-    [Fact]
-    public async Task Test()
-    {
-        await ResetDatabaseAsync();  // ALWAYS call first - clears data in ~50-100ms
-        
-        var (user, establishment, token) = await Prepare();  // Creates test user + establishment
-        var command = new CreateProductCommand(...);
-        
-        var response = await PostAsync("/api/products", command, token);
-        
-        response.StatusCode.ShouldBe(HttpStatusCode.Created);
-    }
-}
-`
-
-**Critical rules:**
-- ALWAYS call `await ResetDatabaseAsync()` at the start of each test
-- Each feature has its own `WebApplicationFactory` + Collection (e.g., `ProductsWebApplicationFactory`)
-- Use `Prepare()` helper to create authenticated users with establishment context
-- Respawn cleans data 50x faster than recreating the database (~50-100ms vs 2-5s)
-
-See `docs/INTEGRATION-TESTS.md` for complete guide.
-
-### Manual Testing
-Use `Devlivery.http` (root of project) with REST Client extension in VS Code or Rider.
-
-**Test credentials**:
-`
-Email: admin@pizza.com
-Password: 123456
-`
-
-**Endpoints**: `/scalar/v1` for Scalar UI, `/health` for health checks.
-
----
-
-For detailed API response patterns, see `docs/API-RESPONSE-PATTERN.md`.
+1.  **Dapper Tenant Filtering**: You **MUST** manually add `WHERE establishment_id = @TenantId` to ALL Dapper queries. Dapper does NOT respect EF Core global filters.
+2.  **No Direct DbContext**: Do not inject `DbContext` into Handlers. Use Repositories and UnitOfWork.
+3.  **Validation**: Manual validation check in endpoints is required.
+4.  **Language**: All validation messages in PT-BR.
+5.  **Integration Tests**: Always call `await ResetDatabaseAsync()` at start of tests.
