@@ -1,6 +1,8 @@
 using System.Text.Json;
+
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.Establishments.Domain;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

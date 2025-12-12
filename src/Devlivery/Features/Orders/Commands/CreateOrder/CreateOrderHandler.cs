@@ -3,7 +3,9 @@ using Devlivery.Features.Orders.Infrastructure;
 using Devlivery.Features.Products.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
+
 using FluentResults;
+
 using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.CreateOrder;
@@ -40,7 +42,7 @@ public sealed class CreateOrderHandler(
             establishmentId: tenantAccessor.Tenant.Id,
             notes: command.Notes
         );
-        
+
         foreach (var item in command.Items)
         {
             var orderItem = new OrderItem(
@@ -55,13 +57,13 @@ public sealed class CreateOrderHandler(
 
         // Persistir usando Repository
         await orderRepository.AddAsync(order, cancellationToken);
-        
+
         // Disparar domain event
         order.RaiseCreatedEvent();
 
         // Salvar via UnitOfWork (dispara eventos automaticamente via interceptor)
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        
+
         return new CreateOrderResponse(order.Id);
     }
 }

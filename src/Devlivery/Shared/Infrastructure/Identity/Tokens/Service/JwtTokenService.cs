@@ -1,8 +1,10 @@
 ﻿using System.Security.Claims;
 using System.Text;
+
 using Devlivery.Shared.Infrastructure.Identity.Abstractions;
 using Devlivery.Shared.Infrastructure.Identity.Tokens.Settings;
 using Devlivery.Shared.Infrastructure.Tenancy;
+
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;

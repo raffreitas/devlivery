@@ -1,6 +1,7 @@
 ﻿using Devlivery.Features.Establishments.Domain;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Products.Domain;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

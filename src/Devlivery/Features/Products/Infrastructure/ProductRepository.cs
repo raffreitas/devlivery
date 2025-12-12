@@ -1,5 +1,6 @@
 using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Products.Infrastructure;

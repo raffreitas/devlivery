@@ -14,7 +14,7 @@ public static class OrdersFeature
     {
         // Register Repository
         services.AddScoped<IOrderRepository, OrderRepository>();
-        
+
         // Register Handlers
         services.AddScoped<CreateOrderHandler>();
         services.AddScoped<DeleteOrderHandler>();

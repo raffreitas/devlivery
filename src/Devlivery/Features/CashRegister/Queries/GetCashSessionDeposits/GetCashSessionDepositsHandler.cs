@@ -1,6 +1,7 @@
-using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using FluentResults;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;

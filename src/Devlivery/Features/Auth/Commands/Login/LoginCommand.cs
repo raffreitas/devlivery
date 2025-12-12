@@ -1,6 +1,8 @@
 ﻿using FluentResults;
+
 using FluentValidation;
 using FluentValidation.Results;
+
 using Mediator;
 
 namespace Devlivery.Features.Auth.Commands.Login;

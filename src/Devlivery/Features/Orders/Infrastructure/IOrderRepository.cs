@@ -37,4 +37,3 @@ public interface IOrderRepository
         DateTime end,
         CancellationToken ct = default);
 }
-

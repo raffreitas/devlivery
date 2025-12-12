@@ -1,7 +1,9 @@
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using FluentResults;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Orders.Queries.GetAllOrders;

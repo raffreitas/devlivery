@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -53,7 +52,7 @@ namespace Devlivery.Shared.Database.Migrations
                 {
                     table.PrimaryKey("pk_establishments", x => x.id);
                 });
-            
+
             migrationBuilder.Sql(
                 """
                 INSERT INTO establishments (id, trade_name, is_active, created_at, updated_at)

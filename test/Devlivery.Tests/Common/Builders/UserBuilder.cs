@@ -1,4 +1,5 @@
 ﻿using Bogus;
+
 using Devlivery.Features.Users.Domain;
 
 namespace Devlivery.Tests.Common.Builders;

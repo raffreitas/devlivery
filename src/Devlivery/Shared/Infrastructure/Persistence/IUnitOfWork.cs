@@ -20,4 +20,3 @@ public interface IUnitOfWork
     /// </summary>
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 }
-

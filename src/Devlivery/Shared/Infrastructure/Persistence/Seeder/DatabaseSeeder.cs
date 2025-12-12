@@ -3,6 +3,7 @@ using Devlivery.Features.Products.Domain;
 using Devlivery.Features.Users.Domain;
 using Devlivery.Shared.Infrastructure.Identity.Users.Models;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +20,7 @@ public static class DatabaseSeeder
             tradeName: "Pizza Devlivery",
             isActive: true
         );
-        
+
         db.Establishments.Add(establishment);
 
         // Seed User

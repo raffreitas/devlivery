@@ -1,5 +1,6 @@
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
+
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;

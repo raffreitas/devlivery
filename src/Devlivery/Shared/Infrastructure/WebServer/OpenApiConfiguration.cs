@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+
 using Scalar.AspNetCore;
 
 namespace Devlivery.Shared.Infrastructure.WebServer;

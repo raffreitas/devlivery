@@ -1,12 +1,15 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
+
 using Bogus;
+
 using Devlivery.Features.Establishments.Domain;
 using Devlivery.Features.Users.Domain;
 using Devlivery.Shared.Infrastructure.Identity.Abstractions;
 using Devlivery.Shared.Infrastructure.Identity.Users.Models;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using Devlivery.Tests.Common.Builders;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 

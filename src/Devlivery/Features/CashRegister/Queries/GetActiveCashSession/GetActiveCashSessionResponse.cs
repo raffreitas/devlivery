@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+
 using Devlivery.Features.CashRegister.Domain;
 
 namespace Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
@@ -42,4 +43,3 @@ public sealed record GetActiveCashSessionResponse(
             cashSession.Notes);
     }
 }
-

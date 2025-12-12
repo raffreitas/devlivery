@@ -1,5 +1,7 @@
 ﻿using System.Data.Common;
+
 using Devlivery.Shared.Infrastructure.Persistence.Abstractions;
+
 using Npgsql;
 
 namespace Devlivery.Shared.Infrastructure.Persistence.Factory;

@@ -13,4 +13,3 @@ public static class CashRegisterErrors
     public static NotFoundError CashSessionNotFound =>
         new("Caixa não encontrado.");
 }
-

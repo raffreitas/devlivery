@@ -1,4 +1,5 @@
 ﻿using System.Text;
+
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.Identity.Abstractions;
 using Devlivery.Shared.Infrastructure.Identity.Authentication;
@@ -7,6 +8,7 @@ using Devlivery.Shared.Infrastructure.Identity.Tokens.Service;
 using Devlivery.Shared.Infrastructure.Identity.Tokens.Settings;
 using Devlivery.Shared.Infrastructure.Identity.Users.Models;
 using Devlivery.Shared.Infrastructure.Identity.Users.Services;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

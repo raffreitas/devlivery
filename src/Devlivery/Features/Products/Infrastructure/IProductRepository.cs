@@ -34,4 +34,3 @@ public interface IProductRepository
     /// </summary>
     void Remove(Product product);
 }
-

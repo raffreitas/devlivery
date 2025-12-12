@@ -1,5 +1,6 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Infrastructure;

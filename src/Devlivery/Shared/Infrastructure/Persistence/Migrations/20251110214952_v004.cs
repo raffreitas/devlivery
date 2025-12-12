@@ -18,7 +18,7 @@ namespace Devlivery.Shared.Database.Migrations
                 scale: 2,
                 nullable: false,
                 defaultValue: 0m);
-            
+
             migrationBuilder.Sql("""
                                  UPDATE order_items oi
                                  SET unit_price = p.price

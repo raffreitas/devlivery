@@ -1,4 +1,5 @@
 using Devlivery.Features.Orders.Domain.Events;
+
 using Mediator;
 
 namespace Devlivery.Features.CashRegister.Events;

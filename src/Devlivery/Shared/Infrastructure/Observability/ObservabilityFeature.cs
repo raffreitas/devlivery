@@ -1,5 +1,7 @@
 ﻿using Devlivery.Shared.Infrastructure.Observability.Middleware;
+
 using Grafana.OpenTelemetry;
+
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;

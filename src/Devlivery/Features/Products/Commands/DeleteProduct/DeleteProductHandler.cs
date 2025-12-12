@@ -1,8 +1,11 @@
 using Devlivery.Features.Products.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using FluentResults;
+
 using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Products.Commands.DeleteProduct;

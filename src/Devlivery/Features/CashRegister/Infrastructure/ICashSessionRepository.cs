@@ -28,4 +28,3 @@ public interface ICashSessionRepository
     /// </summary>
     void Update(CashSession session);
 }
-

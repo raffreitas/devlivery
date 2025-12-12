@@ -1,11 +1,15 @@
 ﻿using Devlivery.Shared.Infrastructure.Identity.Context;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+
 using Npgsql;
+
 using Respawn;
+
 using Testcontainers.PostgreSql;
 
 namespace Devlivery.Tests.Common;

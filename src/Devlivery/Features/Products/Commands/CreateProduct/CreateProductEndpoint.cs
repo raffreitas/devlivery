@@ -1,7 +1,10 @@
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
+
 using FluentValidation;
+
 using Mediator;
+
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +29,7 @@ public static class CreateProductEndpoint
         CancellationToken ct)
     {
         var command = new CreateProductCommand(request.Name, request.Description, request.Price, request.Category, request.Available);
-        
+
         var validationResult = await validator.ValidateAsync(command, ct);
         if (!validationResult.IsValid)
         {

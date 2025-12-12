@@ -1,7 +1,9 @@
 using System.Net;
 using System.Text.Json;
+
 using Devlivery.Features.Products.Commands.CreateProduct;
 using Devlivery.Tests.Common;
+
 using Shouldly;
 
 namespace Devlivery.Tests.Features.Products.Commands.CreateProduct;

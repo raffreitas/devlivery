@@ -1,12 +1,14 @@
-using Devlivery.Features.CashRegister.Commands.CloseCashSession;
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using FluentResults;
+
 using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
@@ -17,9 +19,7 @@ public sealed class CloseCashSessionHandler(
     IUnitOfWork unitOfWork,
     ApplicationDbContext dbContext) : ICommandHandler<CloseCashSessionCommand, Result<CloseCashSessionResponse>>
 {
-    public async ValueTask<Result<CloseCashSessionResponse>> Handle(
-        CloseCashSessionCommand command,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<Result<CloseCashSessionResponse>> Handle(CloseCashSessionCommand command, CancellationToken cancellationToken)
     {
         var cashSession = await cashSessionRepository.GetByIdAsync(command.Id, cancellationToken);
 
