@@ -5,6 +5,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Combobox } from "@/shared/components/ui/combobox";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { formatMoney } from "@/shared/utils/formatters";
 
 interface ProductSelectorProps {
   products: Product[];
@@ -31,7 +32,7 @@ export function ProductSelector({
     () =>
       products.map((product) => ({
         value: product.id,
-        label: `${product.name} - R$ ${product.price.toFixed(2)}`,
+        label: `${product.name} - ${formatMoney(product.price)}`,
       })),
     [products],
   );

@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { PAYMENT_METHOD_STYLES } from "@/shared/constants/ui-styles";
+import { formatMoney } from "@/shared/utils/formatters";
 import type { PaymentBreakdown } from "../types";
 
 interface PaymentBreakdownCardProps {
@@ -53,7 +54,7 @@ export function PaymentBreakdownCard({
                   {percentage}%
                 </span>
                 <span className="text-sm sm:text-base font-bold">
-                  R$ {value.toFixed(2)}
+                  {formatMoney(value)}
                 </span>
               </div>
             </div>

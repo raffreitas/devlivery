@@ -1,5 +1,6 @@
 import { TrashIcon, XIcon } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
+import { formatMoney } from "@/shared/utils/formatters";
 
 interface OrderItemsTableItem {
   fieldId: string;
@@ -63,9 +64,9 @@ export function OrderItemsTable({
               </div>
               <div className="flex justify-between text-xs text-secondary-foreground">
                 <span>Qtd: {item.quantity}</span>
-                <span>Unit: R$ {item.product.price.toFixed(2)}</span>
+                <span>Unit: {formatMoney(item.product.price)}</span>
                 <span className="font-medium text-gray-900">
-                  R$ {(item.product.price * item.quantity).toFixed(2)}
+                  {formatMoney(item.product.price * item.quantity)}
                 </span>
               </div>
             </div>
@@ -114,10 +115,10 @@ export function OrderItemsTable({
                   {item.quantity}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-900">
-                  R$ {item.product.price.toFixed(2)}
+                  {formatMoney(item.product.price)}
                 </td>
                 <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                  R$ {(item.product.price * item.quantity).toFixed(2)}
+                  {formatMoney(item.product.price * item.quantity)}
                 </td>
                 <td className="px-4 py-3 text-sm">
                   <Button
@@ -141,7 +142,7 @@ export function OrderItemsTable({
             Subtotal
           </span>
           <span className="text-xs sm:text-sm font-medium text-gray-900">
-            R$ {subtotal.toFixed(2)}
+            {formatMoney(subtotal)}
           </span>
         </div>
 
@@ -150,7 +151,7 @@ export function OrderItemsTable({
             Taxa de Entrega
           </span>
           <span className="text-xs sm:text-sm font-medium text-gray-900">
-            R$ {deliveryFee.toFixed(2)}
+            {formatMoney(deliveryFee)}
           </span>
         </div>
 
@@ -159,7 +160,7 @@ export function OrderItemsTable({
             Total:
           </span>
           <span className="text-xl sm:text-2xl font-bold text-primary">
-            R$ {total.toFixed(2)}
+            {formatMoney(total)}
           </span>
         </div>
       </div>

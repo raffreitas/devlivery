@@ -1,6 +1,7 @@
 import { Card } from "@/shared/components/ui/card";
 import { Separator } from "@/shared/components/ui/separator";
 import { ORDER_STATUS_STYLES } from "@/shared/constants/ui-styles";
+import { formatMoney } from "@/shared/utils/formatters";
 import type { OrdersByStatus } from "../types";
 
 interface StatsSidebarProps {
@@ -50,7 +51,7 @@ export function StatsSidebar({
           Ticket Médio
         </span>
         <span className="text-lg sm:text-xl font-bold text-primary">
-          R$ {averageOrderValue.toFixed(2)}
+          {formatMoney(averageOrderValue)}
         </span>
       </div>
     </Card>

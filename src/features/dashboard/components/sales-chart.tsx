@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { formatMoney } from "@/shared/utils/formatters";
 
 interface SalesChartProps {
   data: { date: string; total: number }[];
@@ -25,7 +26,7 @@ export function SalesChart({ data }: SalesChartProps) {
         <CardTitle>Vendas no Período</CardTitle>
       </CardHeader>
       <CardContent className="pl-2">
-        <div className="h-[350px] w-full">
+        <div className="h-87.5 w-full">
           {data.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
@@ -64,7 +65,7 @@ export function SalesChart({ data }: SalesChartProps) {
                                 Total
                               </span>
                               <span className="font-bold">
-                                R$ {Number(payload[0].value).toFixed(2)}
+                                {formatMoney(payload[0].value)}
                               </span>
                             </div>
                           </div>

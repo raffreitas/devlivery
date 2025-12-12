@@ -1,3 +1,4 @@
+import { formatMoney } from "@/shared/utils/formatters";
 import { getPaymentOptionLabel } from "../constants/payment-methods";
 import type { Order } from "../types";
 
@@ -29,7 +30,7 @@ export function OrderPrint({ order }: OrderPrintProps) {
                 {item.quantity}x {item.product.name}
               </span>
               <span className="text-end whitespace-nowrap">
-                R$ {(item.product.price * item.quantity).toFixed(2)}
+                {formatMoney(item.product.price * item.quantity)}
               </span>
             </div>
             {item.notes && <p className="text-sm ml-4">Obs: {item.notes}</p>}
@@ -54,17 +55,17 @@ export function OrderPrint({ order }: OrderPrintProps) {
             <div>
               <div className="flex justify-between">
                 <span>SUBTOTAL:</span>
-                <span>R$ {subtotal.toFixed(2)}</span>
+                <span>{formatMoney(subtotal)}</span>
               </div>
 
               <div className="flex justify-between">
                 <span>TAXA DE ENTREGA:</span>
-                <span>R$ {order.deliveryFee.toFixed(2)}</span>
+                <span>{formatMoney(order.deliveryFee)}</span>
               </div>
 
               <div className="flex justify-between font-bold text-lg mt-2">
                 <span>TOTAL:</span>
-                <span>R$ {order.total.toFixed(2)}</span>
+                <span>{formatMoney(order.total)}</span>
               </div>
             </div>
           );

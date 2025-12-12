@@ -1,3 +1,4 @@
+import { formatMoney } from "@/shared/utils/formatters";
 import type { Order } from "../types";
 
 interface OrderCardTotalProps {
@@ -12,13 +13,13 @@ export function OrderCardTotal({ order }: OrderCardTotalProps) {
   return (
     <div className="flex justify-between items-center">
       <div className="text-sm text-secondary-foreground space-y-1">
-        <div>Subtotal: R$ {subtotal.toFixed(2)}</div>
-        <div>Taxa de Entrega: R$ {order.deliveryFee.toFixed(2)}</div>
+        <div>Subtotal: {formatMoney(subtotal)}</div>
+        <div>Taxa de Entrega: {formatMoney(order.deliveryFee)}</div>
       </div>
       <div className="text-right">
         <div className="text-sm text-secondary-foreground">Total:</div>
         <div className="text-2xl font-bold text-primary">
-          R$ {order.total.toFixed(2)}
+          {formatMoney(order.total)}
         </div>
       </div>
     </div>

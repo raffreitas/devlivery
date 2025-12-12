@@ -6,6 +6,7 @@ import { useOrders } from "@/features/orders/hooks/use-orders";
 import type { Order } from "@/features/orders/types";
 import { BottomSheet } from "@/shared/components/bottom-sheet";
 import { Button } from "@/shared/components/ui/button";
+import { formatMoney } from "@/shared/utils/formatters";
 import { DashboardFiltersContent } from "../components/dashboard-filters-content";
 import { DashboardHeader } from "../components/dashboard-header";
 import { PaymentBreakdownCard } from "../components/payment-breakdown-card";
@@ -68,14 +69,14 @@ export function DashboardPage() {
 
           <StatCard
             title="Receita Total"
-            value={`R$ ${stats.totalRevenue.toFixed(2)}`}
+            value={formatMoney(stats.totalRevenue)}
             icon={<DollarSignIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
             color="green"
           />
 
           <StatCard
             title="Ticket Médio"
-            value={`R$ ${stats.averageOrderValue.toFixed(2)}`}
+            value={formatMoney(stats.averageOrderValue)}
             icon={<DollarSignIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
             color="green"
           />
