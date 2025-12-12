@@ -3,17 +3,18 @@ using Devlivery.Features.Products.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using FluentResults;
+using Mediator;
 
 namespace Devlivery.Features.Products.Commands.CreateProduct;
 
 public sealed class CreateProductHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
-    ITenantAccessor tenantAccessor)
+    ITenantAccessor tenantAccessor) : ICommandHandler<CreateProductCommand, Result<CreateProductResponse>>
 {
-    public async Task<Result<CreateProductResponse>> HandleAsync(
+    public async ValueTask<Result<CreateProductResponse>> Handle(
         CreateProductCommand command,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var product = new Product(
             command.Name,

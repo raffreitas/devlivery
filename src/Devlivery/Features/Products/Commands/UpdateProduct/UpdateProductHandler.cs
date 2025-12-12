@@ -1,14 +1,15 @@
 using Devlivery.Features.Products.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using FluentResults;
+using Mediator;
 
 namespace Devlivery.Features.Products.Commands.UpdateProduct;
 
 public sealed class UpdateProductHandler(
     IProductRepository productRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork) : ICommandHandler<UpdateProductCommand, Result>
 {
-    public async Task<Result> HandleAsync(UpdateProductCommand command, CancellationToken cancellationToken = default)
+    public async ValueTask<Result> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
     {
         var product = await productRepository.GetByIdAsync(command.Id, cancellationToken);
 

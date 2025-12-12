@@ -1,4 +1,6 @@
+using FluentResults;
 using FluentValidation;
+using Mediator;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashSession;
 
@@ -7,7 +9,7 @@ public sealed record CreateCashSessionCommand(
     string AttendantName,
     decimal OpeningAmount,
     string? Notes
-);
+) : ICommand<Result<CreateCashSessionResponse>>;
 
 public sealed class CreateCashSessionValidator : AbstractValidator<CreateCashSessionCommand>
 {

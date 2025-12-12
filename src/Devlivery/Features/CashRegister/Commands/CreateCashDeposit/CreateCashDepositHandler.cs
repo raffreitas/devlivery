@@ -1,20 +1,20 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
-using Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using FluentResults;
+using Mediator;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
 public sealed class CreateCashDepositHandler(
     ICashSessionRepository cashSessionRepository,
     IUnitOfWork unitOfWork,
-    ITenantAccessor tenantAccessor)
+    ITenantAccessor tenantAccessor) : ICommandHandler<CreateCashDepositCommand, Result<CreateCashDepositResponse>>
 {
-    public async Task<Result<GetCashSessionDepositsResponse>> HandleAsync(
+    public async ValueTask<Result<CreateCashDepositResponse>> Handle(
         CreateCashDepositCommand command,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var tenantId = tenantAccessor.Tenant.Id;
 
@@ -23,12 +23,12 @@ public sealed class CreateCashDepositHandler(
 
         if (cashSession is null)
         {
-            return Result.Fail<GetCashSessionDepositsResponse>(CashRegisterErrors.CashSessionNotFound);
+            return Result.Fail<CreateCashDepositResponse>(CashRegisterErrors.CashSessionNotFound);
         }
 
         if (cashSession.Status != CashSessionStatus.Open)
         {
-            return Result.Fail<GetCashSessionDepositsResponse>(
+            return Result.Fail<CreateCashDepositResponse>(
                 new Error("CashSessionNotOpen")
                     .WithMetadata("message", "Não é possível adicionar aporte a um caixa fechado."));
         }
@@ -47,7 +47,12 @@ public sealed class CreateCashDepositHandler(
         cashSessionRepository.Update(cashSession);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var response = GetCashSessionDepositsResponse.FromDomain(deposit);
+        var response = new CreateCashDepositResponse(
+            deposit.Id,
+            deposit.Amount,
+            deposit.AttendantName,
+            deposit.CreatedAt);
+
         return Result.Ok(response);
     }
 }

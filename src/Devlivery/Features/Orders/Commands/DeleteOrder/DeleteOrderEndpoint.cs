@@ -1,5 +1,6 @@
 using Devlivery.Shared.Extensions;
 using FluentValidation;
+using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,8 +18,8 @@ public static class DeleteOrderEndpoint
 
     private static async Task<Results<NoContent, ValidationProblem, NotFound<ProblemDetails>>> Handle(
         Guid id,
+        ISender sender,
         IValidator<DeleteOrderCommand> validator,
-        DeleteOrderHandler handler,
         CancellationToken ct)
     {
         var command = new DeleteOrderCommand(id);
@@ -29,7 +30,7 @@ public static class DeleteOrderEndpoint
             return validationResult.ToValidationProblem();
         }
 
-        var result = await handler.HandleAsync(command, ct);
+        var result = await sender.Send(command, ct);
 
         return result.IsSuccess
             ? result.ToNoContent()

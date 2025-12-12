@@ -1,8 +1,10 @@
+using FluentResults;
 using FluentValidation;
+using Mediator;
 
 namespace Devlivery.Features.Products.Commands.DeleteProduct;
 
-public sealed record DeleteProductCommand(Guid Id);
+public sealed record DeleteProductCommand(Guid Id) : ICommand<Result<DeleteProductResponse>>;
 
 public sealed class Validator : AbstractValidator<DeleteProductCommand>
 {

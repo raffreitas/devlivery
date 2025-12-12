@@ -4,6 +4,7 @@ using Devlivery.Features.Products.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using FluentResults;
+using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.CreateOrder;
 
@@ -11,11 +12,11 @@ public sealed class CreateOrderHandler(
     IOrderRepository orderRepository,
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
-    ITenantAccessor tenantAccessor)
+    ITenantAccessor tenantAccessor) : ICommandHandler<CreateOrderCommand, Result<CreateOrderResponse>>
 {
-    public async Task<Result<CreateOrderResponse>> HandleAsync(
+    public async ValueTask<Result<CreateOrderResponse>> Handle(
         CreateOrderCommand command,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         if (!Enum.TryParse<PaymentMethod>(command.PaymentMethod, ignoreCase: true, out var paymentMethod))
             return Result.Fail("Método de pagamento inválido");

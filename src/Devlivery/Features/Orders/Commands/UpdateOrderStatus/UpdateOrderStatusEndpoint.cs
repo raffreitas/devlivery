@@ -1,5 +1,6 @@
 using Devlivery.Shared.Extensions;
 using FluentValidation;
+using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +8,7 @@ namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
 public static class UpdateOrderStatusEndpoint
 {
-    public record Request(string Status);
+    internal sealed record Request(string Status);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
@@ -20,8 +21,8 @@ public static class UpdateOrderStatusEndpoint
     private static async Task<Results<NoContent, ValidationProblem, NotFound<ProblemDetails>>> Handle(
         Guid id,
         Request request,
+        ISender sender,
         IValidator<UpdateOrderStatusCommand> validator,
-        UpdateOrderStatusHandler handler,
         CancellationToken ct)
     {
         var command = new UpdateOrderStatusCommand(id, request.Status);
@@ -32,7 +33,7 @@ public static class UpdateOrderStatusEndpoint
             return validationResult.ToValidationProblem();
         }
 
-        var result = await handler.HandleAsync(command, ct);
+        var result = await sender.Send(command, ct);
 
         return result.IsSuccess
             ? result.ToNoContent()

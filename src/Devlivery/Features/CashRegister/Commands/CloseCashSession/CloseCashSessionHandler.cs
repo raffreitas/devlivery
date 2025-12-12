@@ -1,11 +1,12 @@
+using Devlivery.Features.CashRegister.Commands.CloseCashSession;
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
-using Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using FluentResults;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
@@ -14,9 +15,9 @@ public sealed class CloseCashSessionHandler(
     ICashSessionRepository cashSessionRepository,
     IOrderRepository orderRepository,
     IUnitOfWork unitOfWork,
-    ApplicationDbContext dbContext)
+    ApplicationDbContext dbContext) : ICommandHandler<CloseCashSessionCommand, Result<CloseCashSessionResponse>>
 {
-    public async Task<Result<GetCashSessionByIdResponse>> HandleAsync(
+    public async ValueTask<Result<CloseCashSessionResponse>> Handle(
         CloseCashSessionCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -24,12 +25,12 @@ public sealed class CloseCashSessionHandler(
 
         if (cashSession is null)
         {
-            return Result.Fail<GetCashSessionByIdResponse>(CashRegisterErrors.CashSessionNotFound);
+            return Result.Fail<CloseCashSessionResponse>(CashRegisterErrors.CashSessionNotFound);
         }
 
         if (cashSession.Status == CashSessionStatus.Closed)
         {
-            return Result.Fail<GetCashSessionByIdResponse>(CashRegisterErrors.CashSessionAlreadyClosed);
+            return Result.Fail<CloseCashSessionResponse>(CashRegisterErrors.CashSessionAlreadyClosed);
         }
 
         // Get all orders within the cash session period (exclude canceled)
@@ -46,12 +47,16 @@ public sealed class CloseCashSessionHandler(
         var totalOrders = sessionOrders.Count;
 
         // Calculate payment breakdown
-        var paymentBreakdown = sessionOrders
+        var paymentBreakdownItems = sessionOrders
             .GroupBy(o => o.PaymentMethod.ToString())
             .Select(g => new PaymentBreakdownItem(
                 g.Key,
                 g.Sum(o => o.Total),
                 g.Count()))
+            .ToList();
+
+        var paymentBreakdown = paymentBreakdownItems
+            .Select(pb => new Devlivery.Features.CashRegister.Domain.PaymentBreakdownItem(pb.Method, pb.Amount, pb.Count))
             .ToList();
 
         // ✅ IMPORTANTE: Recalcular ExpectedCashAmount ANTES de fechar
@@ -75,6 +80,6 @@ public sealed class CloseCashSessionHandler(
         cashSessionRepository.Update(cashSession);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Ok(GetCashSessionByIdResponse.FromDomain(cashSession, expectedCashAmount));
+        return Result.Ok(CloseCashSessionResponse.FromDomain(cashSession, expectedCashAmount));
     }
 }

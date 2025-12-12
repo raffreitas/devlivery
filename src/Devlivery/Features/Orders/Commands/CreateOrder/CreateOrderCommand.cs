@@ -1,5 +1,7 @@
 ﻿using Devlivery.Features.Orders.Domain;
+using FluentResults;
 using FluentValidation;
+using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.CreateOrder;
 
@@ -10,7 +12,7 @@ public sealed record CreateOrderCommand(
     string DeliveryAddress,
     string PaymentMethod,
     decimal DeliveryFee = 0,
-    string? Notes = null);
+    string? Notes = null) : ICommand<Result<CreateOrderResponse>>;
 
 public sealed record OrderItemDto(Guid ProductId, int Quantity, string? Notes);
 

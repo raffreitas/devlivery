@@ -3,17 +3,18 @@ using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using FluentResults;
+using Mediator;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashSession;
 
 public sealed class CreateCashSessionHandler(
     ICashSessionRepository cashSessionRepository,
     IUnitOfWork unitOfWork,
-    ITenantAccessor tenantAccessor)
+    ITenantAccessor tenantAccessor) : ICommandHandler<CreateCashSessionCommand, Result<CreateCashSessionResponse>>
 {
-    public async Task<Result<CreateCashSessionResponse>> HandleAsync(
+    public async ValueTask<Result<CreateCashSessionResponse>> Handle(
         CreateCashSessionCommand command,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var tenantId = tenantAccessor.Tenant.Id;
 

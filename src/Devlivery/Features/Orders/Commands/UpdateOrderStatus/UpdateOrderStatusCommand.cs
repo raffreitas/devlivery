@@ -1,9 +1,11 @@
 using Devlivery.Features.Orders.Domain;
+using FluentResults;
 using FluentValidation;
+using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
-public sealed record UpdateOrderStatusCommand(Guid Id, string Status);
+public sealed record UpdateOrderStatusCommand(Guid Id, string Status) : ICommand<Result>;
 
 public sealed class Validator : AbstractValidator<UpdateOrderStatusCommand>
 {

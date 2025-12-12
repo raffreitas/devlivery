@@ -1,5 +1,6 @@
 ﻿using Devlivery.Shared.Extensions;
 using FluentValidation;
+using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,15 @@ namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
 public static class UpdateOrderEndpoint
 {
+    internal sealed record Request(
+        OrderItemDto[] Items,
+        string CustomerName,
+        string? CustomerPhone,
+        string DeliveryAddress,
+        string PaymentMethod,
+        decimal DeliveryFee = 0,
+        string? Notes = null);
+
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("{id:guid}", Handle)
@@ -19,16 +29,26 @@ public static class UpdateOrderEndpoint
     private static async Task<Results<NoContent, ValidationProblem, NotFound<ProblemDetails>,
         BadRequest<ProblemDetails>>> Handle(
         Guid id,
-        UpdateOrderCommand request,
+        Request request,
+        ISender sender,
         IValidator<UpdateOrderCommand> validator,
-        UpdateOrderHandler handler,
         CancellationToken ct)
     {
-        var validationResult = await validator.ValidateAsync(request, ct);
+        var command = new UpdateOrderCommand(
+            id,
+            request.Items,
+            request.CustomerName,
+            request.CustomerPhone,
+            request.DeliveryAddress,
+            request.PaymentMethod,
+            request.DeliveryFee,
+            request.Notes);
+
+        var validationResult = await validator.ValidateAsync(command, ct);
         if (!validationResult.IsValid)
             return validationResult.ToValidationProblem();
 
-        var result = await handler.HandleAsync(request, ct);
+        var result = await sender.Send(command, ct);
 
         if (result.IsSuccess)
             return result.ToNoContent();

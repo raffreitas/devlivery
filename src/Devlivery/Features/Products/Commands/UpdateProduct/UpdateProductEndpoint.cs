@@ -1,5 +1,6 @@
 using Devlivery.Shared.Extensions;
 using FluentValidation;
+using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +8,7 @@ namespace Devlivery.Features.Products.Commands.UpdateProduct;
 
 public static class UpdateProductEndpoint
 {
-    public record Request(
+    internal sealed record Request(
         string Name,
         string Description,
         decimal Price,
@@ -25,8 +26,8 @@ public static class UpdateProductEndpoint
     private static async Task<Results<NoContent, ValidationProblem, NotFound<ProblemDetails>>> Handle(
         Guid id,
         Request request,
+        ISender sender,
         IValidator<UpdateProductCommand> validator,
-        UpdateProductHandler handler,
         CancellationToken ct)
     {
         var command = new UpdateProductCommand(
@@ -43,7 +44,7 @@ public static class UpdateProductEndpoint
             return validationResult.ToValidationProblem();
         }
 
-        var result = await handler.HandleAsync(command, ct);
+        var result = await sender.Send(command, ct);
 
         return result.IsSuccess
             ? result.ToNoContent()

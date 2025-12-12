@@ -3,17 +3,18 @@ using Devlivery.Features.Orders.Infrastructure;
 using Devlivery.Features.Products.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using FluentResults;
+using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
 public sealed class UpdateOrderHandler(
     IOrderRepository orderRepository,
     IProductRepository productRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork) : ICommandHandler<UpdateOrderCommand, Result>
 {
-    public async Task<Result> HandleAsync(
+    public async ValueTask<Result> Handle(
         UpdateOrderCommand command,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         if (!Enum.TryParse<PaymentMethod>(command.PaymentMethod, ignoreCase: true, out var paymentMethod))
             return Result.Fail("Método de pagamento inválido");
