@@ -53,7 +53,7 @@ public sealed class Order : Entity
             EstablishmentId,
             CustomerName,
             Total,
-            PaymentMethod.ToString(),
+            PaymentMethod,
             CreatedAt));
     }
 
@@ -83,8 +83,8 @@ public sealed class Order : Entity
         AddDomainEvent(new OrderStatusChangedEvent(
             Id,
             EstablishmentId,
-            oldStatus.ToString(),
-            newStatus.ToString(),
+            oldStatus,
+            newStatus,
             UpdatedAt));
     }
 

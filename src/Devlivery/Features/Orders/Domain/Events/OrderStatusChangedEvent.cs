@@ -9,6 +9,6 @@ namespace Devlivery.Features.Orders.Domain.Events;
 public sealed record OrderStatusChangedEvent(
     Guid OrderId,
     Guid EstablishmentId,
-    string OldStatus,
-    string NewStatus,
+    OrderStatus OldStatus,
+    OrderStatus NewStatus,
     DateTime ChangedAt) : DomainEventBase;

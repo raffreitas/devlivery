@@ -11,5 +11,5 @@ public sealed record OrderCreatedEvent(
     Guid EstablishmentId,
     string CustomerName,
     decimal Total,
-    string PaymentMethod,
+    PaymentMethod PaymentMethod,
     DateTime CreatedAt) : DomainEventBase;
