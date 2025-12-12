@@ -1,6 +1,6 @@
 using Devlivery.Features.CashRegister.DTOs;
 using Devlivery.Features.CashRegister.Errors;
-using Devlivery.Shared.Database.Context;
+using Devlivery.Shared.Persistence.Context;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 

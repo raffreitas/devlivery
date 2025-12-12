@@ -1,4 +1,4 @@
-using Devlivery.Shared.Domain;
+using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Features.CashRegister.Domain;
 

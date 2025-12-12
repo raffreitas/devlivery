@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using Devlivery.Features.Orders.Domain;
-using Devlivery.Shared.Database.Context;
+using Devlivery.Shared.Persistence.Context;
 using Devlivery.Tests.Common;
 using Devlivery.Tests.Common.Builders;
 using Microsoft.Extensions.DependencyInjection;

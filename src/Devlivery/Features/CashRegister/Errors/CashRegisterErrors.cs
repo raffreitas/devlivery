@@ -1,4 +1,4 @@
-﻿using Devlivery.Shared.Errors;
+﻿using Devlivery.Shared.SeedWork.Errors;
 
 namespace Devlivery.Features.CashRegister.Errors;
 

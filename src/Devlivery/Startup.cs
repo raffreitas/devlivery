@@ -1,6 +1,4 @@
-﻿using Devlivery.Shared.Database.Context;
-using Devlivery.Shared.Database.Seeder;
-using Devlivery.Shared.Identity.Users.Models;
+﻿using Devlivery.Shared.Identity.Users.Models;
 using Devlivery.Shared.Presentation;
 using Devlivery.Features.Auth;
 using Devlivery.Features.CashRegister;
@@ -10,6 +8,9 @@ using Devlivery.Shared.Authorization;
 using Devlivery.Shared.Database;
 using Devlivery.Shared.Identity;
 using Devlivery.Shared.Observability;
+using Devlivery.Shared.Persistence;
+using Devlivery.Shared.Persistence.Context;
+using Devlivery.Shared.Persistence.Seeder;
 using Devlivery.Shared.Tenancy;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;

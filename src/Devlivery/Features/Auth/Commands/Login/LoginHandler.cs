@@ -1,5 +1,5 @@
-﻿using Devlivery.Shared.Database.Context;
-using Devlivery.Shared.Identity.Abstractions;
+﻿using Devlivery.Shared.Identity.Abstractions;
+using Devlivery.Shared.Persistence.Context;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 

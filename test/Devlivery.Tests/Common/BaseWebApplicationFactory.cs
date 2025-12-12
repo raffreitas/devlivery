@@ -1,5 +1,5 @@
-﻿using Devlivery.Shared.Database.Context;
-using Devlivery.Shared.Identity.Context;
+﻿using Devlivery.Shared.Identity.Context;
+using Devlivery.Shared.Persistence.Context;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
