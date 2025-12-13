@@ -1,5 +1,6 @@
 ﻿using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Infrastructure;
+using Devlivery.Features.Orders.Shared;
 using Devlivery.Features.Products.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
@@ -20,8 +21,13 @@ public sealed class CreateOrderHandler(
         CreateOrderCommand command,
         CancellationToken cancellationToken)
     {
+        if (!command.IsValid(out var errors))
+        {
+            return Result.Fail<CreateOrderResponse>(errors);
+        }
+
         if (!Enum.TryParse<PaymentMethod>(command.PaymentMethod, ignoreCase: true, out var paymentMethod))
-            return Result.Fail("Método de pagamento inválido");
+            return Result.Fail<CreateOrderResponse>(OrderErrors.InvalidPaymentMethod);
 
         // Buscar produtos usando Repository
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
@@ -29,7 +35,7 @@ public sealed class CreateOrderHandler(
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
         if (products.Count != productIds.Count)
-            return Result.Fail("Um ou mais produtos não foram encontrados");
+            return Result.Fail<CreateOrderResponse>(OrderErrors.ProductNotFound);
 
         // Criar Order (domain logic)
         var order = new Order(

@@ -1,4 +1,5 @@
 using Devlivery.Features.Products.Infrastructure;
+using Devlivery.Features.Products.Shared;
 using Devlivery.Shared.Infrastructure.Persistence;
 
 using FluentResults;
@@ -13,10 +14,15 @@ public sealed class UpdateProductHandler(
 {
     public async ValueTask<Result> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
     {
+        if (!command.IsValid(out var errors))
+        {
+            return Result.Fail(errors);
+        }
+
         var product = await productRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (product is null)
-            return Result.Fail("Produto não encontrado");
+            return Result.Fail(ProductErrors.ProductNotFound);
 
         product.Update(
             name: command.Name,

@@ -1,5 +1,6 @@
 using Devlivery.Features.Products.Domain;
 using Devlivery.Features.Products.Infrastructure;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 
@@ -18,6 +19,11 @@ public sealed class CreateProductHandler(
         CreateProductCommand command,
         CancellationToken cancellationToken)
     {
+        if (!command.IsValid(out var errors))
+        {
+            return Result.Fail<CreateProductResponse>(new ValidationError(errors));
+        }
+
         var product = new Product(
             command.Name,
             command.Description,

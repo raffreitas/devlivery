@@ -1,12 +1,10 @@
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
-using FluentValidation;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.Features.Products.Commands.CreateProduct;
 
@@ -18,28 +16,20 @@ public static class CreateProductEndpoint
     {
         app.MapPost("", Handle)
             .Produces<ApiResponse<CreateProductResponse>>(StatusCodes.Status201Created)
-            .ProducesValidationProblem()
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<CreateProductResponse>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Created<ApiResponse<CreateProductResponse>>, ValidationProblem, BadRequest<ProblemDetails>>> Handle(
+    private static async Task<Results<Created<ApiResponse<CreateProductResponse>>, BadRequest<ApiResponse<CreateProductResponse>>>> Handle(
         Request request,
         ISender sender,
-        IValidator<CreateProductCommand> validator,
         CancellationToken ct)
     {
         var command = new CreateProductCommand(request.Name, request.Description, request.Price, request.Category, request.Available);
-
-        var validationResult = await validator.ValidateAsync(command, ct);
-        if (!validationResult.IsValid)
-        {
-            return validationResult.ToValidationProblem();
-        }
 
         var result = await sender.Send(command, ct);
 
         return result.IsSuccess
             ? result.ToCreated($"/api/products/{result.Value.ProductId}")
-            : result.ToBadRequestProblem();
+            : result.ToBadRequest();
     }
 }

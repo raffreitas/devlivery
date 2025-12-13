@@ -2,7 +2,6 @@ using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.Features.Orders.Queries.GetAllOrders;
 
@@ -14,10 +13,10 @@ public static class GetAllOrdersEndpoint
     {
         app.MapGet("", Handle)
             .Produces<ApiResponse<List<GetAllOrdersResponse>>>()
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<List<GetAllOrdersResponse>>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Ok<ApiResponse<List<GetAllOrdersResponse>>>, BadRequest<ProblemDetails>>> Handle(
+    private static async Task<Results<Ok<ApiResponse<List<GetAllOrdersResponse>>>, BadRequest<ApiResponse<List<GetAllOrdersResponse>>>>> Handle(
         DateTime? start,
         DateTime? end,
         string? paymentMethod,
@@ -29,6 +28,6 @@ public static class GetAllOrdersEndpoint
 
         return result.IsSuccess
             ? result.ToOk()
-            : result.ToBadRequestProblem();
+            : result.ToBadRequest();
     }
 }

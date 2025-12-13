@@ -1,4 +1,5 @@
-﻿using Devlivery.Shared.Infrastructure.Identity.Abstractions;
+﻿using Devlivery.Features.Auth.Shared;
+using Devlivery.Shared.Infrastructure.Identity.Abstractions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
@@ -17,6 +18,11 @@ public sealed class LoginHandler(
 {
     public async ValueTask<Result<LoginResponse>> Handle(LoginCommand command, CancellationToken cancellationToken)
     {
+        if (!command.IsValid(out var errors))
+        {
+            return Result.Fail<LoginResponse>(errors);
+        }
+
         var user = await dbContext.Users
             .IgnoreQueryFilters()
             .AsNoTracking()
@@ -25,14 +31,14 @@ public sealed class LoginHandler(
         if (user is null)
         {
             logger.LogInformation("Failed login attempt.");
-            return Result.Fail("Credenciais inválidas");
+            return Result.Fail<LoginResponse>(AuthErrors.InvalidCredentials);
         }
 
         var signInResult = await identityService.SignInAsync(user.Email, command.Password, cancellationToken);
         if (signInResult.IsFailed)
         {
             logger.LogInformation("Failed login attempt.");
-            return Result.Fail("Credenciais inválidas");
+            return Result.Fail<LoginResponse>(AuthErrors.InvalidCredentials);
         }
 
         var tokenRequest = new TokenRequest(

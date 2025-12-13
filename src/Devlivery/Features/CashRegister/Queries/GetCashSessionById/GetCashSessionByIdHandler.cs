@@ -1,4 +1,4 @@
-using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Shared;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;

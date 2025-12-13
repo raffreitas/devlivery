@@ -1,5 +1,6 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
+using Devlivery.Features.CashRegister.Shared;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 
@@ -18,6 +19,11 @@ public sealed class CreateCashSessionHandler(
         CreateCashSessionCommand command,
         CancellationToken cancellationToken)
     {
+        if (!command.IsValid(out var errors))
+        {
+            return Result.Fail<CreateCashSessionResponse>(errors);
+        }
+
         var tenantId = tenantAccessor.Tenant.Id;
 
         var existingOpen = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);

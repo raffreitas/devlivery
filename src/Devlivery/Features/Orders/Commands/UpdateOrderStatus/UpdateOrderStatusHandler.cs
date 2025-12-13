@@ -1,5 +1,6 @@
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Infrastructure;
+using Devlivery.Features.Orders.Shared;
 using Devlivery.Shared.Infrastructure.Persistence;
 
 using FluentResults;
@@ -16,13 +17,18 @@ public sealed class UpdateOrderStatusHandler(
         UpdateOrderStatusCommand command,
         CancellationToken cancellationToken)
     {
+        if (!command.IsValid(out var errors))
+        {
+            return Result.Fail(errors);
+        }
+
         var order = await orderRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (order is null)
-            return Result.Fail("Pedido não encontrado");
+            return Result.Fail(OrderErrors.OrderNotFound);
 
         if (!Enum.TryParse<OrderStatus>(command.Status, ignoreCase: true, out var status))
-            return Result.Fail("Status inválido");
+            return Result.Fail(OrderErrors.InvalidOrderStatus);
 
         order.UpdateStatus(status);
         orderRepository.Update(order);

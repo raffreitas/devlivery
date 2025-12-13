@@ -1,5 +1,6 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
+using Devlivery.Features.CashRegister.Shared;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
@@ -21,6 +22,11 @@ public sealed class CloseCashSessionHandler(
 {
     public async ValueTask<Result<CloseCashSessionResponse>> Handle(CloseCashSessionCommand command, CancellationToken cancellationToken)
     {
+        if (!command.IsValid(out var errors))
+        {
+            return Result.Fail<CloseCashSessionResponse>(errors);
+        }
+
         var cashSession = await cashSessionRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (cashSession is null)
@@ -56,7 +62,7 @@ public sealed class CloseCashSessionHandler(
             .ToList();
 
         var paymentBreakdown = paymentBreakdownItems
-            .Select(pb => new Devlivery.Features.CashRegister.Domain.PaymentBreakdownItem(pb.Method, pb.Amount, pb.Count))
+            .Select(pb => new Domain.PaymentBreakdownItem(pb.Method, pb.Amount, pb.Count))
             .ToList();
 
         // ✅ IMPORTANTE: Recalcular ExpectedCashAmount ANTES de fechar

@@ -71,7 +71,7 @@ public sealed class UpdateOrderEndpointTests(OrdersWebApplicationFactory factory
     }
 
     [Fact]
-    public async Task UpdateOrder_WhenOrderIsCancelledOrDelivered_ReturnsBadRequest()
+    public async Task UpdateOrder_WhenOrderIsCancelledOrDelivered_ReturnsUnprocessableEntity()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -119,7 +119,7 @@ public sealed class UpdateOrderEndpointTests(OrdersWebApplicationFactory factory
         var response = await PutAsync($"/api/orders/{order.Id}", request, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
     }
 
     [Fact]

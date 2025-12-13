@@ -1,5 +1,6 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
+using Devlivery.Features.CashRegister.Shared;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 
@@ -18,6 +19,11 @@ public sealed class CreateCashDepositHandler(
         CreateCashDepositCommand command,
         CancellationToken cancellationToken)
     {
+        if (!command.IsValid(out var errors))
+        {
+            return Result.Fail<CreateCashDepositResponse>(errors);
+        }
+
         var tenantId = tenantAccessor.Tenant.Id;
 
         // Verify that the cash session exists and is open
@@ -30,9 +36,7 @@ public sealed class CreateCashDepositHandler(
 
         if (cashSession.Status != CashSessionStatus.Open)
         {
-            return Result.Fail<CreateCashDepositResponse>(
-                new Error("CashSessionNotOpen")
-                    .WithMetadata("message", "Não é possível adicionar aporte a um caixa fechado."));
+            return Result.Fail<CreateCashDepositResponse>(CashRegisterErrors.CashSessionNotOpen);
         }
 
         // Create the deposit

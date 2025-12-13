@@ -1,3 +1,5 @@
+using Devlivery.Shared.Extensions;
+
 using FluentResults;
 
 using FluentValidation;
@@ -11,11 +13,19 @@ public sealed record CreateProductCommand(
     string Description,
     decimal Price,
     string Category,
-    bool Available) : ICommand<Result<CreateProductResponse>>;
-
-public sealed class Validator : AbstractValidator<CreateProductCommand>
+    bool Available) : ICommand<Result<CreateProductResponse>>
 {
-    public Validator()
+    public bool IsValid(out string[] errors)
+    {
+        var result = new CreateProductCommandValidator().Validate(this);
+        errors = result.GetErrors();
+        return result.IsValid;
+    }
+};
+
+public sealed class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+{
+    public CreateProductCommandValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")

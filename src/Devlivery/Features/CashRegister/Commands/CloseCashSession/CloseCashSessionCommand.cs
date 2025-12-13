@@ -1,3 +1,5 @@
+using Devlivery.Shared.Extensions;
+
 using FluentResults;
 
 using FluentValidation;
@@ -10,7 +12,15 @@ public sealed record CloseCashSessionCommand(
     Guid Id,
     decimal ClosingAmount,
     string? Notes
-) : ICommand<Result<CloseCashSessionResponse>>;
+) : ICommand<Result<CloseCashSessionResponse>>
+{
+    public bool IsValid(out string[] errors)
+    {
+        var result = new CloseCashSessionValidator().Validate(this);
+        errors = result.GetErrors();
+        return result.IsValid;
+    }
+};
 
 public sealed class CloseCashSessionValidator : AbstractValidator<CloseCashSessionCommand>
 {

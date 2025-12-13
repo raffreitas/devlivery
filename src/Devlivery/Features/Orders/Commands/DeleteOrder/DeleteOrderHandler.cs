@@ -1,4 +1,5 @@
 using Devlivery.Features.Orders.Infrastructure;
+using Devlivery.Features.Orders.Shared;
 using Devlivery.Shared.Infrastructure.Persistence;
 
 using FluentResults;
@@ -15,11 +16,16 @@ public sealed class DeleteOrderHandler(
         DeleteOrderCommand command,
         CancellationToken cancellationToken)
     {
+        if (!command.IsValid(out var errors))
+        {
+            return Result.Fail(errors);
+        }
+
         var order = await orderRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (order is null)
         {
-            return Result.Fail("Pedido não encontrado");
+            return Result.Fail(OrderErrors.OrderNotFound);
         }
 
         orderRepository.Remove(order);

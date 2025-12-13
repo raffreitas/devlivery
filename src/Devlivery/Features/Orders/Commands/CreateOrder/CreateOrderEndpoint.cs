@@ -1,12 +1,10 @@
-﻿using Devlivery.Shared.Extensions;
+﻿using Devlivery.Shared.Application.Errors;
+using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
-using FluentValidation;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.Features.Orders.Commands.CreateOrder;
 
@@ -25,14 +23,14 @@ public static class CreateOrderEndpoint
     {
         app.MapPost("", Handle)
             .Produces<ApiResponse<CreateOrderResponse>>(StatusCodes.Status201Created)
-            .ProducesValidationProblem()
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<CreateOrderResponse>>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<CreateOrderResponse>>(StatusCodes.Status404NotFound)
+            .Produces<ApiResponse<CreateOrderResponse>>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<Created<ApiResponse<CreateOrderResponse>>, ValidationProblem, BadRequest<ProblemDetails>>> Handle(
+    private static async Task<Results<Created<ApiResponse<CreateOrderResponse>>, BadRequest<ApiResponse<CreateOrderResponse>>, NotFound<ApiResponse<CreateOrderResponse>>, Conflict<ApiResponse<CreateOrderResponse>>>> Handle(
         Request request,
         ISender sender,
-        IValidator<CreateOrderCommand> validator,
         CancellationToken ct)
     {
         var command = new CreateOrderCommand(
@@ -44,16 +42,16 @@ public static class CreateOrderEndpoint
             request.DeliveryFee,
             request.Notes);
 
-        var validationResult = await validator.ValidateAsync(command, ct);
-        if (!validationResult.IsValid)
-        {
-            return validationResult.ToValidationProblem();
-        }
-
         var result = await sender.Send(command, ct);
 
         return result.IsSuccess
             ? result.ToCreated("/api/orders")
-            : result.ToBadRequestProblem();
+            : result.GetError() switch
+            {
+                ValidationError => result.ToBadRequest(),
+                NotFoundError => result.ToNotFound(),
+                DomainRuleError => result.ToConflict(),
+                _ => result.ToBadRequest()
+            };
     }
 }

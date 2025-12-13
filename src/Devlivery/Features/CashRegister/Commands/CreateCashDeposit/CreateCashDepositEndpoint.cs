@@ -1,13 +1,10 @@
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-using Devlivery.Shared.SeedWork.Errors;
-
-using FluentValidation;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
@@ -23,17 +20,15 @@ public static class CreateCashDepositEndpoint
     {
         app.MapPost("{cashSessionId:guid}/deposits", Handle)
             .Produces<ApiResponse<CreateCashDepositResponse>>(StatusCodes.Status201Created)
-            .ProducesValidationProblem()
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
-            .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse<CreateCashDepositResponse>>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<CreateCashDepositResponse>>(StatusCodes.Status404NotFound)
+            .Produces<ApiResponse<CreateCashDepositResponse>>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<Created<ApiResponse<CreateCashDepositResponse>>, ValidationProblem,
-        BadRequest<ProblemDetails>, NotFound<ProblemDetails>>> Handle(
+    private static async Task<Results<Created<ApiResponse<CreateCashDepositResponse>>, BadRequest<ApiResponse<CreateCashDepositResponse>>, NotFound<ApiResponse<CreateCashDepositResponse>>, Conflict<ApiResponse<CreateCashDepositResponse>>>> Handle(
         Guid cashSessionId,
         Request request,
         ISender sender,
-        IValidator<CreateCashDepositCommand> validator,
         CancellationToken ct)
     {
         // Create command with the correct cashSessionId from URL
@@ -44,25 +39,16 @@ public static class CreateCashDepositEndpoint
             request.Amount,
             request.Notes);
 
-        var validationResult = await validator.ValidateAsync(command, ct);
-        if (!validationResult.IsValid)
-        {
-            return validationResult.ToValidationProblem();
-        }
-
         var result = await sender.Send(command, ct);
 
-        if (!result.IsSuccess)
-        {
-            // Check if it's a NotFound error
-            if (result.Errors.OfType<NotFoundError>().Any())
+        return result.IsSuccess
+            ? result.ToCreated($"/api/cash-sessions/{cashSessionId}/deposits/{result.Value.Id}")
+            : result.GetError() switch
             {
-                return result.ToNotFoundProblem();
-            }
-
-            return result.ToBadRequestProblem();
-        }
-
-        return result.ToCreated($"/api/cash-sessions/{cashSessionId}/deposits/{result.Value.Id}");
+                ValidationError => result.ToBadRequest(),
+                NotFoundError => result.ToNotFound(),
+                DomainRuleError => result.ToConflict(),
+                _ => result.ToBadRequest()
+            };
     }
 }

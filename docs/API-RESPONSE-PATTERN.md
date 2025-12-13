@@ -1,72 +1,116 @@
 # API Response Pattern
 
-Este documento descreve o padrão de resposta padronizado implementado na API Devlivery, seguindo as melhores práticas de construção de APIs REST.
+Este documento descreve o padrão de resposta padronizado implementado na API Devlivery.
 
 ## Visão Geral
 
-A API utiliza **RFC 7807 Problem Details** para erros e um padrão consistente de sucesso usando `ApiResponse<T>`. Todos os status codes são explícitos nos endpoints através de **Typed Results** do ASP.NET Core.
+A API utiliza um padrão **simples e consistente** para todas as respostas, tanto de sucesso quanto de erro, usando `ApiResponse<T>`. Os status codes HTTP são explícitos nos endpoints através de **Typed Results** do ASP.NET Core.
 
-## Padrão de Resposta de Sucesso
+## Padrão de Resposta
 
-### ApiResponse<T>
+### ApiResponse<T> - Sucesso
 
-Estrutura padronizada para respostas bem-sucedidas:
+Estrutura para respostas bem-sucedidas com dados:
 
 ```json
 {
   "success": true,
-  "data": { /* objeto retornado */ },
-  "message": "Operation completed successfully",
-  "timestamp": "2025-11-04T10:30:00Z"
+  "data": { /* objeto retornado */ }
 }
 ```
 
-**Propriedades:**
-- `success`: Sempre `true` em respostas de sucesso
-- `data`: Dados retornados pela operação
-- `message`: Mensagem contextual opcional
-- `timestamp`: Data/hora UTC da resposta
-
-## Padrão de Resposta de Erro
-
-### Problem Details (RFC 7807)
-
-Estrutura padronizada para todos os erros:
-
+**Exemplo prático:**
 ```json
 {
-  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.4",
-    "title": "Recurso não encontrado",
-    "status": 404,
-    "detail": "Produto com ID 123 não foi encontrado",
-  "instance": "/api/products/123"
-}
-```
-
-**Propriedades:**
-- `type`: URI de referência do tipo de erro
-- `title`: Título legível do erro
-- `status`: Código de status HTTP
-- `detail`: Descrição detalhada do erro
-- `instance`: Caminho da requisição que gerou o erro
-
-### Validation Problem Details
-
-Para erros de validação (400):
-
-```json
-{
-  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-  "title": "Um ou mais erros de validação ocorreram",
-  "status": 400,
-  "errors": {
-    "Name": ["O campo 'Name' é obrigatório."],
-    "Price": ["O campo 'Price' deve ser maior que 0."]
+  "success": true,
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "name": "Pizza Margherita",
+    "price": 35.00
   }
 }
 ```
 
-### Validação: mensagens em Português (regra do projeto)
+### ApiResponse<T> - Erro
+
+Estrutura para respostas com erro:
+
+```json
+{
+  "success": false,
+  "errors": [
+    "Mensagem de erro 1",
+    "Mensagem de erro 2"
+  ]
+}
+```
+
+**Exemplo prático - Validação:**
+```json
+{
+  "success": false,
+  "errors": [
+    "O campo 'Name' é obrigatório.",
+    "O campo 'Price' deve ser maior que 0."
+  ]
+}
+```
+
+**Exemplo prático - Not Found:**
+```json
+{
+  "success": false,
+  "errors": [
+    "Produto não foi encontrado"
+  ]
+}
+```
+
+### ApiResponse (sem tipo genérico)
+
+Para operações sem retorno de dados (ex: DELETE, UPDATE):
+
+**Sucesso:**
+```json
+{
+  "success": true
+}
+```
+
+**Erro:**
+```json
+{
+  "success": false,
+  "errors": [
+    "Não é possível deletar este produto pois existem pedidos associados"
+  ]
+}
+```
+
+## Propriedades
+
+- `success` (bool): Indica se a operação foi bem-sucedida
+- `data` (T, opcional): Dados retornados em caso de sucesso
+- `errors` (string[], opcional): Array de mensagens de erro em caso de falha
+
+**Regras:**
+- Campo `errors` só aparece quando `success = false`
+- Campo `data` só aparece quando `success = true`
+- Status HTTP já indica o tipo de erro (400, 404, 409, etc.)
+
+## Status HTTP Utilizados
+
+| Status | Uso | Exemplo |
+|--------|-----|---------|
+| 200 OK | Operação bem-sucedida (GET, UPDATE) | Buscar produto |
+| 201 Created | Recurso criado com sucesso | Criar produto |
+| 204 No Content | Operação sem retorno | DELETE bem-sucedido |
+| 400 Bad Request | Erro de validação | Campos obrigatórios faltando |
+| 401 Unauthorized | Não autenticado | Token inválido |
+| 404 Not Found | Recurso não encontrado | Produto não existe |
+| 409 Conflict | Conflito de regra de negócio | Já existe caixa aberto |
+
+## Validação: mensagens em Português (regra do projeto)
 
 Todas as mensagens de validação expostas pela API devem estar em Português (pt-BR). Para garantir consistência e clareza para os consumidores da API, adote as seguintes práticas:
 
@@ -74,7 +118,7 @@ Todas as mensagens de validação expostas pela API devem estar em Português (p
 - Use os placeholders do FluentValidation para manter as mensagens reutilizáveis e informativas: `{PropertyName}`, `{PropertyValue}`, `{ComparisonValue}`, `{MinLength}`, `{MaxLength}`.
 - Faça as mensagens curtas, claras e orientadas ao usuário (ex.: "O campo '{PropertyName}' é obrigatório.").
 
-Exemplo de Validator com mensagens em Português:
+**Exemplo de Validator com mensagens em Português:**
 
 ```csharp
 public sealed class Validator : AbstractValidator<CreateProductCommand>
@@ -91,11 +135,91 @@ public sealed class Validator : AbstractValidator<CreateProductCommand>
 }
 ```
 
-Observações:
+## Implementação nos Endpoints
 
-- Não traduza apenas via configuração global de cultura: preferimos mensagens explícitas em cada Validator para manter controle fino e consistência entre mensagens customizadas e padrão.
-- Se existir mensagem padrão do FluentValidation que ainda esteja em inglês e não seja sobrescrita por `.WithMessage(...)`, atualize o Validator correspondente para fornecer a tradução.
-- Use mensagens diferentes quando o contexto exigir (por exemplo, mensagens mais amigáveis para campos voltados ao usuário). 
+### Extension Methods Disponíveis
+
+**Para Result<T>:**
+```csharp
+result.ToOk()           // 200 OK
+result.ToCreated(uri)   // 201 Created
+result.ToNoContent()    // 204 No Content
+result.ToBadRequest()   // 400 Bad Request
+result.ToNotFound()     // 404 Not Found
+result.ToConflict()     // 409 Conflict
+```
+
+**Para ValidationResult (FluentValidation):**
+```csharp
+validationResult.ToBadRequest()     // Converte erros de validação para ApiResponse
+validationResult.ToBadRequest<T>()  // Com tipo genérico
+```
+
+### Exemplo de Endpoint Completo
+
+```csharp
+public static class CreateProductEndpoint
+{
+    private static async Task<Results<Created<ApiResponse<CreateProductResponse>>, BadRequest<ApiResponse<CreateProductResponse>>>> Handle(
+        Request request,
+        ISender sender,
+        CancellationToken ct)
+    {
+        var command = new CreateProductCommand(request.Name, request.Price);
+        var result = await sender.Send(command, ct);
+
+        return result.IsSuccess
+            ? result.ToCreated($"/api/products/{result.Value.ProductId}")
+            : result.ToBadRequest();
+    }
+}
+```
+
+### Exemplo com Pattern Matching
+
+```csharp
+return result.IsSuccess
+    ? result.ToOk()
+    : result.GetError() switch
+    {
+        ValidationError => result.ToBadRequest(),
+        NotFoundError => result.ToNotFound(),
+        DomainRuleError => result.ToConflict(),
+        _ => result.ToBadRequest()
+    };
+```
+
+## Benefícios da Abordagem Simplificada
+
+✅ **Consistência**: Sempre a mesma estrutura para sucesso e erro  
+✅ **Simplicidade**: Sem campos extras desnecessários (type, title, detail, instance)  
+✅ **Frontend amigável**: Fácil de consumir - basta verificar `success` e `errors`  
+✅ **Status HTTP semântico**: O status já indica o tipo de erro  
+✅ **Menos código**: Sem necessidade de múltiplos tipos de Problem Details  
+✅ **API interna**: Otimizado para cliente único que conhece a estrutura  
+
+## Exemplo de Consumo no Frontend
+
+```typescript
+try {
+  const response = await fetch('/api/products', {
+    method: 'POST',
+    body: JSON.stringify(product)
+  });
+  
+  const apiResponse = await response.json();
+  
+  if (apiResponse.success) {
+    // Sucesso - usar apiResponse.data
+    console.log('Produto criado:', apiResponse.data);
+  } else {
+    // Erro - exibir apiResponse.errors
+    apiResponse.errors.forEach(error => console.error(error));
+  }
+} catch (error) {
+  // Erro de rede ou parsing
+}
+``` 
 
 
 ## Status Codes Utilizados

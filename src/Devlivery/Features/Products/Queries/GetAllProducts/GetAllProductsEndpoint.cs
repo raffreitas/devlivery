@@ -2,7 +2,6 @@ using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.Features.Products.Queries.GetAllProducts;
 
@@ -12,10 +11,10 @@ public static class GetAllProductsEndpoint
     {
         app.MapGet("", Handle)
             .Produces<ApiResponse<List<GetAllProductsResponse>>>()
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<List<GetAllProductsResponse>>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Ok<ApiResponse<List<GetAllProductsResponse>>>, BadRequest<ProblemDetails>>> Handle(
+    private static async Task<Results<Ok<ApiResponse<List<GetAllProductsResponse>>>, BadRequest<ApiResponse<List<GetAllProductsResponse>>>>> Handle(
         GetAllProductsHandler handler,
         CancellationToken ct)
     {
@@ -24,6 +23,6 @@ public static class GetAllProductsEndpoint
 
         return result.IsSuccess
             ? result.ToOk()
-            : result.ToBadRequestProblem();
+            : result.ToBadRequest();
     }
 }

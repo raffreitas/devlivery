@@ -1,11 +1,10 @@
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Extensions;
-
-using FluentValidation;
+using Devlivery.Shared.Infrastructure.WebServer.Models;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
@@ -17,29 +16,29 @@ public static class UpdateOrderStatusEndpoint
     {
         app.MapPatch("{id:guid}/status", Handle)
             .Produces(StatusCodes.Status204NoContent)
-            .ProducesValidationProblem()
-            .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse>(StatusCodes.Status404NotFound)
+            .Produces<ApiResponse>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<NoContent, ValidationProblem, NotFound<ProblemDetails>>> Handle(
+    private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>, Conflict<ApiResponse>>> Handle(
         Guid id,
         Request request,
         ISender sender,
-        IValidator<UpdateOrderStatusCommand> validator,
         CancellationToken ct)
     {
         var command = new UpdateOrderStatusCommand(id, request.Status);
-
-        var validationResult = await validator.ValidateAsync(command, ct);
-        if (!validationResult.IsValid)
-        {
-            return validationResult.ToValidationProblem();
-        }
 
         var result = await sender.Send(command, ct);
 
         return result.IsSuccess
             ? result.ToNoContent()
-            : result.ToNotFoundProblem();
+            : result.GetError() switch
+            {
+                ValidationError => result.ToBadRequest(),
+                NotFoundError => result.ToNotFound(),
+                DomainRuleError => result.ToConflict(),
+                _ => result.ToBadRequest()
+            };
     }
 }

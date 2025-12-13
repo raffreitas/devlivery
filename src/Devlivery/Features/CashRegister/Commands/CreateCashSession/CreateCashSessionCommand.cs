@@ -1,3 +1,5 @@
+using Devlivery.Shared.Extensions;
+
 using FluentResults;
 
 using FluentValidation;
@@ -11,7 +13,15 @@ public sealed record CreateCashSessionCommand(
     string AttendantName,
     decimal OpeningAmount,
     string? Notes
-) : ICommand<Result<CreateCashSessionResponse>>;
+) : ICommand<Result<CreateCashSessionResponse>>
+{
+    public bool IsValid(out string[] errors)
+    {
+        var result = new CreateCashSessionValidator().Validate(this);
+        errors = result.GetErrors();
+        return result.IsValid;
+    }
+};
 
 public sealed class CreateCashSessionValidator : AbstractValidator<CreateCashSessionCommand>
 {

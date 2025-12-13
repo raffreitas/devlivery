@@ -1,11 +1,10 @@
-﻿using Devlivery.Shared.Extensions;
-
-using FluentValidation;
+﻿using Devlivery.Shared.Application.Errors;
+using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Models;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
@@ -24,17 +23,15 @@ public static class UpdateOrderEndpoint
     {
         app.MapPut("{id:guid}", Handle)
             .Produces(StatusCodes.Status204NoContent)
-            .ProducesValidationProblem()
-            .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse>(StatusCodes.Status404NotFound)
+            .Produces<ApiResponse>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<NoContent, ValidationProblem, NotFound<ProblemDetails>,
-        BadRequest<ProblemDetails>>> Handle(
+    private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>, Conflict<ApiResponse>>> Handle(
         Guid id,
         Request request,
         ISender sender,
-        IValidator<UpdateOrderCommand> validator,
         CancellationToken ct)
     {
         var command = new UpdateOrderCommand(
@@ -47,19 +44,16 @@ public static class UpdateOrderEndpoint
             request.DeliveryFee,
             request.Notes);
 
-        var validationResult = await validator.ValidateAsync(command, ct);
-        if (!validationResult.IsValid)
-            return validationResult.ToValidationProblem();
-
         var result = await sender.Send(command, ct);
 
-        if (result.IsSuccess)
-            return result.ToNoContent();
-
-        var errorMessage = result.Errors[0]?.Message ?? string.Empty;
-
-        return errorMessage == "Pedido não encontrado"
-            ? result.ToNotFoundProblem()
-            : result.ToBadRequestProblem();
+        return result.IsSuccess
+            ? result.ToNoContent()
+            : result.GetError() switch
+            {
+                ValidationError => result.ToBadRequest(),
+                NotFoundError => result.ToNotFound(),
+                DomainRuleError => result.ToConflict(),
+                _ => result.ToBadRequest()
+            };
     }
 }

@@ -55,7 +55,10 @@ public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory fac
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         await using var responseBody = await response.Content.ReadAsStreamAsync();
         var responseData = await JsonDocument.ParseAsync(responseBody);
+        responseData.RootElement.TryGetProperty("success", out var success).ShouldBeTrue();
+        success.GetBoolean().ShouldBeFalse();
         responseData.RootElement.TryGetProperty("errors", out var errors).ShouldBeTrue();
-        errors.ValueKind.ShouldBe(JsonValueKind.Object);
+        errors.ValueKind.ShouldBe(JsonValueKind.Array);
+        errors.GetArrayLength().ShouldBeGreaterThan(0);
     }
 }

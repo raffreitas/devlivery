@@ -1,4 +1,5 @@
-﻿using Devlivery.Shared.Extensions;
+﻿using Devlivery.Shared.Application.Errors;
+using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
 using Mediator;
@@ -18,7 +19,7 @@ public static class LoginEndpoint
             .WithOpenApi();
     }
 
-    private static async Task<Results<Ok<ApiResponse<LoginResponse>>, ValidationProblem, UnauthorizedHttpResult>> Handle(
+    private static async Task<Results<Ok<ApiResponse<LoginResponse>>, BadRequest<ApiResponse<LoginResponse>>, UnauthorizedHttpResult>> Handle(
         Request request,
         ISender sender,
         CancellationToken ct
@@ -28,6 +29,11 @@ public static class LoginEndpoint
 
         return result.IsSuccess
             ? result.ToOk()
-            : TypedResults.Unauthorized();
+            : result.GetError() switch
+            {
+                ValidationError => result.ToBadRequest(),
+                UnauthorizedError => TypedResults.Unauthorized(),
+                _ => TypedResults.Unauthorized()
+            };
     }
 }

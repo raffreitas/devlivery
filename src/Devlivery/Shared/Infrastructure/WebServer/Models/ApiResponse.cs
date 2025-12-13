@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace Devlivery.Shared.Infrastructure.WebServer.Models;
 
 /// <summary>
-/// Standardized API response wrapper for successful operations
+/// Standardized API response wrapper for all operations
 /// </summary>
 /// <typeparam name="T">Type of the data being returned</typeparam>
 public sealed record ApiResponse<T>
@@ -20,25 +20,37 @@ public sealed record ApiResponse<T>
     [JsonPropertyName("data")]
     public T? Data { get; init; }
 
-    private ApiResponse(bool success, T? data)
+    /// <summary>
+    /// Error messages when operation fails
+    /// </summary>
+    [JsonPropertyName("errors")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string[]? Errors { get; init; }
+
+    private ApiResponse(bool success, T? data, string[]? errors = null)
     {
         IsSuccess = success;
         Data = data;
+        Errors = errors;
     }
 
     /// <summary>
     /// Creates a successful response with data
     /// </summary>
     public static ApiResponse<T> Success(T data)
-    {
-        return new(true, data);
-    }
+        => new(true, data);
 
     /// <summary>
-    /// Creates a failed response without data
+    /// Creates a failed response with error messages
     /// </summary>
-    public static ApiResponse<T> Failure()
-        => new(false, default);
+    public static ApiResponse<T> Failure(params string[] errors)
+        => new(false, default, errors);
+
+    /// <summary>
+    /// Creates a failed response with a single error message
+    /// </summary>
+    public static ApiResponse<T> Failure(string error)
+        => new(false, default, [error]);
 }
 
 /// <summary>
@@ -52,15 +64,34 @@ public sealed record ApiResponse
     [JsonPropertyName("success")]
     public bool IsSuccess { get; init; }
 
-    private ApiResponse(bool success)
+    /// <summary>
+    /// Error messages when operation fails
+    /// </summary>
+    [JsonPropertyName("errors")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string[]? Errors { get; init; }
+
+    private ApiResponse(bool success, string[]? errors = null)
     {
         IsSuccess = success;
+        Errors = errors;
     }
 
     /// <summary>
     /// Creates a successful response
     /// </summary>
-    /// 
     public static ApiResponse Success()
         => new(true);
+
+    /// <summary>
+    /// Creates a failed response with error messages
+    /// </summary>
+    public static ApiResponse Failure(params string[] errors)
+        => new(false, errors);
+
+    /// <summary>
+    /// Creates a failed response with a single error message
+    /// </summary>
+    public static ApiResponse Failure(string error)
+        => new(false, [error]);
 }

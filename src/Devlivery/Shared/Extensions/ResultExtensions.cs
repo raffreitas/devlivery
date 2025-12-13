@@ -3,19 +3,14 @@ using Devlivery.Shared.Infrastructure.WebServer.Models;
 using FluentResults;
 
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.Shared.Extensions;
 
 /// <summary>
-/// Extension methods for converting FluentResults to standardized API responses using Problem Details
+/// Extension methods for converting FluentResults to standardized API responses
 /// </summary>
 public static class ResultExtensions
 {
-    private const string BadRequestTitle = "Requisição inválida";
-    private const string NotFoundTitle = "Recurso não encontrado";
-    private const string HttpRfc400 = "https://tools.ietf.org/html/rfc9110#section-15.5.1";
-    private const string HttpRfc404 = "https://tools.ietf.org/html/rfc9110#section-15.5.4";
 
     /// <summary>
     /// Converts a Result to an Ok (ApiResponse of T) response (200)
@@ -36,7 +31,7 @@ public static class ResultExtensions
     /// <summary>
     /// Converts a Result to a NoContent response (204)
     /// </summary>
-    public static NoContent ToNoContent(this Result result)
+    public static NoContent ToNoContent(this Result _)
     {
         return TypedResults.NoContent();
     }
@@ -44,80 +39,72 @@ public static class ResultExtensions
     /// <summary>
     /// Converts a Result with generic type to a NoContent response (204)
     /// </summary>
-    public static NoContent ToNoContent<T>(this Result<T> result)
+    public static NoContent ToNoContent<T>(this Result<T> _)
     {
         return TypedResults.NoContent();
     }
 
     /// <summary>
-    /// Converts a failed Result with generic type to a NotFound ProblemDetails (404)
+    /// Converts a failed Result to a NotFound (ApiResponse) response (404)
     /// </summary>
-    public static NotFound<ProblemDetails> ToNotFoundProblem<T>(this Result<T> result)
+    public static NotFound<ApiResponse<T>> ToNotFound<T>(this Result<T> result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? NotFoundTitle;
-
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status404NotFound,
-            Title = NotFoundTitle,
-            Detail = errorMessage,
-            Type = HttpRfc404
-        };
-
-        return TypedResults.NotFound(problemDetails);
+        var errors = result.GetErrorMessages();
+        return TypedResults.NotFound(ApiResponse<T>.Failure(errors));
     }
 
     /// <summary>
-    /// Converts a failed Result to a NotFound ProblemDetails (404)
+    /// Converts a failed Result to a NotFound (ApiResponse) response (404)
     /// </summary>
-    public static NotFound<ProblemDetails> ToNotFoundProblem(this Result result)
+    public static NotFound<ApiResponse> ToNotFound(this Result result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? NotFoundTitle;
-
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status404NotFound,
-            Title = NotFoundTitle,
-            Detail = errorMessage,
-            Type = HttpRfc404
-        };
-
-        return TypedResults.NotFound(problemDetails);
+        var errors = result.GetErrorMessages();
+        return TypedResults.NotFound(ApiResponse.Failure(errors));
     }
 
     /// <summary>
-    /// Converts a failed Result with generic type to a BadRequest ProblemDetails (400)
+    /// Converts a failed Result to a BadRequest (ApiResponse) response (400)
     /// </summary>
-    public static BadRequest<ProblemDetails> ToBadRequestProblem<T>(this Result<T> result)
+    public static BadRequest<ApiResponse<T>> ToBadRequest<T>(this Result<T> result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? BadRequestTitle;
-
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = BadRequestTitle,
-            Detail = errorMessage,
-            Type = HttpRfc400
-        };
-
-        return TypedResults.BadRequest(problemDetails);
+        var errors = result.GetErrorMessages();
+        return TypedResults.BadRequest(ApiResponse<T>.Failure(errors));
     }
 
     /// <summary>
-    /// Converts a failed Result to a BadRequest ProblemDetails (400)
+    /// Converts a failed Result to a BadRequest (ApiResponse) response (400)
     /// </summary>
-    public static BadRequest<ProblemDetails> ToBadRequestProblem(this Result result)
+    public static BadRequest<ApiResponse> ToBadRequest(this Result result)
     {
-        var errorMessage = result.Errors[0]?.Message ?? BadRequestTitle;
-
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = BadRequestTitle,
-            Detail = errorMessage,
-            Type = HttpRfc400
-        };
-
-        return TypedResults.BadRequest(problemDetails);
+        var errors = result.GetErrorMessages();
+        return TypedResults.BadRequest(ApiResponse.Failure(errors));
     }
+
+    /// <summary>
+    /// Converts a failed Result to a Conflict (ApiResponse) response (409)
+    /// </summary>
+    public static Conflict<ApiResponse<T>> ToConflict<T>(this Result<T> result)
+    {
+        var errors = result.GetErrorMessages();
+        return TypedResults.Conflict(ApiResponse<T>.Failure(errors));
+    }
+
+    /// <summary>
+    /// Converts a failed Result to a Conflict (ApiResponse) response (409)
+    /// </summary>
+    public static Conflict<ApiResponse> ToConflict(this Result result)
+    {
+        var errors = result.GetErrorMessages();
+        return TypedResults.Conflict(ApiResponse.Failure(errors));
+    }
+
+    public static IError? GetError(this Result result) => result.Errors.FirstOrDefault();
+    
+    public static IError? GetError<T>(this Result<T> result) => result.Errors.FirstOrDefault();
+    
+    public static string[] GetErrorMessages(this Result result)
+        => [.. result.Errors.Select(e => e.Metadata.GetValueOrDefault("Errors")).OfType<string[]>().SelectMany(e => e)];
+    
+    public static string[] GetErrorMessages<T>(this Result<T> result)
+        => [.. result.Errors.Select(e => e.Metadata.GetValueOrDefault("Errors")).OfType<string[]>().SelectMany(e => e)];
 }

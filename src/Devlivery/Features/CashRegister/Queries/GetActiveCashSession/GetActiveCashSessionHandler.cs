@@ -1,4 +1,5 @@
 using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Shared;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 

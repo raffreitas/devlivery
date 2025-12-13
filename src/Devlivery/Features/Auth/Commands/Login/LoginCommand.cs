@@ -1,7 +1,8 @@
-﻿using FluentResults;
+﻿using Devlivery.Shared.Extensions;
+
+using FluentResults;
 
 using FluentValidation;
-using FluentValidation.Results;
 
 using Mediator;
 
@@ -9,12 +10,17 @@ namespace Devlivery.Features.Auth.Commands.Login;
 
 public sealed record LoginCommand(string Email, string Password) : ICommand<Result<LoginResponse>>
 {
-    public ValidationResult Validate() => new Validator().Validate(this);
+    public bool IsValid(out string[] errors)
+    {
+        var result = new LoginCommandValidator().Validate(this);
+        errors = result.GetErrors();
+        return result.IsValid;
+    }
 };
 
-public sealed class Validator : AbstractValidator<LoginCommand>
+public sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
 {
-    public Validator()
+    public LoginCommandValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")

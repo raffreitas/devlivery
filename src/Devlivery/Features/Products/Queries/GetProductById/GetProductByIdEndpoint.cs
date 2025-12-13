@@ -1,10 +1,7 @@
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
-using FluentValidation;
-
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.Features.Products.Queries.GetProductById;
 
@@ -14,28 +11,19 @@ public static class GetProductByIdEndpoint
     {
         app.MapGet("{id:guid}", Handle)
             .Produces<ApiResponse<GetProductByIdResponse>>()
-            .ProducesValidationProblem()
-            .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse<GetProductByIdResponse>>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<Ok<ApiResponse<GetProductByIdResponse>>, ValidationProblem, NotFound<ProblemDetails>>> Handle(
+    private static async Task<Results<Ok<ApiResponse<GetProductByIdResponse>>, NotFound<ApiResponse<GetProductByIdResponse>>>> Handle(
         Guid id,
-        IValidator<GetProductByIdQuery> validator,
         GetProductByIdHandler handler,
         CancellationToken ct)
     {
         var query = new GetProductByIdQuery(id);
-
-        var validationResult = await validator.ValidateAsync(query, ct);
-        if (!validationResult.IsValid)
-        {
-            return validationResult.ToValidationProblem();
-        }
-
         var result = await handler.HandleAsync(query, ct);
 
         return result.IsSuccess
             ? result.ToOk()
-            : result.ToNotFoundProblem();
+            : result.ToNotFound();
     }
 }
