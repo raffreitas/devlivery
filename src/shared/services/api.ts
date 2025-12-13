@@ -7,7 +7,7 @@ export interface ApiResponse<T> {
   success: boolean;
   data: T | null;
   message?: string | null;
-  timestamp?: string;
+  errors?: string[] | null;
 }
 
 export class ApiError extends Error {
@@ -80,10 +80,17 @@ async function request<T>(
 
   if (!res.ok) {
     const j = (json ?? {}) as Record<string, unknown>;
-    const errMsg =
-      (typeof j.title === "string" && j.title) ||
-      (typeof j.message === "string" && j.message) ||
-      res.statusText;
+    
+    // Extract error message - novo formato ApiResponse com errors array
+    let errMsg = res.statusText;
+    
+    if (Array.isArray(j.errors) && j.errors.length > 0) {
+      // Se tem errors array, pega o primeiro erro
+      errMsg = String(j.errors[0]);
+    } else if (typeof j.message === "string" && j.message) {
+      // Fallback para message (caso exista)
+      errMsg = j.message;
+    }
 
     if (res.status === 401) {
       throw new UnauthorizedError(String(errMsg), json);
