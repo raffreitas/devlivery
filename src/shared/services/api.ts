@@ -80,10 +80,10 @@ async function request<T>(
 
   if (!res.ok) {
     const j = (json ?? {}) as Record<string, unknown>;
-    
+
     // Extract error message - novo formato ApiResponse com errors array
     let errMsg = res.statusText;
-    
+
     if (Array.isArray(j.errors) && j.errors.length > 0) {
       // Se tem errors array, pega o primeiro erro
       errMsg = String(j.errors[0]);
