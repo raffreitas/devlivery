@@ -1,3 +1,14 @@
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Separator } from "@/shared/components/ui/separator";
 import { usePrintOrder } from "../hooks/use-print-order";
@@ -30,6 +41,11 @@ export function OrderCard({
   onDelete,
 }: OrderCardProps) {
   const { contentRef, handlePrint } = usePrintOrder();
+  const [alert, setAlert] = useState({
+    open: false,
+    type: "",
+    action: () => {},
+  });
 
   const handleEdit = () => {
     onEdit(order);
@@ -42,16 +58,20 @@ export function OrderCard({
     }
   };
 
-  const handleCancel = () => {
-    if (window.confirm("Tem certeza que deseja cancelar este pedido?")) {
-      onUpdateStatus(order.id, "Canceled");
-    }
+  const handleOpenAlert = (type: string, action: () => void) => {
+    setAlert({ open: true, type, action });
   };
 
-  const handleDelete = () => {
-    if (window.confirm("Tem certeza que deseja excluir este pedido?")) {
-      onDelete(order.id);
-    }
+  const handleCancel = () => {
+    onUpdateStatus(order.id, "Canceled");
+    setAlert({ open: false, type: "", action: () => {} });
+    toast.success("Pedido cancelado com sucesso");
+  };
+
+  const handleDelete = async () => {
+    onDelete(order.id);
+    setAlert({ open: false, type: "", action: () => {} });
+    toast.success("Pedido excluído com sucesso");
   };
 
   return (
@@ -73,9 +93,9 @@ export function OrderCard({
         order={order}
         onPrint={handlePrint}
         onEdit={handleEdit}
-        onCancel={handleCancel}
         onNextStatus={handleNextStatus}
-        onDelete={handleDelete}
+        onCancel={() => handleOpenAlert("cancelar", handleCancel)}
+        onDelete={() => handleOpenAlert("excluir", handleDelete)}
         hasNextStatus={NEXT_STATUS[order.status] !== null}
       />
 
@@ -84,6 +104,27 @@ export function OrderCard({
           <OrderPrint order={order} />
         </div>
       </div>
+
+      <AlertDialog
+        open={alert.open}
+        onOpenChange={() =>
+          setAlert({ open: false, type: "", action: () => {} })
+        }
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Tem certeza que deseja {alert.type} este pedido?
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={alert.action}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
