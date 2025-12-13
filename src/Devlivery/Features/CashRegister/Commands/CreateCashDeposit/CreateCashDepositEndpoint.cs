@@ -31,7 +31,6 @@ public static class CreateCashDepositEndpoint
         ISender sender,
         CancellationToken ct)
     {
-        // Create command with the correct cashSessionId from URL
         var command = new CreateCashDepositCommand(
             cashSessionId,
             request.AttendantId,

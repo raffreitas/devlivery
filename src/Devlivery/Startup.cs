@@ -1,4 +1,6 @@
-﻿using Devlivery.Features.Auth;
+﻿using System.Text.Json.Serialization;
+
+using Devlivery.Features.Auth;
 using Devlivery.Features.CashRegister;
 using Devlivery.Features.Orders;
 using Devlivery.Features.Products;
@@ -11,8 +13,6 @@ using Devlivery.Shared.Infrastructure.Persistence.Context;
 using Devlivery.Shared.Infrastructure.Persistence.Seeder;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using Devlivery.Shared.Infrastructure.WebServer;
-
-using FluentValidation;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +27,7 @@ public static class Startup
         var configuration = builder.Configuration;
 
         // Validators
-        services.AddValidatorsFromAssemblyContaining<Program>();
+        builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
 

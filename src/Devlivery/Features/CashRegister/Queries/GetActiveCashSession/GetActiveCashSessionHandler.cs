@@ -1,6 +1,6 @@
 using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.Shared;
 using Devlivery.Features.Orders.Domain;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
@@ -23,7 +23,7 @@ public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext)
 
         if (cashSession is null)
         {
-            return Result.Fail<GetActiveCashSessionResponse>(CashRegisterErrors.CashSessionNotFound);
+            return Result.Fail<GetActiveCashSessionResponse>(new NotFoundError("Caixa não encontrado."));
         }
 
         // Calculate sales within session period

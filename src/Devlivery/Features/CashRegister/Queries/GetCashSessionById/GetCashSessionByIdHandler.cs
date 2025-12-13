@@ -1,4 +1,4 @@
-using Devlivery.Features.CashRegister.Shared;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
@@ -18,7 +18,7 @@ public sealed class GetCashSessionByIdHandler(ApplicationDbContext dbContext)
             .FirstOrDefaultAsync(cs => cs.Id == query.Id, cancellationToken);
 
         return cashSession is null
-            ? Result.Fail<GetCashSessionByIdResponse>(CashRegisterErrors.CashSessionNotFound)
+            ? Result.Fail<GetCashSessionByIdResponse>(new NotFoundError("Caixa não encontrado."))
             : Result.Ok(GetCashSessionByIdResponse.FromDomain(cashSession));
     }
 }

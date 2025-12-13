@@ -1,4 +1,4 @@
-﻿using Devlivery.Features.Auth.Shared;
+﻿using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Identity.Abstractions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
@@ -31,14 +31,14 @@ public sealed class LoginHandler(
         if (user is null)
         {
             logger.LogInformation("Failed login attempt.");
-            return Result.Fail<LoginResponse>(AuthErrors.InvalidCredentials);
+            return Result.Fail<LoginResponse>(new UnauthorizedError("Credenciais inválidas"));
         }
 
         var signInResult = await identityService.SignInAsync(user.Email, command.Password, cancellationToken);
         if (signInResult.IsFailed)
         {
             logger.LogInformation("Failed login attempt.");
-            return Result.Fail<LoginResponse>(AuthErrors.InvalidCredentials);
+            return Result.Fail<LoginResponse>(new UnauthorizedError("Credenciais inválidas"));
         }
 
         var tokenRequest = new TokenRequest(

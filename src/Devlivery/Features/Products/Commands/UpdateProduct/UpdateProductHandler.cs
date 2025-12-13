@@ -1,5 +1,5 @@
 using Devlivery.Features.Products.Infrastructure;
-using Devlivery.Features.Products.Shared;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 
 using FluentResults;
@@ -22,7 +22,7 @@ public sealed class UpdateProductHandler(
         var product = await productRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (product is null)
-            return Result.Fail(ProductErrors.ProductNotFound);
+            return Result.Fail(new NotFoundError("Produto não encontrado."));
 
         product.Update(
             name: command.Name,

@@ -1,3 +1,4 @@
+using Devlivery.Features.Orders.Domain;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
@@ -16,18 +17,16 @@ public static class GetAllOrdersEndpoint
             .Produces<ApiResponse<List<GetAllOrdersResponse>>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Ok<ApiResponse<List<GetAllOrdersResponse>>>, BadRequest<ApiResponse<List<GetAllOrdersResponse>>>>> Handle(
+    private static async Task<Ok<ApiResponse<List<GetAllOrdersResponse>>>> Handle(
         DateTime? start,
         DateTime? end,
-        string? paymentMethod,
+        PaymentMethod? paymentMethod,
         GetAllOrdersHandler handler,
         CancellationToken ct)
     {
         var query = new GetAllOrdersQuery(start, end, paymentMethod);
         var result = await handler.HandleAsync(query, ct);
 
-        return result.IsSuccess
-            ? result.ToOk()
-            : result.ToBadRequest();
+        return result.ToOk();
     }
 }

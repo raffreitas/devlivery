@@ -1,7 +1,7 @@
 ﻿using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Infrastructure;
-using Devlivery.Features.Orders.Shared;
 using Devlivery.Features.Products.Infrastructure;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 
 using FluentResults;
@@ -24,22 +24,19 @@ public sealed class UpdateOrderHandler(
             return Result.Fail(errors);
         }
 
-        if (!Enum.TryParse<PaymentMethod>(command.PaymentMethod, ignoreCase: true, out var paymentMethod))
-            return Result.Fail(OrderErrors.InvalidPaymentMethod);
-
         var order = await orderRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (order is null)
-            return Result.Fail(OrderErrors.OrderNotFound);
+            return Result.Fail(new NotFoundError("Pedido não encontrado"));
 
         if (order.Status is OrderStatus.Canceled or OrderStatus.Delivered)
-            return Result.Fail(OrderErrors.OrderCannotBeUpdated);
+            return Result.Fail(new DomainRuleError("Pedido não pode ser atualizado pois está cancelado ou já foi entregue"));
 
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
         var products = await productRepository.GetByIdsAsync(productIds, cancellationToken);
 
         if (products.Count != productIds.Count)
-            return Result.Fail(OrderErrors.ProductNotFound);
+            return Result.Fail(new NotFoundError("Um ou mais produtos não foram encontrados"));
 
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
@@ -56,7 +53,7 @@ public sealed class UpdateOrderHandler(
             customerName: command.CustomerName,
             customerPhone: command.CustomerPhone,
             deliveryAddress: command.DeliveryAddress,
-            paymentMethod: paymentMethod,
+            paymentMethod: command.PaymentMethod,
             deliveryFee: command.DeliveryFee,
             notes: command.Notes
         );

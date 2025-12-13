@@ -1,4 +1,3 @@
-using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
@@ -10,8 +9,6 @@ namespace Devlivery.Features.Products.Commands.CreateProduct;
 
 public static class CreateProductEndpoint
 {
-    internal sealed record Request(string Name, string Description, decimal Price, string Category, bool Available);
-
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("", Handle)
@@ -20,12 +17,10 @@ public static class CreateProductEndpoint
     }
 
     private static async Task<Results<Created<ApiResponse<CreateProductResponse>>, BadRequest<ApiResponse<CreateProductResponse>>>> Handle(
-        Request request,
+        CreateProductCommand command,
         ISender sender,
         CancellationToken ct)
     {
-        var command = new CreateProductCommand(request.Name, request.Description, request.Price, request.Category, request.Available);
-
         var result = await sender.Send(command, ct);
 
         return result.IsSuccess

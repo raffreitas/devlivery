@@ -1,7 +1,7 @@
 ﻿using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Infrastructure;
-using Devlivery.Features.Orders.Shared;
 using Devlivery.Features.Products.Infrastructure;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 
@@ -23,26 +23,22 @@ public sealed class CreateOrderHandler(
     {
         if (!command.IsValid(out var errors))
         {
-            return Result.Fail<CreateOrderResponse>(errors);
+            return Result.Fail<CreateOrderResponse>(new ValidationError(errors));
         }
 
-        if (!Enum.TryParse<PaymentMethod>(command.PaymentMethod, ignoreCase: true, out var paymentMethod))
-            return Result.Fail<CreateOrderResponse>(OrderErrors.InvalidPaymentMethod);
-
-        // Buscar produtos usando Repository
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
         var products = await productRepository.GetByIdsAsync(productIds, cancellationToken);
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
         if (products.Count != productIds.Count)
-            return Result.Fail<CreateOrderResponse>(OrderErrors.ProductNotFound);
+            return Result.Fail<CreateOrderResponse>(new NotFoundError("Um ou mais produtos não foram encontrados"));
 
         // Criar Order (domain logic)
         var order = new Order(
             customerName: command.CustomerName,
             customerPhone: command.CustomerPhone,
             deliveryAddress: command.DeliveryAddress,
-            paymentMethod: paymentMethod,
+            paymentMethod: command.PaymentMethod,
             status: OrderStatus.Pending,
             deliveryFee: command.DeliveryFee,
             establishmentId: tenantAccessor.Tenant.Id,

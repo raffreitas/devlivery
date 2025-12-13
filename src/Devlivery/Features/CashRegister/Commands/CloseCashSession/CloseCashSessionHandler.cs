@@ -1,8 +1,8 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
-using Devlivery.Features.CashRegister.Shared;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Infrastructure;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
@@ -31,12 +31,12 @@ public sealed class CloseCashSessionHandler(
 
         if (cashSession is null)
         {
-            return Result.Fail<CloseCashSessionResponse>(CashRegisterErrors.CashSessionNotFound);
+            return Result.Fail<CloseCashSessionResponse>(new NotFoundError("Caixa não encontrado."));
         }
 
         if (cashSession.Status == CashSessionStatus.Closed)
         {
-            return Result.Fail<CloseCashSessionResponse>(CashRegisterErrors.CashSessionAlreadyClosed);
+            return Result.Fail<CloseCashSessionResponse>(new DomainRuleError("O caixa já está fechado."));
         }
 
         // Get all orders within the cash session period (exclude canceled)

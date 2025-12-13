@@ -1,3 +1,4 @@
+using Devlivery.Features.Orders.Domain;
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
@@ -10,7 +11,7 @@ namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
 public static class UpdateOrderStatusEndpoint
 {
-    internal sealed record Request(string Status);
+    internal sealed record Request(OrderStatus Status);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {

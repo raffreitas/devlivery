@@ -1,5 +1,5 @@
 using Devlivery.Features.Products.Infrastructure;
-using Devlivery.Features.Products.Shared;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
@@ -29,7 +29,7 @@ public sealed class DeleteProductHandler(
 
         if (product is null)
         {
-            return Result.Fail<DeleteProductResponse>(ProductErrors.ProductNotFound);
+            return Result.Fail<DeleteProductResponse>(new NotFoundError("Produto não encontrado"));
         }
 
         // Verificação de uso em OrderItems (query read-only, pode usar DbContext diretamente)
@@ -39,7 +39,7 @@ public sealed class DeleteProductHandler(
 
         if (productInUse)
         {
-            return Result.Fail<DeleteProductResponse>(ProductErrors.ProductInUse);
+            return Result.Fail<DeleteProductResponse>(new DomainRuleError("Não é possível excluir um produto que já foi atribuido a um pedido."));
         }
 
         productRepository.Remove(product);

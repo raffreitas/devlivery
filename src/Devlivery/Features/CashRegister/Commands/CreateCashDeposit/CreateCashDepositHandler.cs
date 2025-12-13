@@ -1,6 +1,6 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
-using Devlivery.Features.CashRegister.Shared;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 
@@ -26,17 +26,16 @@ public sealed class CreateCashDepositHandler(
 
         var tenantId = tenantAccessor.Tenant.Id;
 
-        // Verify that the cash session exists and is open
         var cashSession = await cashSessionRepository.GetByIdAsync(command.CashSessionId, cancellationToken);
 
         if (cashSession is null)
         {
-            return Result.Fail<CreateCashDepositResponse>(CashRegisterErrors.CashSessionNotFound);
+            return Result.Fail<CreateCashDepositResponse>(new NotFoundError("Caixa não encontrado."));
         }
 
         if (cashSession.Status != CashSessionStatus.Open)
         {
-            return Result.Fail<CreateCashDepositResponse>(CashRegisterErrors.CashSessionNotOpen);
+            return Result.Fail<CreateCashDepositResponse>(new DomainRuleError("Não é possível adicionar aporte a um caixa fechado."));
         }
 
         // Create the deposit

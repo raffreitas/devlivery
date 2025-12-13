@@ -1,4 +1,3 @@
-using Devlivery.Features.Orders.Domain;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
@@ -10,9 +9,7 @@ namespace Devlivery.Features.Orders.Queries.GetAllOrders;
 
 public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
 {
-    public async Task<Result<List<GetAllOrdersResponse>>> HandleAsync(
-        GetAllOrdersQuery query,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<List<GetAllOrdersResponse>>> HandleAsync(GetAllOrdersQuery query, CancellationToken cancellationToken = default)
     {
         var ordersQuery = dbContext.Orders
             .AsNoTracking()
@@ -23,10 +20,9 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
         // Database stores all dates in UTC, but filters are expected in local time (America/Sao_Paulo)
         ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
 
-        if (!string.IsNullOrWhiteSpace(query.PaymentMethod) &&
-            Enum.TryParse<PaymentMethod>(query.PaymentMethod, out var paymentMethod))
+        if (query.PaymentMethod is not null)
         {
-            ordersQuery = ordersQuery.Where(o => o.PaymentMethod == paymentMethod);
+            ordersQuery = ordersQuery.Where(o => o.PaymentMethod == query.PaymentMethod);
         }
 
         var orders = await ordersQuery

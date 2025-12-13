@@ -10,12 +10,6 @@ namespace Devlivery.Features.CashRegister.Commands.CreateCashSession;
 
 public static class CreateCashSessionEndpoint
 {
-    internal sealed record Request(
-        Guid AttendantId,
-        string AttendantName,
-        decimal OpeningAmount,
-        string? Notes);
-
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("", Handle)
@@ -25,12 +19,10 @@ public static class CreateCashSessionEndpoint
     }
 
     private static async Task<Results<Created<ApiResponse<CreateCashSessionResponse>>, BadRequest<ApiResponse<CreateCashSessionResponse>>, Conflict<ApiResponse<CreateCashSessionResponse>>>> Handle(
-        Request request,
+        CreateCashSessionCommand command,
         ISender sender,
         CancellationToken ct)
     {
-        var command = new CreateCashSessionCommand(request.AttendantId, request.AttendantName, request.OpeningAmount, request.Notes);
-
         var result = await sender.Send(command, ct);
 
         return result.IsSuccess

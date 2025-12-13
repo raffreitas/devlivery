@@ -1,5 +1,5 @@
 using Devlivery.Features.Orders.Infrastructure;
-using Devlivery.Features.Orders.Shared;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 
 using FluentResults;
@@ -25,7 +25,7 @@ public sealed class DeleteOrderHandler(
 
         if (order is null)
         {
-            return Result.Fail(OrderErrors.OrderNotFound);
+            return Result.Fail(new NotFoundError("Pedido não encontrado"));
         }
 
         orderRepository.Remove(order);

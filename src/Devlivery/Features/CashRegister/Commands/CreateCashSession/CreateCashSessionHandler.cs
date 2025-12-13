@@ -1,6 +1,6 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
-using Devlivery.Features.CashRegister.Shared;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 
@@ -30,7 +30,7 @@ public sealed class CreateCashSessionHandler(
 
         if (existingOpen is not null)
         {
-            return Result.Fail<CreateCashSessionResponse>(CashRegisterErrors.CashSessionAlreadyOpen);
+            return Result.Fail<CreateCashSessionResponse>(new DomainRuleError("Já existe um caixa aberto. Feche o caixa atual antes de abrir um novo."));
         }
 
         var cashSession = new CashSession(

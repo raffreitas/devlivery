@@ -15,7 +15,7 @@ public sealed record UpdateOrderCommand(
     string CustomerName,
     string? CustomerPhone,
     string DeliveryAddress,
-    string PaymentMethod,
+    PaymentMethod PaymentMethod,
     decimal DeliveryFee = 0,
     string? Notes = null) : ICommand<Result>
 {
@@ -55,9 +55,8 @@ public sealed class UpdateOrderCommandValidator : AbstractValidator<UpdateOrderC
         });
 
         RuleFor(x => x.PaymentMethod)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .IsEnumName(typeof(PaymentMethod), caseSensitive: false)
-            .WithMessage("O campo '{PropertyName}' deve ser um método de pagamento válido.");
+            .NotNull().WithMessage("O campo '{PropertyName}' é obrigatório.")
+            .IsInEnum().WithMessage("O campo '{PropertyName}' deve ser um método de pagamento válido.");
 
         RuleFor(x => x.DeliveryAddress)
             .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")

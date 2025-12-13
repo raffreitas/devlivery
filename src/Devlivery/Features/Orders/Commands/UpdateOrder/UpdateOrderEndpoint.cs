@@ -1,4 +1,5 @@
-﻿using Devlivery.Shared.Application.Errors;
+﻿using Devlivery.Features.Orders.Domain;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
@@ -15,7 +16,7 @@ public static class UpdateOrderEndpoint
         string CustomerName,
         string? CustomerPhone,
         string DeliveryAddress,
-        string PaymentMethod,
+        PaymentMethod PaymentMethod,
         decimal DeliveryFee = 0,
         string? Notes = null);
 

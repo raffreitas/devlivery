@@ -10,15 +10,6 @@ namespace Devlivery.Features.Orders.Commands.CreateOrder;
 
 public static class CreateOrderEndpoint
 {
-    internal sealed record Request(
-        OrderItemDto[] Items,
-        string CustomerName,
-        string? CustomerPhone,
-        string DeliveryAddress,
-        string PaymentMethod,
-        decimal DeliveryFee = 0,
-        string? Notes = null);
-
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("", Handle)
@@ -29,19 +20,10 @@ public static class CreateOrderEndpoint
     }
 
     private static async Task<Results<Created<ApiResponse<CreateOrderResponse>>, BadRequest<ApiResponse<CreateOrderResponse>>, NotFound<ApiResponse<CreateOrderResponse>>, Conflict<ApiResponse<CreateOrderResponse>>>> Handle(
-        Request request,
+        CreateOrderCommand command,
         ISender sender,
         CancellationToken ct)
     {
-        var command = new CreateOrderCommand(
-            request.Items,
-            request.CustomerName,
-            request.CustomerPhone,
-            request.DeliveryAddress,
-            request.PaymentMethod,
-            request.DeliveryFee,
-            request.Notes);
-
         var result = await sender.Send(command, ct);
 
         return result.IsSuccess

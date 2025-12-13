@@ -9,7 +9,7 @@ using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
-public sealed record UpdateOrderStatusCommand(Guid Id, string Status) : ICommand<Result>
+public sealed record UpdateOrderStatusCommand(Guid Id, OrderStatus Status) : ICommand<Result>
 {
     public bool IsValid(out string[] errors)
     {
@@ -25,8 +25,7 @@ public sealed class UpdateOrderStatusCommandValidator : AbstractValidator<Update
     {
         RuleFor(x => x.Id).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
         RuleFor(x => x.Status)
-            .NotEmpty()
-            .IsEnumName(typeof(OrderStatus), caseSensitive: false)
-            .WithMessage("Status inválido para o pedido.");
+            .NotNull().WithMessage("O campo '{PropertyName}' é obrigatório.")
+            .IsInEnum().WithMessage("Status inválido para o pedido.");
     }
 }

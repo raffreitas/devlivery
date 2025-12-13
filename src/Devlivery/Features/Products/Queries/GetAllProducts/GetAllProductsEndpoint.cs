@@ -14,15 +14,13 @@ public static class GetAllProductsEndpoint
             .Produces<ApiResponse<List<GetAllProductsResponse>>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Ok<ApiResponse<List<GetAllProductsResponse>>>, BadRequest<ApiResponse<List<GetAllProductsResponse>>>>> Handle(
+    private static async Task<Ok<ApiResponse<List<GetAllProductsResponse>>>> Handle(
         GetAllProductsHandler handler,
         CancellationToken ct)
     {
         var query = new GetAllProductsQuery();
         var result = await handler.HandleAsync(query, ct);
 
-        return result.IsSuccess
-            ? result.ToOk()
-            : result.ToBadRequest();
+        return result.ToOk();
     }
 }
