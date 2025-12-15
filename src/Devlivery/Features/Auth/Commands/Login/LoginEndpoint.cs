@@ -15,11 +15,11 @@ public static class LoginEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/login", Handle)
-            .AllowAnonymous()
-            .WithOpenApi();
+            .AllowAnonymous();
     }
 
-    private static async Task<Results<Ok<ApiResponse<LoginResponse>>, BadRequest<ApiResponse<LoginResponse>>, UnauthorizedHttpResult>> Handle(
+    private static async Task<Results<Ok<ApiResponse<LoginResponse>>, BadRequest<ApiResponse<LoginResponse>>,
+        UnauthorizedHttpResult>> Handle(
         Request request,
         ISender sender,
         CancellationToken ct

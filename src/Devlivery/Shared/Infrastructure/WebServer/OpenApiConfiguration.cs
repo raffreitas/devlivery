@@ -1,4 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi;
 
 using Scalar.AspNetCore;
 
@@ -13,7 +13,7 @@ public static class OpenApiConfiguration
             options.AddDocumentTransformer((document, _, _) =>
             {
                 document.Components ??= new OpenApiComponents();
-                document.Components.SecuritySchemes ??= new Dictionary<string, OpenApiSecurityScheme>();
+                document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
 
                 document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
                 {
@@ -25,18 +25,17 @@ public static class OpenApiConfiguration
                     Description = "Insira seu token JWT. Exemplo: Bearer {seu_token}"
                 };
 
-                document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+                document.Security?.Add(new OpenApiSecurityRequirement
                 {
                     {
-                        new OpenApiSecurityScheme
+                        new OpenApiSecuritySchemeReference("Bearer")
                         {
-                            Reference = new OpenApiReference
+                            Reference = new JsonSchemaReference
                             {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
+                                Type = ReferenceType.SecurityScheme, Id = "Bearer"
                             }
                         },
-                        Array.Empty<string>()
+                        []
                     }
                 });
 
