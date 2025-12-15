@@ -12,4 +12,5 @@ public sealed record OrderCreatedEvent(
     string CustomerName,
     decimal Total,
     PaymentMethod PaymentMethod,
-    DateTime CreatedAt) : DomainEventBase;
+    DateTime CreatedAt
+) : DomainEventBase;
