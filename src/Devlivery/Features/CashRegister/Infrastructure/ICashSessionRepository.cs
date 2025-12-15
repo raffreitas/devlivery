@@ -26,5 +26,5 @@ public interface ICashSessionRepository
     /// <summary>
     /// Updates an existing cash session.
     /// </summary>
-    void Update(CashSession session);
+    Task UpdateAsync(CashSession session, CancellationToken ct = default);
 }

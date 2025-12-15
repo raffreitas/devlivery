@@ -85,7 +85,10 @@ public sealed class Order : Entity
             EstablishmentId,
             oldStatus,
             newStatus,
-            UpdatedAt));
+            PaymentMethod,
+            Total,
+            UpdatedAt
+        ));
     }
 
     public void UpdateDetails(

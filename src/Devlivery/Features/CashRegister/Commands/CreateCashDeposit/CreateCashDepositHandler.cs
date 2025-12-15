@@ -30,12 +30,13 @@ public sealed class CreateCashDepositHandler(
 
         if (cashSession is null)
         {
-            return Result.Fail<CreateCashDepositResponse>(new NotFoundError("Caixa não encontrado."));
+            return Result.Fail<CreateCashDepositResponse>(new NotFoundError("Caixa nï¿½o encontrado."));
         }
 
         if (cashSession.Status != CashSessionStatus.Open)
         {
-            return Result.Fail<CreateCashDepositResponse>(new DomainRuleError("Não é possível adicionar aporte a um caixa fechado."));
+            return Result.Fail<CreateCashDepositResponse>(
+                new DomainRuleError("Nï¿½o ï¿½ possï¿½vel adicionar aporte a um caixa fechado."));
         }
 
         // Create the deposit
@@ -49,7 +50,7 @@ public sealed class CreateCashDepositHandler(
 
         cashSession.AddDeposit(deposit);
 
-        cashSessionRepository.Update(cashSession);
+        await cashSessionRepository.UpdateAsync(cashSession, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var response = new CreateCashDepositResponse(

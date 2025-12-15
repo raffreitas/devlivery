@@ -1,4 +1,7 @@
+using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Features.Orders.Domain.Events;
+using Devlivery.Features.Orders.Infrastructure;
+using Devlivery.Shared.Infrastructure.Persistence;
 
 using Mediator;
 
@@ -8,10 +11,13 @@ namespace Devlivery.Features.CashRegister.Events;
 /// Handles OrderCreatedEvent to track orders in cash register sessions.
 /// This is an example of cross-feature communication using domain events.
 /// </summary>
-public sealed class OrderCreatedEventHandler(ILogger<OrderCreatedEventHandler> logger)
-    : INotificationHandler<OrderCreatedEvent>
+public sealed class OrderCreatedEventHandler(
+    ILogger<OrderCreatedEventHandler> logger,
+    ICashSessionRepository cashSessionRepository,
+    IUnitOfWork unitOfWork
+) : INotificationHandler<OrderCreatedEvent>
 {
-    public ValueTask Handle(OrderCreatedEvent notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OrderCreatedEvent notification, CancellationToken cancellationToken)
     {
         logger.LogInformation(
             "Order {OrderId} created with total {Total} and payment method {PaymentMethod}",
@@ -19,12 +25,15 @@ public sealed class OrderCreatedEventHandler(ILogger<OrderCreatedEventHandler> l
             notification.Total,
             notification.PaymentMethod);
 
-        // In the future, this could:
-        // 1. Update active cash session totals in real-time
-        // 2. Track payment breakdown
-        // 3. Trigger notifications
-        // For now, we just log the event as demonstration
+        var activeSession = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
+        if (activeSession is null)
+        {
+            logger.LogWarning("No active cash session found for Order {OrderId}", notification.OrderId);
+            return;
+        }
 
-        return ValueTask.CompletedTask;
+        activeSession.RecordOrder(notification.Total, notification.PaymentMethod.ToString());
+        await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

@@ -43,8 +43,9 @@ public sealed class CashSessionRepository(ApplicationDbContext dbContext) : ICas
     /// <summary>
     /// Updates an existing cash session.
     /// </summary>
-    public void Update(CashSession session)
+    public Task UpdateAsync(CashSession session, CancellationToken ct = default)
     {
         dbContext.CashSessions.Update(session);
+        return Task.CompletedTask;
     }
 }

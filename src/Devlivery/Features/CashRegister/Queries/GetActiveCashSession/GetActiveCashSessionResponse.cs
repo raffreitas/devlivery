@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 
 using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.Orders.Domain;
 
 namespace Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
 
@@ -19,13 +20,19 @@ public sealed record GetActiveCashSessionResponse(
     string Status,
     string? Notes)
 {
-    public static GetActiveCashSessionResponse FromDomain(
-        CashSession cashSession,
-        decimal expectedCashAmount)
+    public static GetActiveCashSessionResponse FromDomain(CashSession cashSession)
     {
         var payments = cashSession.PaymentBreakdown
             .Select(pb => new PaymentBreakdownDto(pb.Method, pb.Amount, pb.Count))
             .ToList();
+
+        var cashSales = payments
+            .Where(o => o.Method == nameof(PaymentMethod.Cash))
+            .Sum(o => o.Amount);
+
+        var totalDeposits = cashSession.Deposits.Sum(o => o.Amount);
+
+        var expectedCashAmount = cashSession.OpeningAmount + totalDeposits + cashSales;
 
         return new GetActiveCashSessionResponse(
             cashSession.Id,

@@ -20,7 +20,8 @@ public sealed class CloseCashSessionHandler(
     IUnitOfWork unitOfWork,
     ApplicationDbContext dbContext) : ICommandHandler<CloseCashSessionCommand, Result<CloseCashSessionResponse>>
 {
-    public async ValueTask<Result<CloseCashSessionResponse>> Handle(CloseCashSessionCommand command, CancellationToken cancellationToken)
+    public async ValueTask<Result<CloseCashSessionResponse>> Handle(CloseCashSessionCommand command,
+        CancellationToken cancellationToken)
     {
         if (!command.IsValid(out var errors))
         {
@@ -83,7 +84,7 @@ public sealed class CloseCashSessionHandler(
         cashSession.UpdateTotals(totalRevenue, totalOrders, paymentBreakdown);
         cashSession.Close(command.ClosingAmount, command.Notes);
 
-        cashSessionRepository.Update(cashSession);
+        await cashSessionRepository.UpdateAsync(cashSession, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok(CloseCashSessionResponse.FromDomain(cashSession, expectedCashAmount));
