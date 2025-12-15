@@ -109,6 +109,38 @@ public sealed class CashSession : Entity
 
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void CancelOrder(decimal orderTotal, string paymentMethod)
+    {
+        TotalRevenue -= orderTotal;
+        TotalOrders -= 1;
+
+        var existingItem = PaymentBreakdown.FirstOrDefault(p => p.Method == paymentMethod);
+        if (existingItem is not null)
+        {
+            PaymentBreakdown.Remove(existingItem);
+
+            var updatedItem = existingItem with
+            {
+                Amount = existingItem.Amount - orderTotal,
+                Count = existingItem.Count - 1
+            };
+
+            // Only add back if count is still positive
+            if (updatedItem.Count > 0)
+            {
+                PaymentBreakdown.Add(updatedItem);
+            }
+        }
+
+        if (paymentMethod == "Cash")
+        {
+            var totalDeposits = Deposits.Sum(cd => cd.Amount);
+            UpdateExpectedCashAmount(OpeningAmount + totalDeposits - orderTotal);
+        }
+
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
 
 public sealed record PaymentBreakdownItem(string Method, decimal Amount, int Count);
