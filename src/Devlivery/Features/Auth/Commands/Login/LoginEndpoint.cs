@@ -10,29 +10,29 @@ namespace Devlivery.Features.Auth.Commands.Login;
 
 public static class LoginEndpoint
 {
-    internal sealed record Request(string Email, string Password);
-
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/login", Handle)
+            .Produces<ApiResponse<LoginResponse>>()
+            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
             .AllowAnonymous();
     }
 
     private static async Task<Results<Ok<ApiResponse<LoginResponse>>, BadRequest<ApiResponse<LoginResponse>>,
         UnauthorizedHttpResult>> Handle(
-        Request request,
+        LoginCommand command,
         ISender sender,
         CancellationToken ct
     )
     {
-        var result = await sender.Send(new LoginCommand(request.Email, request.Password), ct);
+        var result = await sender.Send(command, ct);
 
         return result.IsSuccess
             ? result.ToOk()
             : result.GetError() switch
             {
                 ValidationError => result.ToBadRequest(),
-                UnauthorizedError => TypedResults.Unauthorized(),
                 _ => TypedResults.Unauthorized()
             };
     }

@@ -14,11 +14,12 @@ public static class CreateCashSessionEndpoint
     {
         app.MapPost("", Handle)
             .Produces<ApiResponse<CreateCashSessionResponse>>(StatusCodes.Status201Created)
-            .Produces<ApiResponse<CreateCashSessionResponse>>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse<CreateCashSessionResponse>>(StatusCodes.Status409Conflict);
+            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<Created<ApiResponse<CreateCashSessionResponse>>, BadRequest<ApiResponse<CreateCashSessionResponse>>, Conflict<ApiResponse<CreateCashSessionResponse>>>> Handle(
+    private static async Task<Results<Created<ApiResponse<CreateCashSessionResponse>>,
+        BadRequest<ApiResponse<CreateCashSessionResponse>>, Conflict<ApiResponse<CreateCashSessionResponse>>>> Handle(
         CreateCashSessionCommand command,
         ISender sender,
         CancellationToken ct)

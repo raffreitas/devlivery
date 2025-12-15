@@ -1,5 +1,3 @@
-using Devlivery.Shared.Extensions;
-
 using FluentResults;
 
 using FluentValidation;
@@ -14,15 +12,7 @@ public sealed record UpdateProductCommand(
     string Description,
     decimal Price,
     string Category,
-    bool Available) : ICommand<Result>
-{
-    public bool IsValid(out string[] errors)
-    {
-        var result = new UpdateProductCommandValidator().Validate(this);
-        errors = result.GetErrors();
-        return result.IsValid;
-    }
-};
+    bool Available) : ICommand<Result>;
 
 public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProductCommand>
 {

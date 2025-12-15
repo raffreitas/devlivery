@@ -14,6 +14,8 @@ using Devlivery.Shared.Infrastructure.Persistence.Seeder;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using Devlivery.Shared.Infrastructure.WebServer;
 
+using FluentValidation;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,12 +32,15 @@ public static class Startup
         builder.Services.ConfigureHttpJsonOptions(options =>
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
+        services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
+
         services.AddMediator(options =>
         {
             options.ServiceLifetime = ServiceLifetime.Scoped;
             options.PipelineBehaviors =
             [
-                typeof(Shared.Infrastructure.Tenancy.Behaviors.DomainEventTenantBehavior<,>)
+                typeof(Shared.Infrastructure.Tenancy.Behaviors.DomainEventTenantBehavior<,>),
+                typeof(Shared.Application.Behaviors.ValidationPipelineBehavior<,>)
             ];
         });
 

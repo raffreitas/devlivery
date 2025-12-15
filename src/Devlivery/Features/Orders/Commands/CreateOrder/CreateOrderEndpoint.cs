@@ -14,9 +14,9 @@ public static class CreateOrderEndpoint
     {
         app.MapPost("", Handle)
             .Produces<ApiResponse<CreateOrderResponse>>(StatusCodes.Status201Created)
-            .Produces<ApiResponse<CreateOrderResponse>>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse<CreateOrderResponse>>(StatusCodes.Status404NotFound)
-            .Produces<ApiResponse<CreateOrderResponse>>(StatusCodes.Status409Conflict);
+            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse>(StatusCodes.Status404NotFound)
+            .Produces<ApiResponse>(StatusCodes.Status409Conflict);
     }
 
     private static async Task<Results<Created<ApiResponse<CreateOrderResponse>>, BadRequest<ApiResponse<CreateOrderResponse>>, NotFound<ApiResponse<CreateOrderResponse>>, Conflict<ApiResponse<CreateOrderResponse>>>> Handle(

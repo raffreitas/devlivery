@@ -18,11 +18,6 @@ public sealed class LoginHandler(
 {
     public async ValueTask<Result<LoginResponse>> Handle(LoginCommand command, CancellationToken cancellationToken)
     {
-        if (!command.IsValid(out var errors))
-        {
-            return Result.Fail<LoginResponse>(errors);
-        }
-
         var user = await dbContext.Users
             .IgnoreQueryFilters()
             .AsNoTracking()

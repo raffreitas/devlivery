@@ -19,11 +19,6 @@ public sealed class CreateCashDepositHandler(
         CreateCashDepositCommand command,
         CancellationToken cancellationToken)
     {
-        if (!command.IsValid(out var errors))
-        {
-            return Result.Fail<CreateCashDepositResponse>(errors);
-        }
-
         var tenantId = tenantAccessor.Tenant.Id;
 
         var cashSession = await cashSessionRepository.GetByIdAsync(command.CashSessionId, cancellationToken);

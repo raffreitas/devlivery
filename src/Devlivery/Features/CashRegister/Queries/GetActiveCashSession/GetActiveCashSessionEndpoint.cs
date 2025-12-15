@@ -11,10 +11,11 @@ public static class GetActiveCashSessionEndpoint
     {
         app.MapGet("active", Handle)
             .Produces<ApiResponse<GetActiveCashSessionResponse>>()
-            .Produces<ApiResponse<GetActiveCashSessionResponse>>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<Ok<ApiResponse<GetActiveCashSessionResponse>>, NotFound<ApiResponse<GetActiveCashSessionResponse>>>> Handle(
+    private static async Task<Results<Ok<ApiResponse<GetActiveCashSessionResponse>>,
+        NotFound<ApiResponse<GetActiveCashSessionResponse>>>> Handle(
         GetActiveCashSessionHandler handler,
         CancellationToken ct)
     {

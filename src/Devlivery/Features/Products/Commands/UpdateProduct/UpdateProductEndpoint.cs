@@ -10,7 +10,7 @@ namespace Devlivery.Features.Products.Commands.UpdateProduct;
 
 public static class UpdateProductEndpoint
 {
-    internal sealed record Request(
+    internal sealed record UpdateProductRequest(
         string Name,
         string Description,
         decimal Price,
@@ -27,7 +27,7 @@ public static class UpdateProductEndpoint
 
     private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>>> Handle(
         Guid id,
-        Request request,
+        UpdateProductRequest request,
         ISender sender,
         CancellationToken ct)
     {

@@ -11,7 +11,7 @@ namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
 public static class UpdateOrderStatusEndpoint
 {
-    internal sealed record Request(OrderStatus Status);
+    internal sealed record UpdateOrderStatusRequest(OrderStatus Status);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
@@ -24,7 +24,7 @@ public static class UpdateOrderStatusEndpoint
 
     private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>, Conflict<ApiResponse>>> Handle(
         Guid id,
-        Request request,
+        UpdateOrderStatusRequest request,
         ISender sender,
         CancellationToken ct)
     {

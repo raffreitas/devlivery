@@ -1,5 +1,4 @@
 using Devlivery.Features.Orders.Domain;
-using Devlivery.Shared.Extensions;
 
 using FluentResults;
 
@@ -11,12 +10,6 @@ namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
 public sealed record UpdateOrderStatusCommand(Guid Id, OrderStatus Status) : ICommand<Result>
 {
-    public bool IsValid(out string[] errors)
-    {
-        var result = new UpdateOrderStatusCommandValidator().Validate(this);
-        errors = result.GetErrors();
-        return result.IsValid;
-    }
 };
 
 public sealed class UpdateOrderStatusCommandValidator : AbstractValidator<UpdateOrderStatusCommand>

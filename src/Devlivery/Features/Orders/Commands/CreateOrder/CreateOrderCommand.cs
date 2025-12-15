@@ -1,5 +1,4 @@
 ﻿using Devlivery.Features.Orders.Domain;
-using Devlivery.Shared.Extensions;
 
 using FluentResults;
 
@@ -16,15 +15,7 @@ public sealed record CreateOrderCommand(
     string DeliveryAddress,
     PaymentMethod PaymentMethod,
     decimal DeliveryFee = 0,
-    string? Notes = null) : ICommand<Result<CreateOrderResponse>>
-{
-    public bool IsValid(out string[] errors)
-    {
-        var result = new CreateOrderCommandValidator().Validate(this);
-        errors = result.GetErrors();
-        return result.IsValid;
-    }
-};
+    string? Notes = null) : ICommand<Result<CreateOrderResponse>>;
 
 public sealed record OrderItemDto(Guid ProductId, int Quantity, string? Notes);
 

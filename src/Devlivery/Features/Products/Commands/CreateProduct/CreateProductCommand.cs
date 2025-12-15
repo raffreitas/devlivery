@@ -1,5 +1,3 @@
-using Devlivery.Shared.Extensions;
-
 using FluentResults;
 
 using FluentValidation;
@@ -13,15 +11,7 @@ public sealed record CreateProductCommand(
     string Description,
     decimal Price,
     string Category,
-    bool Available) : ICommand<Result<CreateProductResponse>>
-{
-    public bool IsValid(out string[] errors)
-    {
-        var result = new CreateProductCommandValidator().Validate(this);
-        errors = result.GetErrors();
-        return result.IsValid;
-    }
-};
+    bool Available) : ICommand<Result<CreateProductResponse>>;
 
 public sealed class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
 {

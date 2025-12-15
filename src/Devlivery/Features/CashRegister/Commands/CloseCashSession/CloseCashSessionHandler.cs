@@ -23,11 +23,6 @@ public sealed class CloseCashSessionHandler(
     public async ValueTask<Result<CloseCashSessionResponse>> Handle(CloseCashSessionCommand command,
         CancellationToken cancellationToken)
     {
-        if (!command.IsValid(out var errors))
-        {
-            return Result.Fail<CloseCashSessionResponse>(errors);
-        }
-
         var cashSession = await cashSessionRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (cashSession is null)

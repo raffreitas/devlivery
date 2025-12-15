@@ -11,7 +11,7 @@ public static class GetAllProductsEndpoint
     {
         app.MapGet("", Handle)
             .Produces<ApiResponse<List<GetAllProductsResponse>>>()
-            .Produces<ApiResponse<List<GetAllProductsResponse>>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<Ok<ApiResponse<List<GetAllProductsResponse>>>> Handle(

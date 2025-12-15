@@ -13,7 +13,7 @@ public static class CreateProductEndpoint
     {
         app.MapPost("", Handle)
             .Produces<ApiResponse<CreateProductResponse>>(StatusCodes.Status201Created)
-            .Produces<ApiResponse<CreateProductResponse>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<Results<Created<ApiResponse<CreateProductResponse>>, BadRequest<ApiResponse<CreateProductResponse>>>> Handle(

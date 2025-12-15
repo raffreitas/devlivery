@@ -11,7 +11,7 @@ public static class GetProductByIdEndpoint
     {
         app.MapGet("{id:guid}", Handle)
             .Produces<ApiResponse<GetProductByIdResponse>>()
-            .Produces<ApiResponse<GetProductByIdResponse>>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
     private static async Task<Results<Ok<ApiResponse<GetProductByIdResponse>>, NotFound<ApiResponse<GetProductByIdResponse>>>> Handle(

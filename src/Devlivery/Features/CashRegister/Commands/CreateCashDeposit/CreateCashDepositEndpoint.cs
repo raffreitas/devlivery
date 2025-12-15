@@ -10,7 +10,7 @@ namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
 public static class CreateCashDepositEndpoint
 {
-    internal sealed record Request(
+    internal sealed record CreateCashDepositRequest(
         Guid AttendantId,
         string AttendantName,
         decimal Amount,
@@ -20,14 +20,16 @@ public static class CreateCashDepositEndpoint
     {
         app.MapPost("{cashSessionId:guid}/deposits", Handle)
             .Produces<ApiResponse<CreateCashDepositResponse>>(StatusCodes.Status201Created)
-            .Produces<ApiResponse<CreateCashDepositResponse>>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse<CreateCashDepositResponse>>(StatusCodes.Status404NotFound)
-            .Produces<ApiResponse<CreateCashDepositResponse>>(StatusCodes.Status409Conflict);
+            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse>(StatusCodes.Status404NotFound)
+            .Produces<ApiResponse>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<Created<ApiResponse<CreateCashDepositResponse>>, BadRequest<ApiResponse<CreateCashDepositResponse>>, NotFound<ApiResponse<CreateCashDepositResponse>>, Conflict<ApiResponse<CreateCashDepositResponse>>>> Handle(
+    private static async Task<Results<Created<ApiResponse<CreateCashDepositResponse>>,
+        BadRequest<ApiResponse<CreateCashDepositResponse>>, NotFound<ApiResponse<CreateCashDepositResponse>>,
+        Conflict<ApiResponse<CreateCashDepositResponse>>>> Handle(
         Guid cashSessionId,
-        Request request,
+        CreateCashDepositRequest request,
         ISender sender,
         CancellationToken ct)
     {

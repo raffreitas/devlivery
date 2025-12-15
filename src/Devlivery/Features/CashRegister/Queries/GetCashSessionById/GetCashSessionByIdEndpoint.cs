@@ -11,7 +11,7 @@ public static class GetCashSessionByIdEndpoint
     {
         app.MapGet("{id:guid}", Handle)
             .Produces<ApiResponse<GetCashSessionByIdResponse>>()
-            .Produces<ApiResponse<GetCashSessionByIdResponse>>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
     private static async Task<Results<Ok<ApiResponse<GetCashSessionByIdResponse>>, NotFound<ApiResponse<GetCashSessionByIdResponse>>>> Handle(

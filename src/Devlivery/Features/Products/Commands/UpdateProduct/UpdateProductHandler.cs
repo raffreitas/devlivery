@@ -14,15 +14,10 @@ public sealed class UpdateProductHandler(
 {
     public async ValueTask<Result> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
     {
-        if (!command.IsValid(out var errors))
-        {
-            return Result.Fail(errors);
-        }
-
         var product = await productRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (product is null)
-            return Result.Fail(new NotFoundError("Produto não encontrado."));
+            return Result.Fail(new NotFoundError("Produto nï¿½o encontrado."));
 
         product.Update(
             name: command.Name,

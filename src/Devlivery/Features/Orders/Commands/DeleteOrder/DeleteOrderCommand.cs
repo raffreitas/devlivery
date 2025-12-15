@@ -1,5 +1,3 @@
-using Devlivery.Shared.Extensions;
-
 using FluentResults;
 
 using FluentValidation;
@@ -8,15 +6,7 @@ using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.DeleteOrder;
 
-public sealed record DeleteOrderCommand(Guid Id) : ICommand<Result>
-{
-    public bool IsValid(out string[] errors)
-    {
-        var result = new DeleteOrderCommandValidator().Validate(this);
-        errors = result.GetErrors();
-        return result.IsValid;
-    }
-};
+public sealed record DeleteOrderCommand(Guid Id) : ICommand<Result>;
 
 public sealed class DeleteOrderCommandValidator : AbstractValidator<DeleteOrderCommand>
 {

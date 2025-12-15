@@ -11,7 +11,7 @@ namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
 public static class UpdateOrderEndpoint
 {
-    internal sealed record Request(
+    internal sealed record UpdateOrderRequest(
         OrderItemDto[] Items,
         string CustomerName,
         string? CustomerPhone,
@@ -31,7 +31,7 @@ public static class UpdateOrderEndpoint
 
     private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>, Conflict<ApiResponse>>> Handle(
         Guid id,
-        Request request,
+        UpdateOrderRequest request,
         ISender sender,
         CancellationToken ct)
     {

@@ -9,9 +9,8 @@ public static class GetCashSessionDepositsEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("{cashSessionId}/deposits", Handle)
-            .Produces<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>()
-            .Produces<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>(StatusCodes.Status200OK);
+        app.MapGet("{cashSessionId:guid}/deposits", Handle)
+            .Produces<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>();
     }
 
     private static async Task<Ok<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>> Handle(

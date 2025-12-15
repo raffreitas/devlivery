@@ -47,8 +47,4 @@
         </Content>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Features\CashRegister\Shared\"/>
-    </ItemGroup>
-
 </Project>

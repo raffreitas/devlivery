@@ -1,5 +1,3 @@
-using Devlivery.Shared.Extensions;
-
 using FluentResults;
 
 using FluentValidation;
@@ -16,12 +14,6 @@ public sealed record CreateCashDepositCommand(
     string? Notes
 ) : ICommand<Result<CreateCashDepositResponse>>
 {
-    public bool IsValid(out string[] errors)
-    {
-        var result = new CreateCashDepositValidator().Validate(this);
-        errors = result.GetErrors();
-        return result.IsValid;
-    }
 };
 
 public sealed class CreateCashDepositValidator : AbstractValidator<CreateCashDepositCommand>

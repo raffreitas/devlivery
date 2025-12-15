@@ -21,11 +21,6 @@ public sealed class CreateOrderHandler(
         CreateOrderCommand command,
         CancellationToken cancellationToken)
     {
-        if (!command.IsValid(out var errors))
-        {
-            return Result.Fail<CreateOrderResponse>(new ValidationError(errors));
-        }
-
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
         var products = await productRepository.GetByIdsAsync(productIds, cancellationToken);
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);

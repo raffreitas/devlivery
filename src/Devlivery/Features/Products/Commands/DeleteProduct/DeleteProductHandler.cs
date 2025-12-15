@@ -20,11 +20,6 @@ public sealed class DeleteProductHandler(
         DeleteProductCommand command,
         CancellationToken cancellationToken)
     {
-        if (!command.IsValid(out var errors))
-        {
-            return Result.Fail<DeleteProductResponse>(errors);
-        }
-
         var product = await productRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (product is null)
@@ -39,7 +34,8 @@ public sealed class DeleteProductHandler(
 
         if (productInUse)
         {
-            return Result.Fail<DeleteProductResponse>(new DomainRuleError("Não é possível excluir um produto que já foi atribuido a um pedido."));
+            return Result.Fail<DeleteProductResponse>(
+                new DomainRuleError("Não é possível excluir um produto que já foi atribuido a um pedido."));
         }
 
         productRepository.Remove(product);

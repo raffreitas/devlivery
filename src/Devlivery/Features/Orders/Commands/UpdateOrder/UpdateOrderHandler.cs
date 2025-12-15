@@ -19,11 +19,6 @@ public sealed class UpdateOrderHandler(
         UpdateOrderCommand command,
         CancellationToken cancellationToken)
     {
-        if (!command.IsValid(out var errors))
-        {
-            return Result.Fail(errors);
-        }
-
         var order = await orderRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (order is null)

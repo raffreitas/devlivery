@@ -19,18 +19,14 @@ public sealed class CreateCashSessionHandler(
         CreateCashSessionCommand command,
         CancellationToken cancellationToken)
     {
-        if (!command.IsValid(out var errors))
-        {
-            return Result.Fail<CreateCashSessionResponse>(errors);
-        }
-
         var tenantId = tenantAccessor.Tenant.Id;
 
         var existingOpen = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
 
         if (existingOpen is not null)
         {
-            return Result.Fail<CreateCashSessionResponse>(new DomainRuleError("Já existe um caixa aberto. Feche o caixa atual antes de abrir um novo."));
+            return Result.Fail<CreateCashSessionResponse>(
+                new DomainRuleError("Jï¿½ existe um caixa aberto. Feche o caixa atual antes de abrir um novo."));
         }
 
         var cashSession = new CashSession(
