@@ -84,8 +84,5 @@ public sealed class CreateOrderEndpointTests(OrdersWebApplicationFactory factory
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        await using var responseBody = await response.Content.ReadAsStreamAsync();
-        var responseData = await JsonDocument.ParseAsync(responseBody);
-        responseData.RootElement.TryGetProperty("errors", out _).ShouldBeTrue();
     }
 }

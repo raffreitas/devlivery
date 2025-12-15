@@ -4,14 +4,14 @@ using Mediator;
 
 namespace Devlivery.Shared.Infrastructure.Tenancy.Behaviors;
 
-public sealed class DomainEventTenantBehavior<TNotification>(
+public sealed class DomainEventTenantBehavior<TNotification, TResponse>(
     ITenantAccessor tenantAccessor,
-    ILogger<DomainEventTenantBehavior<TNotification>> logger
-) : IPipelineBehavior<TNotification, Unit> where TNotification : DomainEventBase
+    ILogger<DomainEventTenantBehavior<TNotification, TResponse>> logger
+) : IPipelineBehavior<TNotification, TResponse> where TNotification : DomainEventBase
 {
-    public async ValueTask<Unit> Handle(
+    public async ValueTask<TResponse> Handle(
         TNotification message,
-        MessageHandlerDelegate<TNotification, Unit> next,
+        MessageHandlerDelegate<TNotification, TResponse> next,
         CancellationToken cancellationToken
     )
     {
@@ -33,8 +33,6 @@ public sealed class DomainEventTenantBehavior<TNotification>(
                 typeof(TNotification).Name);
         }
 
-        await next(message, cancellationToken);
-
-        return Unit.Value;
+        return await next(message, cancellationToken);
     }
 }
