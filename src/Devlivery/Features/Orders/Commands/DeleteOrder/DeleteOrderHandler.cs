@@ -23,7 +23,7 @@ public sealed class DeleteOrderHandler(
             return Result.Fail(new NotFoundError("Pedido n�o encontrado"));
         }
 
-        orderRepository.Remove(order);
+        await orderRepository.Remove(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

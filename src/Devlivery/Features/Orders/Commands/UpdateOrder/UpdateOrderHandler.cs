@@ -24,7 +24,8 @@ public sealed class UpdateOrderHandler(
             return Result.Fail(new NotFoundError("Pedido não encontrado"));
 
         if (order.Status is OrderStatus.Canceled or OrderStatus.Delivered)
-            return Result.Fail(new DomainRuleError("Pedido não pode ser atualizado pois está cancelado ou já foi entregue"));
+            return Result.Fail(
+                new DomainRuleError("Pedido não pode ser atualizado pois está cancelado ou já foi entregue"));
 
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
         var products = await productRepository.GetByIdsAsync(productIds, cancellationToken);
@@ -52,7 +53,7 @@ public sealed class UpdateOrderHandler(
             notes: command.Notes
         );
 
-        orderRepository.Update(order);
+        await orderRepository.Update(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
