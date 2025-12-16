@@ -1,6 +1,4 @@
-using Devlivery.Features.Products.Domain;
-
-namespace Devlivery.Features.Products.Infrastructure;
+namespace Devlivery.Features.Products.Domain;
 
 /// <summary>
 /// Repository interface for Product aggregate.

@@ -1,4 +1,4 @@
-using Devlivery.Features.Products.Infrastructure;
+using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 

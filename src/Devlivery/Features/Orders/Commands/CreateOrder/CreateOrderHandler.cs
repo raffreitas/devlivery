@@ -1,6 +1,5 @@
 ﻿using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Infrastructure;
-using Devlivery.Features.Products.Infrastructure;
+using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;

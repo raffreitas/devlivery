@@ -1,5 +1,4 @@
 using Devlivery.Features.Products.Domain;
-using Devlivery.Features.Products.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 

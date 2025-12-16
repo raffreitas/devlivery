@@ -1,20 +1,19 @@
-using Devlivery.Features.Products.Infrastructure;
+using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
 
 using Mediator;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Products.Commands.DeleteProduct;
 
 public sealed class DeleteProductHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
-    ApplicationDbContext dbContext) : ICommandHandler<DeleteProductCommand, Result<DeleteProductResponse>>
+    IOrderRepository orderRepository
+) : ICommandHandler<DeleteProductCommand, Result<DeleteProductResponse>>
 {
     public async ValueTask<Result<DeleteProductResponse>> Handle(
         DeleteProductCommand command,
@@ -27,10 +26,7 @@ public sealed class DeleteProductHandler(
             return Result.Fail<DeleteProductResponse>(new NotFoundError("Produto não encontrado"));
         }
 
-        // Verificação de uso em OrderItems (query read-only, pode usar DbContext diretamente)
-        var productInUse = await dbContext.OrderItems
-            .Where(i => i.ProductId == product.Id)
-            .AnyAsync(cancellationToken: cancellationToken);
+        var productInUse = await orderRepository.ExistsItemWithProductIdAsync(product.Id, cancellationToken);
 
         if (productInUse)
         {

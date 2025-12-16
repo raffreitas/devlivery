@@ -5,15 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Orders.Infrastructure;
 
-/// <summary>
-/// Repository for Order aggregate.
-/// Handles write operations and complex queries for Orders.
-/// </summary>
 public sealed class OrderRepository(ApplicationDbContext dbContext) : IOrderRepository
 {
-    /// <summary>
-    /// Gets an order by ID, including its items.
-    /// </summary>
     public async Task<Order?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await dbContext.Orders
@@ -21,34 +14,23 @@ public sealed class OrderRepository(ApplicationDbContext dbContext) : IOrderRepo
             .FirstOrDefaultAsync(o => o.Id == id, ct);
     }
 
-    /// <summary>
-    /// Adds a new order to the database.
-    /// </summary>
     public async Task AddAsync(Order order, CancellationToken ct = default)
     {
         await dbContext.Orders.AddAsync(order, ct);
     }
 
-    /// <summary>
-    /// Updates an existing order.
-    /// </summary>
-    public void Update(Order order)
+    public Task Update(Order order)
     {
         dbContext.Orders.Update(order);
+        return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Removes an order from the database.
-    /// </summary>
-    public void Remove(Order order)
+    public Task Remove(Order order)
     {
         dbContext.Orders.Remove(order);
+        return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Gets all orders in a specific time period with optional filters.
-    /// Used for business analytics and reporting.
-    /// </summary>
     public async Task<List<Order>> GetOrdersInPeriodAsync(
         DateTime start,
         DateTime end,
@@ -59,5 +41,12 @@ public sealed class OrderRepository(ApplicationDbContext dbContext) : IOrderRepo
             .Where(o => o.CreatedAt >= start && o.CreatedAt <= end)
             .Where(o => o.Status != OrderStatus.Canceled)
             .ToListAsync(ct);
+    }
+
+    public Task<bool> ExistsItemWithProductIdAsync(Guid productId, CancellationToken ct = default)
+    {
+        return dbContext.OrderItems
+            .AsNoTracking()
+            .AnyAsync(oi => oi.ProductId == productId, ct);
     }
 }

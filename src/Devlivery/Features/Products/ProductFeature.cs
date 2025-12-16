@@ -1,6 +1,7 @@
 using Devlivery.Features.Products.Commands.CreateProduct;
 using Devlivery.Features.Products.Commands.DeleteProduct;
 using Devlivery.Features.Products.Commands.UpdateProduct;
+using Devlivery.Features.Products.Domain;
 using Devlivery.Features.Products.Infrastructure;
 using Devlivery.Features.Products.Queries.GetAllProducts;
 using Devlivery.Features.Products.Queries.GetProductById;
