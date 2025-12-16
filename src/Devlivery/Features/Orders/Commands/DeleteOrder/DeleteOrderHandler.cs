@@ -20,8 +20,11 @@ public sealed class DeleteOrderHandler(
 
         if (order is null)
         {
-            return Result.Fail(new NotFoundError("Pedido n�o encontrado"));
+            return Result.Fail(new NotFoundError("Pedido não encontrado"));
         }
+
+        // Raise domain event before deletion so handlers can access order data
+        order.Delete();
 
         await orderRepository.Remove(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);

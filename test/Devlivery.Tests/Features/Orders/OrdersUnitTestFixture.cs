@@ -4,6 +4,7 @@ using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Tests.Common.Builders;
 
 using NSubstitute;
 
@@ -16,7 +17,7 @@ namespace Devlivery.Tests.Features.Orders;
 public sealed class OrdersUnitTestFixture : IDisposable
 {
     public Faker Faker { get; } = new("pt_BR");
-    
+
     private readonly Guid _defaultTenantId = Guid.NewGuid();
 
     /// <summary>
@@ -65,18 +66,33 @@ public sealed class OrdersUnitTestFixture : IDisposable
         OrderStatus? status = null,
         decimal? deliveryFee = null,
         Guid? establishmentId = null,
-        string? notes = null)
+        string? notes = null,
+        IEnumerable<OrderItem>? orderItems = null)
     {
-        return new Order(
-            customerName ?? Faker.Person.FullName,
-            customerPhone ?? Faker.Phone.PhoneNumber(),
-            deliveryAddress ?? Faker.Address.FullAddress(),
-            paymentMethod ?? Faker.PickRandom<PaymentMethod>(),
-            status ?? OrderStatus.Pending,
-            deliveryFee ?? Faker.Random.Decimal(0, 20),
-            establishmentId ?? _defaultTenantId,
-            notes ?? Faker.Lorem.Sentence()
-        );
+        var orderBuilder = new OrderBuilder();
+        if (!string.IsNullOrEmpty(customerName))
+            orderBuilder.WithCustomerName(customerName);
+        if (!string.IsNullOrEmpty(customerPhone))
+            orderBuilder.WithCustomerPhone(customerPhone);
+        if (!string.IsNullOrEmpty(deliveryAddress))
+            orderBuilder.WithDeliveryAddress(deliveryAddress);
+        if (paymentMethod != null)
+            orderBuilder.WithPaymentMethod(paymentMethod.Value);
+        if (orderItems != null)
+            orderBuilder.WithItems(orderItems.ToArray());
+        if (!string.IsNullOrEmpty(notes))
+            orderBuilder.WithNotes(notes);
+        if (establishmentId != null && establishmentId != Guid.Empty)
+            orderBuilder.WithEstablishmentId(establishmentId.Value);
+        if (deliveryFee != null)
+            orderBuilder.WithDeliveryFee(deliveryFee.Value);
+
+        var order = orderBuilder.Build();
+
+        if (status != null)
+            order.UpdateStatus(status.Value);
+
+        return order;
     }
 
     /// <summary>

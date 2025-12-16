@@ -16,6 +16,7 @@ public static class UpdateOrderEndpoint
         string CustomerName,
         string? CustomerPhone,
         string DeliveryAddress,
+        string? DeliveryReference,
         PaymentMethod PaymentMethod,
         decimal DeliveryFee = 0,
         string? Notes = null);
@@ -29,11 +30,12 @@ public static class UpdateOrderEndpoint
             .Produces<ApiResponse>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>, Conflict<ApiResponse>>> Handle(
-        Guid id,
-        UpdateOrderRequest request,
-        ISender sender,
-        CancellationToken ct)
+    private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>, Conflict<ApiResponse>>>
+        Handle(
+            Guid id,
+            UpdateOrderRequest request,
+            ISender sender,
+            CancellationToken ct)
     {
         var command = new UpdateOrderCommand(
             id,
@@ -43,6 +45,7 @@ public static class UpdateOrderEndpoint
             request.DeliveryAddress,
             request.PaymentMethod,
             request.DeliveryFee,
+            request.DeliveryReference,
             request.Notes);
 
         var result = await sender.Send(command, ct);

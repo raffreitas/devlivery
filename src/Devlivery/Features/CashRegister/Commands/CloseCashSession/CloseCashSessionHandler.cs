@@ -16,8 +16,8 @@ namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
 public sealed class CloseCashSessionHandler(
     ICashSessionRepository cashSessionRepository,
     IOrderRepository orderRepository,
-    IUnitOfWork unitOfWork,
-    ApplicationDbContext dbContext) : ICommandHandler<CloseCashSessionCommand, Result<CloseCashSessionResponse>>
+    IUnitOfWork unitOfWork
+) : ICommandHandler<CloseCashSessionCommand, Result<CloseCashSessionResponse>>
 {
     public async ValueTask<Result<CloseCashSessionResponse>> Handle(CloseCashSessionCommand command,
         CancellationToken cancellationToken)
@@ -60,12 +60,7 @@ public sealed class CloseCashSessionHandler(
             .Select(pb => new Domain.PaymentBreakdownItem(pb.Method, pb.Amount, pb.Count))
             .ToList();
 
-        // ✅ IMPORTANTE: Recalcular ExpectedCashAmount ANTES de fechar
-        // Formula: Opening + Deposits + CashSales
-        // Motivo: PaymentBreakdown só é disponível aqui no fechamento
-        var totalDeposits = await dbContext.CashDeposits
-            .Where(cd => cd.CashSessionId == cashSession.Id)
-            .SumAsync(cd => cd.Amount, cancellationToken);
+        var totalDeposits = cashSession.TotalDeposits();
 
         var cashSales = paymentBreakdown
             .Where(pb => pb.Method.Equals(nameof(PaymentMethod.Cash), StringComparison.OrdinalIgnoreCase))
@@ -74,7 +69,6 @@ public sealed class CloseCashSessionHandler(
         var expectedCashAmount = cashSession.OpeningAmount + totalDeposits + cashSales;
         cashSession.UpdateExpectedCashAmount(expectedCashAmount);
 
-        // Update session with calculated totals
         cashSession.UpdateTotals(totalRevenue, totalOrders, paymentBreakdown);
         cashSession.Close(command.ClosingAmount, command.Notes);
 

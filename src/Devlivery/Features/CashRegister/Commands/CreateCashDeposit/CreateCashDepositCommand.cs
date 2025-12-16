@@ -12,9 +12,7 @@ public sealed record CreateCashDepositCommand(
     string AttendantName,
     decimal Amount,
     string? Notes
-) : ICommand<Result<CreateCashDepositResponse>>
-{
-};
+) : ICommand<Result<CreateCashDepositResponse>>;
 
 public sealed class CreateCashDepositValidator : AbstractValidator<CreateCashDepositCommand>
 {

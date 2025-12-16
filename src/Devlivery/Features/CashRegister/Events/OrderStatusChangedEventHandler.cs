@@ -49,8 +49,7 @@ public sealed class OrderStatusChangedEventHandler(
             return;
         }
 
-        // Use the semantic method for cancellations
-        activeSession.CancelOrder(notification.TotalAmount, notification.PaymentMethod.ToString());
+        activeSession.RemoveOrder(notification.TotalAmount, notification.PaymentMethod.ToString());
         await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

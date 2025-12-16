@@ -1,8 +1,10 @@
 ﻿using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.ValueObjects;
 using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Shared.SeedWork;
 
 using FluentResults;
 
@@ -27,37 +29,28 @@ public sealed class CreateOrderHandler(
         if (products.Count != productIds.Count)
             return Result.Fail<CreateOrderResponse>(new NotFoundError("Um ou mais produtos não foram encontrados"));
 
-        // Criar Order (domain logic)
+        var items = command.Items.Select(item => new OrderItem(
+            productId: item.ProductId,
+            establishmentId: tenantAccessor.Tenant.Id,
+            quantity: item.Quantity,
+            unitPrice: productsDictionary[item.ProductId].Price,
+            notes: item.Notes)).ToList();
+
+        // Create Value Objects
+        var customer = CustomerInfo.Create(command.CustomerName, command.CustomerPhone);
+        var deliveryAddress = new DeliveryAddress(command.DeliveryAddress, command.DeliveryReference);
+
         var order = new Order(
-            customerName: command.CustomerName,
-            customerPhone: command.CustomerPhone,
-            deliveryAddress: command.DeliveryAddress,
+            customer: customer,
+            deliveryAddress: deliveryAddress,
             paymentMethod: command.PaymentMethod,
-            status: OrderStatus.Pending,
             deliveryFee: command.DeliveryFee,
             establishmentId: tenantAccessor.Tenant.Id,
+            items: items,
             notes: command.Notes
         );
 
-        foreach (var item in command.Items)
-        {
-            var orderItem = new OrderItem(
-                productId: item.ProductId,
-                establishmentId: order.EstablishmentId,
-                quantity: item.Quantity,
-                unitPrice: productsDictionary[item.ProductId].Price,
-                notes: item.Notes);
-
-            order.AddItem(orderItem);
-        }
-
-        // Persistir usando Repository
         await orderRepository.AddAsync(order, cancellationToken);
-
-        // Disparar domain event
-        order.RaiseCreatedEvent();
-
-        // Salvar via UnitOfWork (dispara eventos automaticamente via interceptor)
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new CreateOrderResponse(order.Id);

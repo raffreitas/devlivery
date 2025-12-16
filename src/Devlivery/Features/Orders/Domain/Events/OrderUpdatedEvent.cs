@@ -8,5 +8,7 @@ namespace Devlivery.Features.Orders.Domain.Events;
 public sealed record OrderUpdatedEvent(
     Guid OrderId,
     Guid EstablishmentId,
+    decimal OldTotal,
     decimal NewTotal,
+    PaymentMethod PaymentMethod,
     DateTime UpdatedAt) : DomainEventBase;

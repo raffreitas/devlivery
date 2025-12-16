@@ -88,8 +88,9 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         await orderRepository.Received(1).AddAsync(
             Arg.Is<Order>(o =>
-                o.CustomerName == "João Silva" &&
-                o.CustomerPhone == "11987654321" &&
+                o.Customer.Name == "João Silva" &&
+                o.Customer.Phone != null &&
+                o.Customer.Phone.Number == "11987654321" &&
                 o.DeliveryAddress == "Av. Paulista, 1000" &&
                 o.PaymentMethod == PaymentMethod.CreditCard &&
                 o.DeliveryFee == 10.00m &&

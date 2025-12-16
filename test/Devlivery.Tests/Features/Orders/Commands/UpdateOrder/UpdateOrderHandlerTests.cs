@@ -217,9 +217,10 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        order.CustomerName.ShouldBe("João Atualizado");
-        order.CustomerPhone.ShouldBe("11900001111");
-        order.DeliveryAddress.ShouldBe("Av. Atualizada, 999");
+        order.Customer.Name.ShouldBe("João Atualizado");
+        order.Customer.Phone.ShouldNotBeNull();
+        order.Customer.Phone.Number.ShouldBe("11900001111");
+        order.DeliveryAddress.FullAddress.ShouldBe("Av. Atualizada, 999");
         order.PaymentMethod.ShouldBe(PaymentMethod.Pix);
         order.DeliveryFee.ShouldBe(15.00m);
         order.Notes.ShouldBe("Nova observação");

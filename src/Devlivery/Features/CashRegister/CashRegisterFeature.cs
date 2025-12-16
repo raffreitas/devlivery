@@ -1,6 +1,7 @@
 using Devlivery.Features.CashRegister.Commands.CloseCashSession;
 using Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 using Devlivery.Features.CashRegister.Commands.CreateCashSession;
+using Devlivery.Features.CashRegister.Events;
 using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
 using Devlivery.Features.CashRegister.Queries.GetCashSessionById;
@@ -24,6 +25,14 @@ public static class CashRegisterFeature
         services.AddScoped<GetCashSessionByIdHandler>();
         services.AddScoped<GetCashSessionDepositsHandler>();
         services.AddScoped<GetCashSessionsHandler>();
+        
+        // Register Domain Event Handlers
+        services.AddScoped<OrderCreatedEventHandler>();
+        services.AddScoped<OrderStatusChangedEventHandler>();
+        services.AddScoped<OrderPaymentMethodChangedEventHandler>();
+        services.AddScoped<OrderUpdatedEventHandler>();
+        services.AddScoped<OrderDeletedEventHandler>();
+        
         return services;
     }
 

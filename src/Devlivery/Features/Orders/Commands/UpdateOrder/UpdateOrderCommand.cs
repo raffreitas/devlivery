@@ -16,6 +16,7 @@ public sealed record UpdateOrderCommand(
     string DeliveryAddress,
     PaymentMethod PaymentMethod,
     decimal DeliveryFee = 0,
+    string? DeliveryReference = null,
     string? Notes = null) : ICommand<Result>;
 
 public sealed record OrderItemDto(Guid ProductId, int Quantity, string? Notes);

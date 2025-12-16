@@ -11,9 +11,7 @@ public sealed record CreateCashSessionCommand(
     string AttendantName,
     decimal OpeningAmount,
     string? Notes
-) : ICommand<Result<CreateCashSessionResponse>>
-{
-};
+) : ICommand<Result<CreateCashSessionResponse>>;
 
 public sealed class CreateCashSessionValidator : AbstractValidator<CreateCashSessionCommand>
 {

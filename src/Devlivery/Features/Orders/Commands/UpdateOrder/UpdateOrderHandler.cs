@@ -1,4 +1,5 @@
 ﻿using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.ValueObjects;
 using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
@@ -35,21 +36,25 @@ public sealed class UpdateOrderHandler(
 
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
+        if (order.PaymentMethod != command.PaymentMethod)
+            order.UpdatePaymentMethod(command.PaymentMethod);
+
         var newItens = command.Items.Select(item => new OrderItem(
             productId: item.ProductId,
             establishmentId: order.EstablishmentId,
             quantity: item.Quantity,
             unitPrice: productsDictionary[item.ProductId].Price,
-            notes: item.Notes));
+            notes: item.Notes)).ToList();
 
-        order.ReplaceItems(newItens);
+        // Create Value Objects
+        var customer = CustomerInfo.Create(command.CustomerName, command.CustomerPhone);
+        var deliveryAddress = new DeliveryAddress(command.DeliveryAddress, command.DeliveryReference);
 
         order.UpdateDetails(
-            customerName: command.CustomerName,
-            customerPhone: command.CustomerPhone,
-            deliveryAddress: command.DeliveryAddress,
-            paymentMethod: command.PaymentMethod,
+            customer: customer,
+            deliveryAddress: deliveryAddress,
             deliveryFee: command.DeliveryFee,
+            items: newItens,
             notes: command.Notes
         );
 

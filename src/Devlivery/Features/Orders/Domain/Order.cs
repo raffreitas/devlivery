@@ -1,13 +1,13 @@
 using Devlivery.Features.Orders.Domain.Events;
+using Devlivery.Features.Orders.Domain.ValueObjects;
 using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Features.Orders.Domain;
 
 public sealed class Order : Entity
 {
-    public string CustomerName { get; private set; }
-    public string? CustomerPhone { get; private set; }
-    public string DeliveryAddress { get; private set; }
+    public CustomerInfo Customer { get; private set; }
+    public DeliveryAddress DeliveryAddress { get; private set; }
     public PaymentMethod PaymentMethod { get; private set; }
     public OrderStatus Status { get; private set; }
     public decimal Total { get; private set; }
@@ -20,62 +20,62 @@ public sealed class Order : Entity
     private readonly List<OrderItem> _items = [];
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
 
+    private Order()
+    {
+    }
+
     public Order(
-        string customerName,
-        string? customerPhone,
-        string deliveryAddress,
+        CustomerInfo customer,
+        DeliveryAddress deliveryAddress,
         PaymentMethod paymentMethod,
-        OrderStatus status,
         decimal deliveryFee,
         Guid establishmentId,
+        List<OrderItem> items,
         string? notes = null
     )
     {
-        CustomerName = customerName;
-        CustomerPhone = customerPhone;
+        if (items == null || items.Count == 0)
+            throw new ArgumentException("Pedido deve ter pelo menos um item", nameof(items));
+
+        if (deliveryFee < 0)
+            throw new ArgumentException("Taxa de entrega não pode ser negativa", nameof(deliveryFee));
+
+        Customer = customer;
         DeliveryAddress = deliveryAddress;
         PaymentMethod = paymentMethod;
-        Status = status;
+        Status = OrderStatus.Pending;
         DeliveryFee = deliveryFee;
         EstablishmentId = establishmentId;
+
+        _items = items;
+
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
         Notes = notes;
-    }
 
-    /// <summary>
-    /// Call this after the order is fully constructed and saved to raise the created event.
-    /// </summary>
-    public void RaiseCreatedEvent()
-    {
+        CalculateTotal();
         AddDomainEvent(new OrderCreatedEvent(
             Id,
             EstablishmentId,
-            CustomerName,
+            Customer.Name,
             Total,
             PaymentMethod,
             CreatedAt));
     }
 
-    public void ReplaceItems(IEnumerable<OrderItem> items)
-    {
-        _items.Clear();
-        _items.AddRange(items);
-        UpdatedAt = DateTime.UtcNow;
-        CalculateTotal();
-
-        AddDomainEvent(new OrderUpdatedEvent(Id, EstablishmentId, Total, UpdatedAt));
-    }
-
-    public void AddItem(OrderItem item)
-    {
-        _items.Add(item);
-        UpdatedAt = DateTime.UtcNow;
-        CalculateTotal();
-    }
-
     public void UpdateStatus(OrderStatus newStatus)
     {
+        // Validate state transitions
+        if (Status == OrderStatus.Canceled)
+        {
+            throw new InvalidOperationException("Não é possível alterar o status de um pedido cancelado.");
+        }
+
+        if (Status == OrderStatus.Delivered && newStatus != OrderStatus.Delivered)
+        {
+            throw new InvalidOperationException("Não é possível alterar o status de um pedido já entregue.");
+        }
+
         var oldStatus = Status;
         Status = newStatus;
         UpdatedAt = DateTime.UtcNow;
@@ -91,24 +91,60 @@ public sealed class Order : Entity
         ));
     }
 
-    public void UpdateDetails(
-        string customerName,
-        string? customerPhone,
-        string deliveryAddress,
-        PaymentMethod paymentMethod,
-        decimal deliveryFee,
-        string? notes = null)
+    public void UpdatePaymentMethod(PaymentMethod newPaymentMethod)
     {
-        CustomerName = customerName;
-        CustomerPhone = customerPhone;
+        var oldPaymentMethod = PaymentMethod;
+        PaymentMethod = newPaymentMethod;
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new OrderPaymentMethodChangedEvent(
+            Id,
+            EstablishmentId,
+            oldPaymentMethod,
+            PaymentMethod,
+            Total,
+            UpdatedAt
+        ));
+    }
+
+    public void Delete()
+    {
+        AddDomainEvent(new OrderDeletedEvent(
+            Id,
+            EstablishmentId,
+            Total,
+            PaymentMethod,
+            Status,
+            DateTime.UtcNow
+        ));
+    }
+
+    public void UpdateDetails(
+        CustomerInfo customer,
+        DeliveryAddress deliveryAddress,
+        decimal deliveryFee,
+        string? notes = null,
+        List<OrderItem>? items = null)
+    {
+        var oldTotal = Total;
+        
+        Customer = customer;
         DeliveryAddress = deliveryAddress;
-        PaymentMethod = paymentMethod;
         DeliveryFee = deliveryFee;
         UpdatedAt = DateTime.UtcNow;
         Notes = notes;
-        CalculateTotal();
+        if (items is not null)
+        {
+            _items.Clear();
+            _items.AddRange(items);
+        }
 
-        AddDomainEvent(new OrderUpdatedEvent(Id, EstablishmentId, Total, UpdatedAt));
+        CalculateTotal();
+        
+        if (oldTotal != Total)
+        {
+            AddDomainEvent(new OrderUpdatedEvent(Id, EstablishmentId, oldTotal, Total, PaymentMethod, UpdatedAt));
+        }
     }
 
     private void CalculateTotal()

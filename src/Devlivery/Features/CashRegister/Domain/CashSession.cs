@@ -53,6 +53,50 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void AdjustRevenue(decimal amount, string paymentMethod)
+    {
+        TotalRevenue += amount;
+        
+        var existingItem = PaymentBreakdown.FirstOrDefault(p => p.Method == paymentMethod);
+        if (existingItem is not null)
+        {
+            PaymentBreakdown.Remove(existingItem);
+            var updatedItem = existingItem with { Amount = existingItem.Amount + amount };
+            PaymentBreakdown.Add(updatedItem);
+        }
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Adjusts cash session totals when an order total changes.
+    /// Encapsulates the business logic of adjusting revenue and payment breakdown.
+    /// </summary>
+    public void AdjustOrderTotal(decimal oldTotal, decimal newTotal, string paymentMethod)
+    {
+        var difference = newTotal - oldTotal;
+        
+        if (difference == 0)
+            return;
+
+        TotalRevenue += difference;
+        
+        var existingItem = PaymentBreakdown.FirstOrDefault(p => p.Method == paymentMethod);
+        if (existingItem is not null)
+        {
+            PaymentBreakdown.Remove(existingItem);
+            var updatedItem = existingItem with { Amount = existingItem.Amount + difference };
+            PaymentBreakdown.Add(updatedItem);
+        }
+
+        if (paymentMethod == "Cash")
+        {
+            UpdateExpectedCashAmount(ExpectedCashAmount + difference);
+        }
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void UpdateExpectedCashAmount(decimal expectedAmount)
     {
         ExpectedCashAmount = expectedAmount;
@@ -62,8 +106,7 @@ public sealed class CashSession : Entity
     public void AddDeposit(CashDeposit deposit)
     {
         _deposits.Add(deposit);
-        var totalDeposits = Deposits.Sum(cd => cd.Amount);
-        UpdateExpectedCashAmount(OpeningAmount + totalDeposits);
+        UpdateExpectedCashAmount(OpeningAmount + TotalDeposits());
         UpdatedAt = DateTime.UtcNow;
     }
 
@@ -110,37 +153,34 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void CancelOrder(decimal orderTotal, string paymentMethod)
+    public void RemoveOrder(decimal orderTotal, string paymentMethod)
     {
         TotalRevenue -= orderTotal;
         TotalOrders -= 1;
 
-        var existingItem = PaymentBreakdown.FirstOrDefault(p => p.Method == paymentMethod);
-        if (existingItem is not null)
+        var existingItem = PaymentBreakdown.SingleOrDefault(p => p.Method == paymentMethod);
+        if (existingItem is null)
+            return;
+
+        PaymentBreakdown.Remove(existingItem);
+        var updatedItem = existingItem with
         {
-            PaymentBreakdown.Remove(existingItem);
-
-            var updatedItem = existingItem with
-            {
-                Amount = existingItem.Amount - orderTotal,
-                Count = existingItem.Count - 1
-            };
-
-            // Only add back if count is still positive
-            if (updatedItem.Count > 0)
-            {
-                PaymentBreakdown.Add(updatedItem);
-            }
+            Amount = existingItem.Amount - orderTotal, Count = existingItem.Count - 1
+        };
+        if (updatedItem.Count > 0)
+        {
+            PaymentBreakdown.Add(updatedItem);
         }
 
         if (paymentMethod == "Cash")
         {
-            var totalDeposits = Deposits.Sum(cd => cd.Amount);
-            UpdateExpectedCashAmount(OpeningAmount + totalDeposits - orderTotal);
+            UpdateExpectedCashAmount(OpeningAmount + TotalDeposits() - orderTotal);
         }
 
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public decimal TotalDeposits() => Deposits.Sum(cd => cd.Amount);
 }
 
 public sealed record PaymentBreakdownItem(string Method, decimal Amount, int Count);

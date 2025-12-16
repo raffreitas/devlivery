@@ -1,6 +1,8 @@
 ﻿using Bogus;
 
 using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.ValueObjects;
+using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Tests.Common.Builders;
 
@@ -9,8 +11,9 @@ public class OrderBuilder
     private readonly Faker _faker = new();
 
     private string _customerName;
-    private string _customerPhone;
+    private string? _customerPhone;
     private string _deliveryAddress;
+    private string? _deliveryReference;
     private PaymentMethod _paymentMethod;
     private decimal _deliveryFee;
     private OrderItem[] _orderItems;
@@ -22,6 +25,7 @@ public class OrderBuilder
         _customerName = _faker.Name.FirstName();
         _customerPhone = _faker.Phone.PhoneNumber("## #####-####");
         _deliveryAddress = _faker.Address.FullAddress();
+        _deliveryReference = null;
         _paymentMethod = _faker.PickRandom<PaymentMethod>();
         _deliveryFee = _faker.Random.Decimal(0.0m, 20.0m);
         _orderItems = [];
@@ -34,7 +38,7 @@ public class OrderBuilder
         return this;
     }
 
-    public OrderBuilder WithCustomerPhone(string customerPhone)
+    public OrderBuilder WithCustomerPhone(string? customerPhone)
     {
         _customerPhone = customerPhone;
         return this;
@@ -43,6 +47,12 @@ public class OrderBuilder
     public OrderBuilder WithDeliveryAddress(string deliveryAddress)
     {
         _deliveryAddress = deliveryAddress;
+        return this;
+    }
+
+    public OrderBuilder WithDeliveryReference(string? deliveryReference)
+    {
+        _deliveryReference = deliveryReference;
         return this;
     }
 
@@ -84,19 +94,25 @@ public class OrderBuilder
         if (_establishmentId == Guid.Empty)
             throw new InvalidOperationException("No establishment id has been added");
 
+        // Create value objects
+        PhoneNumber? phone = null;
+        if (!string.IsNullOrEmpty(_customerPhone))
+        {
+            phone = new PhoneNumber(_customerPhone);
+        }
+
+        var customer = CustomerInfo.Create(_customerName, phone);
+        var deliveryAddress = new DeliveryAddress(_deliveryAddress, _deliveryReference);
+
         var order = new Order(
-            customerName: _customerName,
-            customerPhone: _customerPhone,
-            deliveryAddress: _deliveryAddress,
+            customer: customer,
+            deliveryAddress: deliveryAddress,
             paymentMethod: _paymentMethod,
-            status: OrderStatus.Pending,
             deliveryFee: _deliveryFee,
             establishmentId: _establishmentId,
+            items: _orderItems.ToList(),
             notes: _notes
         );
-
-        foreach (var orderItem in _orderItems)
-            order.AddItem(orderItem);
 
         return order;
     }

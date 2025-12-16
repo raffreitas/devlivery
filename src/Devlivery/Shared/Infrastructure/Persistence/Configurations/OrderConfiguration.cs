@@ -1,5 +1,7 @@
 ﻿using Devlivery.Features.Establishments.Domain;
 using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.ValueObjects;
+using Devlivery.Shared.SeedWork;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,9 +15,37 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.HasKey(e => e.Id);
 
         builder.Property(x => x.Id).ValueGeneratedNever();
-        builder.Property(e => e.CustomerName).IsRequired().HasMaxLength(200);
-        builder.Property(e => e.CustomerPhone).IsRequired(false).HasMaxLength(20);
-        builder.Property(e => e.DeliveryAddress).IsRequired().HasMaxLength(500);
+
+        builder.ComplexProperty(o => o.Customer, customer =>
+        {
+            customer.Property(c => c.Name)
+                .HasColumnName("customer_name")
+                .IsRequired()
+                .HasMaxLength(200);
+
+            customer.ComplexProperty(c => c.Phone, phone =>
+            {
+                phone.IsRequired(false);
+
+                phone.Property(p => p.Number)
+                    .HasColumnName("customer_phone")
+                    .HasMaxLength(20);
+            });
+        });
+
+        builder.ComplexProperty(o => o.DeliveryAddress, address =>
+        {
+            address.Property(a => a.FullAddress)
+                .HasColumnName("delivery_address")
+                .IsRequired()
+                .HasMaxLength(500);
+
+            address.Property(a => a.Reference)
+                .HasColumnName("delivery_reference")
+                .IsRequired(false)
+                .HasMaxLength(200);
+        });
+
         builder.Property(e => e.Status).IsRequired().HasMaxLength(20).HasConversion<string>();
         builder.Property(e => e.Total).HasPrecision(18, 2);
         builder.Property(e => e.DeliveryFee).HasPrecision(18, 2);

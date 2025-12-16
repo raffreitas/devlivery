@@ -22,6 +22,7 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: fixture.Faker.Person.FullName,
             CustomerPhone: fixture.Faker.Phone.PhoneNumber(),
             DeliveryAddress: fixture.Faker.Address.FullAddress(),
+            DeliveryReference: null,
             PaymentMethod: PaymentMethod.Pix,
             DeliveryFee: 5.00m,
             Notes: fixture.Faker.Lorem.Sentence()
@@ -44,7 +45,9 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash
         );
 
         // Act
@@ -65,7 +68,9 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash
         );
 
         // Act
@@ -86,7 +91,9 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash
         );
 
         // Act
@@ -107,7 +114,9 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash
         );
 
         // Act
@@ -128,7 +137,9 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: string.Empty,
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash
         );
 
         // Act
@@ -149,7 +160,9 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: new string('A', 201), // 201 caracteres
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash
         );
 
         // Act
@@ -170,7 +183,9 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: new string('1', 21), // 21 caracteres
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash
         );
 
         // Act
@@ -191,7 +206,9 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: null,
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash
         );
 
         // Act
@@ -210,7 +227,9 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: string.Empty,
-            PaymentMethod: PaymentMethod.Cash
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash
         );
 
         // Act
@@ -231,6 +250,7 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: new string('A', 501), // 501 caracteres
+            DeliveryReference: null,
             PaymentMethod: PaymentMethod.Cash
         );
 
@@ -252,8 +272,11 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash,
-            DeliveryFee: -5.00m
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash,
+            DeliveryFee:
+            -5.00m
         );
 
         // Act
@@ -274,8 +297,11 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash,
-            DeliveryFee: 0m
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash,
+            DeliveryFee:
+            0m
         );
 
         // Act
@@ -294,8 +320,11 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash,
-            Notes: new string('A', 501) // 501 caracteres
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash,
+            Notes:
+            new string('A', 501) // 501 caracteres
         );
 
         // Act
@@ -316,8 +345,11 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: PaymentMethod.Cash,
-            Notes: null
+            DeliveryReference: null,
+            PaymentMethod:
+            PaymentMethod.Cash,
+            Notes:
+            null
         );
 
         // Act
@@ -340,7 +372,9 @@ public sealed class CreateOrderValidatorTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "123456789",
             DeliveryAddress: "Endereço Teste",
-            PaymentMethod: paymentMethod
+            DeliveryReference: null,
+            PaymentMethod:
+            paymentMethod
         );
 
         // Act
