@@ -1,7 +1,0 @@
- ---- Cash Sessions
- 1. Quando atualizado o PaymentMethod da Order não está atualizando o Caixa.
- 2. Quando atualizado adicionado itens ao pedido não está atualizando o Caixa.
- 3. Quando obtido o total revenue de uma ordem que foi cancelada está ficando negativo
- 4. Implementar novos handlers dos domain events
- ---- Orders
- 1. Quando aberto o modal de edição do pedido o valor da taxa de entrega não está aparecendo corretamente no campo e não está somando nos totais
