@@ -98,8 +98,9 @@ function mapDepositDtoToDomain(dto: CashDepositDto): CashDeposit {
 
 export const cashService = {
   async getAll(): Promise<CashSession[]> {
-    const response =
-      await api.get<ApiResponse<CashSessionDto[]>>("/api/cash-register/sessions");
+    const response = await api.get<ApiResponse<CashSessionDto[]>>(
+      "/api/cash-register/sessions",
+    );
     return response.data?.map(mapDtoToDomain) ?? [];
   },
 
