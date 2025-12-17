@@ -44,7 +44,7 @@ public sealed class CreateOrderEndpointTests(OrdersWebApplicationFactory factory
                 }
             },
             CustomerName = Faker.Name.FullName(),
-            CustomerPhone = Faker.Phone.PhoneNumber(),
+            CustomerPhone = Faker.Phone.PhoneNumber("## #########"),
             DeliveryAddress = Faker.Address.FullAddress(),
             PaymentMethod = Faker.PickRandom<PaymentMethod>().ToString(),
             DeliveryFee = Faker.Random.Decimal(0, 100)

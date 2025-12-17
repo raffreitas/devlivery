@@ -57,6 +57,7 @@ public sealed class OrdersUnitTestFixture : IDisposable
 
     /// <summary>
     /// Cria uma instância de Order para uso em testes.
+    /// Usa o OrderBuilder com valores padrão sensatos.
     /// </summary>
     public Order CreateOrder(
         string? customerName = null,
@@ -70,26 +71,33 @@ public sealed class OrdersUnitTestFixture : IDisposable
         IEnumerable<OrderItem>? orderItems = null)
     {
         var orderBuilder = new OrderBuilder();
+
         if (!string.IsNullOrEmpty(customerName))
             orderBuilder.WithCustomerName(customerName);
+
         if (!string.IsNullOrEmpty(customerPhone))
             orderBuilder.WithCustomerPhone(customerPhone);
+
         if (!string.IsNullOrEmpty(deliveryAddress))
             orderBuilder.WithDeliveryAddress(deliveryAddress);
-        if (paymentMethod != null)
+
+        if (paymentMethod.HasValue)
             orderBuilder.WithPaymentMethod(paymentMethod.Value);
+
         if (orderItems != null)
             orderBuilder.WithItems(orderItems.ToArray());
+
         if (!string.IsNullOrEmpty(notes))
             orderBuilder.WithNotes(notes);
-        if (establishmentId != null && establishmentId != Guid.Empty)
-            orderBuilder.WithEstablishmentId(establishmentId.Value);
-        if (deliveryFee != null)
+
+        orderBuilder.WithEstablishmentId(establishmentId ?? _defaultTenantId);
+
+        if (deliveryFee.HasValue)
             orderBuilder.WithDeliveryFee(deliveryFee.Value);
 
         var order = orderBuilder.Build();
 
-        if (status != null)
+        if (status.HasValue)
             order.UpdateStatus(status.Value);
 
         return order;

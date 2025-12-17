@@ -9,14 +9,19 @@ public class OrderItemBuilder
 {
     private readonly Faker _faker = new();
     private Product? _product;
+    private Guid _productId;
+    private decimal _unitPrice;
     private int _quantity;
-    private string _notes;
+    private string? _notes;
     private Guid _establishmentId;
 
     public OrderItemBuilder()
     {
-        _quantity = _faker.Random.Int(min: 1);
-        _notes = _faker.Lorem.Sentence();
+        _productId = Guid.NewGuid();
+        _unitPrice = _faker.Random.Decimal(10, 200);
+        _quantity = _faker.Random.Int(1, 10);
+        _notes = null;
+        _establishmentId = Guid.NewGuid();
     }
 
     public OrderItemBuilder WithProduct(Product product)
@@ -49,14 +54,15 @@ public class OrderItemBuilder
         if (_establishmentId == Guid.Empty)
             throw new InvalidOperationException("No establishment id has been added");
 
-        if (_product == null)
-            throw new InvalidOperationException("No product has been added");
+        // Se um produto foi fornecido, usar os seus dados
+        var productId = _product?.Id ?? _productId;
+        var unitPrice = _product?.Price ?? _unitPrice;
 
         return new OrderItem(
-            productId: _product.Id,
+            productId: productId,
             establishmentId: _establishmentId,
             quantity: _quantity,
-            unitPrice: _product.Price,
+            unitPrice: unitPrice,
             notes: _notes);
     }
 }

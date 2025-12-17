@@ -28,6 +28,7 @@ public class OrderBuilder
         _deliveryReference = null;
         _paymentMethod = _faker.PickRandom<PaymentMethod>();
         _deliveryFee = _faker.Random.Decimal(0.0m, 20.0m);
+        _establishmentId = Guid.NewGuid();
         _orderItems = [];
         _notes = null;
     }
@@ -88,11 +89,13 @@ public class OrderBuilder
 
     public Order Build()
     {
-        if (_orderItems.Length == 0)
-            throw new InvalidOperationException("No order items have been added");
-
         if (_establishmentId == Guid.Empty)
             throw new InvalidOperationException("No establishment id has been added");
+
+        // Se não houver items, criar um item padrão
+        var items = _orderItems.Length == 0
+            ? new[] { CreateDefaultOrderItem() }
+            : _orderItems;
 
         // Create value objects
         PhoneNumber? phone = null;
@@ -110,10 +113,18 @@ public class OrderBuilder
             paymentMethod: _paymentMethod,
             deliveryFee: _deliveryFee,
             establishmentId: _establishmentId,
-            items: _orderItems.ToList(),
+            items: items.ToList(),
             notes: _notes
         );
 
         return order;
+    }
+
+    private OrderItem CreateDefaultOrderItem()
+    {
+        return new OrderItemBuilder()
+            .WithEstablishmentId(_establishmentId)
+            .WithQuantity(_faker.Random.Int(1, 5))
+            .Build();
     }
 }

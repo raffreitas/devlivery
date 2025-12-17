@@ -38,5 +38,5 @@ public sealed record PhoneNumber
 
     public override string ToString() => Formatted;
 
-    public static implicit operator string(PhoneNumber phone) => phone.Number;
+    public static implicit operator string?(PhoneNumber? phone) => phone?.Number;
 }
