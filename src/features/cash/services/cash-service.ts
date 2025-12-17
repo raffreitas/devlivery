@@ -26,7 +26,7 @@ interface CashSessionDto {
   }>;
   startAt: string;
   endAt: string | null;
-  status: string;
+  status: CashSession["status"] | string;
   notes: string | null;
 }
 
@@ -69,7 +69,7 @@ function mapDtoToDomain(dto: CashSessionDto): CashSession {
     startAt: dto.startAt,
     endAt: dto.endAt ?? undefined,
     notes: dto.notes ?? undefined,
-    status: dto.status as "open" | "closed",
+    status: dto.status as CashSession["status"],
     salesTotals: {
       totalRevenue: dto.totalRevenue,
       totalOrders: dto.totalOrders,

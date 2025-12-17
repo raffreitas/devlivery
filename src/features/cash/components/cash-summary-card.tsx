@@ -29,7 +29,7 @@ export function CashSummaryCard({
   onOpenClose,
   onAddDeposit,
 }: CashSummaryCardProps) {
-  const isOpen = session.status === "open";
+  const isOpen = session.status === "Open";
   const expectedCashAmount = session.expectedCashAmount;
   const difference = session.closingAmount
     ? session.closingAmount - expectedCashAmount

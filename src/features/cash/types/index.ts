@@ -1,6 +1,6 @@
 import z from "zod";
 
-export type CashSessionStatus = "open" | "closed";
+export type CashSessionStatus = "Open" | "Closed";
 
 export interface PaymentMethodTotal {
   method: string;
