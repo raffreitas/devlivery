@@ -1,3 +1,4 @@
+using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
@@ -14,10 +15,11 @@ public static class GetCashSessionsEndpoint
             .Produces<ApiResponse<List<GetCashSessionsResponse>>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Ok<ApiResponse<List<GetCashSessionsResponse>>>, BadRequest<ApiResponse<List<GetCashSessionsResponse>>>>> Handle(
+    private static async Task<Results<Ok<ApiResponse<List<GetCashSessionsResponse>>>,
+        BadRequest<ApiResponse<List<GetCashSessionsResponse>>>>> Handle(
         DateTime? start,
         DateTime? end,
-        string? status,
+        CashSessionStatus? status,
         GetCashSessionsHandler handler,
         CancellationToken ct)
     {

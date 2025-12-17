@@ -2,7 +2,7 @@ using Devlivery.Features.CashRegister.Domain;
 
 using Shouldly;
 
-namespace Devlivery.Tests.Features.CashRegister;
+namespace Devlivery.Tests.Features.CashRegister.Domain;
 
 [Collection("CashRegister Unit Tests")]
 [Trait("Category", "Unit Tests")]

@@ -1,4 +1,3 @@
-using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
@@ -21,9 +20,9 @@ public sealed class GetCashSessionsHandler(ApplicationDbContext dbContext)
         sessionsQuery = sessionsQuery
             .WhereDateInRange(cs => cs.StartAt, query.StartDate, query.EndDate);
 
-        if (!string.IsNullOrWhiteSpace(query.Status) && Enum.TryParse(query.Status, true, out CashSessionStatus status))
+        if (query.Status is not null)
         {
-            sessionsQuery = sessionsQuery.Where(cs => cs.Status == status);
+            sessionsQuery = sessionsQuery.Where(cs => cs.Status == query.Status);
         }
 
         var sessions = await sessionsQuery

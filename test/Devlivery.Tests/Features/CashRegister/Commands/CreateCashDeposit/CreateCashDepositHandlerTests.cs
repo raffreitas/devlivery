@@ -168,7 +168,7 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        result.Errors.First().Message.ShouldContain("não encontrado");
+        result.Errors[0].Message.ShouldContain("não encontrado");
     }
 
     [Fact]
@@ -181,7 +181,7 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
 
         var cashSession = fixture.CreateCashSession();
         cashSession.Close(100.00m, null);
-        
+
         cashSessionRepository.GetByIdAsync(cashSession.Id, Arg.Any<CancellationToken>())
             .Returns(cashSession);
 

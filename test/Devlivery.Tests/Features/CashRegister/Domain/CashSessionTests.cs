@@ -2,7 +2,7 @@ using Devlivery.Features.CashRegister.Domain;
 
 using Shouldly;
 
-namespace Devlivery.Tests.Features.CashRegister;
+namespace Devlivery.Tests.Features.CashRegister.Domain;
 
 [Collection("CashRegister Unit Tests")]
 [Trait("Category", "Unit Tests")]
@@ -70,11 +70,11 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
 
         // Assert
         cashSession.PaymentBreakdown.Count.ShouldBe(2);
-        
+
         var cashBreakdown = cashSession.PaymentBreakdown.Single(p => p.Method == "Cash");
         cashBreakdown.Amount.ShouldBe(40.00m);
         cashBreakdown.Count.ShouldBe(2);
-        
+
         var cardBreakdown = cashSession.PaymentBreakdown.Single(p => p.Method == "Card");
         cardBreakdown.Amount.ShouldBe(30.00m);
         cardBreakdown.Count.ShouldBe(1);
@@ -88,13 +88,13 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
 
         // Act - RecordOrder atualiza ExpectedCashAmount baseado apenas na última ordem
         cashSession.RecordOrder(50.00m, "Cash");
-        
+
         // Assert - Após primeira ordem
         cashSession.ExpectedCashAmount.ShouldBe(150.00m); // 100 + 50
-        
+
         // Act - Segunda ordem
         cashSession.RecordOrder(30.00m, "Cash");
-        
+
         // Assert - ExpectedCashAmount é recalculado mas só com a última ordem
         cashSession.ExpectedCashAmount.ShouldBe(130.00m); // 100 + 0 (deposits) + 30 (last order)
     }
@@ -265,7 +265,7 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
         // Arrange
         var cashSession = fixture.CreateCashSession();
         cashSession.RecordOrder(50.00m, "Cash");
-        
+
         // Act
         cashSession.AdjustOrderTotal(oldTotal: 50.00m, newTotal: 75.00m, "Cash");
 
@@ -279,7 +279,7 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
         // Arrange
         var cashSession = fixture.CreateCashSession();
         cashSession.RecordOrder(50.00m, "Cash");
-        
+
         // Act
         cashSession.AdjustOrderTotal(oldTotal: 50.00m, newTotal: 30.00m, "Cash");
 
@@ -295,7 +295,7 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
         cashSession.RecordOrder(50.00m, "Cash");
         var initialRevenue = cashSession.TotalRevenue;
         var initialExpected = cashSession.ExpectedCashAmount;
-        
+
         // Act
         cashSession.AdjustOrderTotal(oldTotal: 50.00m, newTotal: 50.00m, "Cash");
 
@@ -310,7 +310,7 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
         // Arrange
         var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
         cashSession.RecordOrder(50.00m, "Cash");
-        
+
         // Act
         cashSession.AdjustOrderTotal(oldTotal: 50.00m, newTotal: 75.00m, "Cash");
 
@@ -324,7 +324,7 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
         // Arrange
         var cashSession = fixture.CreateCashSession();
         cashSession.RecordOrder(50.00m, "Cash");
-        
+
         // Act
         cashSession.AdjustOrderTotal(oldTotal: 50.00m, newTotal: 75.00m, "Cash");
 
@@ -338,7 +338,7 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
     {
         // Arrange
         var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
-        
+
         // Act
         cashSession.UpdateExpectedCashAmount(250.00m);
 
