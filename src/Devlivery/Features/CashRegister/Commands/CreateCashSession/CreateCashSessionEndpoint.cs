@@ -12,7 +12,7 @@ public static class CreateCashSessionEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("", Handle)
+        app.MapPost("sessions", Handle)
             .Produces<ApiResponse<CreateCashSessionResponse>>(StatusCodes.Status201Created)
             .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
             .Produces<ApiResponse>(StatusCodes.Status409Conflict);
@@ -27,7 +27,7 @@ public static class CreateCashSessionEndpoint
         var result = await sender.Send(command, ct);
 
         return result.IsSuccess
-            ? result.ToCreated($"/api/cash-sessions/{result.Value.Id}")
+            ? result.ToCreated($"/api/cash-register/sessions/{result.Value.Id}")
             : result.GetError() switch
             {
                 ValidationError => result.ToBadRequest(),

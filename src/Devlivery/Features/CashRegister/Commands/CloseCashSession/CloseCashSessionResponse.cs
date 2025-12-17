@@ -33,7 +33,7 @@ public sealed record CloseCashSessionResponse(
             cashSession.ClosingAmount ?? 0,
             cashSession.TotalRevenue,
             cashSession.TotalOrders,
-            cashSession.Status.ToString().ToLowerInvariant(),
+            cashSession.Status.ToString(),
             paymentBreakdownItems,
             expectedCashAmount,
             cashSession.Notes);

@@ -1,5 +1,4 @@
 ﻿using Devlivery.Features.CashRegister.Infrastructure;
-using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Events;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;

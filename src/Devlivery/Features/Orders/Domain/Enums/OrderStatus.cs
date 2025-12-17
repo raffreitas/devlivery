@@ -1,4 +1,4 @@
-﻿namespace Devlivery.Features.Orders.Domain;
+﻿namespace Devlivery.Features.Orders.Domain.Enums;
 
 public enum OrderStatus
 {

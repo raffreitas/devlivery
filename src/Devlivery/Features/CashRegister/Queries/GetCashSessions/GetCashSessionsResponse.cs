@@ -45,7 +45,7 @@ public sealed record GetCashSessionsResponse(
             new ReadOnlyCollection<PaymentBreakdownDto>(payments),
             cashSession.StartAt,
             cashSession.EndAt,
-            cashSession.Status.ToString().ToLowerInvariant(),
+            cashSession.Status.ToString(),
             cashSession.Notes);
     }
 }

@@ -9,7 +9,7 @@ public static class GetActiveCashSessionEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("active", Handle)
+        app.MapGet("sessions/active", Handle)
             .Produces<ApiResponse<GetActiveCashSessionResponse>>()
             .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }

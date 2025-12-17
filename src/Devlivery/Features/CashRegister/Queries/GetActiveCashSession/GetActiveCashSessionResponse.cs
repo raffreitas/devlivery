@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 
 using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.Enums;
 
 namespace Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
 
@@ -46,7 +46,7 @@ public sealed record GetActiveCashSessionResponse(
             new ReadOnlyCollection<PaymentBreakdownDto>(payments),
             cashSession.StartAt,
             cashSession.EndAt,
-            cashSession.Status.ToString().ToLowerInvariant(),
+            cashSession.Status.ToString(),
             cashSession.Notes);
     }
 }

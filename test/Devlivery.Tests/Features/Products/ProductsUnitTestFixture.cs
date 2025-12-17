@@ -2,7 +2,6 @@ using Bogus;
 
 using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
 using Devlivery.Shared.Infrastructure.Tenancy;
 
 using NSubstitute;

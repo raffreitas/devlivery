@@ -1,4 +1,4 @@
-﻿using Devlivery.Features.Orders.Domain;
+﻿using Devlivery.Features.Orders.Domain.Enums;
 
 using FluentResults;
 

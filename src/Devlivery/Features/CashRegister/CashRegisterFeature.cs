@@ -38,7 +38,7 @@ public static class CashRegisterFeature
 
     public static IEndpointRouteBuilder MapCashRegisterEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/cash-sessions").WithTags("CashRegister");
+        var group = app.MapGroup("/api/cash-register").WithTags("CashRegister");
 
         CreateCashSessionEndpoint.MapEndpoint(group);
         CloseCashSessionEndpoint.MapEndpoint(group);

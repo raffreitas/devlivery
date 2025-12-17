@@ -1,6 +1,5 @@
 ﻿using Devlivery.Features.Establishments.Domain;
 using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.ValueObjects;
 using Devlivery.Shared.SeedWork;
 
 using Microsoft.EntityFrameworkCore;
@@ -23,14 +22,14 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
                 .IsRequired()
                 .HasMaxLength(200);
 
-            customer.ComplexProperty(c => c.Phone, phone =>
-            {
-                phone.IsRequired(false);
-
-                phone.Property(p => p.Number)
-                    .HasColumnName("customer_phone")
-                    .HasMaxLength(20);
-            });
+            customer.Property(c => c.Phone)
+                .HasColumnName("customer_phone")
+                .IsRequired(false)
+                .HasMaxLength(20)
+                .HasConversion(
+                    v => v != null ? v.Number : null,
+                    v => !string.IsNullOrWhiteSpace(v) ? new PhoneNumber(v) : null
+                );
         });
 
         builder.ComplexProperty(o => o.DeliveryAddress, address =>

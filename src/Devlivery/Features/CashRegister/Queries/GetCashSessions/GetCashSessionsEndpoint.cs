@@ -9,7 +9,7 @@ public static class GetCashSessionsEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("", Handle)
+        app.MapGet("sessions", Handle)
             .Produces<ApiResponse<List<GetCashSessionsResponse>>>()
             .Produces<ApiResponse<List<GetCashSessionsResponse>>>(StatusCodes.Status400BadRequest);
     }

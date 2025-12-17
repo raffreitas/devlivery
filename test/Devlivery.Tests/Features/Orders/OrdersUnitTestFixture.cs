@@ -1,6 +1,8 @@
 using Bogus;
 
 using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.Entities;
+using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;

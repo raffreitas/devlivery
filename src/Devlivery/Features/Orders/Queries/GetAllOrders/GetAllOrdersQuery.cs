@@ -1,4 +1,4 @@
-using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.Enums;
 
 namespace Devlivery.Features.Orders.Queries.GetAllOrders;
 

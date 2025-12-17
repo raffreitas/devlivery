@@ -1,6 +1,6 @@
 using Devlivery.Shared.SeedWork;
 
-namespace Devlivery.Features.Orders.Domain;
+namespace Devlivery.Features.Orders.Domain.Entities;
 
 /// <summary>
 /// Child Entity of Order aggregate.

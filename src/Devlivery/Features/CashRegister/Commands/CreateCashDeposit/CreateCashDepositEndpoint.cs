@@ -18,7 +18,7 @@ public static class CreateCashDepositEndpoint
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("{cashSessionId:guid}/deposits", Handle)
+        app.MapPost("sessions/{cashSessionId:guid}/deposits", Handle)
             .Produces<ApiResponse<CreateCashDepositResponse>>(StatusCodes.Status201Created)
             .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
             .Produces<ApiResponse>(StatusCodes.Status404NotFound)
@@ -43,7 +43,7 @@ public static class CreateCashDepositEndpoint
         var result = await sender.Send(command, ct);
 
         return result.IsSuccess
-            ? result.ToCreated($"/api/cash-sessions/{cashSessionId}/deposits/{result.Value.Id}")
+            ? result.ToCreated($"/api/cash-register/sessions/{cashSessionId}/deposits/{result.Value.Id}")
             : result.GetError() switch
             {
                 ValidationError => result.ToBadRequest(),

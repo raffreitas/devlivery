@@ -1,4 +1,5 @@
-﻿using Devlivery.Shared.SeedWork;
+﻿using Devlivery.Features.Orders.Domain.Enums;
+using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Features.Orders.Domain.Events;
 

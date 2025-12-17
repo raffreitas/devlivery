@@ -1,4 +1,4 @@
-using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;

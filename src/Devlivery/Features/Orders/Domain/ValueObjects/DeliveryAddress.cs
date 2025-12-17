@@ -14,9 +14,6 @@ public sealed record DeliveryAddress
         if (string.IsNullOrWhiteSpace(fullAddress))
             throw new ArgumentException("Endereço de entrega é obrigatório", nameof(fullAddress));
 
-        if (fullAddress.Length < 10)
-            throw new ArgumentException("Endereço de entrega deve ser mais detalhado", nameof(fullAddress));
-
         FullAddress = fullAddress.Trim();
         Reference = reference?.Trim();
     }

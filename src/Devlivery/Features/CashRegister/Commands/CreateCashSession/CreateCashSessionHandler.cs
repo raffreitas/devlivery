@@ -44,7 +44,7 @@ public sealed class CreateCashSessionHandler(
             cashSession.AttendantName,
             cashSession.OpeningAmount,
             cashSession.StartAt,
-            cashSession.Status.ToString().ToLowerInvariant());
+            cashSession.Status.ToString());
 
         return Result.Ok(response);
     }

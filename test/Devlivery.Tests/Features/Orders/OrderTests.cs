@@ -1,4 +1,6 @@
 using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.Entities;
+using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Orders.Domain.Events;
 using Devlivery.Features.Orders.Domain.ValueObjects;
 using Devlivery.Shared.SeedWork;
@@ -9,28 +11,21 @@ namespace Devlivery.Tests.Features.Orders;
 
 [Collection("Orders Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class OrderTests
+public sealed class OrderTests(OrdersUnitTestFixture fixture)
 {
-    private readonly OrdersUnitTestFixture _fixture;
-
-    public OrderTests(OrdersUnitTestFixture fixture)
-    {
-        _fixture = fixture;
-    }
-
     [Fact]
     public void Constructor_Should_Create_Order_With_Correct_Properties()
     {
         // Arrange
-        var customerName = "João Silva";
+        const string customerName = "João Silva";
         var customerPhone = new PhoneNumber("11987654321");
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123", null);
-        var paymentMethod = PaymentMethod.Pix;
-        var deliveryFee = 10.00m;
+        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
+        const PaymentMethod paymentMethod = PaymentMethod.Pix;
+        const decimal deliveryFee = 10.00m;
         var establishmentId = Guid.NewGuid();
-        var notes = "Sem cebola";
+        const string notes = "Sem cebola";
         var customer = CustomerInfo.Create(customerName, customerPhone);
-        var item = _fixture.CreateOrderItem(establishmentId: establishmentId);
+        var item = fixture.CreateOrderItem(establishmentId: establishmentId);
 
         // Act
         var order = new Order(
@@ -39,7 +34,7 @@ public sealed class OrderTests
             paymentMethod: paymentMethod,
             deliveryFee: deliveryFee,
             establishmentId: establishmentId,
-            items: new List<OrderItem> { item },
+            items: [item],
             notes: notes
         );
 
@@ -63,10 +58,10 @@ public sealed class OrderTests
     {
         // Arrange
         var customer = CustomerInfo.Create("João Silva", new PhoneNumber("11987654321"));
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123", null);
+        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
         var establishmentId = Guid.NewGuid();
-        var item1 = _fixture.CreateOrderItem(establishmentId: establishmentId, quantity: 2, unitPrice: 50.00m);
-        var item2 = _fixture.CreateOrderItem(establishmentId: establishmentId, quantity: 1, unitPrice: 30.00m);
+        var item1 = fixture.CreateOrderItem(establishmentId: establishmentId, quantity: 2, unitPrice: 50.00m);
+        var item2 = fixture.CreateOrderItem(establishmentId: establishmentId, quantity: 1, unitPrice: 30.00m);
 
         // Act
         var order = new Order(
@@ -75,7 +70,7 @@ public sealed class OrderTests
             paymentMethod: PaymentMethod.Cash,
             deliveryFee: 10.00m,
             establishmentId: establishmentId,
-            items: new List<OrderItem> { item1, item2 }
+            items: [item1, item2]
         );
 
         // Assert
@@ -86,8 +81,8 @@ public sealed class OrderTests
     public void Constructor_Should_Throw_When_No_Items_Provided()
     {
         // Arrange
-        var customer = CustomerInfo.Create("João Silva", null);
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123", null);
+        var customer = CustomerInfo.Create("João Silva");
+        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => new Order(
@@ -104,10 +99,10 @@ public sealed class OrderTests
     public void Constructor_Should_Throw_When_DeliveryFee_Is_Negative()
     {
         // Arrange
-        var customer = CustomerInfo.Create("João Silva", null);
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123", null);
+        var customer = CustomerInfo.Create("João Silva");
+        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
         var establishmentId = Guid.NewGuid();
-        var item = _fixture.CreateOrderItem(establishmentId: establishmentId);
+        var item = fixture.CreateOrderItem(establishmentId: establishmentId);
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => new Order(
@@ -116,7 +111,7 @@ public sealed class OrderTests
             paymentMethod: PaymentMethod.Cash,
             deliveryFee: -5.00m,
             establishmentId: establishmentId,
-            items: new List<OrderItem> { item }
+            items: [item]
         ));
     }
 
@@ -125,9 +120,9 @@ public sealed class OrderTests
     {
         // Arrange
         var customer = CustomerInfo.Create("João Silva", new PhoneNumber("11987654321"));
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123", null);
+        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
         var establishmentId = Guid.NewGuid();
-        var item = _fixture.CreateOrderItem(establishmentId: establishmentId);
+        var item = fixture.CreateOrderItem(establishmentId: establishmentId);
 
         // Act
         var order = new Order(
@@ -136,7 +131,7 @@ public sealed class OrderTests
             paymentMethod: PaymentMethod.Pix,
             deliveryFee: 10.00m,
             establishmentId: establishmentId,
-            items: new List<OrderItem> { item }
+            items: [item]
         );
 
         // Assert
@@ -151,7 +146,7 @@ public sealed class OrderTests
     public void UpdateStatus_Should_Change_Status()
     {
         // Arrange
-        var order = _fixture.CreateOrder();
+        var order = fixture.CreateOrder();
 
         // Act
         order.UpdateStatus(OrderStatus.Preparing);
@@ -164,7 +159,7 @@ public sealed class OrderTests
     public async Task UpdateStatus_Should_Update_UpdatedAt_Timestamp()
     {
         // Arrange
-        var order = _fixture.CreateOrder();
+        var order = fixture.CreateOrder();
         var originalUpdatedAt = order.UpdatedAt;
         await Task.Delay(10);
 
@@ -179,7 +174,7 @@ public sealed class OrderTests
     public void UpdateStatus_Should_Raise_OrderStatusChangedEvent()
     {
         // Arrange
-        var order = _fixture.CreateOrder();
+        var order = fixture.CreateOrder();
 
         // Act
         order.UpdateStatus(OrderStatus.Delivered);
@@ -195,7 +190,7 @@ public sealed class OrderTests
     public void UpdateStatus_Should_Throw_When_Order_Is_Canceled()
     {
         // Arrange
-        var order = _fixture.CreateOrder(status: OrderStatus.Canceled);
+        var order = fixture.CreateOrder(status: OrderStatus.Canceled);
 
         // Act & Assert
         Should.Throw<InvalidOperationException>(() => order.UpdateStatus(OrderStatus.Preparing));
@@ -205,7 +200,7 @@ public sealed class OrderTests
     public void UpdateStatus_Should_Throw_When_Order_Is_Delivered()
     {
         // Arrange
-        var order = _fixture.CreateOrder(status: OrderStatus.Delivered);
+        var order = fixture.CreateOrder(status: OrderStatus.Delivered);
 
         // Act & Assert
         Should.Throw<InvalidOperationException>(() => order.UpdateStatus(OrderStatus.Preparing));
@@ -215,7 +210,7 @@ public sealed class OrderTests
     public void UpdateDetails_Should_Update_Customer_Information()
     {
         // Arrange
-        var order = _fixture.CreateOrder(
+        var order = fixture.CreateOrder(
             customerName: "Nome Original",
             customerPhone: "11111111111",
             deliveryAddress: "Endereço Original",
@@ -225,7 +220,7 @@ public sealed class OrderTests
         );
 
         var newCustomer = CustomerInfo.Create("Nome Atualizado", new PhoneNumber("22222222222"));
-        var newDeliveryAddress = new DeliveryAddress("Endereço Atualizado", null);
+        var newDeliveryAddress = new DeliveryAddress("Endereço Atualizado");
 
         // Act
         order.UpdateDetails(
@@ -250,17 +245,17 @@ public sealed class OrderTests
     {
         // Arrange
         var establishmentId = Guid.NewGuid();
-        var item = _fixture.CreateOrderItem(quantity: 2, unitPrice: 50.00m, establishmentId: establishmentId);
-        var customer = CustomerInfo.Create("João Silva", null);
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123", null);
-        
+        var item = fixture.CreateOrderItem(quantity: 2, unitPrice: 50.00m, establishmentId: establishmentId);
+        var customer = CustomerInfo.Create("João Silva");
+        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
+
         var order = new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
             paymentMethod: PaymentMethod.Cash,
             deliveryFee: 5.00m,
             establishmentId: establishmentId,
-            items: new List<OrderItem> { item }
+            items: [item]
         );
 
         // Total inicial: (2 * 50.00) + 5.00 = 105.00
@@ -282,9 +277,9 @@ public sealed class OrderTests
     {
         // Arrange
         var establishmentId = Guid.NewGuid();
-        var originalItem = _fixture.CreateOrderItem(establishmentId: establishmentId);
-        var customer = CustomerInfo.Create("João Silva", null);
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123", null);
+        var originalItem = fixture.CreateOrderItem(establishmentId: establishmentId);
+        var customer = CustomerInfo.Create("João Silva");
+        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
 
         var order = new Order(
             customer: customer,
@@ -292,18 +287,18 @@ public sealed class OrderTests
             paymentMethod: PaymentMethod.Cash,
             deliveryFee: 5.00m,
             establishmentId: establishmentId,
-            items: new List<OrderItem> { originalItem }
+            items: [originalItem]
         );
 
-        var newItem1 = _fixture.CreateOrderItem(quantity: 2, unitPrice: 25.00m, establishmentId: establishmentId);
-        var newItem2 = _fixture.CreateOrderItem(quantity: 1, unitPrice: 40.00m, establishmentId: establishmentId);
+        var newItem1 = fixture.CreateOrderItem(quantity: 2, unitPrice: 25.00m, establishmentId: establishmentId);
+        var newItem2 = fixture.CreateOrderItem(quantity: 1, unitPrice: 40.00m, establishmentId: establishmentId);
 
         // Act
         order.UpdateDetails(
             customer: customer,
             deliveryAddress: deliveryAddress,
             deliveryFee: 10.00m,
-            items: new List<OrderItem> { newItem1, newItem2 }
+            items: [newItem1, newItem2]
         );
 
         // Assert
@@ -316,12 +311,12 @@ public sealed class OrderTests
     public async Task UpdateDetails_Should_Update_UpdatedAt_Timestamp()
     {
         // Arrange
-        var order = _fixture.CreateOrder();
+        var order = fixture.CreateOrder();
         var originalUpdatedAt = order.UpdatedAt;
         await Task.Delay(10);
 
-        var newCustomer = CustomerInfo.Create("Novo Nome", null);
-        var newDeliveryAddress = new DeliveryAddress("Novo Endereço", null);
+        var newCustomer = CustomerInfo.Create("Novo Nome");
+        var newDeliveryAddress = new DeliveryAddress("Novo Endereço");
 
         // Act
         order.UpdateDetails(
@@ -339,9 +334,9 @@ public sealed class OrderTests
     {
         // Arrange
         var establishmentId = Guid.NewGuid();
-        var item = _fixture.CreateOrderItem(quantity: 2, unitPrice: 50.00m, establishmentId: establishmentId);
-        var customer = CustomerInfo.Create("João Silva", null);
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123", null);
+        var item = fixture.CreateOrderItem(quantity: 2, unitPrice: 50.00m, establishmentId: establishmentId);
+        var customer = CustomerInfo.Create("João Silva");
+        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
 
         var order = new Order(
             customer: customer,
@@ -349,7 +344,7 @@ public sealed class OrderTests
             paymentMethod: PaymentMethod.Cash,
             deliveryFee: 5.00m,
             establishmentId: establishmentId,
-            items: new List<OrderItem> { item }
+            items: [item]
         );
 
         order.ClearDomainEvents(); // Clear creation event
@@ -373,10 +368,10 @@ public sealed class OrderTests
     public void UpdateDetails_Should_Not_Raise_OrderUpdatedEvent_When_Total_Does_Not_Change()
     {
         // Arrange
-        var order = _fixture.CreateOrder();
+        var order = fixture.CreateOrder();
         var oldTotal = order.Total;
-        var newCustomer = CustomerInfo.Create("Novo Nome", null);
-        var newDeliveryAddress = new DeliveryAddress("Novo Endereço", null);
+        var newCustomer = CustomerInfo.Create("Novo Nome");
+        var newDeliveryAddress = new DeliveryAddress("Novo Endereço");
 
         order.ClearDomainEvents(); // Clear creation event
 
@@ -396,7 +391,7 @@ public sealed class OrderTests
     public void UpdatePaymentMethod_Should_Change_PaymentMethod()
     {
         // Arrange
-        var order = _fixture.CreateOrder(paymentMethod: PaymentMethod.Cash);
+        var order = fixture.CreateOrder(paymentMethod: PaymentMethod.Cash);
 
         // Act
         order.UpdatePaymentMethod(PaymentMethod.Pix);
@@ -409,7 +404,7 @@ public sealed class OrderTests
     public void UpdatePaymentMethod_Should_Raise_OrderPaymentMethodChangedEvent()
     {
         // Arrange
-        var order = _fixture.CreateOrder(paymentMethod: PaymentMethod.Cash);
+        var order = fixture.CreateOrder(paymentMethod: PaymentMethod.Cash);
 
         // Act
         order.UpdatePaymentMethod(PaymentMethod.CreditCard);
@@ -425,7 +420,7 @@ public sealed class OrderTests
     public void Delete_Should_Raise_OrderDeletedEvent()
     {
         // Arrange
-        var order = _fixture.CreateOrder();
+        var order = fixture.CreateOrder();
 
         // Act
         order.Delete();
@@ -442,11 +437,11 @@ public sealed class OrderTests
     {
         // Arrange
         var establishmentId = Guid.NewGuid();
-        var item1 = _fixture.CreateOrderItem(quantity: 2, unitPrice: 30.00m, establishmentId: establishmentId); // 60.00
-        var item2 = _fixture.CreateOrderItem(quantity: 3, unitPrice: 15.00m, establishmentId: establishmentId); // 45.00
-        var item3 = _fixture.CreateOrderItem(quantity: 1, unitPrice: 25.00m, establishmentId: establishmentId); // 25.00
-        var customer = CustomerInfo.Create("João Silva", null);
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123", null);
+        var item1 = fixture.CreateOrderItem(quantity: 2, unitPrice: 30.00m, establishmentId: establishmentId); // 60.00
+        var item2 = fixture.CreateOrderItem(quantity: 3, unitPrice: 15.00m, establishmentId: establishmentId); // 45.00
+        var item3 = fixture.CreateOrderItem(quantity: 1, unitPrice: 25.00m, establishmentId: establishmentId); // 25.00
+        var customer = CustomerInfo.Create("João Silva");
+        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
 
         // Act
         var order = new Order(
@@ -455,7 +450,7 @@ public sealed class OrderTests
             paymentMethod: PaymentMethod.Cash,
             deliveryFee: 7.50m,
             establishmentId: establishmentId,
-            items: new List<OrderItem> { item1, item2, item3 }
+            items: [item1, item2, item3]
         );
 
         // Assert

@@ -9,7 +9,7 @@ public static class GetCashSessionDepositsEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("{cashSessionId:guid}/deposits", Handle)
+        app.MapGet("sessions/{cashSessionId:guid}/deposits", Handle)
             .Produces<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>();
     }
 

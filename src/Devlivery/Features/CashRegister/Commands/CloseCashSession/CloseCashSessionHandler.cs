@@ -1,15 +1,13 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
 
 using Mediator;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
 

@@ -2,8 +2,6 @@ using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Products.Commands.DeleteProduct;
 using Devlivery.Shared.Application.Errors;
 
-using Microsoft.EntityFrameworkCore;
-
 using NSubstitute;
 
 using Shouldly;

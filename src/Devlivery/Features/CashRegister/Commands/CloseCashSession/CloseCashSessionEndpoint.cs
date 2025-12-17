@@ -14,7 +14,7 @@ public static class CloseCashSessionEndpoint
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("{id:guid}/close", Handle)
+        app.MapPut("sessions/{id:guid}/close", Handle)
             .Produces<ApiResponse<CloseCashSessionResponse>>()
             .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
             .Produces<ApiResponse>(StatusCodes.Status404NotFound)

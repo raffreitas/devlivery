@@ -1,5 +1,6 @@
 using Devlivery.Features.Orders.Commands.CreateOrder;
 using Devlivery.Features.Orders.Domain;
+using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Application.Errors;
 

@@ -1,110 +1,89 @@
-# Makefile for Devlivery WebAPI migrations management
-# Versioning standard: vXXX (ex: v001, v002, v003)
+# ==============================================================================
+# DEVLIVERY WEBAPI MAKEFILE (Windows Compatible)
+# ==============================================================================
 
-# Project directory
-PROJECT_DIR = src/Devlivery
-
-# Migrations paths
-MIGRATIONS_DB_PATH = ./Shared/Database/Migrations
-MIGRATIONS_IDENTITY_PATH = ./Shared/Identity/Migrations
+PROJECT_NAME = Devlivery
+PROJECT_DIR  = src/Devlivery
+TEST_PROJECT = test/Devlivery.Tests/Devlivery.Tests.csproj
 
 # Contexts
-CONTEXT_DB = ApplicationDbContext
+CONTEXT_DB       = ApplicationDbContext
 CONTEXT_IDENTITY = ApplicationIdentityDbContext
 
-# Colors for output (PowerShell) - Note: This comment is retained but colors themselves are removed from output messages
-.PHONY: help migration-db migration-identity migration-new migration-update-db migration-update-identity migration-status migration-remove-db migration-remove-identity migration-apply-all
+# Migrations Paths
+MIGRATIONS_DB_PATH       = ./Shared/Infrastructure/Persistence/Migrations
+MIGRATIONS_IDENTITY_PATH = ./Shared/Infrastructure/Identity/Migrations
 
+DOTNET_CMD = dotnet
+
+.PHONY: help build clean test db-add db-update
+
+# No Windows, o 'help' manual é mais seguro para evitar erro de comando não encontrado
 help:
-	@echo "==================================================="
-	@echo "  Devlivery WebAPI"
-	@echo "==================================================="
-	@echo ""
-	@echo "Available commands:"
-	@echo ""
-	@echo "  make migration-new VERSION=XXX        - Creates ApplicationDbContext migration"
-	@echo "  make migration-db VERSION=XXX         - Creates ApplicationDbContext migration"
-	@echo "  make migration-identity VERSION=XXX   - Creates ApplicationIdentityDbContext migration"
-	@echo ""
-	@echo "  make migration-update-db              - Applies Database migrations"
-	@echo "  make migration-update-identity        - Applies Identity migrations"
-	@echo ""
-	@echo "  make migration-status                 - Shows migrations status"
-	@echo "  make migration-remove-db              - Removes last Database migration"
-	@echo "  make migration-remove-identity        - Removes last Identity migration"
-	@echo ""
-	@echo "  make migration-apply-all              - Applies all migrations (DB + Identity)"
-	@echo ""
-	@echo "Examples:"
-	@echo "  make migration-new VERSION=002"
-	@echo "  make migration-update-db"
-	@echo ""
+	@echo ===================================================
+	@echo  $(PROJECT_NAME) CLI - Available Commands
+	@echo ===================================================
+	@echo  GENERAL:
+	@echo    make setup             - Install tools and restore
+	@echo    make build             - Build the solution
+	@echo    make clean             - Remove build artifacts
+	@echo.
+	@echo  DATABASE (App):
+	@echo    make db-add V=XXX      - Add migration (Ex: make db-add V=001)
+	@echo    make db-update         - Apply migrations
+	@echo    make db-remove         - Remove last migration
+	@echo.
+	@echo  DATABASE (Identity):
+	@echo    make id-add V=XXX      - Add identity migration
+	@echo    make id-update         - Apply identity migrations
+	@echo.
+	@echo  TESTS:
+	@echo    make test              - Run all tests
+	@echo    make test-unit         - Run unit tests
+	@echo    make test-coverage     - Run coverage
+	@echo ===================================================
 
-# Creates ApplicationDbContext migration
-migration-db:
-ifndef VERSION
-	@echo "Error: VERSION was not specified."
-	@echo "Usage: make migration-db VERSION=XXX"
-	@exit 1
-endif
-	@echo "Creating migration v$(VERSION) for ApplicationDbContext..."
-	@cd $(PROJECT_DIR) && dotnet ef migrations add v$(VERSION) -o $(MIGRATIONS_DB_PATH) -c $(CONTEXT_DB)
-	@echo "Migration v$(VERSION) successfully created for Database!"
+# --- Build & Maintenance ---
 
-# Creates ApplicationIdentityDbContext migration
-migration-identity:
-ifndef VERSION
-	@echo "Error: VERSION was not specified."
-	@echo "Usage: make migration-identity VERSION=XXX"
-	@exit 1
-endif
-	@echo "Creating migration v$(VERSION) for ApplicationIdentityDbContext..."
-	@cd $(PROJECT_DIR) && dotnet ef migrations add v$(VERSION) -o $(MIGRATIONS_IDENTITY_PATH) -c $(CONTEXT_IDENTITY)
-	@echo "Migration v$(VERSION) successfully created for Identity!"
+setup:
+	$(DOTNET_CMD) tool restore
+	$(DOTNET_CMD) restore
 
-# Alias for migration-db (main command)
-migration-new:
-	@$(MAKE) migration-db VERSION=$(VERSION)
+build:
+	$(DOTNET_CMD) build $(PROJECT_DIR) -c Release
 
-# Applies ApplicationDbContext migrations
-migration-update-db:
-	@echo "Applying ApplicationDbContext migrations..."
-	@cd $(PROJECT_DIR) && dotnet ef database update -c $(CONTEXT_DB)
-	@echo "Database successfully updated!"
+clean:
+	$(DOTNET_CMD) clean
+	@if exist TestResults rmdir /s /q TestResults
 
-# Applies ApplicationIdentityDbContext migrations
-migration-update-identity:
-	@echo "Applying ApplicationIdentityDbContext migrations..."
-	@cd $(PROJECT_DIR) && dotnet ef database update -c $(CONTEXT_IDENTITY)
-	@echo "Identity database successfully updated!"
+# --- Database Migrations (App) ---
 
-# Shows migrations status
-migration-status:
-	@echo "Migrations Status - ApplicationDbContext:"
-	@echo "================================================"
-	@cd $(PROJECT_DIR) && dotnet ef migrations list -c $(CONTEXT_DB) || echo "No migration found"
-	@echo ""
-	@echo "Migrations Status - ApplicationIdentityDbContext:"
-	@echo "========================================================="
-	@cd $(PROJECT_DIR) && dotnet ef migrations list -c $(CONTEXT_IDENTITY) || echo "No migration found"
+db-add:
+	@if "$(V)"=="" (echo ERROR: V is required. Use: make db-add V=001 & exit /b 1)
+	$(DOTNET_CMD) ef migrations add v$(V) -p $(PROJECT_DIR) -o $(MIGRATIONS_DB_PATH) -c $(CONTEXT_DB)
 
-# Removes last Database migration only
-migration-remove-db:
-	@echo "Removing last ApplicationDbContext migration..."
-	@cd $(PROJECT_DIR) && dotnet ef migrations remove -c $(CONTEXT_DB) --force
-	@echo "Migration successfully removed!"
+db-update:
+	$(DOTNET_CMD) ef database update -p $(PROJECT_DIR) -c $(CONTEXT_DB)
 
-# Removes last Identity migration only
-migration-remove-identity:
-	@echo "Removing last ApplicationIdentityDbContext migration..."
-	@cd $(PROJECT_DIR) && dotnet ef migrations remove -c $(CONTEXT_IDENTITY) --force
-	@echo "Migration successfully removed!"
+db-remove:
+	$(DOTNET_CMD) ef migrations remove -p $(PROJECT_DIR) -c $(CONTEXT_DB) --force
 
-# Applies all migrations (Database + Identity)
-migration-apply-all:
-	@echo "Applying all migrations..."
-	@$(MAKE) migration-update-db
-	@echo ""
-	@$(MAKE) migration-update-identity
-	@echo ""
-	@echo "All migrations were successfully applied!"
+# --- Database Migrations (Identity) ---
+
+id-add:
+	@if "$(V)"=="" (echo ERROR: V is required. Use: make id-add V=001 & exit /b 1)
+	$(DOTNET_CMD) ef migrations add v$(V) -p $(PROJECT_DIR) -o $(MIGRATIONS_IDENTITY_PATH) -c $(CONTEXT_IDENTITY)
+
+id-update:
+	$(DOTNET_CMD) ef database update -p $(PROJECT_DIR) -c $(CONTEXT_IDENTITY)
+
+# --- Testing ---
+
+test:
+	$(DOTNET_CMD) test $(TEST_PROJECT) --logger "console;verbosity=normal"
+
+test-unit:
+	$(DOTNET_CMD) test $(TEST_PROJECT) --filter "Category=Unit Tests"
+
+test-coverage:
+	$(DOTNET_CMD) test $(TEST_PROJECT) --collect:"XPlat Code Coverage" --results-directory ./TestResults
