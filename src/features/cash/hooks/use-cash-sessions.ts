@@ -8,31 +8,23 @@ import type {
 
 const CASH_SESSIONS_QUERY_KEY = ["cash-sessions"];
 
-/**
- * Hook for managing cash sessions with React Query
- * Uses API service for backend integration
- *
- * NOTE: If you only need the current session, use useCurrentCashSession instead
- * to avoid unnecessary queries.
- */
 export function useCashSessions() {
   const queryClient = useQueryClient();
 
-  // Query current open session - separate cache key for targeted invalidation
   const currentSessionQuery = useQuery({
     queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
     queryFn: () => cashService.getActive(),
-    staleTime: 45_000, // 45 seconds - current session updates more frequently
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
     placeholderData: (previousData) => previousData,
   });
 
-  // Query all sessions - only fetch when needed (lazy query)
   const sessionsQuery = useQuery({
     queryKey: CASH_SESSIONS_QUERY_KEY,
     queryFn: () => cashService.getAll(),
-    staleTime: 60_000, // 60 seconds - sessions don't change often
+    staleTime: 60_000,
     placeholderData: (previousData) => previousData,
-    enabled: false, // Disabled by default - must be manually refetched
+    enabled: false,
   });
 
   // Create new session
@@ -79,7 +71,7 @@ export function useCashSessions() {
     },
   });
 
-  // Query for deposits of current session
+  // Query for deposits of current session - always refetch but keep temporary cache
   const depositsQuery = useQuery({
     queryKey: [
       ...CASH_SESSIONS_QUERY_KEY,
@@ -91,7 +83,8 @@ export function useCashSessions() {
       return cashService.getDeposits(currentSessionQuery.data.id);
     },
     enabled: !!currentSessionQuery.data?.id,
-    staleTime: 20_000,
+    staleTime: 0, // Always refetch to ensure fresh data
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5min for smooth navigation
     placeholderData: (previousData) => previousData,
   });
 
