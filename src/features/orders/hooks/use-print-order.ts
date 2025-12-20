@@ -9,7 +9,7 @@ export function usePrintOrder() {
     documentTitle: "Pedido - Devlivery",
     pageStyle: `
       @page {
-        size: 55mm auto;
+        size: 48mm auto;
         margin: 1mm;
       }
 
@@ -17,7 +17,7 @@ export function usePrintOrder() {
         font-family: 'Courier New', monospace;
         font-size: 12px;
         line-height: 1.4;
-        width: 55mm;
+        width: 48mm;
         margin: 0 auto;
         padding: 1mm;
         padding-right: 5mm; /* Specific for printing */
