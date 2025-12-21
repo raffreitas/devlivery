@@ -90,6 +90,20 @@ export function ExpenseForm({
   }, [selectedCategoryId, subcategories, form, loadingCategories]);
 
   const handleSubmit = async (data: ExpenseFormData) => {
+    // Validação dinâmica: se a categoria selecionada tem subcategorias ativas,
+    // então a subcategoria é obrigatória.
+    const selected = categories?.find((c) => c.id === data.categoryId);
+    const activeSubcategories =
+      selected?.subCategories?.filter((s) => s.isActive) ?? [];
+    if (activeSubcategories.length > 0 && !data.subcategoryId) {
+      form.setError("subcategoryId", {
+        type: "required",
+        message: "Subcategoria é obrigatória para a categoria selecionada",
+      });
+      form.setFocus("subcategoryId");
+      return;
+    }
+
     try {
       await onSubmit(data);
       if (!expense) {
