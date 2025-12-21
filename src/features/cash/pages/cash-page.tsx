@@ -7,12 +7,12 @@ import { CloseCashForm } from "@/features/cash/components/close-cash-form";
 import { OpenCashForm } from "@/features/cash/components/open-cash-form";
 import { useCashSessions } from "@/features/cash/hooks/use-cash-sessions";
 import type { CreateCashDepositFormData } from "@/features/cash/types";
-import { CashModal } from "@/shared/components/cash-modal";
+import { Modal } from "@/shared/components/modal";
 import { Button } from "@/shared/components/ui/button";
 
 export function CashPage() {
-  const [isOpenCashModalOpen, setIsOpenCashModalOpen] = useState(false);
-  const [isCloseCashModalOpen, setIsCloseCashModalOpen] = useState(false);
+  const [isOpenModalOpen, setIsOpenModalOpen] = useState(false);
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
 
   const {
@@ -31,7 +31,7 @@ export function CashPage() {
     notes?: string;
   }) => {
     await openCashSession(dto);
-    setIsOpenCashModalOpen(false);
+    setIsOpenModalOpen(false);
   };
 
   const handleCloseCash = async (dto: {
@@ -44,7 +44,7 @@ export function CashPage() {
       id: currentSession.id,
       dto,
     });
-    setIsCloseCashModalOpen(false);
+    setIsCloseModalOpen(false);
   };
 
   const handleCreateDeposit = async (dto: CreateCashDepositFormData) => {
@@ -80,7 +80,7 @@ export function CashPage() {
               <CashSummaryCard
                 session={currentSession}
                 deposits={deposits}
-                onOpenClose={() => setIsCloseCashModalOpen(true)}
+                onOpenClose={() => setIsCloseModalOpen(true)}
                 onAddDeposit={() => setIsDepositModalOpen(true)}
               />
 
@@ -100,7 +100,7 @@ export function CashPage() {
                 fluxo de caixa
               </p>
               <Button
-                onClick={() => setIsOpenCashModalOpen(true)}
+                onClick={() => setIsOpenModalOpen(true)}
                 className="bg-green-600 hover:bg-green-700"
               >
                 <WalletIcon className="w-4 h-4 mr-2" />
@@ -112,22 +112,22 @@ export function CashPage() {
       </div>
 
       {/* Open Cash Modal */}
-      <CashModal
-        isOpen={isOpenCashModalOpen}
-        onClose={() => setIsOpenCashModalOpen(false)}
+      <Modal
+        isOpen={isOpenModalOpen}
+        onClose={() => setIsOpenModalOpen(false)}
         title="Abrir Caixa"
       >
         <OpenCashForm
           onSubmit={handleOpenCash}
           isSubmitting={isOpening}
-          onCancel={() => setIsOpenCashModalOpen(false)}
+          onCancel={() => setIsOpenModalOpen(false)}
         />
-      </CashModal>
+      </Modal>
 
       {/* Close Cash Modal */}
-      <CashModal
-        isOpen={isCloseCashModalOpen}
-        onClose={() => setIsCloseCashModalOpen(false)}
+      <Modal
+        isOpen={isCloseModalOpen}
+        onClose={() => setIsCloseModalOpen(false)}
         title="Fechar Caixa"
       >
         {currentSession && (
@@ -138,13 +138,13 @@ export function CashPage() {
             cashSales={cashSales}
             onSubmit={handleCloseCash}
             isSubmitting={isClosing}
-            onCancel={() => setIsCloseCashModalOpen(false)}
+            onCancel={() => setIsCloseModalOpen(false)}
           />
         )}
-      </CashModal>
+      </Modal>
 
       {/* Deposit Cash Modal */}
-      <CashModal
+      <Modal
         isOpen={isDepositModalOpen}
         onClose={() => setIsDepositModalOpen(false)}
         title="Adicionar Aporte de Caixa"
@@ -153,7 +153,7 @@ export function CashPage() {
           onSubmit={handleCreateDeposit}
           isLoading={isCreatingDeposit}
         />
-      </CashModal>
+      </Modal>
     </>
   );
 }

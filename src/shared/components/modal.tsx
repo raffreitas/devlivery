@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 
-interface CashModalProps {
+interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
@@ -25,14 +25,14 @@ interface CashModalProps {
  *
  * Automatically detects screen size on mount and on window resize
  */
-export function CashModal({
+export function Modal({
   isOpen,
   onClose,
   title,
   description,
   children,
   footer,
-}: CashModalProps) {
+}: ModalProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 

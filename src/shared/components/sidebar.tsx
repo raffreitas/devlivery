@@ -3,6 +3,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   Package,
+  Receipt,
   ShoppingCart,
   Wallet,
 } from "lucide-react";
@@ -37,6 +38,11 @@ export function Sidebar() {
       label: "Produtos",
       icon: Package,
       path: "/products",
+    },
+    {
+      label: "Despesas",
+      icon: Receipt,
+      path: "/expenses",
     },
     // Future Menu Placeholders
     // {

@@ -1,4 +1,10 @@
-import { LayoutDashboard, Package, ShoppingCart, Wallet } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  Receipt,
+  ShoppingCart,
+  Wallet,
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/shared/lib/utils";
 
@@ -27,6 +33,11 @@ export function NavbarBottom() {
       label: "Produtos",
       icon: Package,
       path: "/products",
+    },
+    {
+      label: "Despesas",
+      icon: Receipt,
+      path: "/expenses",
     },
     // Future Menu Management Placeholder
     // {
