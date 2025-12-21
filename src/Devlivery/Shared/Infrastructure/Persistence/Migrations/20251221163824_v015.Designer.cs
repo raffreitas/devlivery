@@ -4,17 +4,20 @@ using System.Collections.Generic;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Devlivery.Shared.Infrastructure.Database.Migrations
+namespace Devlivery.Shared.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251221163824_v015")]
+    partial class v015
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -277,16 +280,16 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("description");
 
-                    b.Property<DateOnly>("DueDate")
-                        .HasColumnType("date")
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("due_date");
 
                     b.Property<Guid>("EstablishmentId")
                         .HasColumnType("uuid")
                         .HasColumnName("establishment_id");
 
-                    b.Property<DateOnly?>("PaymentDate")
-                        .HasColumnType("date")
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("payment_date");
 
                     b.Property<string>("Status")

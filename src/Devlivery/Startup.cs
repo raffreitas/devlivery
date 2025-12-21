@@ -2,6 +2,7 @@
 
 using Devlivery.Features.Auth;
 using Devlivery.Features.CashRegister;
+using Devlivery.Features.Expenses;
 using Devlivery.Features.Orders;
 using Devlivery.Features.Products;
 using Devlivery.Shared.Infrastructure.Authorization;
@@ -63,6 +64,7 @@ public static class Startup
         services.AddOrderFeature();
         services.AddProductFeature();
         services.AddCashRegisterFeature();
+        services.AddExpenseFeature();
 
         // CORS
         services.AddCorsConfiguration();
@@ -107,5 +109,6 @@ public static class Startup
         app.MapProductEndpoints();
         app.MapOrderEndpoints();
         app.MapCashRegisterEndpoints();
+        app.MapExpenseEndpoints();
     }
 }
