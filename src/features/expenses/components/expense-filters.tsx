@@ -15,7 +15,7 @@ interface ExpenseFiltersProps {
   period?: DateRange;
   categoryId?: string;
   status?: string;
-  onPeriodChange: (period: DateRange | undefined) => void;
+  onDuePeriodChange: (period: DateRange | undefined) => void;
   onCategoryChange: (categoryId: string | undefined) => void;
   onStatusChange: (status: ExpenseStatus | undefined) => void;
 }
@@ -31,7 +31,7 @@ export function ExpenseFiltersComponent({
   period,
   categoryId,
   status,
-  onPeriodChange,
+  onDuePeriodChange,
   onCategoryChange,
   onStatusChange,
 }: ExpenseFiltersProps) {
@@ -93,9 +93,9 @@ export function ExpenseFiltersComponent({
 
         <div className="flex flex-col gap-1.5 min-w-60">
           <Label className="text-xs font-medium text-muted-foreground">
-            Período
+            Período de Vencimento
           </Label>
-          <DateRangePicker date={period} onDateChange={onPeriodChange} />
+          <DateRangePicker date={period} onDateChange={onDuePeriodChange} />
         </div>
       </div>
     </div>

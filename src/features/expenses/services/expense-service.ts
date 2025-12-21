@@ -30,6 +30,25 @@ function mapCategory(dto: CategoryDto): Category {
   };
 }
 
+function parseDateOnly(dateString?: string | null): Date | undefined {
+  if (!dateString) return undefined;
+
+  const isoOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateString);
+  if (isoOnly) {
+    const [, y, m, d] = isoOnly;
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+
+  const slashOnly = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(dateString);
+  if (slashOnly) {
+    const [, y, m, d] = slashOnly;
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+
+  const dt = new Date(dateString);
+  return Number.isNaN(dt.getTime()) ? undefined : dt;
+}
+
 function mapExpense(dto: ExpenseDto): Expense {
   return {
     id: dto.id,
@@ -37,8 +56,9 @@ function mapExpense(dto: ExpenseDto): Expense {
     supplier: dto.supplier ?? undefined,
     description: dto.description ?? undefined,
     amount: dto.amount,
-    dueDate: new Date(dto.dueDate),
-    paymentDate: dto.paymentDate ? new Date(dto.paymentDate) : undefined,
+    // biome-ignore lint/style/noNonNullAssertion: <explanation> We are sure the date strings are valid.</explanation>
+    dueDate: parseDateOnly(dto.dueDate)!,
+    paymentDate: parseDateOnly(dto.paymentDate),
     status: dto.status as Expense["status"],
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),

@@ -12,7 +12,7 @@ import { useExpenses } from "../hooks/use-expenses";
 import type { Expense, ExpenseFormData, ExpenseStatus } from "../types";
 
 export function ExpensesPage() {
-  const [period, setPeriod] = useState<DateRange | undefined>();
+  const [duePeriod, setDuePeriod] = useState<DateRange | undefined>();
   const [categoryId, setCategoryId] = useState<string | undefined>();
   const [status, setStatus] = useState<ExpenseStatus | undefined>();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,7 +26,7 @@ export function ExpensesPage() {
     updateExpense,
     deleteExpense,
     markAsPaid,
-  } = useExpenses({ dateRange: period, categoryId, status });
+  } = useExpenses({ duePeriod, categoryId, status });
 
   const handleSubmit = async (data: ExpenseFormData) => {
     try {
@@ -111,10 +111,10 @@ export function ExpensesPage() {
 
         {/* Filters */}
         <ExpenseFiltersComponent
-          period={period}
+          period={duePeriod}
           categoryId={categoryId}
           status={status}
-          onPeriodChange={setPeriod}
+          onDuePeriodChange={setDuePeriod}
           onCategoryChange={setCategoryId}
           onStatusChange={setStatus}
         />

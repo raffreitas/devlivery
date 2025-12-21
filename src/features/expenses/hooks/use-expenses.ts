@@ -6,28 +6,28 @@ import { expenseService } from "../services/expense-service";
 import type { ExpenseFormData, ExpenseStatus, ExpenseSummary } from "../types";
 
 type ExpenseInput = {
-  dateRange?: DateRange;
+  duePeriod?: DateRange;
   categoryId?: string;
   status?: ExpenseStatus;
 };
 
-export function useExpenses({ dateRange, categoryId, status }: ExpenseInput) {
+export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
   const queryClient = useQueryClient();
 
   const expensesQuery = useQuery({
     queryKey: [
       "expenses",
       {
-        startDate: dateRange?.from,
-        endDate: dateRange?.to,
+        startDate: duePeriod?.from,
+        endDate: duePeriod?.to,
         categoryId,
         status,
       },
     ],
     queryFn: () =>
       expenseService.getAll({
-        startDate: dateRange?.from ? formatDate(dateRange.from) : undefined,
-        endDate: dateRange?.from ? formatDate(dateRange.from) : undefined,
+        startDate: duePeriod?.from ? formatDate(duePeriod.from) : undefined,
+        endDate: duePeriod?.to ? formatDate(duePeriod.to) : undefined,
         categoryId,
         status,
       }),
