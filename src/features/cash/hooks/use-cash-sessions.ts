@@ -8,34 +8,38 @@ import type {
 
 const CASH_SESSIONS_QUERY_KEY = ["cash-sessions"];
 
-/**
- * Hook for managing cash sessions with React Query
- * Uses API service for backend integration
- */
 export function useCashSessions() {
   const queryClient = useQueryClient();
 
-  // Query all sessions
-  const sessionsQuery = useQuery({
-    queryKey: CASH_SESSIONS_QUERY_KEY,
-    queryFn: () => cashService.getAll(),
-    staleTime: 30_000, // 30 seconds
-    placeholderData: (previousData) => previousData,
-  });
-
-  // Query current open session
   const currentSessionQuery = useQuery({
     queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
     queryFn: () => cashService.getActive(),
-    staleTime: 30_000,
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
     placeholderData: (previousData) => previousData,
+  });
+
+  const sessionsQuery = useQuery({
+    queryKey: CASH_SESSIONS_QUERY_KEY,
+    queryFn: () => cashService.getAll(),
+    staleTime: 60_000,
+    placeholderData: (previousData) => previousData,
+    enabled: false,
   });
 
   // Create new session
   const createMutation = useMutation({
     mutationFn: (dto: CreateCashSessionFormData) => cashService.create(dto),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CASH_SESSIONS_QUERY_KEY });
+      // Invalidate both current and all sessions since a new one was opened
+      queryClient.invalidateQueries({
+        queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
+        exact: true,
+      });
+      queryClient.invalidateQueries({
+        queryKey: CASH_SESSIONS_QUERY_KEY,
+        exact: true,
+      });
     },
   });
 
@@ -44,7 +48,15 @@ export function useCashSessions() {
     mutationFn: ({ id, dto }: { id: string; dto: CloseCashSessionFormData }) =>
       cashService.close(id, dto),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CASH_SESSIONS_QUERY_KEY });
+      // Invalidate both current and all sessions since session was closed
+      queryClient.invalidateQueries({
+        queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
+        exact: true,
+      });
+      queryClient.invalidateQueries({
+        queryKey: CASH_SESSIONS_QUERY_KEY,
+        exact: true,
+      });
     },
   });
 
@@ -59,7 +71,7 @@ export function useCashSessions() {
     },
   });
 
-  // Query for deposits of current session
+  // Query for deposits of current session - always refetch but keep temporary cache
   const depositsQuery = useQuery({
     queryKey: [
       ...CASH_SESSIONS_QUERY_KEY,
@@ -71,7 +83,8 @@ export function useCashSessions() {
       return cashService.getDeposits(currentSessionQuery.data.id);
     },
     enabled: !!currentSessionQuery.data?.id,
-    staleTime: 20_000,
+    staleTime: 0, // Always refetch to ensure fresh data
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5min for smooth navigation
     placeholderData: (previousData) => previousData,
   });
 
@@ -84,8 +97,17 @@ export function useCashSessions() {
       sessionId: string;
       dto: CreateCashDepositFormData;
     }) => cashService.createDeposit(sessionId, dto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CASH_SESSIONS_QUERY_KEY });
+    onSuccess: (_data, variables) => {
+      // Invalidate deposits list for this session
+      queryClient.invalidateQueries({
+        queryKey: [...CASH_SESSIONS_QUERY_KEY, "deposits", variables.sessionId],
+        exact: true,
+      });
+      // Invalidate current session to update totals
+      queryClient.invalidateQueries({
+        queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
+        exact: true,
+      });
     },
   });
 
@@ -94,6 +116,7 @@ export function useCashSessions() {
     sessions: sessionsQuery.data ?? [],
     currentSession: currentSessionQuery.data ?? null,
     deposits: depositsQuery.data ?? [],
+    refetchSessions: sessionsQuery.refetch, // Manual refetch for all sessions list
     isLoading:
       sessionsQuery.isLoading ||
       currentSessionQuery.isLoading ||

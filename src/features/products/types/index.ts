@@ -13,17 +13,23 @@ export interface Product {
 
 export const productFormSchema = z.object({
   name: z
-    .string({ error: "Deve ser informado um nome válido." })
-    .min(1, "O nome é obrigatório"),
+    .string({ message: "Nome do produto é obrigatório" })
+    .min(1, "O nome é obrigatório")
+    .max(200, "O nome deve ter no máximo 200 caracteres")
+    .trim(),
   description: z
-    .string({ error: "Deve ser informado uma descrição válida." })
-    .min(1, "A descrição é obrigatória"),
+    .string({ message: "Descrição do produto é obrigatória" })
+    .min(1, "A descrição é obrigatória")
+    .max(1000, "A descrição deve ter no máximo 1000 caracteres")
+    .trim(),
   price: z
-    .number({ error: "Deve ser informado um preço válido" })
-    .min(0.01, "O preço deve ser maior que a zero"),
+    .number({ message: "Deve ser informado um preço válido" })
+    .min(0.01, "O preço deve ser maior que zero"),
   category: z
-    .string({ error: "Deve ser informado uma categoria válida." })
-    .min(1, "A categoria é obrigatória"),
+    .string({ message: "Categoria do produto é obrigatória" })
+    .min(1, "A categoria é obrigatória")
+    .max(100, "A categoria deve ter no máximo 100 caracteres")
+    .trim(),
   available: z.boolean(),
 });
 

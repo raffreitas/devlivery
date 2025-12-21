@@ -2,10 +2,10 @@
 
 ## Project Overview
 **Stack:** React 19 + TypeScript + Vite + TailwindCSS 4 + React Router 7 + React Query (TanStack)
-**Purpose:** PDV (Point of Sale) for pizza delivery with products, orders, and dashboard management.
+**Purpose:** To provide an end-to-end delivery solution that connects customers and businesses, enabling online self-service ordering for customers and comprehensive operational management for merchants, including products, orders, payments, dashboards, and cash register control.
 
 ## Architecture: Feature-Based Organization
-Each domain lives in `src/features/{dashboard,orders,products,auth}` with:
+Each domain lives in `src/features/{dashboard,orders,products,auth,cash}` with:
 - `components/` — Feature-specific UI
 - `pages/` — Route pages
 - `services/` — API calls and DTO mapping
@@ -13,12 +13,14 @@ Each domain lives in `src/features/{dashboard,orders,products,auth}` with:
 - `types/` — TypeScript interfaces
 
 **Shared resources** in `src/shared/`:
-- `components/` — Reusable UI (Button, Card, Input, Layout, Modal, RequireAuth)
+- `components/` — Reusable UI (Layout, RequireAuth, bottom-sheet, cash-modal, etc.)
+- `components/ui/` — shadcn/ui-style components (Button, Card, Input, Dialog, etc.) with Radix UI + CVA + TailwindCSS
 - `contexts/` — AuthContext only (user/token state)
 - `services/api.ts` — HTTP client with auto-auth headers
 - `services/auth-events.ts` — Global auth event emitter for 401 handling
 - `hooks/` — Shared hooks like `useDateRangeFilter`
 - `utils/formatters.ts` — Date/currency formatting utilities
+- `constants/ui-styles.ts` — Shared UI configuration constants
 
 ## Critical Patterns
 
@@ -79,7 +81,21 @@ return { orders: ordersQuery.data ?? [], createOrder: createMutation.mutateAsync
 **File:** `src/app-routes.tsx`
 - Uses `createBrowserRouter` with nested routes under `<Layout />`
 - Protected routes wrapped in `<RequireAuth />` element (nested under Layout)
-- Routes: `/` (dashboard), `/products`, `/orders`, `/login`
+- Routes: `/` (dashboard), `/products`, `/orders`, `/cash`, `/login`
+
+### Cash Register Feature
+**Files:** `src/features/cash/*` (see `src/features/cash/README.md` for details)
+- **Purpose:** Open/close cash register sessions, track deposits, validate physical cash count
+- **Flow:** Open session with initial amount → Add deposits as needed → View real-time sales breakdown → Close with actual cash count
+- **Backend validation:** System auto-calculates expected cash (opening + deposits + cash sales) and compares with actual count
+- **Key service methods:** `openCashSession`, `closeCashSession`, `createDeposit`, `getCurrentSession`
+- Hook returns current session state + sales totals + payment breakdown for live monitoring
+
+### User Feedback & Toasts
+**Library:** `sonner` for toast notifications (setup in `src/main.tsx`)
+- Import with `import { toast } from "sonner"`
+- Common pattern: Show `toast.success()` after successful mutations (create/update/delete)
+- Toaster component configured with `richColors` prop for semantic color coding
 
 ### Specialized Hooks
 **Printing:** `src/features/orders/hooks/use-print-order.ts` uses `react-to-print` with thermal receipt styling (55mm width, Courier New, custom `@page` styles for thermal printers).

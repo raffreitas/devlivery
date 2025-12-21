@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { productService } from "../services/product-service";
 import type { Product, ProductFormData } from "../types";
 
@@ -26,6 +27,11 @@ export function useProducts() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => productService.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
+    onError: (error) => {
+      const message =
+        error instanceof Error ? error.message : "Falha ao deletar o produto.";
+      toast.error(message);
+    },
   });
 
   return {
