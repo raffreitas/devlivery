@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -57,7 +57,11 @@ export function ExpenseForm({
     },
   });
 
-  const selectedCategoryId = form.watch("categoryId");
+  const selectedCategoryId = useWatch({
+    control: form.control,
+    name: "categoryId",
+    defaultValue: expense?.category.id,
+  });
 
   // Encontra a categoria selecionada e suas subcategorias
   const selectedCategory = useMemo(() => {
@@ -68,11 +72,22 @@ export function ExpenseForm({
     return selectedCategory?.subCategories ?? [];
   }, [selectedCategory]);
 
-  // Limpa subcategoria quando categoria muda
-  // biome-ignore lint/correctness/useExhaustiveDependencies: We only want to run this effect when selectedCategoryId changes
   useEffect(() => {
-    form.setValue("subcategoryId", "");
-  }, [selectedCategoryId, form]);
+    if (loadingCategories) return;
+
+    const currentSubcategoryId = form.getValues("subcategoryId");
+    if (!selectedCategoryId) {
+      form.setValue("subcategoryId", "");
+      return;
+    }
+
+    const belongsToSelected = subcategories.some(
+      (s) => s.id === currentSubcategoryId,
+    );
+    if (!belongsToSelected) {
+      form.setValue("subcategoryId", "");
+    }
+  }, [selectedCategoryId, subcategories, form, loadingCategories]);
 
   const handleSubmit = async (data: ExpenseFormData) => {
     try {
