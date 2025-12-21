@@ -1,370 +1,232 @@
-# Devlivery WebAPI — AI Agent Guide
-
-Quick reference for AI coding agents working in this .NET 9 Minimal API using Vertical Slice Architecture + CQRS.
+# Devlivery - AI Coding Instructions
 
 ## Architecture Overview
 
-**Pattern**: Vertical Slice Architecture (VSA) with CQRS — each feature is self-contained with its Commands, Queries, Handlers, and Endpoints.
+This is a **modular monolith** organized by **vertical slices** (features). Everything lives in one deployable (`src/Devlivery`), but features are self-contained modules. See ADRs in `docs/architectural-decision-records/` for architectural decisions.
 
-**Structure**:
-`
-Features/[FeatureName]/
-├── Commands/[CommandName]/
-│   ├── [CommandName]Command.cs      # Input DTO + FluentValidation
-│   ├── [CommandName]Handler.cs      # Business logic, returns Result<T>
-│   ├── [CommandName]Endpoint.cs     # HTTP endpoint with typed results
-│   └── [CommandName]Response.cs     # Output DTO
-├── Queries/[QueryName]/             # Read-only operations (same structure)
-├── Domain/                          # Entities (if needed)
-└── [FeatureName]Feature.cs          # DI registration + endpoint mapping
-`
+**Key Principle:** Features own their entire vertical stack — from HTTP endpoint → handler → domain model → database repository.
 
-**Database**: Two DbContexts (`ApplicationDbContext` for app data, `ApplicationIdentityDbContext` for auth) using the same PostgreSQL connection string (`DefaultConnection`) with snake_case naming via `UseSnakeCaseNamingConvention()`.
+## Feature Structure (Critical Pattern)
 
-## Critical Patterns (Do NOT Deviate)
+Every feature follows this exact structure:
 
-### 1. Multi-Tenancy Pattern
-**All entities MUST have an `EstablishmentId`** for tenant isolation:
-
-`csharp
-// Entity definition
-public sealed class Product : Entity
-{
-    public Guid EstablishmentId { get; private set; }
-    // ... other properties
-}
-
-// In Handlers - inject ITenantAccessor and use tenant ID
-public sealed class CreateProductHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
-{
-    public async Task<Result<CreateProductResponse>> HandleAsync(CreateProductCommand command, ...)
-    {
-        var product = new Product(..., tenantAccessor.Tenant.Id);  // Always pass tenant ID
-    }
-}
-
-// In Queries - ALWAYS use .ForTenant() extension
-var products = await dbContext.Products
-    .ForTenant(tenantAccessor.Tenant.Id)  // Filters by EstablishmentId
-    .AsNoTracking()
-    .ToListAsync();
-`
-
-**How it works:**
-- JWT token contains `establishment_id` claim (added during login via `ITokenService`)
-- `TenantRegisterMiddleware` extracts tenant from JWT → stores in `ITenantAccessor`
-- All handlers inject `ITenantAccessor` to get current tenant
-- `.ForTenant()` extension uses `EF.Property<Guid>(e, "EstablishmentId")` for filtering
-
-**Critical rules:**
-- Commands: Pass `tenantAccessor.Tenant.Id` when creating entities
-- Queries: ALWAYS use `.ForTenant(tenantAccessor.Tenant.Id)` before any filtering
-- Login bypassed: Middleware skips `/login`, `/health`, `/scalar`, `/openapi` paths
-
-### 2. API Response Pattern
-All endpoints use **ASP.NET Core Typed Results** + **RFC 7807 Problem Details**:
-
-`csharp
-// Endpoint signature example
-private static async Task<Results<Created<ApiResponse<ProductResponse>>, ValidationProblem, BadRequest<ProblemDetails>>> Handle(...)
-
-// Success responses (wrap in ApiResponse<T>)
-return result.ToCreated($"/api/products/{result.Value.Id}", "Product created successfully");
-return result.ToOk("Operation successful");
-return result.ToNoContent();
-
-// Error responses (Problem Details)
-return validationResult.ToValidationProblem();  // 400 with validation errors
-return result.ToBadRequestProblem();            // 400 business error
-return result.ToNotFoundProblem();              // 404 not found
-`
-
-See `docs/API-RESPONSE-PATTERN.md` for complete examples.
-
-### 3. Validation Pattern
-Validators are **explicitly called** in endpoints (not automatic):
-
-`csharp
-public sealed class Validator : AbstractValidator<CreateProductCommand>
-{
-    public Validator()
-    {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .MaximumLength(200).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
-    }
-}
-
-// In endpoint
-var validationResult = await validator.ValidateAsync(request, ct);
-if (!validationResult.IsValid)
-    return validationResult.ToValidationProblem();
-`
-
-**All validation messages MUST be in Portuguese (PT-BR)** — use `.WithMessage(...)` with placeholders like `{PropertyName}`, `{MaxLength}`.
-
-### 4. Error Handling Pattern
-Use **FluentResults** — never throw business exceptions:
-
-`csharp
-// In Handler
-if (product is null)
-    return Result.Fail<ProductResponse>("Produto não foi encontrado");
-
-return Result.Ok(response);
-`
-
-### 5. Primary Constructors
-Always use C# primary constructors for dependency injection:
-
-`csharp
-public sealed class CreateProductHandler(ApplicationDbContext dbContext, ILogger<CreateProductHandler> logger)
-{
-    public async Task<Result<CreateProductResponse>> HandleAsync(...) { }
-}
-`
-
-### 6. Query Filtering Pattern
-For list queries with optional filters, use nullable parameters in the Query record:
-
-`csharp
-// Query with optional filters
-public sealed record GetAllOrdersQuery(DateTime? StartDate, DateTime? EndDate, string? PaymentMethod);
-
-// Handler applies filters conditionally
-var query = dbContext.Orders.AsQueryable();
-if (request.StartDate.HasValue)
-    query = query.Where(o => o.CreatedAt >= request.StartDate.Value);
-`
-
-## Development Workflow
-
-### Start App Locally
-`ash
-docker-compose up -d                    # Start PostgreSQL (port 5432)
-dotnet run --project src/Devlivery.WebApi  # Run API (auto-migrates in Dev)
-`
-
-**Auto-migration**: In Development, `Startup.ConfigureApp()` runs migrations and seeds data automatically on startup.
-
-### Database Migrations
-**Two contexts**: Always specify `-c ApplicationDbContext` or `-c ApplicationIdentityDbContext`.
-
-**Using Makefile** (preferred on Linux/macOS):
-`ash
-make migration-db VERSION=002              # Create application migration
-make migration-identity VERSION=002        # Create identity migration
-make migration-update-db                   # Apply application migrations
-make migration-update-identity             # Apply identity migrations
-`
-
-**Using PowerShell/Windows**:
-`ash
-.\scripts\apply-migrations.ps1             # Apply all migrations locally
-`
-
-**Using EF Core directly**:
-```bash
-dotnet ef migrations add v002 -o ./Shared/Database/Migrations -c ApplicationDbContext
-dotnet ef database update -c ApplicationDbContext
+```
+Features/Products/
+├── ProductFeature.cs              # DI registration + endpoint mapping
+├── Commands/                      # Write operations (CUD)
+│   └── CreateProduct/
+│       ├── CreateProductCommand.cs
+│       ├── CreateProductHandler.cs
+│       ├── CreateProductValidator.cs     # FluentValidation
+│       ├── CreateProductEndpoint.cs      # Minimal API endpoint
+│       └── CreateProductResponse.cs
+├── Queries/                       # Read operations (R)
+│   └── GetAllProducts/
+│       ├── GetAllProductsQuery.cs
+│       ├── GetAllProductsHandler.cs
+│       └── GetAllProductsEndpoint.cs
+├── Domain/                        # Business logic
+│   ├── Product.cs                 # Entity (inherits from Entity)
+│   └── IProductRepository.cs
+└── Infrastructure/
+    └── ProductRepository.cs       # EF Core implementation
 ```
 
-**Migration naming**: Use `vXXX` format (v001, v002, v003).
+**When creating new features:**
+1. Create `XxxFeature.cs` with `AddXxxFeature()` and `MapXxxEndpoints()` methods
+2. Register in `Startup.cs` → `ConfigureBuilder()` and `ConfigureApp()`
+3. Follow CQRS: separate Commands (writes) from Queries (reads)
+4. One file per endpoint — `CreateProductEndpoint.cs`, not a Controller
 
-### CI/CD
-GitHub Actions on `main` branch (`.github/workflows/main-build-deploy.yml`):
-1. Builds and tests solution
-2. **Applies migrations to production** using `DATABASE_CONNECTION_STRING` secret for both contexts
+## CQRS Implementation (Mediator Pattern)
 
-**Important**: Migrations run automatically on main branch — no manual production migrations needed.
+**Commands (Writes):**
+- Use `ICommand<Result<TResponse>>` from Mediator library
+- Handler: `ICommandHandler<TCommand, Result<TResponse>>`
+- **Always** inject `ITenantAccessor` to get `EstablishmentId`
+- **Always** call `unitOfWork.SaveChangesAsync()` to commit
 
-**Note**: Docker image building and version tagging are currently disabled in the workflow (configured with `if: false`). To enable, remove the `if: false` conditions from the Docker-related steps in `.github/workflows/main-build-deploy.yml`.
+```csharp
+public sealed record CreateProductCommand(...) : ICommand<Result<CreateProductResponse>>;
 
-## Adding a New Feature
-
-Follow this exact sequence:
-
-### 1. Create folder structure
-`
-Features/MyFeature/Commands/DoSomething/
-`
-
-### 2. Create Command with validation
-`csharp
-// DoSomethingCommand.cs
-public sealed record DoSomethingCommand(string Name, decimal Value);
-
-public sealed class Validator : AbstractValidator<DoSomethingCommand>
+public sealed class CreateProductHandler(
+    IProductRepository repo,
+    IUnitOfWork unitOfWork,
+    ITenantAccessor tenantAccessor) : ICommandHandler<...>
 {
-    public Validator()
+    public async ValueTask<Result<CreateProductResponse>> Handle(...)
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
+        var product = new Product(..., tenantAccessor.Tenant.Id); // ← Multi-tenancy
+        await repo.AddAsync(product, ct);
+        await unitOfWork.SaveChangesAsync(ct);  // ← Commits and dispatches domain events
+        return Result.Ok(new CreateProductResponse(product.Id));
     }
 }
-`
+```
 
-### 3. Create Handler
-`csharp
-// DoSomethingHandler.cs
-using FluentResults;
+**Queries (Reads):**
+- Use `IQuery<Result<TResponse>>`
+- Handler: `IQueryHandler<TQuery, Result<TResponse>>`
+- Can use Dapper for raw SQL if needed (performance optimization)
 
-public sealed class DoSomethingHandler(ApplicationDbContext dbContext, ITenantAccessor tenantAccessor)
+## Multi-Tenancy (Row-Level Security)
+
+**Every entity MUST have `EstablishmentId`:**
+```csharp
+public sealed class Product : Entity
 {
-    public async Task<Result<DoSomethingResponse>> HandleAsync(
-        DoSomethingCommand command,
-        CancellationToken cancellationToken = default)
-    {
-        // Business logic here - always pass tenant ID when creating entities
-        var entity = new MyEntity(..., tenantAccessor.Tenant.Id);
-        
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return Result.Ok(new DoSomethingResponse());
+    public Guid EstablishmentId { get; private set; }  // ← Required
+    // ... other properties
+}
+```
+
+**In handlers:**
+```csharp
+tenantAccessor.Tenant.Id  // ← Current establishment from JWT claim
+```
+
+**Query Filters automatically applied** by EF Core in `ApplicationDbContext.ApplyQueryFilters()` — no need to manually filter by `EstablishmentId` in queries.
+
+## Domain Model (DDD Tactical)
+
+**Entities:**
+- Inherit from `Entity` base class (gives `Guid Id` via `Guid.CreateVersion7()`)
+- Use **private setters** — only modify via methods
+- Constructors enforce invariants (validation in constructor or throw `DomainException`)
+
+```csharp
+public sealed class Product : Entity
+{
+    public string Name { get; private set; }  // ← private set!
+    
+    public Product(string name, ...) {
+        if (string.IsNullOrWhiteSpace(name)) throw new DomainException("...");
+        Name = name;
+    }
+    
+    public void Update(string? name = null, ...) {
+        Name = name ?? Name;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
-`
+```
 
-### 4. Create Endpoint with Typed Results
-`csharp
-// DoSomethingEndpoint.cs
-using Devlivery.WebApi.Shared.Extensions;
+**Domain Events:**
+- Use `AddDomainEvent(new XxxEvent(...))` in entity methods
+- Events dispatched automatically when `unitOfWork.SaveChangesAsync()` is called
 
-public static class DoSomethingEndpoint
+## Minimal API Endpoints
+
+**Pattern:**
+```csharp
+public static class CreateProductEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("", Handle)
-            .Produces<ApiResponse<DoSomethingResponse>>(StatusCodes.Status201Created)
-            .ProducesValidationProblem()
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<CreateProductResponse>>(StatusCodes.Status201Created)
+            .Produces<ApiResponse>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Created<ApiResponse<DoSomethingResponse>>, ValidationProblem, BadRequest<ProblemDetails>>> Handle(
-        DoSomethingCommand request,
-        IValidator<DoSomethingCommand> validator,
-        DoSomethingHandler handler,
+    private static async Task<Results<Created<...>, BadRequest<...>>> Handle(
+        CreateProductCommand command,
+        ISender sender,  // ← Mediator
         CancellationToken ct)
     {
-        var validationResult = await validator.ValidateAsync(request, ct);
-        if (!validationResult.IsValid)
-            return validationResult.ToValidationProblem();
-
-        var result = await handler.HandleAsync(request, ct);
-
-        return result.IsSuccess
-            ? result.ToCreated($"/api/my-feature/{result.Value.Id}", "Resource created successfully")
-            : result.ToBadRequestProblem();
+        var result = await sender.Send(command, ct);
+        return result.IsSuccess 
+            ? result.ToCreated($"/api/products/{result.Value.ProductId}") 
+            : result.ToBadRequest();
     }
 }
-`
+```
 
-### 5. Create Feature registration
-`csharp
-// MyFeature.cs
-public static class MyFeature
+**Register in Feature bootstrap:**
+```csharp
+public static IEndpointRouteBuilder MapProductEndpoints(this IEndpointRouteBuilder app)
 {
-    public static IServiceCollection AddMyFeature(this IServiceCollection services)
-    {
-        services.AddScoped<DoSomethingHandler>();
-        return services;
-    }
+    var group = app.MapGroup("/api/products").WithTags("Products");
+    CreateProductEndpoint.MapEndpoint(group);  // ← One call per endpoint
+    // ...
+    return app;
+}
+```
 
-    public static IEndpointRouteBuilder MapMyFeatureEndpoints(this IEndpointRouteBuilder app)
+## Validation (FluentValidation)
+
+Every Command **should** have a Validator class:
+```csharp
+public sealed class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+{
+    public CreateProductCommandValidator()
     {
-        var group = app.MapGroup("/api/my-feature").WithTags("MyFeature");
-        DoSomethingEndpoint.MapEndpoint(group);
-        return app;
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.Price).GreaterThan(0);
     }
 }
-`
+```
 
-### 6. Register in Startup.cs
-`csharp
-// In ConfigureBuilder:
-builder.Services.AddMyFeature();
+Validation runs automatically via `ValidationPipelineBehavior` pipeline behavior before handlers execute.
 
-// In ConfigureApp:
-app.MapMyFeatureEndpoints();
-`
+## Developer Workflow
 
-## Key Files to Reference
+**Local development:**
+```bash
+dotnet run --project src/Devlivery          # Run API (auto-migrates DB in Dev)
+dotnet test test/Devlivery.Tests            # Run tests
+```
 
-**Examples**:
-- `Features/Products/Commands/CreateProduct/*` — complete Command pattern
-- `Features/Orders/` — complex entity with relationships (OrderItems)
-- `Features/Auth/` — JWT authentication with Identity
+**Using Makefile (Windows):**
+```bash
+make build                  # Build solution
+make test                   # Run all tests
+make db-add V=001           # Add migration for ApplicationDbContext
+make id-add V=001           # Add migration for Identity context
+make db-update              # Apply migrations
+```
 
-**Infrastructure**:
-- `Shared/Extensions/ResultExtensions.cs` — ToOk, ToCreated, ToBadRequestProblem helpers
-- `Shared/Extensions/ValidationExtensions.cs` — ToValidationProblem
-- `Shared/Models/ApiResponse.cs` — response wrapper
-- `Shared/Presentation/GlobalExceptionHandler.cs` — unhandled exception handler
-
-**Configuration**:
-- `Startup.cs` — app boot, feature registration, auto-migration
-- `Program.cs` — minimal entry point
-- `appsettings.json` — connection strings, JWT config
-
-## Common Gotchas
-
-1. **Two DbContexts**: Always specify `-c ApplicationDbContext` or `-c ApplicationIdentityDbContext` in EF commands
-2. **Same connection string**: Both contexts use `DefaultConnection` — they share the same database
-3. **Manual validation**: Validation is NOT automatic — must call `validator.ValidateAsync()` in endpoints
-4. **FluentResults pattern**: Return `Result.Ok()` or `Result.Fail()`, never throw business exceptions
-5. **Typed Results**: Always use explicit typed results (e.g., `Results<Ok<T>, NotFound<P>>`)
-6. **Validation messages**: All validation messages must be in Portuguese PT-BR with `.WithMessage(...)`
-7. **Handler registration**: Each handler must be manually registered in Feature's `Add[Feature]Feature()` method
-8. **UTC timestamps**: Always use `DateTime.UtcNow` for `CreatedAt`/`UpdatedAt`
-9. **CancellationToken**: Always pass through to async DB operations
-10. **Query filtering**: Use nullable parameters in Query records for optional filters, apply conditionally in Handler
-11. **Multi-tenancy**: ALL entities must have `EstablishmentId`; always inject `ITenantAccessor` in handlers; use `.ForTenant()` in queries
-12. **Integration tests**: Always call `await ResetDatabaseAsync()` first; use `Prepare()` helper for auth setup
+**Docker:**
+```bash
+docker compose up --build   # Run app + PostgreSQL container
+```
 
 ## Testing
 
-### Integration Tests
-Use **Testcontainers + Respawn** pattern with **Collections per Feature**:
+Tests use **Testcontainers** (PostgreSQL 16 in Docker) + **Respawn** (database reset between tests).
 
-`csharp
-[Collection("Products Tests")]  // Shares PostgreSQL container with all Products tests
-[Trait("Category", "Integration Tests")]
-public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory factory)
-    : WebApiBaseFixture<ProductsWebApplicationFactory>(factory)
+**Base class:** `BaseWebApplicationFactory<Program>` provides:
+- Isolated PostgreSQL container per test run
+- `ResetDatabaseAsync()` to clean DB between tests
+
+**Pattern:**
+```csharp
+public class ProductTests(BaseWebApplicationFactory<Program> factory) 
+    : WebApiBaseFixture(factory)
 {
     [Fact]
-    public async Task Test()
+    public async Task CreateProduct_Should_Return_201()
     {
-        await ResetDatabaseAsync();  // ALWAYS call first - clears data in ~50-100ms
+        // Arrange
+        await ResetDatabaseAsync();
         
-        var (user, establishment, token) = await Prepare();  // Creates test user + establishment
-        var command = new CreateProductCommand(...);
+        // Act
+        var response = await Client.PostAsJsonAsync("/api/products", command);
         
-        var response = await PostAsync("/api/products", command, token);
-        
-        response.StatusCode.ShouldBe(HttpStatusCode.Created);
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
     }
 }
-`
+```
 
-**Critical rules:**
-- ALWAYS call `await ResetDatabaseAsync()` at the start of each test
-- Each feature has its own `WebApplicationFactory` + Collection (e.g., `ProductsWebApplicationFactory`)
-- Use `Prepare()` helper to create authenticated users with establishment context
-- Respawn cleans data 50x faster than recreating the database (~50-100ms vs 2-5s)
+## Common Pitfalls
 
-See `docs/INTEGRATION-TESTS.md` for complete guide.
+❌ **Don't** create Controllers — use Minimal API Endpoints  
+❌ **Don't** forget `ITenantAccessor.Tenant.Id` when creating entities  
+❌ **Don't** call `DbContext.SaveChanges()` directly — use `IUnitOfWork.SaveChangesAsync()`  
+❌ **Don't** put business logic in handlers — it belongs in domain entities  
+❌ **Don't** use public setters on entities — use methods like `Update()`, `SetAsAvailable()`  
 
-### Manual Testing
-Use `Devlivery.WebApi.http` (root of project) with REST Client extension in VS Code or Rider.
-
-**Test credentials**:
-`
-Email: admin@pizza.com
-Password: 123456
-`
-
-**Endpoints**: `/scalar/v1` for Scalar UI, `/health` for health checks.
-
----
-
-For detailed API response patterns, see `docs/API-RESPONSE-PATTERN.md`.
+✅ **Do** follow the feature folder structure exactly  
+✅ **Do** use `Result<T>` from FluentResults for error handling  
+✅ **Do** read ADRs for context on "why" decisions were made  
+✅ **Do** register handlers in `XxxFeature.AddXxxFeature()` method

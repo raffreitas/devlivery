@@ -6,12 +6,12 @@ on:
       - main
     paths:
       - "src/**"
-      - "*.sln"
+      - "*.slnx"
       - "Dockerfile"
       - ".github/workflows/main-build-deploy.yml"
 
 env:
-  DOTNET_VERSION: "9.0.x"
+  DOTNET_VERSION: "10.0.x"
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   REGISTRY: ghcr.io
@@ -104,7 +104,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./src/Devlivery.WebApi/Dockerfile
+          file: ./src/Devlivery/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -156,12 +156,12 @@ jobs:
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}
         run: |
-          cd src/Devlivery.WebApi
+          cd src/Devlivery
           dotnet ef database update -c ApplicationDbContext --configuration Release
 
       - name: Apply ApplicationIdentityDbContext migrations
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}
         run: |
-          cd src/Devlivery.WebApi
+          cd src/Devlivery
           dotnet ef database update -c ApplicationIdentityDbContext --configuration Release
