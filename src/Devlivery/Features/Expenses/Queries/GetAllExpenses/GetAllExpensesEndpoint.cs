@@ -20,8 +20,8 @@ public static class GetAllExpensesEndpoint
     private static async Task<Ok<ApiResponse<List<GetAllExpensesResponse>>>> Handle(
         [FromQuery] Guid? categoryId,
         [FromQuery] ExpenseStatus? status,
-        [FromQuery] DateOnly? startDate,
-        [FromQuery] DateOnly? endDate,
+        [FromQuery(Name = "start")] DateOnly? startDate,
+        [FromQuery(Name = "end")] DateOnly? endDate,
         ISender sender,
         CancellationToken ct)
     {

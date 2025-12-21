@@ -10,7 +10,7 @@ public static class GetAllExpenseCategoriesEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("", Handle)
+        app.MapGet("/categories", Handle)
             .Produces<ApiResponse<List<GetAllExpenseCategoriesResponse>>>()
             .Produces<ApiResponse>(StatusCodes.Status400BadRequest);
     }

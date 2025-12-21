@@ -54,30 +54,30 @@ public sealed class GetAllExpensesHandler(IDbConnectionFactory dbConnectionFacto
         var expenses = await connection.QueryAsync<GetAllExpensesQueryDto>(sql, parameters);
 
         return expenses
-            .Select(e => new GetAllExpensesResponse(
-                e.Id,
-                new CategoryDto(
-                    e.CategoryId,
-                    e.CategoryName,
-                    e.CategoryIsActive,
-                    e.ParentCategoryId.HasValue
-                        ?
+            .Select(e =>
+            {
+                var category = e.ParentCategoryId is not null
+                    ? new CategoryDto(
+                        e.ParentCategoryId.Value,
+                        e.ParentCategoryName!,
+                        e.ParentCategoryIsActive!.Value,
                         [
-                            new CategoryDto(
-                                e.ParentCategoryId.Value,
-                                e.ParentCategoryName!,
-                                e.ParentCategoryIsActive!.Value,
-                                [])
-                        ]
-                        : []),
-                e.Supplier,
-                e.Description,
-                e.Amount,
-                e.DueDate,
-                e.PaymentDate,
-                e.Status,
-                e.CreatedAt,
-                e.UpdatedAt))
+                            new CategoryDto(e.CategoryId, e.CategoryName, e.CategoryIsActive, [])
+                        ])
+                    : new CategoryDto(e.CategoryId, e.CategoryName, e.CategoryIsActive, []);
+
+                return new GetAllExpensesResponse(
+                    e.Id,
+                    category,
+                    e.Supplier,
+                    e.Description,
+                    e.Amount,
+                    e.DueDate,
+                    e.PaymentDate,
+                    e.Status,
+                    e.CreatedAt,
+                    e.UpdatedAt);
+            })
             .ToList();
     }
 }

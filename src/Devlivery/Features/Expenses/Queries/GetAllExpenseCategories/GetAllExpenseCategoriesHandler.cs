@@ -14,7 +14,7 @@ public sealed class GetAllExpenseCategoriesHandler(ApplicationDbContext dbContex
     {
         var categories = await dbContext.ExpenseCategories
             .AsNoTracking()
-            .Where(c => c.IsActive)
+            .Where(c => c.IsActive && c.ParentCategoryId == null)
             .OrderBy(c => c.Name)
             .Select(c => new GetAllExpenseCategoriesResponse(
                 c.Id,
