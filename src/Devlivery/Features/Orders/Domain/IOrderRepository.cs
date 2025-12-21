@@ -6,9 +6,9 @@ public interface IOrderRepository
 
     Task AddAsync(Order order, CancellationToken ct = default);
 
-    Task Update(Order order);
+    Task UpdateAsync(Order order, CancellationToken ct = default);
 
-    Task Remove(Order order);
+    Task RemoveAsync(Order order, CancellationToken ct = default);
 
     Task<List<Order>> GetOrdersInPeriodAsync(
         DateTime start,

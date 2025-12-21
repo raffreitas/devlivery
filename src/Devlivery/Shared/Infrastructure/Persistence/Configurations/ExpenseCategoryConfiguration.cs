@@ -44,43 +44,5 @@ public sealed class ExpenseCategoryConfiguration : IEntityTypeConfiguration<Cate
 
         builder.HasIndex(x => x.EstablishmentId);
         builder.HasIndex(e => e.IsActive);
-
-        // Seed data - Categorias padrão (IDs fixos para consistência)
-        // TODO: Alterar para insert na migration fazendo o select em todos os estaabelecimentos disponíveis
-        //  SeedDefaultCategories(builder);
     }
-
-    //  private static void SeedDefaultCategories(EntityTypeBuilder<Category> builder)
-    //  {
-    // Nota: EstablishmentId será o ID do primeiro estabelecimento criado no sistema
-    // Em produção, estas categorias devem ser copiadas para cada novo estabelecimento
-    //       var defaultEstablishmentId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
-    //       var companyExpenseId = Guid.Parse("10000000-0000-0000-0000-000000000001");
-    //       var supplierId = Guid.Parse("10000000-0000-0000-0000-000000000002");
-
-    // //        builder.HasData(
-    //  new
-    //  {
-    //      Id = companyExpenseId,
-    //      Name = "Despesas da Empresa",
-    //      CategoryType = Features.Expenses.Domain.Enums.ExpenseCategory.CompanyExpense,
-    //      RequiresSupplier = false,
-    //      IsActive = true,
-    //      EstablishmentId = defaultEstablishmentId,
-    //      CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-    //      UpdatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-    //  },
-    //  new
-    //  {
-    //      Id = supplierId,
-    //      Name = "Fornecedor",
-    //      CategoryType = Features.Expenses.Domain.Enums.ExpenseCategory.Supplier,
-    //      RequiresSupplier = true,
-    //      IsActive = true,
-    //      EstablishmentId = defaultEstablishmentId,
-    //      CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-    //      UpdatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-    //  }
-    // );
 }

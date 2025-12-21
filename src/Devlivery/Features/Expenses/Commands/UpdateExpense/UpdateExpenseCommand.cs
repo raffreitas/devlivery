@@ -32,7 +32,4 @@ public sealed class UpdateExpenseCommandValidator : AbstractValidator<UpdateExpe
             RuleFor(x => x.DueDate);
         });
     }
-
-    private bool BeValidDate(string? date) =>
-        !string.IsNullOrEmpty(date) && DateTime.TryParse(date, out _);
 }

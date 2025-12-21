@@ -77,7 +77,7 @@ public sealed class DeleteOrderHandlerTests(OrdersUnitTestFixture fixture)
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await orderRepository.Received(1).Remove(order);
+        await orderRepository.Received(1).RemoveAsync(order, Arg.Any<CancellationToken>());
     }
 
     [Fact]

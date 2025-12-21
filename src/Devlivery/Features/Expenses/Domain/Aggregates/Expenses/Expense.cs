@@ -1,4 +1,4 @@
-using Devlivery.Features.Expenses.Domain.Enums;
+using Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Features.Expenses.Domain.Aggregates.Expenses;

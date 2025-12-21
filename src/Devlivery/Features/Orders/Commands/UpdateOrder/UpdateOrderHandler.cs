@@ -60,7 +60,7 @@ public sealed class UpdateOrderHandler(
             notes: command.Notes
         );
 
-        await orderRepository.Update(order);
+        await orderRepository.UpdateAsync(order, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

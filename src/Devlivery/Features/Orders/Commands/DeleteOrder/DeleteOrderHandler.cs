@@ -26,7 +26,7 @@ public sealed class DeleteOrderHandler(
         // Raise domain event before deletion so handlers can access order data
         order.Delete();
 
-        await orderRepository.Remove(order);
+        await orderRepository.RemoveAsync(order, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

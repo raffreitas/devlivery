@@ -33,10 +33,7 @@ public static class ExpenseFeature
         MarkExpenseAsPaidEndpoint.MapEndpoint(expensesGroup);
         GetAllExpensesEndpoint.MapEndpoint(expensesGroup);
         GetExpenseByIdEndpoint.MapEndpoint(expensesGroup);
-
-        // Category endpoints
-        var categoriesGroup = app.MapGroup("/api/expenses/categories").WithTags("Expense Categories");
-        GetAllExpenseCategoriesEndpoint.MapEndpoint(categoriesGroup);
+        GetAllExpenseCategoriesEndpoint.MapEndpoint(expensesGroup);
 
         return app;
     }
