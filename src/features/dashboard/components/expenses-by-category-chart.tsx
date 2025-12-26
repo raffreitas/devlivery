@@ -39,7 +39,7 @@ export function ExpensesByCategoryChart({
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={chartData}
+                  data={chartData as unknown as Array<Record<string, unknown>>}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}

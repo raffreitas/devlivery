@@ -6,19 +6,20 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { useExpenses } from "@/features/expenses/hooks/use-expenses";
-import { ExpenseStatus } from "@/features/expenses/types";
-import { useOrders } from "@/features/orders/hooks/use-orders";
 import { BottomSheet } from "@/shared/components/bottom-sheet";
 import { Button } from "@/shared/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 import { formatMoney } from "@/shared/utils/formatters";
 import { StatCard } from "../../../shared/components/stat-card";
 import { DashboardFiltersContent } from "../components/dashboard-filters-content";
 import { DashboardHeader } from "../components/dashboard-header";
-import { ExpenseAlertsCard } from "../components/expense-alerts-card";
 import { ExpenseStatusChart } from "../components/expense-status-chart";
 import { ExpensesByCategoryChart } from "../components/expenses-by-category-chart";
 import { ExpensesOverTimeChart } from "../components/expenses-over-time-chart";
@@ -27,6 +28,9 @@ import { RevenueVsExpensesChart } from "../components/revenue-vs-expenses-chart"
 import { SalesChart } from "../components/sales-chart";
 import { StatusDistributionChart } from "../components/status-distribution-chart";
 import { TopProductsCard } from "../components/top-products-card";
+import { useDashboardExpenses } from "../hooks/use-dashboard-expenses";
+import { useDashboardOverview } from "../hooks/use-dashboard-overview";
+import { useDashboardSales } from "../hooks/use-dashboard-sales";
 import { dashboardService } from "../services/dashboard-service";
 
 export function DashboardPage() {
@@ -34,19 +38,49 @@ export function DashboardPage() {
     from: subDays(new Date(), 7),
     to: new Date(),
   });
-  const { orders, isFetching: isOrdersFetching } = useOrders(
+
+  const [activeTab, setActiveTab] = useState("vendas");
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  // Dados sempre necessários (overview)
+  const overview = useDashboardOverview(period?.from, period?.to);
+
+  // Dados condicionais por tab
+  const sales = useDashboardSales(
     period?.from,
     period?.to,
+    activeTab === "vendas",
   );
-  const {
-    expenses,
-    summary: expenseSummary,
-    isFetching: isExpensesFetching,
-  } = useExpenses({
-    duePeriod: period,
-  });
+  const expenses = useDashboardExpenses(
+    period?.from,
+    period?.to,
+    activeTab === "despesas",
+  );
 
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  // Combinar isFetching de todos os hooks
+  const isFetching =
+    overview.isFetching || sales.isFetching || expenses.isFetching;
+
+  // Extrair dados do overview
+  const {
+    stats,
+    expenseSummary,
+    salesOverTime: overviewSalesOverTime,
+    expensesOverTime: overviewExpensesOverTime,
+    expensesByStatus: overviewExpensesByStatus,
+  } = overview;
+
+  // Usar salesOverTime do hook de vendas se disponível, senão do overview
+  const salesOverTime =
+    sales.salesOverTime.length > 0
+      ? sales.salesOverTime
+      : overviewSalesOverTime;
+
+  // Usar expensesOverTime do hook de despesas se disponível, senão do overview
+  const expensesOverTime =
+    expenses.expensesOverTime.length > 0
+      ? expenses.expensesOverTime
+      : overviewExpensesOverTime;
 
   const handlePeriodFilterChange = (dateRange: DateRange | undefined) => {
     if (!dateRange) {
@@ -59,47 +93,20 @@ export function DashboardPage() {
     }
   };
 
-  const isFetching = isOrdersFetching || isExpensesFetching;
-
-  const stats = dashboardService.calculateStats(orders);
-  const ordersByStatus = dashboardService.getOrdersByStatus(orders);
-  const paymentBreakdown = dashboardService.getPaymentBreakdown(orders);
-
-  // Calcular métricas de despesas
-  const expensesByStatus = dashboardService.getExpensesByStatus(expenses);
-  const expensesByCategory = dashboardService.getExpensesByCategory(expenses);
-  const expensesOverTime = dashboardService.getExpensesOverTime(expenses);
-  const salesOverTime = dashboardService.getSalesOverTime(orders);
-
   // Calcular lucro líquido
   const netProfit = dashboardService.calculateNetProfit(
     stats.totalRevenue,
     expenseSummary.paid,
   );
 
-  // Separar despesas por alertas
-  const overdueExpenses = useMemo(
-    () => expenses.filter((e) => e.status === ExpenseStatus.OVERDUE),
-    [expenses],
-  );
-
-  const dueTodayExpenses = useMemo(
-    () => expenses.filter((e) => e.status === ExpenseStatus.DUE_TODAY),
-    [expenses],
-  );
-
-  const upcomingExpenses = useMemo(
-    () => dashboardService.getUpcomingExpenses(expenses, 7),
-    [expenses],
-  );
+  // Usar expensesByStatus do hook de despesas se disponível, senão do overview
+  const expensesByStatus =
+    expenses.expensesByStatus.length > 0
+      ? expenses.expensesByStatus
+      : overviewExpensesByStatus;
 
   // Calcular despesas pendentes (Pending + Overdue)
-  const pendingExpensesTotal =
-    expenseSummary.pending + expenseSummary.overdue;
-
-  // Verificar se há alertas importantes
-  const hasImportantAlerts =
-    overdueExpenses.length > 0 || dueTodayExpenses.length > 0;
+  const pendingExpensesTotal = expenseSummary.pending + expenseSummary.overdue;
 
   return (
     <>
@@ -139,14 +146,10 @@ export function DashboardPage() {
           />
 
           <StatCard
-            title={hasImportantAlerts ? "Alertas" : "Pedidos"}
-            value={
-              hasImportantAlerts
-                ? `${overdueExpenses.length + dueTodayExpenses.length}`
-                : stats.totalOrders
-            }
+            title="Pedidos"
+            value={stats.totalOrders}
             icon={<AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
-            color={hasImportantAlerts ? "red" : "orange"}
+            color="orange"
           />
         </div>
 
@@ -162,83 +165,59 @@ export function DashboardPage() {
           />
         </div>
 
-        {/* Alertas de Despesas (se houver) */}
-        {(overdueExpenses.length > 0 ||
-          dueTodayExpenses.length > 0 ||
-          upcomingExpenses.length > 0) && (
-          <div
-            className={`transition-opacity duration-200 ${
-              isFetching ? "opacity-60" : "opacity-100"
-            }`}
-          >
-            <ExpenseAlertsCard
-              overdueExpenses={overdueExpenses}
-              dueTodayExpenses={dueTodayExpenses}
-              upcomingExpenses={upcomingExpenses}
-            />
-          </div>
-        )}
-
         {/* Tabs para organizar gráficos detalhados */}
-        <Tabs defaultValue="vendas" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 lg:w-fit">
             <TabsTrigger value="vendas">Vendas</TabsTrigger>
             <TabsTrigger value="despesas">Despesas</TabsTrigger>
             <TabsTrigger value="analises">Análises</TabsTrigger>
           </TabsList>
 
-          <TabsContent
-            value="vendas"
-            className="mt-4 space-y-4 sm:space-y-6"
-          >
+          <TabsContent value="vendas" className="mt-4 space-y-4 sm:space-y-6">
             <div
               className={`grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 transition-opacity duration-200 ${
-                isFetching ? "opacity-60" : "opacity-100"
+                sales.isFetching ? "opacity-60" : "opacity-100"
               }`}
             >
               <SalesChart data={salesOverTime} />
               <StatusDistributionChart
-                data={Object.entries(ordersByStatus).map(([status, count]) => ({
-                  status,
-                  count,
-                }))}
+                data={Object.entries(sales.ordersByStatus).map(
+                  ([status, count]) => ({
+                    status,
+                    count,
+                  }),
+                )}
               />
             </div>
             <div
               className={`grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 transition-opacity duration-200 ${
-                isFetching ? "opacity-60" : "opacity-100"
+                sales.isFetching ? "opacity-60" : "opacity-100"
               }`}
             >
-              <PaymentBreakdownCard paymentBreakdown={paymentBreakdown} />
-              <TopProductsCard data={dashboardService.getTopProducts(orders)} />
+              <PaymentBreakdownCard paymentBreakdown={sales.paymentBreakdown} />
+              <TopProductsCard data={sales.topProducts} />
             </div>
           </TabsContent>
 
-          <TabsContent
-            value="despesas"
-            className="mt-4 space-y-4 sm:space-y-6"
-          >
+          <TabsContent value="despesas" className="mt-4 space-y-4 sm:space-y-6">
             <div
               className={`grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 transition-opacity duration-200 ${
-                isFetching ? "opacity-60" : "opacity-100"
+                expenses.isFetching ? "opacity-60" : "opacity-100"
               }`}
             >
               <ExpenseStatusChart data={expensesByStatus} />
-              <ExpensesByCategoryChart data={expensesByCategory} />
+              <ExpensesByCategoryChart data={expenses.expensesByCategory} />
             </div>
             <div
               className={`transition-opacity duration-200 ${
-                isFetching ? "opacity-60" : "opacity-100"
+                expenses.isFetching ? "opacity-60" : "opacity-100"
               }`}
             >
               <ExpensesOverTimeChart data={expensesOverTime} />
             </div>
           </TabsContent>
 
-          <TabsContent
-            value="analises"
-            className="mt-4 space-y-4 sm:space-y-6"
-          >
+          <TabsContent value="analises" className="mt-4 space-y-4 sm:space-y-6">
             <div
               className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 transition-opacity duration-200 ${
                 isFetching ? "opacity-60" : "opacity-100"

@@ -36,14 +36,20 @@ export function RevenueVsExpensesChart({
       if (!dataMap.has(item.date)) {
         dataMap.set(item.date, { date: item.date, revenue: 0, expenses: 0 });
       }
-      dataMap.get(item.date)!.revenue = item.total;
+      const entry = dataMap.get(item.date);
+      if (entry) {
+        entry.revenue = item.total;
+      }
     });
 
     expensesData.forEach((item) => {
       if (!dataMap.has(item.date)) {
         dataMap.set(item.date, { date: item.date, revenue: 0, expenses: 0 });
       }
-      dataMap.get(item.date)!.expenses = item.total;
+      const entry = dataMap.get(item.date);
+      if (entry) {
+        entry.expenses = item.total;
+      }
     });
 
     return Array.from(dataMap.values()).sort((a, b) => {
