@@ -15,12 +15,8 @@ public static class ProductFeature
         // Register Repository
         services.AddScoped<IProductRepository, ProductRepository>();
 
-        // Register Handlers
-        services.AddScoped<CreateProductHandler>();
-        services.AddScoped<DeleteProductHandler>();
-        services.AddScoped<UpdateProductHandler>();
-        services.AddScoped<GetAllProductsHandler>();
-        services.AddScoped<GetProductByIdHandler>();
+        // Commands and Queries handlers are automatically discovered by Mediator
+        // No manual registration needed when using ICommandHandler/IQueryHandler
         return services;
     }
 

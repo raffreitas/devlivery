@@ -18,9 +18,6 @@ public static class CashRegisterFeature
         services.AddScoped<ICashSessionRepository, CashSessionRepository>();
 
         // Register Handlers
-        services.AddScoped<CreateCashSessionHandler>();
-        services.AddScoped<CloseCashSessionHandler>();
-        services.AddScoped<CreateCashDepositHandler>();
         services.AddScoped<GetActiveCashSessionHandler>();
         services.AddScoped<GetCashSessionByIdHandler>();
         services.AddScoped<GetCashSessionDepositsHandler>();

@@ -2,15 +2,18 @@ using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
 
+using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Products.Queries.GetProductById;
 
 public sealed class GetProductByIdHandler(ApplicationDbContext dbContext)
+    : IQueryHandler<GetProductByIdQuery, Result<GetProductByIdResponse>>
 {
-    public async Task<Result<GetProductByIdResponse>> HandleAsync(
+    public async ValueTask<Result<GetProductByIdResponse>> Handle(
         GetProductByIdQuery query,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var product = await dbContext.Products
             .AsNoTracking()

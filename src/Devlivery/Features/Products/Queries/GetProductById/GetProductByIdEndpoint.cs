@@ -1,6 +1,8 @@
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
+using Mediator;
+
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Products.Queries.GetProductById;
@@ -16,11 +18,11 @@ public static class GetProductByIdEndpoint
 
     private static async Task<Results<Ok<ApiResponse<GetProductByIdResponse>>, NotFound<ApiResponse<GetProductByIdResponse>>>> Handle(
         Guid id,
-        GetProductByIdHandler handler,
+        ISender sender,
         CancellationToken ct)
     {
         var query = new GetProductByIdQuery(id);
-        var result = await handler.HandleAsync(query, ct);
+        var result = await sender.Send(query, ct);
 
         return result.IsSuccess
             ? result.ToOk()
