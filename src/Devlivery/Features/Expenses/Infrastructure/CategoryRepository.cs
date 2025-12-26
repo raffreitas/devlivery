@@ -10,7 +10,7 @@ public sealed class CategoryRepository(ApplicationDbContext dbContext) : ICatego
     public async Task<Category?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await dbContext.ExpenseCategories
-            .Include(x => x.SubCategories)
+            .Include(x => x.Subcategories)
             .FirstOrDefaultAsync(c => c.Id == id, ct);
     }
 
@@ -18,7 +18,7 @@ public sealed class CategoryRepository(ApplicationDbContext dbContext) : ICatego
     {
         return await dbContext.ExpenseCategories
             .AsNoTracking()
-            .Include(x => x.SubCategories)
+            .Include(x => x.Subcategories)
             .OrderBy(c => c.Name)
             .ToListAsync(ct);
     }
@@ -27,7 +27,7 @@ public sealed class CategoryRepository(ApplicationDbContext dbContext) : ICatego
     {
         return await dbContext.ExpenseCategories
             .AsNoTracking()
-            .Include(x => x.SubCategories)
+            .Include(x => x.Subcategories)
             .Where(c => c.IsActive)
             .OrderBy(c => c.Name)
             .ToListAsync(ct);

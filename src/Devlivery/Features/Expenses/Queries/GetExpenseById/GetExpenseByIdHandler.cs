@@ -34,7 +34,7 @@ public sealed class GetExpenseByIdHandler(ApplicationDbContext dbContext)
                 category.Id,
                 category.Name,
                 category.IsActive,
-                category.SubCategories
+                category.Subcategories
                     .Select(sc => new CategoryDto(
                         sc.Id,
                         sc.Name,

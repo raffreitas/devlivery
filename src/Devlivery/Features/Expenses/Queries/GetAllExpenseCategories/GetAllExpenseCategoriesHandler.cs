@@ -20,7 +20,7 @@ public sealed class GetAllExpenseCategoriesHandler(ApplicationDbContext dbContex
                 c.Id,
                 c.Name,
                 c.IsActive,
-                c.SubCategories
+                c.Subcategories
                     .Where(sc => sc.IsActive)
                     .OrderBy(sc => sc.Name)
                     .Select(sc => new GetAllExpenseCategoriesResponse(

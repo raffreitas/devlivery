@@ -588,7 +588,7 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasConstraintName("fk_expense_categories_establishments_establishment_id");
 
                     b.HasOne("Devlivery.Features.Expenses.Domain.Aggregates.Categories.Category", null)
-                        .WithMany("SubCategories")
+                        .WithMany("Subcategories")
                         .HasForeignKey("ParentCategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_expense_categories_expense_categories_parent_category_id");
@@ -672,7 +672,7 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
 
             modelBuilder.Entity("Devlivery.Features.Expenses.Domain.Aggregates.Categories.Category", b =>
                 {
-                    b.Navigation("SubCategories");
+                    b.Navigation("Subcategories");
                 });
 
             modelBuilder.Entity("Devlivery.Features.Orders.Domain.Order", b =>

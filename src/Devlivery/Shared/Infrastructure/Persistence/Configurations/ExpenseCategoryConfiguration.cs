@@ -38,7 +38,7 @@ public sealed class ExpenseCategoryConfiguration : IEntityTypeConfiguration<Cate
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne<Category>()
-            .WithMany(c => c.SubCategories)
+            .WithMany(c => c.Subcategories)
             .HasForeignKey(c => c.ParentCategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 

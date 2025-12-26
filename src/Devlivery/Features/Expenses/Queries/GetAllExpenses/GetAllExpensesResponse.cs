@@ -35,7 +35,7 @@ public sealed record CategoryDto(
     Guid Id,
     string Name,
     bool IsActive,
-    CategoryDto[] SubCategories
+    CategoryDto[] Subcategories
 );
 
 public enum ExpenseDisplayStatus

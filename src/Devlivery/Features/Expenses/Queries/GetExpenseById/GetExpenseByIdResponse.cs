@@ -16,5 +16,5 @@ public sealed record CategoryDto(
     Guid Id,
     string CategoryName,
     bool IsActive,
-    CategoryDto[] SubCategories
+    CategoryDto[] Subcategories
 );

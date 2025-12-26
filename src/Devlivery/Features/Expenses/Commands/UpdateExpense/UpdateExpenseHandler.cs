@@ -29,7 +29,7 @@ public sealed class UpdateExpenseHandler(
             var category = await categoryRepository.GetByIdAsync(command.CategoryId.Value, cancellationToken);
             if (category is null || !category.IsActive)
             {
-                return Result.Fail("Subcategory not found or inactive.");
+                return Result.Fail("subcategory not found or inactive.");
             }
         }
 

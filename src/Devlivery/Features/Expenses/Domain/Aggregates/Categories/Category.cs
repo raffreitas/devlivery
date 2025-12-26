@@ -4,7 +4,7 @@ namespace Devlivery.Features.Expenses.Domain.Aggregates.Categories;
 
 public sealed class Category : Entity
 {
-    private readonly List<Category> _subCategories = [];
+    private readonly List<Category> _subcategories = [];
 
     public string Name { get; private set; }
     public bool IsActive { get; private set; }
@@ -13,7 +13,7 @@ public sealed class Category : Entity
     public DateTime UpdatedAt { get; private set; }
     public Guid? ParentCategoryId { get; private set; }
 
-    public IReadOnlyList<Category> SubCategories => _subCategories;
+    public IReadOnlyList<Category> Subcategories => _subcategories;
 
     public Category(string name, Guid establishmentId)
     {
@@ -24,13 +24,13 @@ public sealed class Category : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void AddSubCategory(Category subCategory)
+    public void AddSubcategory(Category subcategory)
     {
-        if (_subCategories.Contains(subCategory) || subCategory.ParentCategoryId == this.Id)
+        if (_subcategories.Contains(subcategory) || subcategory.ParentCategoryId == this.Id)
             throw new InvalidOperationException("A subcategoria já está associada a esta categoria.");
 
-        subCategory.ParentCategoryId = this.Id;
-        _subCategories.Add(subCategory);
+        subcategory.ParentCategoryId = this.Id;
+        _subcategories.Add(subcategory);
         UpdatedAt = DateTime.UtcNow;
     }
 
