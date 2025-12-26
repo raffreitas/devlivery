@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import type { ComponentProps } from "react";
+import { useEffect, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { Button } from "@/shared/components/ui/button";
 import { Calendar } from "@/shared/components/ui/calendar";
@@ -24,6 +25,17 @@ export function DateRangePicker({
   onDateChange,
   className,
 }: DateRangePickerProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -32,7 +44,7 @@ export function DateRangePicker({
             id="date"
             variant={"outline"}
             className={cn(
-              "w-[250px] justify-start px-3 text-left font-normal",
+              "w-full sm:w-auto lg:w-[250px] justify-start px-3 text-left font-normal",
               !date && "text-muted-foreground",
             )}
           >
@@ -52,7 +64,7 @@ export function DateRangePicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-auto p-0 z-10000"
+          className="w-[calc(100vw-2rem)] sm:w-auto p-0 z-[10000]"
           align="start"
         >
           <Calendar
@@ -61,7 +73,7 @@ export function DateRangePicker({
             defaultMonth={date?.from}
             selected={date}
             onSelect={onDateChange}
-            numberOfMonths={2}
+            numberOfMonths={isMobile ? 1 : 2}
             locale={ptBR}
           />
         </PopoverContent>

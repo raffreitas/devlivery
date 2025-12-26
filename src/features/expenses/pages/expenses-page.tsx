@@ -2,10 +2,12 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
+import { BottomSheet } from "@/shared/components/bottom-sheet";
 import { Modal } from "@/shared/components/modal";
 import { Button } from "@/shared/components/ui/button";
 import { LoadingState, TableSkeleton } from "@/shared/components/loading";
-import { ExpenseFiltersComponent } from "../components/expense-filters";
+import { ExpensesFilters } from "../components/expenses-filters";
+import { ExpensesFiltersContent } from "../components/expenses-filters-content";
 import { ExpenseForm } from "../components/expense-form";
 import { ExpenseList } from "../components/expense-list";
 import { ExpenseSummaryCard } from "../components/expense-summary-card";
@@ -18,6 +20,7 @@ export function ExpensesPage() {
   const [status, setStatus] = useState<ExpenseStatus | undefined>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>();
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const {
     expenses,
@@ -106,7 +109,7 @@ export function ExpensesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Despesas</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Despesas</h1>
             <p className="text-muted-foreground">
               Gerencie as despesas do estabelecimento
             </p>
@@ -136,13 +139,14 @@ export function ExpensesPage() {
           <ExpenseSummaryCard summary={summary} />
 
           {/* Filters */}
-          <ExpenseFiltersComponent
+          <ExpensesFilters
             period={duePeriod}
             categoryId={categoryId}
             status={status}
             onDuePeriodChange={setDuePeriod}
             onCategoryChange={setCategoryId}
             onStatusChange={setStatus}
+            onOpenFilters={() => setIsFiltersOpen(true)}
           />
 
           {/* List */}
@@ -167,6 +171,29 @@ export function ExpensesPage() {
           onCancel={handleCloseModal}
         />
       </Modal>
+
+      <BottomSheet
+        isOpen={isFiltersOpen}
+        onClose={() => setIsFiltersOpen(false)}
+        title="Filtros"
+      >
+        <div className="space-y-4">
+          <ExpensesFiltersContent
+            period={duePeriod}
+            categoryId={categoryId}
+            status={status}
+            onDuePeriodChange={setDuePeriod}
+            onCategoryChange={setCategoryId}
+            onStatusChange={setStatus}
+          />
+
+          <div className="pt-4 pb-2 border-t border-gray-200">
+            <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
+              Aplicar Filtros
+            </Button>
+          </div>
+        </div>
+      </BottomSheet>
     </>
   );
 }

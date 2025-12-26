@@ -26,7 +26,7 @@ export function StatCard({
   color = "orange",
 }: StatCardProps) {
   return (
-    <Card className="p-6">
+    <Card className="p-4 sm:p-6">
       <div className="flex items-center gap-3 sm:gap-4">
         <div className={`p-2 sm:p-3 rounded-full ${colorClasses[color]}`}>
           {icon}

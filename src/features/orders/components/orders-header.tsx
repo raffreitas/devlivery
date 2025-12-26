@@ -11,7 +11,7 @@ export function OrdersHeader({ isFetching, onNewOrder }: OrdersHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
           Pedidos
         </h1>
         <p className="text-muted-foreground">Gerencie e acompanhe os pedidos</p>
