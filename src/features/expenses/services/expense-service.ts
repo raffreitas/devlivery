@@ -3,7 +3,8 @@ import type { Category, Expense, ExpenseFormData } from "../types";
 
 interface CategoryDto {
   id: string;
-  name: string;
+  name?: string; // GetAllExpenses usa 'name'
+  categoryName?: string; // GetExpenseById usa 'categoryName'
   isActive: boolean;
   subCategories: CategoryDto[];
 }
@@ -24,7 +25,7 @@ interface ExpenseDto {
 function mapCategory(dto: CategoryDto): Category {
   return {
     id: dto.id,
-    name: dto.name,
+    name: dto.name ?? dto.categoryName ?? "", // Suporta ambos os formatos do backend
     isActive: dto.isActive,
     subCategories: dto.subCategories.map(mapCategory),
   };
@@ -49,6 +50,25 @@ function parseDateOnly(dateString?: string | null): Date | undefined {
   return Number.isNaN(dt.getTime()) ? undefined : dt;
 }
 
+function mapExpenseStatus(status: string): Expense["status"] {
+  // Mapeia os valores do backend para os tipos do frontend
+  switch (status) {
+    case "Paid":
+      return "Paid";
+    case "Pending":
+      return "Pending";
+    case "Overdue":
+      return "Overdue";
+    case "DueToday":
+      return "DueToday";
+    case "Cancelled":
+      return "Cancelled";
+    default:
+      // Fallback para valores desconhecidos
+      return status as Expense["status"];
+  }
+}
+
 function mapExpense(dto: ExpenseDto): Expense {
   return {
     id: dto.id,
@@ -59,7 +79,7 @@ function mapExpense(dto: ExpenseDto): Expense {
     // biome-ignore lint/style/noNonNullAssertion: <explanation> We are sure the date strings are valid.</explanation>
     dueDate: parseDateOnly(dto.dueDate)!,
     paymentDate: parseDateOnly(dto.paymentDate),
-    status: dto.status as Expense["status"],
+    status: mapExpenseStatus(dto.status),
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };

@@ -45,7 +45,7 @@ export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
         .filter((exp) => exp.status === "Paid")
         .reduce((sum, exp) => sum + exp.amount, 0),
       pending: expenses
-        .filter((exp) => exp.status === "Pending")
+        .filter((exp) => exp.status === "Pending" || exp.status === "DueToday")
         .reduce((sum, exp) => sum + exp.amount, 0),
       overdue: expenses
         .filter((exp) => exp.status === "Overdue")

@@ -24,7 +24,8 @@ const statusLabels: Record<ExpenseStatus, string> = {
   [ExpenseStatus.PAID]: "Pago",
   [ExpenseStatus.PENDING]: "Pendente",
   [ExpenseStatus.OVERDUE]: "Vencido",
-  [ExpenseStatus.SCHEDULED]: "Agendado",
+  [ExpenseStatus.DUE_TODAY]: "Vence Hoje",
+  [ExpenseStatus.CANCELLED]: "Cancelado",
 };
 
 export function ExpenseFiltersComponent({

@@ -5,7 +5,8 @@ export const ExpenseStatus = {
   PAID: "Paid",
   PENDING: "Pending",
   OVERDUE: "Overdue",
-  SCHEDULED: "Scheduled",
+  DUE_TODAY: "DueToday",
+  CANCELLED: "Cancelled",
 } as const;
 
 export type ExpenseStatus = (typeof ExpenseStatus)[keyof typeof ExpenseStatus];

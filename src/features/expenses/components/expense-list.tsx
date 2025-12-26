@@ -62,11 +62,17 @@ const statusConfig = {
     icon: AlertCircle,
     className: "bg-red-500 hover:bg-red-600",
   },
-  [ExpenseStatus.SCHEDULED]: {
-    label: "Agendado",
+  [ExpenseStatus.DUE_TODAY]: {
+    label: "Vence Hoje",
     variant: "outline" as const,
     icon: Calendar,
     className: "bg-amber-500 hover:bg-amber-600 text-white",
+  },
+  [ExpenseStatus.CANCELLED]: {
+    label: "Cancelado",
+    variant: "secondary" as const,
+    icon: AlertCircle,
+    className: "bg-gray-500 hover:bg-gray-600 text-white",
   },
 };
 
