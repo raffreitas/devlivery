@@ -1,6 +1,11 @@
 import { Filter, PlusIcon, Search } from "lucide-react";
 import { useState } from "react";
 import {
+  GridSkeleton,
+  LoadingOverlay,
+  LoadingState,
+} from "@/shared/components/loading";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -24,7 +29,6 @@ import {
   SelectTrigger,
 } from "@/shared/components/ui/select";
 import { Separator } from "@/shared/components/ui/separator";
-import { Spinner } from "@/shared/components/ui/spinner";
 import { ProductCard } from "../components/product-card";
 import { ProductForm } from "../components/product-form";
 import { useProducts } from "../hooks/use-products";
@@ -88,6 +92,8 @@ export function ProductsPage() {
 
   return (
     <div className="space-y-6">
+      <LoadingOverlay isFetching={isFetching} position="top-bar" />
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
@@ -98,12 +104,6 @@ export function ProductsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          {isFetching && (
-            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground mr-2">
-              <Spinner className="w-4 h-4" />
-              <span>Sincronizando...</span>
-            </div>
-          )}
           <Button
             onClick={() => setIsModalOpen(true)}
             className="w-full sm:w-auto"
@@ -157,34 +157,35 @@ export function ProductsPage() {
         </div>
       </div>
 
-      {loading && products.length === 0 ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="text-xl text-secondary-foreground">Carregando...</div>
-        </div>
-      ) : filteredProducts.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">
-            {products.length === 0
-              ? "Nenhum produto cadastrado. Comece criando um novo produto!"
-              : "Nenhum produto encontrado com os filtros aplicados."}
-          </p>
-        </div>
-      ) : (
-        <div
-          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 transition-opacity duration-200 ${
-            isFetching ? "opacity-60" : "opacity-100"
-          }`}
-        >
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onEdit={handleEdit}
-              onDelete={(productId) => setAlert({ open: true, productId })}
-            />
-          ))}
-        </div>
-      )}
+      <LoadingState
+        isLoading={loading && products.length === 0}
+        skeleton={<GridSkeleton items={10} columns={5} />}
+      >
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">
+              {products.length === 0
+                ? "Nenhum produto cadastrado. Comece criando um novo produto!"
+                : "Nenhum produto encontrado com os filtros aplicados."}
+            </p>
+          </div>
+        ) : (
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 transition-opacity duration-200 ${
+              isFetching ? "opacity-60" : "opacity-100"
+            }`}
+          >
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onEdit={handleEdit}
+                onDelete={(productId) => setAlert({ open: true, productId })}
+              />
+            ))}
+          </div>
+        )}
+      </LoadingState>
 
       <AlertDialog
         open={alert.open}

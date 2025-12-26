@@ -1,5 +1,5 @@
 import type { DateRange } from "react-day-picker";
-import { Spinner } from "@/shared/components/ui/spinner";
+import { LoadingOverlay } from "@/shared/components/loading";
 import { DashboardFilters } from "./dashboard-filters";
 
 interface DashboardHeaderProps {
@@ -24,12 +24,7 @@ export function DashboardHeader({
         </p>
       </div>
 
-      {isFetching && (
-        <div className="fixed top-4 right-4 z-50 bg-white/80 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-gray-100 flex items-center gap-2 text-sm text-muted-foreground">
-          <Spinner className="w-4 h-4" />
-          <span>Atualizando...</span>
-        </div>
-      )}
+      <LoadingOverlay isFetching={isFetching} position="top-bar" />
 
       <DashboardFilters
         period={period}

@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { LoadingButton, LoadingState } from "@/shared/components/loading";
 import { useExpenseCategories } from "../hooks/use-expenses";
 import type { Expense, ExpenseFormData } from "../types";
 import { expenseFormSchema } from "../types";
@@ -116,12 +117,18 @@ export function ExpenseForm({
     }
   };
 
-  if (loadingCategories) {
-    return <div className="p-4 text-center">Carregando categorias...</div>;
-  }
-
   return (
-    <Form {...form}>
+    <LoadingState
+      isLoading={loadingCategories}
+      skeleton={
+        <div className="p-4 space-y-4">
+          <div className="h-10 bg-accent animate-pulse rounded-md" />
+          <div className="h-10 bg-accent animate-pulse rounded-md" />
+          <div className="h-10 bg-accent animate-pulse rounded-md" />
+        </div>
+      }
+    >
+      <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {/* Categoria */}
         <FormField
@@ -280,15 +287,16 @@ export function ExpenseForm({
               Cancelar
             </Button>
           )}
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting
-              ? "Salvando..."
-              : expense
-                ? "Atualizar"
-                : "Criar Despesa"}
-          </Button>
+          <LoadingButton
+            type="submit"
+            isLoading={isSubmitting}
+            loadingText="Salvando..."
+          >
+            {expense ? "Atualizar" : "Criar Despesa"}
+          </LoadingButton>
         </div>
       </form>
     </Form>
+    </LoadingState>
   );
 }

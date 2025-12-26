@@ -4,6 +4,7 @@ import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { Modal } from "@/shared/components/modal";
 import { Button } from "@/shared/components/ui/button";
+import { LoadingState, TableSkeleton } from "@/shared/components/loading";
 import { ExpenseFiltersComponent } from "../components/expense-filters";
 import { ExpenseForm } from "../components/expense-form";
 import { ExpenseList } from "../components/expense-list";
@@ -99,16 +100,6 @@ export function ExpensesPage() {
     setEditingExpense(undefined);
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto py-6 space-y-6">
-        <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Carregando despesas...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="space-y-6">
@@ -126,26 +117,42 @@ export function ExpensesPage() {
           </Button>
         </div>
 
-        {/* Summary Cards */}
-        <ExpenseSummaryCard summary={summary} />
+        <LoadingState
+          isLoading={loading}
+          skeleton={
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="h-24 bg-accent animate-pulse rounded-lg" />
+                <div className="h-24 bg-accent animate-pulse rounded-lg" />
+                <div className="h-24 bg-accent animate-pulse rounded-lg" />
+              </div>
+              <div className="bg-card p-4 rounded-lg border">
+                <TableSkeleton rows={5} columns={9} />
+              </div>
+            </div>
+          }
+        >
+          {/* Summary Cards */}
+          <ExpenseSummaryCard summary={summary} />
 
-        {/* Filters */}
-        <ExpenseFiltersComponent
-          period={duePeriod}
-          categoryId={categoryId}
-          status={status}
-          onDuePeriodChange={setDuePeriod}
-          onCategoryChange={setCategoryId}
-          onStatusChange={setStatus}
-        />
+          {/* Filters */}
+          <ExpenseFiltersComponent
+            period={duePeriod}
+            categoryId={categoryId}
+            status={status}
+            onDuePeriodChange={setDuePeriod}
+            onCategoryChange={setCategoryId}
+            onStatusChange={setStatus}
+          />
 
-        {/* List */}
-        <ExpenseList
-          expenses={expenses}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onMarkAsPaid={handleMarkAsPaid}
-        />
+          {/* List */}
+          <ExpenseList
+            expenses={expenses}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onMarkAsPaid={handleMarkAsPaid}
+          />
+        </LoadingState>
       </div>
 
       {/* Modal Create/Edit */}

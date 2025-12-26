@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Separator } from "@/shared/components/ui/separator";
+import { GridSkeleton, LoadingOverlay, LoadingState } from "@/shared/components/loading";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
 import { OrdersFilters } from "../components/orders-filters";
@@ -104,6 +105,8 @@ export function OrdersPage() {
 
   return (
     <>
+      <LoadingOverlay isFetching={isFetching} position="top-bar" />
+      
       <div className="space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <OrdersHeader
@@ -124,43 +127,42 @@ export function OrdersPage() {
           onOpenFilters={() => setIsFiltersOpen(true)}
         />
 
-        {loading && orders.length === 0 ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="text-base sm:text-xl text-secondary-foreground">
-              Carregando...
+        <LoadingState
+          isLoading={loading && orders.length === 0}
+          skeleton={<GridSkeleton items={6} columns={3} />}
+        >
+          {filteredByPayment.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-sm sm:text-lg">
+                {orders.length === 0
+                  ? "Nenhum pedido cadastrado. Comece criando um novo pedido!"
+                  : "Nenhum pedido encontrado com o filtro aplicado."}
+              </p>
             </div>
-          </div>
-        ) : filteredByPayment.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-sm sm:text-lg">
-              {orders.length === 0
-                ? "Nenhum pedido cadastrado. Comece criando um novo pedido!"
-                : "Nenhum pedido encontrado com o filtro aplicado."}
-            </p>
-          </div>
-        ) : (
-          <div
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 transition-opacity duration-200 ${
-              isFetching ? "opacity-60" : "opacity-100"
-            }`}
-          >
-            {filteredByPayment
-              .sort(
-                (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime(),
-              )
-              .map((order) => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  onEdit={handleEditOrder}
-                  onUpdateStatus={updateOrderStatus}
-                  onDelete={deleteOrder}
-                />
-              ))}
-          </div>
-        )}
+          ) : (
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 transition-opacity duration-200 ${
+                isFetching ? "opacity-60" : "opacity-100"
+              }`}
+            >
+              {filteredByPayment
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime(),
+                )
+                .map((order) => (
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    onEdit={handleEditOrder}
+                    onUpdateStatus={updateOrderStatus}
+                    onDelete={deleteOrder}
+                  />
+                ))}
+            </div>
+          )}
+        </LoadingState>
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>

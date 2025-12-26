@@ -13,7 +13,7 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { InputMoney } from "@/shared/components/ui/input-money";
-import { Spinner } from "@/shared/components/ui/spinner";
+import { LoadingButton } from "@/shared/components/loading";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { type ProductFormData, productFormSchema } from "../types";
 
@@ -132,10 +132,13 @@ export function ProductForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button type="submit">
-            {form.formState.isSubmitting && <Spinner />}
+          <LoadingButton
+            type="submit"
+            isLoading={form.formState.isSubmitting}
+            loadingText={initialData?.id ? "Atualizando..." : "Criando..."}
+          >
             {initialData?.id ? "Atualizar" : "Criar"} Produto
-          </Button>
+          </LoadingButton>
         </div>
       </form>
     </Form>

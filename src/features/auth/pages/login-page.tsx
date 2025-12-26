@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
-import { Spinner } from "@/shared/components/ui/spinner";
+import { LoadingButton } from "@/shared/components/loading";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { type AuthFormData, authFormSchema } from "../types";
 
@@ -96,16 +96,14 @@ export function LoginPage() {
                 )}
               />
 
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Spinner />
-                    Entrando...
-                  </span>
-                ) : (
-                  "Entrar"
-                )}
-              </Button>
+              <LoadingButton
+                type="submit"
+                isLoading={loading}
+                loadingText="Entrando..."
+                className="w-full"
+              >
+                Entrar
+              </LoadingButton>
             </form>
           </Form>
         </Card>
