@@ -23,3 +23,20 @@ export interface OrdersByStatus {
   Delivered: number;
   Canceled: number;
 }
+
+export interface ExpensesByCategory {
+  category: string;
+  total: number;
+  percentage: number;
+}
+
+export interface ExpensesByStatus {
+  status: string;
+  count: number;
+  total: number;
+}
+
+export interface ExpenseTimeSeries {
+  date: string;
+  total: number;
+}
