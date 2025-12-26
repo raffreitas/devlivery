@@ -185,18 +185,25 @@ export function ExpenseList({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => onEdit(expense)}>
+                            <DropdownMenuItem
+                              onClick={() => onEdit(expense)}
+                              disabled={
+                                expense.status === ExpenseStatus.PAID ||
+                                expense.status === ExpenseStatus.CANCELLED
+                              }
+                            >
                               <Pencil className="mr-2 h-4 w-4" />
                               Editar
                             </DropdownMenuItem>
-                            {expense.status !== ExpenseStatus.PAID && (
-                              <DropdownMenuItem
-                                onClick={() => handleMarkAsPaid(expense)}
-                              >
-                                <CheckCircle2 className="mr-2 h-4 w-4" />
-                                Marcar como Pago
-                              </DropdownMenuItem>
-                            )}
+                            {expense.status !== ExpenseStatus.PAID &&
+                              expense.status !== ExpenseStatus.CANCELLED && (
+                                <DropdownMenuItem
+                                  onClick={() => handleMarkAsPaid(expense)}
+                                >
+                                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                                  Marcar como Pago
+                                </DropdownMenuItem>
+                              )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => handleDelete(expense.id)}
@@ -246,18 +253,25 @@ export function ExpenseList({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(expense)}>
+                      <DropdownMenuItem
+                        onClick={() => onEdit(expense)}
+                        disabled={
+                          expense.status === ExpenseStatus.PAID ||
+                          expense.status === ExpenseStatus.CANCELLED
+                        }
+                      >
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar
                       </DropdownMenuItem>
-                      {expense.status !== ExpenseStatus.PAID && (
-                        <DropdownMenuItem
-                          onClick={() => handleMarkAsPaid(expense)}
-                        >
-                          <CheckCircle2 className="mr-2 h-4 w-4" />
-                          Marcar como Pago
-                        </DropdownMenuItem>
-                      )}
+                      {expense.status !== ExpenseStatus.PAID &&
+                        expense.status !== ExpenseStatus.CANCELLED && (
+                          <DropdownMenuItem
+                            onClick={() => handleMarkAsPaid(expense)}
+                          >
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                            Marcar como Pago
+                          </DropdownMenuItem>
+                        )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => handleDelete(expense.id)}

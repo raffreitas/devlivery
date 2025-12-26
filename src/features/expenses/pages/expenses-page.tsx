@@ -39,12 +39,27 @@ export function ExpensesPage() {
       }
       handleCloseModal();
     } catch (error) {
-      toast.error("Erro ao salvar despesa");
+      // Tratamento de erros específicos do backend
+      const errorMessage =
+        error instanceof Error &&
+        error.message.includes("Paga ou Cancelada")
+          ? "Não é permitido alterar uma despesa paga ou cancelada. Estorne o pagamento primeiro."
+          : "Erro ao salvar despesa";
+      toast.error(errorMessage);
       console.error(error);
     }
   };
 
   const handleEdit = (expense: Expense) => {
+    // Validação de regra de negócio: não permite editar despesas pagas ou canceladas
+    if (expense.status === "Paid" || expense.status === "Cancelled") {
+      toast.error(
+        expense.status === "Paid"
+          ? "Não é permitido editar uma despesa paga. Estorne o pagamento primeiro."
+          : "Não é permitido editar uma despesa cancelada."
+      );
+      return;
+    }
     setEditingExpense(expense);
     setIsModalOpen(true);
   };
@@ -64,7 +79,12 @@ export function ExpensesPage() {
       await markAsPaid(id, paymentDate);
       toast.success("Despesa marcada como paga!");
     } catch (error) {
-      toast.error("Erro ao marcar despesa como paga");
+      // O backend retorna erro específico se tentar pagar despesa cancelada
+      const errorMessage =
+        error instanceof Error && error.message.includes("cancelada")
+          ? "Não é possível pagar uma despesa cancelada."
+          : "Erro ao marcar despesa como paga";
+      toast.error(errorMessage);
       console.error(error);
     }
   };
