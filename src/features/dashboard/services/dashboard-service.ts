@@ -69,11 +69,11 @@ interface UpcomingExpenseDto {
     id: string;
     name: string;
     isActive: boolean;
-    subCategories: Array<{
+    subcategories: Array<{
       id: string;
       name: string;
       isActive: boolean;
-      subCategories: never[];
+      subcategories: never[];
     }>;
   };
   supplier?: string | null;

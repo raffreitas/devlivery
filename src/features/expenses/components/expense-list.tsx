@@ -148,7 +148,7 @@ export function ExpenseList({
                     <TableRow key={expense.id}>
                       <TableCell>{expense.category.name}</TableCell>
                       <TableCell>
-                        {expense.category.subCategories?.[0]?.name || "-"}
+                        {expense.category.subcategories?.[0]?.name || "-"}
                       </TableCell>
                       <TableCell className="max-w-[150px] truncate">
                         {expense.supplier || "-"}
@@ -236,7 +236,7 @@ export function ExpenseList({
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <CardTitle className="text-base">
-                      {expense.category.subCategories?.[0]?.name || "-"}
+                      {expense.category.subcategories?.[0]?.name || "-"}
                     </CardTitle>
                     <p className="text-sm text-muted-foreground">
                       {expense.category.name}

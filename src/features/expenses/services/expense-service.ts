@@ -6,7 +6,7 @@ interface CategoryDto {
   name?: string; // GetAllExpenses usa 'name'
   categoryName?: string; // GetExpenseById usa 'categoryName'
   isActive: boolean;
-  subCategories: CategoryDto[];
+  subcategories: CategoryDto[];
 }
 
 interface ExpenseDto {
@@ -27,7 +27,7 @@ function mapCategory(dto: CategoryDto): Category {
     id: dto.id,
     name: dto.name ?? dto.categoryName ?? "", // Suporta ambos os formatos do backend
     isActive: dto.isActive,
-    subCategories: dto.subCategories.map(mapCategory),
+    subcategories: dto.subcategories.map(mapCategory),
   };
 }
 

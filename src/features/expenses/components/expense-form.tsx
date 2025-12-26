@@ -46,7 +46,7 @@ export function ExpenseForm({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: {
       categoryId: expense?.category.id ?? "",
-      subcategoryId: expense?.category.subCategories?.[0]?.id ?? "",
+      subcategoryId: expense?.category.subcategories?.[0]?.id ?? "",
       supplier: expense?.supplier ?? "",
       description: expense?.description ?? "",
       amount: expense?.amount ?? 0,
@@ -69,7 +69,7 @@ export function ExpenseForm({
   }, [categories, selectedCategoryId]);
 
   const subcategories = useMemo(() => {
-    return selectedCategory?.subCategories ?? [];
+    return selectedCategory?.subcategories ?? [];
   }, [selectedCategory]);
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export function ExpenseForm({
     // então a subcategoria é obrigatória.
     const selected = categories?.find((c) => c.id === data.categoryId);
     const activeSubcategories =
-      selected?.subCategories?.filter((s) => s.isActive) ?? [];
+      selected?.subcategories?.filter((s) => s.isActive) ?? [];
     if (activeSubcategories.length > 0 && !data.subcategoryId) {
       form.setError("subcategoryId", {
         type: "required",

@@ -16,7 +16,7 @@ export interface Category {
   id: string;
   name: string;
   isActive: boolean;
-  subCategories: Category[];
+  subcategories: Category[];
 }
 
 // Interface principal da despesa
