@@ -1,4 +1,3 @@
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
 using Mediator;
@@ -19,7 +18,7 @@ public static class GetAllExpensesEndpoint
 
     private static async Task<Ok<ApiResponse<List<GetAllExpensesResponse>>>> Handle(
         [FromQuery] Guid? categoryId,
-        [FromQuery] ExpenseStatus? status,
+        [FromQuery] ExpenseDisplayStatus? status,
         [FromQuery(Name = "start")] DateOnly? startDate,
         [FromQuery(Name = "end")] DateOnly? endDate,
         ISender sender,

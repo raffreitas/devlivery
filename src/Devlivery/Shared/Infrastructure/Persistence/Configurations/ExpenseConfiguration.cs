@@ -70,8 +70,5 @@ public sealed class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.HasIndex(e => e.CategoryId);
         builder.HasIndex(e => new { e.EstablishmentId, e.CategoryId, e.DueDate });
         builder.HasIndex(e => new { e.EstablishmentId, e.Status, e.PaymentDate });
-
-        // Ignore computed property
-        builder.Ignore(e => e.CurrentStatus);
     }
 }

@@ -27,7 +27,7 @@ public sealed record GetAllExpensesResponse(
     decimal Amount,
     DateOnly DueDate,
     DateOnly? PaymentDate,
-    string Status,
+    ExpenseDisplayStatus Status,
     DateTime CreatedAt,
     DateTime UpdatedAt);
 
@@ -37,3 +37,12 @@ public sealed record CategoryDto(
     bool IsActive,
     CategoryDto[] SubCategories
 );
+
+public enum ExpenseDisplayStatus
+{
+    Pending,
+    Paid,
+    Cancelled,
+    Overdue,
+    DueToday
+}

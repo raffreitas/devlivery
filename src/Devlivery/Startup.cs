@@ -5,6 +5,7 @@ using Devlivery.Features.CashRegister;
 using Devlivery.Features.Expenses;
 using Devlivery.Features.Orders;
 using Devlivery.Features.Products;
+using Devlivery.Shared.Application.Abstractions;
 using Devlivery.Shared.Infrastructure.Authorization;
 using Devlivery.Shared.Infrastructure.Identity;
 using Devlivery.Shared.Infrastructure.Identity.Users.Models;
@@ -13,6 +14,7 @@ using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using Devlivery.Shared.Infrastructure.Persistence.Seeder;
 using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Shared.Infrastructure.Time;
 using Devlivery.Shared.Infrastructure.WebServer;
 
 using FluentValidation;
@@ -29,7 +31,6 @@ public static class Startup
         var services = builder.Services;
         var configuration = builder.Configuration;
 
-        // Validators
         builder.Services.ConfigureHttpJsonOptions(options =>
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
@@ -49,6 +50,8 @@ public static class Startup
         services.AddProblemDetails();
         services.AddHealthChecksConfiguration();
         services.AddHttpContextAccessor();
+
+        services.AddSingleton<IDateTimeProvider, BrazilDateTimeProvider>();
 
         // OpenAPI/Swagger
         services.AddOpenApiConfiguration();

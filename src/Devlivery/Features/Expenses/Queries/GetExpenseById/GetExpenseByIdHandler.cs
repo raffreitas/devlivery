@@ -39,7 +39,7 @@ public sealed class GetExpenseByIdHandler(ApplicationDbContext dbContext)
                         sc.Id,
                         sc.Name,
                         sc.IsActive,
-                        Array.Empty<CategoryDto>()))
+                        []))
                     .ToArray()),
             expense.Supplier,
             expense.Description,

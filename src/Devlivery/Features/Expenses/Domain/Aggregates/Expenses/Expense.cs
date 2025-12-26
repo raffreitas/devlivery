@@ -15,7 +15,6 @@ public sealed class Expense : Entity
     public ExpenseStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public ExpenseStatus CurrentStatus => CalculateCurrentStatus();
 
     public Expense(
         Guid establishmentId,
@@ -37,10 +36,21 @@ public sealed class Expense : Entity
         DueDate = dueDate;
         PaymentDate = paymentDate;
         EstablishmentId = establishmentId;
+        Status = paymentDate is not null ? ExpenseStatus.Paid : ExpenseStatus.Pending;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+    }
 
-        Status = CalculateCurrentStatus();
+    public bool IsOverdue(DateOnly referenceDate)
+    {
+        if (Status == ExpenseStatus.Paid) return false;
+        return Status == ExpenseStatus.Pending && DueDate < referenceDate;
+    }
+
+    public bool IsDueToday(DateOnly referenceDate)
+    {
+        if (Status == ExpenseStatus.Paid) return false;
+        return Status == ExpenseStatus.Pending && DueDate == referenceDate;
     }
 
     public void Update(
@@ -50,42 +60,50 @@ public sealed class Expense : Entity
         string? supplier = null,
         string? description = null)
     {
-        CategoryId = categoryId ?? CategoryId;
+        if (Status != ExpenseStatus.Pending)
+        {
+            throw new InvalidOperationException(
+                "Não é permitido alterar uma despesa Paga ou Cancelada. Estorne o pagamento primeiro.");
+        }
+
+        Description = description ?? Description;
         Amount = amount ?? Amount;
         DueDate = dueDate ?? DueDate;
+        CategoryId = categoryId ?? CategoryId;
         Supplier = supplier ?? Supplier;
-        Description = description ?? Description;
-        UpdatedAt = DateTime.UtcNow;
 
-        Status = CalculateCurrentStatus();
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void MarkAsPaid(DateOnly paymentDate)
     {
-        PaymentDate = paymentDate;
+        if (Status == ExpenseStatus.Paid) return;
+
+        if (Status == ExpenseStatus.Cancelled)
+            throw new InvalidOperationException("Não é possível pagar uma despesa cancelada.");
+
         Status = ExpenseStatus.Paid;
+        PaymentDate = paymentDate;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateStatus()
+    public void Cancel()
     {
-        Status = CalculateCurrentStatus();
+        if (Status == ExpenseStatus.Paid)
+            throw new InvalidOperationException(
+                "Não é possível cancelar uma despesa já paga. Faça o estorno primeiro."
+            );
+
+        Status = ExpenseStatus.Cancelled;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    private ExpenseStatus CalculateCurrentStatus()
+    public void UnmarkAsPaid()
     {
-        if (PaymentDate.HasValue)
-            return ExpenseStatus.Paid;
+        if (Status != ExpenseStatus.Paid) return;
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var due = DueDate;
-
-        if (due < today)
-            return ExpenseStatus.Overdue;
-
-        return due <= today.AddDays(3)
-            ? ExpenseStatus.Scheduled
-            : ExpenseStatus.Pending;
+        Status = ExpenseStatus.Pending;
+        PaymentDate = null;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

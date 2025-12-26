@@ -26,8 +26,8 @@ public sealed class UpdateExpenseHandler(
         // Validate subcategory if changed
         if (command.CategoryId.HasValue)
         {
-            var subcategory = await categoryRepository.GetByIdAsync(command.CategoryId.Value, cancellationToken);
-            if (subcategory is null || !subcategory.IsActive)
+            var category = await categoryRepository.GetByIdAsync(command.CategoryId.Value, cancellationToken);
+            if (category is null || !category.IsActive)
             {
                 return Result.Fail("Subcategory not found or inactive.");
             }

@@ -2,6 +2,8 @@ using System.Data;
 
 using Dapper;
 
+using Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
+using Devlivery.Shared.Application.Abstractions;
 using Devlivery.Shared.Infrastructure.Persistence.Abstractions;
 using Devlivery.Shared.Infrastructure.Tenancy;
 
@@ -9,44 +11,61 @@ using Mediator;
 
 namespace Devlivery.Features.Expenses.Queries.GetAllExpenses;
 
-public sealed class GetAllExpensesHandler(IDbConnectionFactory dbConnectionFactory, ITenantAccessor tenantAccessor)
+public sealed class GetAllExpensesHandler(
+    IDbConnectionFactory dbConnectionFactory,
+    ITenantAccessor tenantAccessor,
+    IDateTimeProvider dateTimeProvider
+)
     : IQueryHandler<GetAllExpensesQuery, List<GetAllExpensesResponse>>
 {
     public async ValueTask<List<GetAllExpensesResponse>> Handle(GetAllExpensesQuery query,
         CancellationToken cancellationToken)
     {
+        var today = dateTimeProvider.GetLocalDate();
+
         const string sql =
-            """
-            select e.id               as "Id",
-                   e.establishment_id as "EstablishmentId",
-                   e.supplier         as "Supplier",
-                   e.description      as "Description",
-                   e.amount           as "Amount",
-                   e.due_date         as "DueDate",
-                   e.payment_date     as "PaymentDate",
-                   e.status           as "Status",
-                   e.created_at       as "CreatedAt",
-                   e.updated_at       as "UpdatedAt",
-                   ec.id              as "CategoryId",
-                   ec.name            as "CategoryName",
-                   ec.is_active       as "CategoryIsActive",
-                   ecp.id             as "ParentCategoryId",
-                   ecp.name           as "ParentCategoryName",
-                   ecp.is_active      as "ParentCategoryIsActive"
-            from public.expenses e
-                     join public.expense_categories ec on ec.id = e.category_id
-                     left join public.expense_categories ecp on ecp.id = ec.parent_category_id
-            where e.establishment_id = @EstablishmentId
-              and (@CategoryId is null or e.category_id = @CategoryId)
-              and (@Status is null or e.status = @Status)
-              and (@StartDate is null or e.due_date >= @StartDate)
-              and (@EndDate is null or e.due_date <= @EndDate)
-            """;
+            $"""
+             select e.id               as "Id",
+                    e.establishment_id as "EstablishmentId",
+                    e.supplier         as "Supplier",
+                    e.description      as "Description",
+                    e.amount           as "Amount",
+                    e.due_date         as "DueDate",
+                    e.payment_date     as "PaymentDate",
+                    e.status           as "Status",
+                    e.created_at       as "CreatedAt",
+                    e.updated_at       as "UpdatedAt",
+                    ec.id              as "CategoryId",
+                    ec.name            as "CategoryName",
+                    ec.is_active       as "CategoryIsActive",
+                    ecp.id             as "ParentCategoryId",
+                    ecp.name           as "ParentCategoryName",
+                    ecp.is_active      as "ParentCategoryIsActive"
+             from public.expenses e
+                      join public.expense_categories ec on ec.id = e.category_id
+                      left join public.expense_categories ecp on ecp.id = ec.parent_category_id
+             where e.establishment_id = @EstablishmentId
+             and (@CategoryId is null or e.category_id = @CategoryId)
+               and (
+                   @StatusFilter is null 
+                   or (@StatusFilter = {nameof(ExpenseDisplayStatus.Overdue)} 
+                           and e.status = {nameof(ExpenseDisplayStatus.Pending)} 
+                           and e.due_date < @Today)
+                   or (@StatusFilter = {nameof(ExpenseDisplayStatus.DueToday)} 
+                           and e.status = {nameof(ExpenseDisplayStatus.Pending)} 
+                           and e.due_date = @Today)
+                   or (@StatusFilter not in ({nameof(ExpenseDisplayStatus.Overdue)}, {nameof(ExpenseDisplayStatus.DueToday)}) 
+                           and e.status = @StatusFilter)
+               )
+               and (@StartDate is null or e.due_date >= @StartDate)
+               and (@EndDate is null or e.due_date <= @EndDate)
+             """;
 
         var parameters = new DynamicParameters();
         parameters.Add("EstablishmentId", tenantAccessor.Tenant.Id, DbType.Guid);
         parameters.Add("CategoryId", query.CategoryId, DbType.Guid);
-        parameters.Add("Status", query.Status?.ToString(), DbType.String);
+        parameters.Add("StatusFilter", query.Status?.ToString(), DbType.String);
+        parameters.Add("Today", today, DbType.Date);
         parameters.Add("StartDate", query.StartDate, DbType.Date);
         parameters.Add("EndDate", query.EndDate, DbType.Date);
 
@@ -66,6 +85,15 @@ public sealed class GetAllExpensesHandler(IDbConnectionFactory dbConnectionFacto
                         ])
                     : new CategoryDto(e.CategoryId, e.CategoryName, e.CategoryIsActive, []);
 
+                var displayStatus = e.Status switch
+                {
+                    nameof(ExpenseStatus.Paid) => ExpenseDisplayStatus.Paid,
+                    nameof(ExpenseStatus.Cancelled) => ExpenseDisplayStatus.Cancelled,
+                    nameof(ExpenseStatus.Pending) when e.DueDate < today => ExpenseDisplayStatus.Overdue,
+                    nameof(ExpenseStatus.Pending) when e.DueDate == today => ExpenseDisplayStatus.DueToday,
+                    _ => ExpenseDisplayStatus.Pending
+                };
+
                 return new GetAllExpensesResponse(
                     e.Id,
                     category,
@@ -74,7 +102,7 @@ public sealed class GetAllExpensesHandler(IDbConnectionFactory dbConnectionFacto
                     e.Amount,
                     e.DueDate,
                     e.PaymentDate,
-                    e.Status,
+                    displayStatus,
                     e.CreatedAt,
                     e.UpdatedAt);
             })
