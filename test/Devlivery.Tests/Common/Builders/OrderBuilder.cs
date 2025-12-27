@@ -24,7 +24,7 @@ public class OrderBuilder
 
     public OrderBuilder()
     {
-        _customerName = _faker.Name.FirstName();
+        _customerName = _faker.Name.FullName();
         _customerPhone = _faker.Phone.PhoneNumber("## #####-####");
         _deliveryAddress = _faker.Address.FullAddress();
         _deliveryReference = null;

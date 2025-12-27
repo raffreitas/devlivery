@@ -39,7 +39,7 @@ public sealed class CloseCashSessionEndpointTests(CashRegisterWebApplicationFact
         var command = new CloseCashSessionCommand(cashSessionId, closingAmount, notes);
 
         // Act
-        var response = await PutAsync($"/api/cash-register/sessions/{cashSessionId}/close", command, accessToken);
+        var response = await PatchAsync($"/api/cash-register/sessions/{cashSessionId}/close", command, accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -62,7 +62,7 @@ public sealed class CloseCashSessionEndpointTests(CashRegisterWebApplicationFact
         var command = new CloseCashSessionCommand(cashSessionId, -10m, null);
 
         // Act
-        var response = await PutAsync($"/api/cash-register/sessions/{cashSessionId}/close", command, accessToken);
+        var response = await PatchAsync($"/api/cash-register/sessions/{cashSessionId}/close", command, accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -83,7 +83,7 @@ public sealed class CloseCashSessionEndpointTests(CashRegisterWebApplicationFact
         var command = new CloseCashSessionCommand(cashSessionId, 100m, null);
 
         // Act
-        var response = await PutAsync($"/api/cash-register/sessions/{cashSessionId}/close", command, accessToken);
+        var response = await PatchAsync($"/api/cash-register/sessions/{cashSessionId}/close", command, accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -109,13 +109,13 @@ public sealed class CloseCashSessionEndpointTests(CashRegisterWebApplicationFact
         var cashSessionId = sessionData.RootElement.GetProperty("data").GetProperty("id").GetGuid();
 
         var firstCloseCommand = new CloseCashSessionCommand(cashSessionId, 100m, null);
-        await PutAsync($"/api/cash-register/sessions/{cashSessionId}/close", firstCloseCommand, accessToken);
+        await PatchAsync($"/api/cash-register/sessions/{cashSessionId}/close", firstCloseCommand, accessToken);
 
         // Try to close again
         var secondCloseCommand = new CloseCashSessionCommand(cashSessionId, 100m, null);
 
         // Act
-        var response = await PutAsync($"/api/cash-register/sessions/{cashSessionId}/close", secondCloseCommand,
+        var response = await PatchAsync($"/api/cash-register/sessions/{cashSessionId}/close", secondCloseCommand,
             accessToken);
 
         // Assert
