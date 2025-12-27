@@ -41,11 +41,11 @@ public sealed class DeleteExpenseEndpointTests(ExpensesWebApplicationFactory fac
         var response = await DeleteAsync($"/api/expenses/{expense.Id}", accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
 
     [Fact]
-    public async Task DeleteExpense_WithInvalidId_ReturnsBadRequest()
+    public async Task DeleteExpense_WithInvalidId_ReturnsNotFound()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -55,7 +55,6 @@ public sealed class DeleteExpenseEndpointTests(ExpensesWebApplicationFactory fac
         var response = await DeleteAsync("/api/expenses/00000000-0000-0000-0000-000000000000", accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 }
-

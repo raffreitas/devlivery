@@ -29,6 +29,9 @@ public sealed class Category : Entity
         if (_subcategories.Contains(subcategory) || subcategory.ParentCategoryId == this.Id)
             throw new InvalidOperationException("A subcategoria já está associada a esta categoria.");
 
+        if (subcategory.ParentCategoryId.HasValue && subcategory.ParentCategoryId != this.Id)
+            throw new InvalidOperationException("A subcategoria já está associada a outra categoria.");
+
         subcategory.ParentCategoryId = this.Id;
         _subcategories.Add(subcategory);
         UpdatedAt = DateTime.UtcNow;

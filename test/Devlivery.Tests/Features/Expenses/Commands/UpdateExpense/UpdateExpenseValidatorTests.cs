@@ -67,7 +67,7 @@ public sealed class UpdateExpenseValidatorTests
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount);
+        result.ShouldHaveValidationErrorFor(x => x.Amount!.Value);
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public sealed class UpdateExpenseValidatorTests
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount);
+        result.ShouldHaveValidationErrorFor(x => x.Amount!.Value);
     }
 
     [Fact]

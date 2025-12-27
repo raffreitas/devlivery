@@ -81,6 +81,7 @@ public sealed class CategoryTests(ExpensesUnitTestFixture fixture)
         parentCategory1.AddSubcategory(subcategory);
 
         // Act & Assert
+        // A subcategoria já tem um parent (parentCategory1), então não pode ser adicionada a outro parent
         Should.Throw<InvalidOperationException>(() => parentCategory2.AddSubcategory(subcategory));
     }
 

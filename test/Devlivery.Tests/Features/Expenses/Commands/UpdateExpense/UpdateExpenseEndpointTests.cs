@@ -16,7 +16,7 @@ public sealed class UpdateExpenseEndpointTests(ExpensesWebApplicationFactory fac
     : WebApiBaseFixture<ExpensesWebApplicationFactory>(factory)
 {
     [Fact]
-    public async Task UpdateExpense_WithValidData_ReturnsOk()
+    public async Task UpdateExpense_WithValidData_ReturnsNoContent()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -51,7 +51,7 @@ public sealed class UpdateExpenseEndpointTests(ExpensesWebApplicationFactory fac
         var response = await PutAsync($"/api/expenses/{expense.Id}", request, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
 
     [Fact]
@@ -78,4 +78,3 @@ public sealed class UpdateExpenseEndpointTests(ExpensesWebApplicationFactory fac
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 }
-

@@ -38,17 +38,13 @@ public sealed class MarkExpenseAsPaidEndpointTests(ExpensesWebApplicationFactory
         dbContext.Expenses.Add(expense);
         await dbContext.SaveChangesAsync();
 
-        var request = new
-        {
-            ExpenseId = expense.Id,
-            PaymentDate = DateOnly.FromDateTime(DateTime.UtcNow)
-        };
+        var request = new { ExpenseId = expense.Id, PaymentDate = DateOnly.FromDateTime(DateTime.UtcNow) };
 
         // Act
         var response = await PatchAsync($"/api/expenses/{expense.Id}/mark-as-paid", request, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
 
     [Fact]
@@ -58,17 +54,13 @@ public sealed class MarkExpenseAsPaidEndpointTests(ExpensesWebApplicationFactory
         await ResetDatabaseAsync();
         var (_, _, accessToken) = await Prepare();
 
-        var request = new
-        {
-            ExpenseId = Guid.Empty,
-            PaymentDate = default(DateOnly)
-        };
+        var request = new { ExpenseId = Guid.Empty, PaymentDate = default(DateOnly) };
 
         // Act
-        var response = await PatchAsync("/api/expenses/00000000-0000-0000-0000-000000000000/mark-as-paid", request, accessToken);
+        var response = await PatchAsync("/api/expenses/00000000-0000-0000-0000-000000000000/mark-as-paid", request,
+            accessToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 }
-
