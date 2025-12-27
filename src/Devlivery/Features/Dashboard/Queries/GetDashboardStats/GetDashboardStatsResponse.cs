@@ -6,4 +6,3 @@ public sealed record GetDashboardStatsResponse(
     int PendingOrders,
     int DeliveredOrders,
     decimal AverageOrderValue);
-

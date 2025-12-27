@@ -6,4 +6,3 @@ public sealed class ExpensesWebApplicationFactory : BaseWebApplicationFactory<Pr
 
 [CollectionDefinition("Expenses Tests")]
 public sealed class ExpensesTestCollection : ICollectionFixture<ExpensesWebApplicationFactory>;
-

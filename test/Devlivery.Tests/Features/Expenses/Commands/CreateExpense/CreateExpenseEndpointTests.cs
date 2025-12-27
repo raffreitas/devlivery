@@ -111,4 +111,3 @@ public sealed class CreateExpenseEndpointTests(ExpensesWebApplicationFactory fac
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 }
-

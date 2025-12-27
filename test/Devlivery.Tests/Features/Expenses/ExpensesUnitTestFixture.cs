@@ -116,4 +116,3 @@ public sealed class ExpensesUnitTestFixture : IDisposable
 
 [CollectionDefinition("Expenses Unit Tests")]
 public sealed class ExpensesUnitTestCollection : ICollectionFixture<ExpensesUnitTestFixture>;
-

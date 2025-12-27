@@ -65,4 +65,3 @@ public sealed class GetExpenseByIdEndpointTests(ExpensesWebApplicationFactory fa
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 }
-

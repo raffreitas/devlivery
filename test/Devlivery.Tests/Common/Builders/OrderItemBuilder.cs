@@ -9,8 +9,8 @@ public class OrderItemBuilder
 {
     private readonly Faker _faker = new();
     private Product? _product;
-    private Guid _productId;
-    private decimal _unitPrice;
+    private readonly Guid _productId;
+    private readonly decimal _unitPrice;
     private int _quantity;
     private string? _notes;
     private Guid _establishmentId;

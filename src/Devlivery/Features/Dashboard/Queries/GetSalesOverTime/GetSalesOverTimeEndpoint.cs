@@ -28,4 +28,3 @@ public static class GetSalesOverTimeEndpoint
         return result.ToOk();
     }
 }
-

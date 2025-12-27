@@ -28,4 +28,3 @@ public static class GetTopProductsEndpoint
         return result.ToOk();
     }
 }
-

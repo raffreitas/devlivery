@@ -74,4 +74,3 @@ public sealed class GetExpensesByStatusHandler(
         return Result.Ok(response);
     }
 }
-

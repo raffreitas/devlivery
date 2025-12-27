@@ -58,4 +58,3 @@ public sealed class MarkExpenseAsPaidValidatorTests
         result.ShouldHaveValidationErrorFor(x => x.PaymentDate);
     }
 }
-

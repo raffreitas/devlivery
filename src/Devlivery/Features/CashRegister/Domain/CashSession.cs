@@ -56,7 +56,7 @@ public sealed class CashSession : Entity
     public void AdjustRevenue(decimal amount, string paymentMethod)
     {
         TotalRevenue += amount;
-        
+
         var existingItem = PaymentBreakdown.FirstOrDefault(p => p.Method == paymentMethod);
         if (existingItem is not null)
         {
@@ -75,12 +75,12 @@ public sealed class CashSession : Entity
     public void AdjustOrderTotal(decimal oldTotal, decimal newTotal, string paymentMethod)
     {
         var difference = newTotal - oldTotal;
-        
+
         if (difference == 0)
             return;
 
         TotalRevenue += difference;
-        
+
         var existingItem = PaymentBreakdown.FirstOrDefault(p => p.Method == paymentMethod);
         if (existingItem is not null)
         {
@@ -135,7 +135,8 @@ public sealed class CashSession : Entity
             PaymentBreakdown.Remove(existingItem);
             var updatedItem = existingItem with
             {
-                Amount = existingItem.Amount + orderTotal, Count = existingItem.Count + 1
+                Amount = existingItem.Amount + orderTotal,
+                Count = existingItem.Count + 1
             };
             PaymentBreakdown.Add(updatedItem);
         }
@@ -165,7 +166,8 @@ public sealed class CashSession : Entity
         PaymentBreakdown.Remove(existingItem);
         var updatedItem = existingItem with
         {
-            Amount = existingItem.Amount - orderTotal, Count = existingItem.Count - 1
+            Amount = existingItem.Amount - orderTotal,
+            Count = existingItem.Count - 1
         };
         if (updatedItem.Count > 0)
         {

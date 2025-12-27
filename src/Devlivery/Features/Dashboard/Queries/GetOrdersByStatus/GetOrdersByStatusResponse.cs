@@ -6,4 +6,3 @@ public sealed record GetOrdersByStatusResponse(
     int Ready,
     int Delivered,
     int Canceled);
-

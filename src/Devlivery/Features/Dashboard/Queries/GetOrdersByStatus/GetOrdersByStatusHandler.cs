@@ -37,4 +37,3 @@ public sealed class GetOrdersByStatusHandler(ApplicationDbContext dbContext)
         return Result.Ok(response);
     }
 }
-

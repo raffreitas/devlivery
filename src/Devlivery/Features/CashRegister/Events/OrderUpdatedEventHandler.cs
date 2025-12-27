@@ -40,8 +40,8 @@ public sealed class OrderUpdatedEventHandler(
 
         // Use encapsulated business logic in the aggregate
         activeSession.AdjustOrderTotal(
-            notification.OldTotal, 
-            notification.NewTotal, 
+            notification.OldTotal,
+            notification.NewTotal,
             notification.PaymentMethod.ToString()
         );
 

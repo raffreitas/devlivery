@@ -56,4 +56,3 @@ public sealed class GetExpensesOverTimeHandler(
         return Result.Ok(response);
     }
 }
-

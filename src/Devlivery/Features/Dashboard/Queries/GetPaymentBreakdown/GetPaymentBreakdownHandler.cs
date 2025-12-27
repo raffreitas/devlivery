@@ -48,4 +48,3 @@ public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
         return Result.Ok(response);
     }
 }
-
