@@ -160,4 +160,49 @@ export const expenseService = {
     const list = res.data ?? [];
     return list.map(mapCategory);
   },
+
+  createCategory: async (data: {
+    name: string;
+    parentCategoryId?: string;
+  }): Promise<Category> => {
+    const payload: {
+      name: string;
+      parentCategoryId?: string;
+    } = {
+      name: data.name,
+    };
+    if (data.parentCategoryId) {
+      payload.parentCategoryId = data.parentCategoryId;
+    }
+    const res = await api.post<ApiResponse<{ categoryId: string }>>(
+      "/api/expenses/categories",
+      payload,
+    );
+
+    if (!res.data?.categoryId) {
+      throw new Error("Erro ao criar categoria: ID não retornado");
+    }
+
+    // Construir o objeto Category diretamente a partir da resposta
+    // Não precisamos buscar na lista porque temos todos os dados necessários
+    const createdCategory: Category = {
+      id: res.data.categoryId,
+      name: data.name,
+      isActive: true,
+      subcategories: [], // Nova categoria não tem subcategorias ainda
+    };
+
+    return createdCategory;
+  },
+
+  updateCategory: async (
+    id: string,
+    data: { name?: string; isActive?: boolean },
+  ): Promise<void> => {
+    await api.put<void>(`/api/expenses/categories/${id}`, data);
+  },
+
+  deleteCategory: async (id: string): Promise<void> => {
+    await api.delete<void>(`/api/expenses/categories/${id}`);
+  },
 };

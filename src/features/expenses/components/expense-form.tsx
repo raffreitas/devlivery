@@ -15,17 +15,12 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { InputMoney } from "@/shared/components/ui/input-money";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { useExpenseCategories } from "../hooks/use-expenses";
 import type { Expense, ExpenseFormData } from "../types";
 import { expenseFormSchema } from "../types";
+import { CategoryCombobox } from "./category-combobox";
+import { SubcategoryCombobox } from "./subcategory-combobox";
 
 interface ExpenseFormProps {
   expense?: Expense;
@@ -91,20 +86,6 @@ export function ExpenseForm({
   }, [selectedCategoryId, subcategories, form, loadingCategories]);
 
   const handleSubmit = async (data: ExpenseFormData) => {
-    // Validação dinâmica: se a categoria selecionada tem subcategorias ativas,
-    // então a subcategoria é obrigatória.
-    const selected = categories?.find((c) => c.id === data.categoryId);
-    const activeSubcategories =
-      selected?.subcategories?.filter((s) => s.isActive) ?? [];
-    if (activeSubcategories.length > 0 && !data.subcategoryId) {
-      form.setError("subcategoryId", {
-        type: "required",
-        message: "Subcategoria é obrigatória para a categoria selecionada",
-      });
-      form.setFocus("subcategoryId");
-      return;
-    }
-
     try {
       await onSubmit(data);
       if (!expense) {
@@ -137,22 +118,14 @@ export function ExpenseForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Categoria</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione a categoria" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories
-                      ?.filter((cat) => cat.isActive)
-                      .map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <CategoryCombobox
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Selecione ou crie uma categoria"
+                    allowCreate
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -164,27 +137,17 @@ export function ExpenseForm({
             name="subcategoryId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Subcategoria</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={!selectedCategoryId || subcategories.length === 0}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione a subcategoria" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {subcategories
-                      .filter((sub) => sub.isActive)
-                      .map((sub) => (
-                        <SelectItem key={sub.id} value={sub.id}>
-                          {sub.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <FormLabel>Subcategoria (opcional)</FormLabel>
+                <FormControl>
+                  <SubcategoryCombobox
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Selecione ou crie uma subcategoria"
+                    parentCategoryId={selectedCategoryId}
+                    allowCreate
+                    disabled={!selectedCategoryId}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
