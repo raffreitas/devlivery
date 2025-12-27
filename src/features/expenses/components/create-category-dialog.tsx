@@ -30,6 +30,7 @@ import type { Category } from "../types";
 
 const createCategorySchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(200, "Nome muito longo"),
+  categoryType: z.enum(["main", "subcategory"]).optional(),
   parentCategoryId: z.string().optional(),
 });
 
@@ -62,6 +63,7 @@ export function CreateCategoryDialog({
     resolver: zodResolver(createCategorySchema),
     defaultValues: {
       name: initialName || "",
+      categoryType: isSubcategory ? "subcategory" : "main",
       parentCategoryId: initialParentCategoryId,
     },
   });
@@ -78,15 +80,16 @@ export function CreateCategoryDialog({
     if (open) {
       form.reset({
         name: initialName || "",
+        categoryType: isSubcategory ? "subcategory" : "main",
         parentCategoryId: initialParentCategoryId,
       });
     }
-  }, [open, initialName, initialParentCategoryId, form]);
+  }, [open, initialName, initialParentCategoryId, isSubcategory, form]);
 
-  const formParentCategoryId = form.watch("parentCategoryId");
+  const categoryType = form.watch("categoryType");
   // Se escolheu "subcategory" no tipo, precisa selecionar categoria pai
   const needsParentSelection =
-    !isSubcategory && formParentCategoryId === "subcategory";
+    !isSubcategory && categoryType === "subcategory";
 
   const handleSubmit = async (data: CreateCategoryFormData) => {
     try {
@@ -97,11 +100,7 @@ export function CreateCategoryDialog({
       if (initialParentCategoryId) {
         // Subcategoria criada a partir do SubcategoryCombobox
         finalParentId = initialParentCategoryId;
-      } else if (
-        data.parentCategoryId &&
-        data.parentCategoryId !== "none" &&
-        data.parentCategoryId !== "subcategory"
-      ) {
+      } else if (data.categoryType === "subcategory" && data.parentCategoryId) {
         // Subcategoria criada escolhendo tipo "Subcategoria" e selecionando categoria pai
         finalParentId = data.parentCategoryId;
       } else {
@@ -210,22 +209,26 @@ export function CreateCategoryDialog({
           {!isSubcategory && !categoryOnly && (
             <FormField
               control={form.control}
-              name="parentCategoryId"
+              name="categoryType"
               render={({ field }) => (
                 <FormItem className="space-y-2">
                   <FormLabel className="text-sm font-medium">Tipo</FormLabel>
                   <FormControl>
                     <Select
                       onValueChange={(value) => {
-                        field.onChange(value === "none" ? undefined : value);
+                        field.onChange(value as "main" | "subcategory");
+                        // Limpa parentCategoryId quando muda para "main"
+                        if (value === "main") {
+                          form.setValue("parentCategoryId", undefined);
+                        }
                       }}
-                      value={field.value || "none"}
+                      value={field.value || "main"}
                     >
                       <SelectTrigger className="h-10">
                         <SelectValue placeholder="Selecione o tipo" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">
+                        <SelectItem value="main">
                           Categoria Principal
                         </SelectItem>
                         <SelectItem value="subcategory">
@@ -253,11 +256,7 @@ export function CreateCategoryDialog({
                   <FormControl>
                     <Select
                       onValueChange={field.onChange}
-                      value={
-                        field.value && field.value !== "subcategory"
-                          ? field.value
-                          : ""
-                      }
+                      value={field.value || ""}
                     >
                       <SelectTrigger className="h-10">
                         <SelectValue placeholder="Selecione a categoria pai" />
