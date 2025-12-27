@@ -21,7 +21,7 @@ public sealed class ProductBuilder
         _productDescription = _faker.Commerce.ProductDescription();
         _productPrice = _faker.Random.Decimal(1.0m, 999.99m);
         _productCategory = _faker.Commerce.Categories(1)[0];
-        _productAvailable = _faker.Random.Bool();
+        _productAvailable = true;
     }
 
     public ProductBuilder WithName(string name)
