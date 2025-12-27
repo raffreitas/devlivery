@@ -86,7 +86,10 @@ public sealed class CreateCashDepositEndpointTests(CashRegisterWebApplicationFac
         var nonExistentCashSessionId = Guid.NewGuid();
         var command = new
         {
-            AttendantId = Guid.NewGuid(), AttendantName = Faker.Name.FullName(), Amount = 50m, Notes = (string?)null
+            AttendantId = Guid.NewGuid(),
+            AttendantName = Faker.Name.FullName(),
+            Amount = 50m,
+            Notes = (string?)null
         };
 
         // Act

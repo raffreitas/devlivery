@@ -6,4 +6,3 @@ public sealed record GetExpenseSummaryResponse(
     decimal Pending,
     decimal Overdue,
     int Count);
-

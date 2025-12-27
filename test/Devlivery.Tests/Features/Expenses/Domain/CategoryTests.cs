@@ -199,4 +199,3 @@ public sealed class CategoryTests(ExpensesUnitTestFixture fixture)
         category.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
     }
 }
-

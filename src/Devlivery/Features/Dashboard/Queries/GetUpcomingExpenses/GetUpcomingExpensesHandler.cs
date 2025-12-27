@@ -102,4 +102,3 @@ public sealed class GetUpcomingExpensesHandler(
         return Result.Ok(response);
     }
 }
-

@@ -55,4 +55,3 @@ public sealed class GetAllExpensesEndpointTests(ExpensesWebApplicationFactory fa
         data.GetArrayLength().ShouldBeGreaterThanOrEqualTo(2);
     }
 }
-

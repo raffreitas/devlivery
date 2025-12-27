@@ -28,4 +28,3 @@ public static class GetDashboardStatsEndpoint
         return result.ToOk();
     }
 }
-

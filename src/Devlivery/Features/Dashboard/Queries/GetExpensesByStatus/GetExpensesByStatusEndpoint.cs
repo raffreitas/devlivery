@@ -28,4 +28,3 @@ public static class GetExpensesByStatusEndpoint
         return result.ToOk();
     }
 }
-

@@ -129,7 +129,7 @@ public sealed class Order : Entity
         List<OrderItem>? items = null)
     {
         var oldTotal = Total;
-        
+
         Customer = customer;
         DeliveryAddress = deliveryAddress;
         DeliveryFee = deliveryFee;
@@ -142,7 +142,7 @@ public sealed class Order : Entity
         }
 
         CalculateTotal();
-        
+
         if (oldTotal != Total)
         {
             AddDomainEvent(new OrderUpdatedEvent(Id, EstablishmentId, oldTotal, Total, PaymentMethod, UpdatedAt));

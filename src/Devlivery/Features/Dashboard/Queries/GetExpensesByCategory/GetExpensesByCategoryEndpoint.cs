@@ -28,4 +28,3 @@ public static class GetExpensesByCategoryEndpoint
         return result.ToOk();
     }
 }
-

@@ -27,4 +27,3 @@ public static class GetUpcomingExpensesEndpoint
         return result.ToOk();
     }
 }
-

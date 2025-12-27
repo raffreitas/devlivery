@@ -99,12 +99,12 @@ public static class ResultExtensions
     }
 
     public static IError? GetError(this Result result) => result.Errors.FirstOrDefault();
-    
+
     public static IError? GetError<T>(this Result<T> result) => result.Errors.FirstOrDefault();
-    
+
     public static string[] GetErrorMessages(this Result result)
         => [.. result.Errors.Select(e => e.Metadata.GetValueOrDefault("Errors")).OfType<string[]>().SelectMany(e => e)];
-    
+
     public static string[] GetErrorMessages<T>(this Result<T> result)
         => [.. result.Errors.Select(e => e.Metadata.GetValueOrDefault("Errors")).OfType<string[]>().SelectMany(e => e)];
 }

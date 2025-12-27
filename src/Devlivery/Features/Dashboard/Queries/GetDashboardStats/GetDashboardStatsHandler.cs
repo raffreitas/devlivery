@@ -48,4 +48,3 @@ public sealed class GetDashboardStatsHandler(ApplicationDbContext dbContext)
         return Result.Ok(response);
     }
 }
-

@@ -28,4 +28,3 @@ public static class GetExpenseSummaryEndpoint
         return result.ToOk();
     }
 }
-

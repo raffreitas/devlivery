@@ -12,4 +12,3 @@ public sealed record UpcomingExpenseItem(
     decimal Amount,
     DateOnly DueDate,
     ExpenseDisplayStatus Status);
-

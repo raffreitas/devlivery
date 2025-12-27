@@ -64,4 +64,3 @@ public sealed class GetExpenseSummaryHandler(
         return Result.Ok(response);
     }
 }
-

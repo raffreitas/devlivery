@@ -70,4 +70,3 @@ public sealed class GetTopProductsHandler(ApplicationDbContext dbContext)
         return Result.Ok(response);
     }
 }
-

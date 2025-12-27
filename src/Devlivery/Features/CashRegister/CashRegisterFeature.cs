@@ -22,14 +22,14 @@ public static class CashRegisterFeature
         services.AddScoped<GetCashSessionByIdHandler>();
         services.AddScoped<GetCashSessionDepositsHandler>();
         services.AddScoped<GetCashSessionsHandler>();
-        
+
         // Register Domain Event Handlers
         services.AddScoped<OrderCreatedEventHandler>();
         services.AddScoped<OrderStatusChangedEventHandler>();
         services.AddScoped<OrderPaymentMethodChangedEventHandler>();
         services.AddScoped<OrderUpdatedEventHandler>();
         services.AddScoped<OrderDeletedEventHandler>();
-        
+
         return services;
     }
 

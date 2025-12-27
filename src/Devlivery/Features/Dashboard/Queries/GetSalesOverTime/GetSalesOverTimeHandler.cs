@@ -58,4 +58,3 @@ public sealed class GetSalesOverTimeHandler(ApplicationDbContext dbContext)
         return Result.Ok(response);
     }
 }
-

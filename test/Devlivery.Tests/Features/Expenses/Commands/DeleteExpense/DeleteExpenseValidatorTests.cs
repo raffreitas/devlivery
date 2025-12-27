@@ -36,4 +36,3 @@ public sealed class DeleteExpenseValidatorTests
         result.ShouldHaveValidationErrorFor(x => x.ExpenseId);
     }
 }
-

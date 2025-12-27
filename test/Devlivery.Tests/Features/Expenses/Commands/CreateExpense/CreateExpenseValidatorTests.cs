@@ -150,4 +150,3 @@ public sealed class CreateExpenseValidatorTests
         result.ShouldNotHaveValidationErrorFor(x => x.PaymentDate);
     }
 }
-
