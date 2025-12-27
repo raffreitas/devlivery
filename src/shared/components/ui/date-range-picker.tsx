@@ -64,7 +64,7 @@ export function DateRangePicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[calc(100vw-2rem)] sm:w-auto p-0 z-[10000]"
+          className="w-[calc(100vw-2rem)] sm:w-auto p-0 z-10000"
           align="start"
         >
           <Calendar
