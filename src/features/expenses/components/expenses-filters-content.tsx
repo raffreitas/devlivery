@@ -94,4 +94,3 @@ export function ExpensesFiltersContent({
     </div>
   );
 }
-

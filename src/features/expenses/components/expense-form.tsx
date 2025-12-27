@@ -129,174 +129,174 @@ export function ExpenseForm({
       }
     >
       <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {/* Categoria */}
-        <FormField
-          control={form.control}
-          name="categoryId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoria</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione a categoria" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categories
-                    ?.filter((cat) => cat.isActive)
-                    .map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          {/* Categoria */}
+          <FormField
+            control={form.control}
+            name="categoryId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Categoria</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione a categoria" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories
+                      ?.filter((cat) => cat.isActive)
+                      .map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Subcategoria */}
-        <FormField
-          control={form.control}
-          name="subcategoryId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Subcategoria</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={!selectedCategoryId || subcategories.length === 0}
+          {/* Subcategoria */}
+          <FormField
+            control={form.control}
+            name="subcategoryId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subcategoria</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={!selectedCategoryId || subcategories.length === 0}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione a subcategoria" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {subcategories
+                      .filter((sub) => sub.isActive)
+                      .map((sub) => (
+                        <SelectItem key={sub.id} value={sub.id}>
+                          {sub.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Fornecedor */}
+          <FormField
+            control={form.control}
+            name="supplier"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fornecedor (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Nome do fornecedor"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Descrição */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descrição (opcional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Detalhes adicionais..."
+                    className="resize-none"
+                    rows={3}
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Valor */}
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Valor</FormLabel>
+                <FormControl>
+                  <InputMoney value={field.value} onChange={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Data de Vencimento */}
+          <FormField
+            control={form.control}
+            name="dueDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Data de Vencimento</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} value={field.value ?? ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Data de Pagamento */}
+          <FormField
+            control={form.control}
+            name="paymentDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Data de Pagamento (opcional)</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} value={field.value ?? ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Botões */}
+          <div className="flex gap-2 justify-end pt-2">
+            {onCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isSubmitting}
               >
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione a subcategoria" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {subcategories
-                    .filter((sub) => sub.isActive)
-                    .map((sub) => (
-                      <SelectItem key={sub.id} value={sub.id}>
-                        {sub.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Fornecedor */}
-        <FormField
-          control={form.control}
-          name="supplier"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fornecedor (opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Nome do fornecedor"
-                  {...field}
-                  value={field.value ?? ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Descrição */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição (opcional)</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Detalhes adicionais..."
-                  className="resize-none"
-                  rows={3}
-                  {...field}
-                  value={field.value ?? ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Valor */}
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor</FormLabel>
-              <FormControl>
-                <InputMoney value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Data de Vencimento */}
-        <FormField
-          control={form.control}
-          name="dueDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data de Vencimento</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} value={field.value ?? ""} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Data de Pagamento */}
-        <FormField
-          control={form.control}
-          name="paymentDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data de Pagamento (opcional)</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} value={field.value ?? ""} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Botões */}
-        <div className="flex gap-2 justify-end pt-2">
-          {onCancel && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isSubmitting}
+                Cancelar
+              </Button>
+            )}
+            <LoadingButton
+              type="submit"
+              isLoading={isSubmitting}
+              loadingText="Salvando..."
             >
-              Cancelar
-            </Button>
-          )}
-          <LoadingButton
-            type="submit"
-            isLoading={isSubmitting}
-            loadingText="Salvando..."
-          >
-            {expense ? "Atualizar" : "Criar Despesa"}
-          </LoadingButton>
-        </div>
-      </form>
-    </Form>
+              {expense ? "Atualizar" : "Criar Despesa"}
+            </LoadingButton>
+          </div>
+        </form>
+      </Form>
     </LoadingState>
   );
 }

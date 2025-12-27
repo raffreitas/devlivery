@@ -34,4 +34,3 @@ export function GridSkeleton({
     </div>
   );
 }
-

@@ -71,7 +71,10 @@ export function ProductsFilters({
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" onSelect={() => onCategoryChange("all")}>
+                <SelectItem
+                  value="all"
+                  onSelect={() => onCategoryChange("all")}
+                >
                   Todas as categorias
                 </SelectItem>
                 {categories.map((category) => (
@@ -92,4 +95,3 @@ export function ProductsFilters({
     </>
   );
 }
-

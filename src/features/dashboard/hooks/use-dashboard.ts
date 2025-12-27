@@ -127,4 +127,3 @@ export function useDashboard(startDate?: Date, endDate?: Date) {
     isFetching,
   };
 }
-

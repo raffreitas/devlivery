@@ -45,8 +45,7 @@ export function ExpensesPage() {
     } catch (error) {
       // Tratamento de erros específicos do backend
       const errorMessage =
-        error instanceof Error &&
-        error.message.includes("Paga ou Cancelada")
+        error instanceof Error && error.message.includes("Paga ou Cancelada")
           ? "Não é permitido alterar uma despesa paga ou cancelada. Estorne o pagamento primeiro."
           : "Erro ao salvar despesa";
       toast.error(errorMessage);
@@ -60,7 +59,7 @@ export function ExpensesPage() {
       toast.error(
         expense.status === "Paid"
           ? "Não é permitido editar uma despesa paga. Estorne o pagamento primeiro."
-          : "Não é permitido editar uma despesa cancelada."
+          : "Não é permitido editar uma despesa cancelada.",
       );
       return;
     }
@@ -109,7 +108,9 @@ export function ExpensesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Despesas</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Despesas
+            </h1>
             <p className="text-muted-foreground">
               Gerencie as despesas do estabelecimento
             </p>

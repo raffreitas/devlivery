@@ -59,8 +59,6 @@ export function CashSummaryCard({
     0,
   );
 
-  console.log(isOpen);
-
   return (
     <Card className="p-4 sm:p-6 gap-1">
       <div className="flex items-start justify-between mb-4">

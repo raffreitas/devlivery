@@ -10,7 +10,11 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Separator } from "@/shared/components/ui/separator";
-import { GridSkeleton, LoadingOverlay, LoadingState } from "@/shared/components/loading";
+import {
+  GridSkeleton,
+  LoadingOverlay,
+  LoadingState,
+} from "@/shared/components/loading";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
 import { OrdersFilters } from "../components/orders-filters";
@@ -106,7 +110,7 @@ export function OrdersPage() {
   return (
     <>
       <LoadingOverlay isFetching={isFetching} position="top-bar" />
-      
+
       <div className="space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <OrdersHeader

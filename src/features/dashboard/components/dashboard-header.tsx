@@ -18,7 +18,9 @@ export function DashboardHeader({
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          Dashboard
+        </h1>
         <p className="text-muted-foreground mt-1">
           Visão geral dos pedidos e métricas
         </p>

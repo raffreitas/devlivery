@@ -62,7 +62,7 @@ export function LoadingOverlay({
       <div
         className={cn(
           "inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50 text-xs text-muted-foreground border border-border/50",
-          className
+          className,
         )}
         aria-live="polite"
       >
@@ -77,7 +77,7 @@ export function LoadingOverlay({
     <div
       className={cn(
         "inline-flex items-center gap-1.5 text-xs text-muted-foreground",
-        className
+        className,
       )}
       aria-live="polite"
     >
@@ -86,4 +86,3 @@ export function LoadingOverlay({
     </div>
   );
 }
-

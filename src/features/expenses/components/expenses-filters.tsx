@@ -98,7 +98,9 @@ export function ExpensesFilters({
             <Select
               value={status ?? "all"}
               onValueChange={(value) =>
-                onStatusChange(value === "all" ? undefined : (value as ExpenseStatus))
+                onStatusChange(
+                  value === "all" ? undefined : (value as ExpenseStatus),
+                )
               }
             >
               <SelectTrigger className="w-full">
@@ -126,4 +128,3 @@ export function ExpensesFilters({
     </>
   );
 }
-
