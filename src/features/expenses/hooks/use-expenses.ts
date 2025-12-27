@@ -124,3 +124,46 @@ export function useExpenseCategories() {
     staleTime: 60_000, // Cache por 1 minuto (categorias não mudam frequentemente)
   });
 }
+
+export function useExpenseCategoriesManagement() {
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: (data: { name: string; parentCategoryId?: string }) =>
+      expenseService.createCategory(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expense-categories"] });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name?: string; isActive?: boolean };
+    }) => expenseService.updateCategory(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expense-categories"] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => expenseService.deleteCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expense-categories"] });
+    },
+  });
+
+  return {
+    createCategory: (data: { name: string; parentCategoryId?: string }) =>
+      createMutation.mutateAsync(data),
+    updateCategory: (id: string, data: { name?: string; isActive?: boolean }) =>
+      updateMutation.mutateAsync({ id, data }),
+    deleteCategory: (id: string) => deleteMutation.mutateAsync(id),
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+  };
+}

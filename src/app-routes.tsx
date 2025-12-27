@@ -7,6 +7,7 @@ import { OrdersPage } from "./features/orders/pages/orders-page";
 import { ProductsPage } from "./features/products/pages/products-page";
 import { Layout } from "./shared/components/layout";
 import { RequireAuth } from "./shared/components/require-auth";
+import { NotFoundPage } from "./shared/pages/not-found-page";
 
 const router = createBrowserRouter([
   {
@@ -20,14 +21,33 @@ const router = createBrowserRouter([
       {
         element: <Layout />,
         children: [
-          { index: true, element: <DashboardPage /> },
-          { path: "orders", element: <OrdersPage /> },
-          { path: "cash", element: <CashPage /> },
-          { path: "products", element: <ProductsPage /> },
-          { path: "expenses", element: <ExpensesPage /> },
+          {
+            index: true,
+            element: <DashboardPage />,
+          },
+          {
+            path: "orders",
+            element: <OrdersPage />,
+          },
+          {
+            path: "cash",
+            element: <CashPage />,
+          },
+          {
+            path: "products",
+            element: <ProductsPage />,
+          },
+          {
+            path: "expenses",
+            element: <ExpensesPage />,
+          },
         ],
       },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);
 
