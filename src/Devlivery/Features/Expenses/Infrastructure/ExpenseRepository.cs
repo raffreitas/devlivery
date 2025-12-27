@@ -20,6 +20,12 @@ public sealed class ExpenseRepository(ApplicationDbContext dbContext) : IExpense
             .ToListAsync(ct);
     }
 
+    public Task<bool> ExistsWithCategoryAsync(Guid categoryId, CancellationToken ct = default)
+    {
+        return dbContext.Expenses
+            .AnyAsync(e => e.CategoryId == categoryId, ct);
+    }
+
     public async Task AddAsync(Expense expense, CancellationToken ct = default)
     {
         await dbContext.Expenses.AddAsync(expense, ct);

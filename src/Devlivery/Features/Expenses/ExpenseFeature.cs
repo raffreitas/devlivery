@@ -1,6 +1,9 @@
+using Devlivery.Features.Expenses.Commands.CreateCategory;
 using Devlivery.Features.Expenses.Commands.CreateExpense;
+using Devlivery.Features.Expenses.Commands.DeleteCategory;
 using Devlivery.Features.Expenses.Commands.DeleteExpense;
 using Devlivery.Features.Expenses.Commands.MarkExpenseAsPaid;
+using Devlivery.Features.Expenses.Commands.UpdateCategory;
 using Devlivery.Features.Expenses.Commands.UpdateExpense;
 using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
 using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
@@ -33,7 +36,12 @@ public static class ExpenseFeature
         MarkExpenseAsPaidEndpoint.MapEndpoint(expensesGroup);
         GetAllExpensesEndpoint.MapEndpoint(expensesGroup);
         GetExpenseByIdEndpoint.MapEndpoint(expensesGroup);
+
+        // Category CRUD endpoints
         GetAllExpenseCategoriesEndpoint.MapEndpoint(expensesGroup);
+        CreateCategoryEndpoint.MapEndpoint(expensesGroup);
+        UpdateCategoryEndpoint.MapEndpoint(expensesGroup);
+        DeleteCategoryEndpoint.MapEndpoint(expensesGroup);
 
         return app;
     }
