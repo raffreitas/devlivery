@@ -136,7 +136,9 @@ export function ProductForm({
           </Button>
           <LoadingButton
             type="submit"
-            isLoading={form.formState.isSubmitting || externalIsSubmitting === true}
+            isLoading={
+              form.formState.isSubmitting || externalIsSubmitting === true
+            }
             loadingText={initialData?.id ? "Atualizando..." : "Criando..."}
           >
             {initialData?.id ? "Atualizar" : "Criar"} Produto

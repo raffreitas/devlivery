@@ -268,13 +268,17 @@ export function OrderForm({
             type="button"
             variant="outline"
             onClick={onCancel}
-            disabled={form.formState.isSubmitting || externalIsSubmitting === true}
+            disabled={
+              form.formState.isSubmitting || externalIsSubmitting === true
+            }
           >
             Cancelar
           </Button>
           <LoadingButton
             type="submit"
-            isLoading={form.formState.isSubmitting || externalIsSubmitting === true}
+            isLoading={
+              form.formState.isSubmitting || externalIsSubmitting === true
+            }
             loadingText={initialData?.id ? "Atualizando..." : "Criando..."}
           >
             {initialData?.id ? "Atualizar" : "Criar"} Pedido

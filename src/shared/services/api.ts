@@ -72,7 +72,9 @@ async function request<T>(
   } catch {
     if (!res.ok) {
       if (res.status === 401) {
-        throw new UnauthorizedError("Sua sessão expirou. Por favor, faça login novamente.");
+        throw new UnauthorizedError(
+          "Sua sessão expirou. Por favor, faça login novamente.",
+        );
       }
       throw new ApiError(res.statusText, res.status);
     }
@@ -96,7 +98,8 @@ async function request<T>(
 
     if (res.status === 401) {
       // Provide a more user-friendly message for expired tokens
-      const friendlyMessage = errMsg || "Sua sessão expirou. Por favor, faça login novamente.";
+      const friendlyMessage =
+        errMsg || "Sua sessão expirou. Por favor, faça login novamente.";
       throw new UnauthorizedError(friendlyMessage, json);
     }
 

@@ -168,8 +168,13 @@ export function ProductsPage() {
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDelete()} disabled={isDeleting}>
+            <AlertDialogCancel disabled={isDeleting}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleDelete()}
+              disabled={isDeleting}
+            >
               {isDeleting ? "Excluindo..." : "Confirmar"}
             </AlertDialogAction>
           </AlertDialogFooter>
