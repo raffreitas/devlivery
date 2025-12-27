@@ -2,6 +2,8 @@ using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
+using Mediator;
+
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Orders.Queries.GetAllOrders;
@@ -21,11 +23,11 @@ public static class GetAllOrdersEndpoint
         DateTime? start,
         DateTime? end,
         PaymentMethod? paymentMethod,
-        GetAllOrdersHandler handler,
+        ISender sender,
         CancellationToken ct)
     {
         var query = new GetAllOrdersQuery(start, end, paymentMethod);
-        var result = await handler.HandleAsync(query, ct);
+        var result = await sender.Send(query, ct);
 
         return result.ToOk();
     }

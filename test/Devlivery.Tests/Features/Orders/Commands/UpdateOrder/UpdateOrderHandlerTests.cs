@@ -259,7 +259,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await orderRepository.Received(1).Update(order);
+        await orderRepository.Received(1).UpdateAsync(order, Arg.Any<CancellationToken>());
     }
 
     [Fact]

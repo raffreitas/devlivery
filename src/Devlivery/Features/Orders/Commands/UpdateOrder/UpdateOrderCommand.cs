@@ -43,7 +43,9 @@ public sealed class UpdateOrderCommandValidator : AbstractValidator<UpdateOrderC
         When(x => !string.IsNullOrWhiteSpace(x.CustomerPhone), () =>
         {
             RuleFor(x => x.CustomerPhone)
-                .MaximumLength(20).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+                .MaximumLength(20).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.")
+                .WithMessage(
+                    "O campo '{PropertyName}' deve ser um telefone válido (formato: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX).");
         });
 
         RuleFor(x => x.PaymentMethod)
@@ -64,4 +66,5 @@ public sealed class UpdateOrderCommandValidator : AbstractValidator<UpdateOrderC
                 .WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
         });
     }
+
 }

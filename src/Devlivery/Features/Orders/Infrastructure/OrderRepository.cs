@@ -20,13 +20,13 @@ public sealed class OrderRepository(ApplicationDbContext dbContext) : IOrderRepo
         await dbContext.Orders.AddAsync(order, ct);
     }
 
-    public Task Update(Order order)
+    public Task UpdateAsync(Order order, CancellationToken ct = default)
     {
         dbContext.Orders.Update(order);
         return Task.CompletedTask;
     }
 
-    public Task Remove(Order order)
+    public Task RemoveAsync(Order order, CancellationToken ct = default)
     {
         dbContext.Orders.Remove(order);
         return Task.CompletedTask;

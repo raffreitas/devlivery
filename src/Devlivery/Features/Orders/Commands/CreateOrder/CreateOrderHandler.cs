@@ -29,6 +29,15 @@ public sealed class CreateOrderHandler(
         if (products.Count != productIds.Count)
             return Result.Fail<CreateOrderResponse>(new NotFoundError("Um ou mais produtos não foram encontrados"));
 
+        // Verify all products are available
+        var unavailableProducts = products.Where(p => !p.Available).ToList();
+        if (unavailableProducts.Count != 0)
+        {
+            var productNames = string.Join(", ", unavailableProducts.Select(p => p.Name));
+            return Result.Fail<CreateOrderResponse>(
+                new DomainRuleError($"Os seguintes produtos estão indisponíveis: {productNames}"));
+        }
+
         var items = command.Items.Select(item => new OrderItem(
             productId: item.ProductId,
             establishmentId: tenantAccessor.Tenant.Id,

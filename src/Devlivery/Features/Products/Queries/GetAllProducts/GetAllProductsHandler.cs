@@ -2,15 +2,18 @@ using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
 
+using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Products.Queries.GetAllProducts;
 
 public sealed class GetAllProductsHandler(ApplicationDbContext dbContext)
+    : IQueryHandler<GetAllProductsQuery, Result<List<GetAllProductsResponse>>>
 {
-    public async Task<Result<List<GetAllProductsResponse>>> HandleAsync(
+    public async ValueTask<Result<List<GetAllProductsResponse>>> Handle(
         GetAllProductsQuery query,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var products = await dbContext.Products
             .AsNoTracking()

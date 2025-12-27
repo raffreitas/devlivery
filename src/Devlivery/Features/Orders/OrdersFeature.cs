@@ -16,13 +16,8 @@ public static class OrdersFeature
         // Register Repository
         services.AddScoped<IOrderRepository, OrderRepository>();
 
-        // Register Handlers
-        services.AddScoped<CreateOrderHandler>();
-        services.AddScoped<DeleteOrderHandler>();
-        services.AddScoped<UpdateOrderStatusHandler>();
-        services.AddScoped<GetAllOrdersHandler>();
-        services.AddScoped<GetOrderByIdHandler>();
-        services.AddScoped<UpdateOrderHandler>();
+        // Commands and Queries handlers are automatically discovered by Mediator
+        // No manual registration needed when using ICommandHandler/IQueryHandler
         return services;
     }
 

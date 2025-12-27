@@ -1,23 +1,51 @@
-# {short title, representative of solved problem and found solution}
+# {título curto, representativo do problema resolvido e solução encontrada}
 
-## Context and Problem Statement
+**Data:** {YYYY-MM-DD}  
+**Status:** Aceito  
+**Contexto:** {C4 Model - Nível X / Padrão de Design / Stack Tecnológica}
 
-{Describe the context and problem statement, e.g., in free form using two to three sentences or in the form of an illustrative story. You may want to articulate the problem in form of a question and add links to collaboration boards or issue management systems.}
+## Contexto e Problema
 
-## Considered Options
+{Descreva o contexto e o problema, por exemplo, em forma livre usando duas a três frases ou na forma de uma história ilustrativa. Você pode querer articular o problema na forma de uma pergunta e adicionar links para quadros de colaboração ou sistemas de gerenciamento de issues.}
 
-* {title of option 1}
-* {title of option 2}
-* {title of option 3}
-* … <!-- numbers of options can vary -->
+A estrutura do repositório revela esta decisão através da organização:
 
-## Decision Outcome
+```
+{caminhos de pasta relevantes}
+```
 
-Chosen option: "{title of option 1}", because {justification. e.g., only option, which meets k.o. criterion decision driver | which resolves force {force} | … | comes out best (see below)}.
+**Problema:** {Pergunta que a decisão responde}
 
-<!-- This is an optional element. Feel free to remove. -->
-### Consequences
+## Opções Consideradas
 
-* Good, because {positive consequence, e.g., improvement of one or more desired qualities, …}
-* Bad, because {negative consequence, e.g., compromising one or more desired qualities, …}
-* … <!-- numbers of consequences can vary -->
+* **{título da opção 1}** - {breve descrição}
+* **{título da opção 2}** - {breve descrição}
+* **{título da opção 3}** - {breve descrição}
+* … <!-- número de opções pode variar -->
+
+## Decisão
+
+**Escolhida:** "{título da opção escolhida}", porque:
+
+1. {justificativa 1}
+2. {justificativa 2}
+3. {justificativa 3}
+…
+
+### Implementação Técnica
+
+A decisão se materializa em:
+
+{código, estrutura de pastas, configurações, etc.}
+
+```
+{árvore de diretórios ou código de exemplo}
+```
+
+### Consequências
+
+* ✅ **Bom:** {consequência positiva, ex: melhoria de uma ou mais qualidades desejadas}
+* ✅ **Bom:** {outra consequência positiva}
+* ⚠️ **Neutro:** {consequência neutra ou trade-off aceitável}
+* ⚠️ **Ruim:** {consequência negativa, ex: comprometimento de uma ou mais qualidades desejadas}
+* ⚠️ **Ruim:** {outra consequência negativa}

@@ -18,7 +18,7 @@ public abstract class BaseWebApplicationFactory<TEntryPoint> : WebApplicationFac
     where TEntryPoint : class
 {
     private readonly PostgreSqlContainer _postgresContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16-alpine")
+        .WithImage("postgres:latest")
         .WithDatabase("devlivery")
         .WithUsername("postgres")
         .WithPassword("postgres")

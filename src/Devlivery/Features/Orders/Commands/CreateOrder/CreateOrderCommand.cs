@@ -1,4 +1,6 @@
-﻿using Devlivery.Features.Orders.Domain.Enums;
+﻿using System.Text.RegularExpressions;
+
+using Devlivery.Features.Orders.Domain.Enums;
 
 using FluentResults;
 

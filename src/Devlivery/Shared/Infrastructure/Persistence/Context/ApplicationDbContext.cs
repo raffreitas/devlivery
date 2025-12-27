@@ -1,5 +1,7 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.Establishments.Domain;
+using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
+using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Entities;
 using Devlivery.Features.Products.Domain;
@@ -24,6 +26,8 @@ public sealed class ApplicationDbContext(
     public DbSet<Establishment> Establishments => Set<Establishment>();
     public DbSet<CashSession> CashSessions => Set<CashSession>();
     public DbSet<CashDeposit> CashDeposits => Set<CashDeposit>();
+    public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<Category> ExpenseCategories => Set<Category>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,6 +39,8 @@ public sealed class ApplicationDbContext(
         modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
         modelBuilder.ApplyConfiguration(new CashSessionConfiguration());
         modelBuilder.ApplyConfiguration(new CashDepositConfiguration());
+        modelBuilder.ApplyConfiguration(new ExpenseConfiguration());
+        modelBuilder.ApplyConfiguration(new ExpenseCategoryConfiguration());
 
         ApplyQueryFilters(modelBuilder);
 
@@ -46,6 +52,8 @@ public sealed class ApplicationDbContext(
         modelBuilder.Entity<User>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
         modelBuilder.Entity<Product>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
         modelBuilder.Entity<Order>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
+        modelBuilder.Entity<Expense>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
+        modelBuilder.Entity<Category>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
         modelBuilder.Entity<OrderItem>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
         modelBuilder.Entity<CashSession>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
         modelBuilder.Entity<CashDeposit>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);

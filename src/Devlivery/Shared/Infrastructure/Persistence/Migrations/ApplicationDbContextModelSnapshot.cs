@@ -206,6 +206,175 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                     b.ToTable("establishments", (string)null);
                 });
 
+            modelBuilder.Entity("Devlivery.Features.Expenses.Domain.Aggregates.Categories.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("EstablishmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("establishment_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid?>("ParentCategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_category_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_expense_categories");
+
+                    b.HasIndex("EstablishmentId")
+                        .HasDatabaseName("ix_expense_categories_establishment_id");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("ix_expense_categories_is_active");
+
+                    b.HasIndex("ParentCategoryId")
+                        .HasDatabaseName("ix_expense_categories_parent_category_id");
+
+                    b.ToTable("expense_categories", (string)null);
+                });
+
+            modelBuilder.Entity("Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Expense", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("description");
+
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<Guid>("EstablishmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("establishment_id");
+
+                    b.Property<DateOnly?>("PaymentDate")
+                        .HasColumnType("date")
+                        .HasColumnName("payment_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Supplier")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("supplier");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_expenses");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_expenses_category_id");
+
+                    b.HasIndex("DueDate")
+                        .HasDatabaseName("ix_expenses_due_date");
+
+                    b.HasIndex("EstablishmentId")
+                        .HasDatabaseName("ix_expenses_establishment_id");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_expenses_status");
+
+                    b.HasIndex("EstablishmentId", "CategoryId", "DueDate")
+                        .HasDatabaseName("ix_expenses_establishment_id_category_id_due_date");
+
+                    b.HasIndex("EstablishmentId", "Status", "PaymentDate")
+                        .HasDatabaseName("ix_expenses_establishment_id_status_payment_date");
+
+                    b.ToTable("expenses", (string)null);
+                });
+
+            modelBuilder.Entity("Devlivery.Features.Orders.Domain.Entities.OrderItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("EstablishmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("establishment_id");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("notes");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("unit_price");
+
+                    b.Property<Guid>("order_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_order_items");
+
+                    b.HasIndex("EstablishmentId")
+                        .HasDatabaseName("ix_order_items_establishment_id");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_order_items_product_id");
+
+                    b.HasIndex("order_id")
+                        .HasDatabaseName("ix_order_items_order_id");
+
+                    b.ToTable("order_items", (string)null);
+                });
+
             modelBuilder.Entity("Devlivery.Features.Orders.Domain.Order", b =>
                 {
                     b.Property<Guid>("Id")
@@ -261,14 +430,10 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                                 .HasColumnType("character varying(200)")
                                 .HasColumnName("customer_name");
 
-                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Phone", "Devlivery.Features.Orders.Domain.Order.Customer#CustomerInfo.Phone#PhoneNumber", b2 =>
-                                {
-                                    b2.Property<string>("Number")
-                                        .IsRequired()
-                                        .HasMaxLength(20)
-                                        .HasColumnType("character varying(20)")
-                                        .HasColumnName("customer_phone");
-                                });
+                            b1.Property<string>("Phone")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("customer_phone");
                         });
 
                     b.ComplexProperty(typeof(Dictionary<string, object>), "DeliveryAddress", "Devlivery.Features.Orders.Domain.Order.DeliveryAddress#DeliveryAddress", b1 =>
@@ -294,53 +459,6 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasDatabaseName("ix_orders_establishment_id");
 
                     b.ToTable("orders", (string)null);
-                });
-
-            modelBuilder.Entity("Devlivery.Features.Orders.Domain.OrderItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("EstablishmentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("establishment_id");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("notes");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("product_id");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("unit_price");
-
-                    b.Property<Guid>("order_id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("order_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_order_items");
-
-                    b.HasIndex("EstablishmentId")
-                        .HasDatabaseName("ix_order_items_establishment_id");
-
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_order_items_product_id");
-
-                    b.HasIndex("order_id")
-                        .HasDatabaseName("ix_order_items_order_id");
-
-                    b.ToTable("order_items", (string)null);
                 });
 
             modelBuilder.Entity("Devlivery.Features.Products.Domain.Product", b =>
@@ -460,17 +578,40 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasConstraintName("fk_cash_sessions_establishments_establishment_id");
                 });
 
-            modelBuilder.Entity("Devlivery.Features.Orders.Domain.Order", b =>
+            modelBuilder.Entity("Devlivery.Features.Expenses.Domain.Aggregates.Categories.Category", b =>
                 {
                     b.HasOne("Devlivery.Features.Establishments.Domain.Establishment", null)
                         .WithMany()
                         .HasForeignKey("EstablishmentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_orders_establishments_establishment_id");
+                        .HasConstraintName("fk_expense_categories_establishments_establishment_id");
+
+                    b.HasOne("Devlivery.Features.Expenses.Domain.Aggregates.Categories.Category", null)
+                        .WithMany("Subcategories")
+                        .HasForeignKey("ParentCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_expense_categories_expense_categories_parent_category_id");
                 });
 
-            modelBuilder.Entity("Devlivery.Features.Orders.Domain.OrderItem", b =>
+            modelBuilder.Entity("Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Expense", b =>
+                {
+                    b.HasOne("Devlivery.Features.Expenses.Domain.Aggregates.Categories.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_expenses_expense_categories_category_id");
+
+                    b.HasOne("Devlivery.Features.Establishments.Domain.Establishment", null)
+                        .WithMany()
+                        .HasForeignKey("EstablishmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_expenses_establishments_establishment_id");
+                });
+
+            modelBuilder.Entity("Devlivery.Features.Orders.Domain.Entities.OrderItem", b =>
                 {
                     b.HasOne("Devlivery.Features.Establishments.Domain.Establishment", null)
                         .WithMany()
@@ -492,6 +633,16 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_order_items_orders_order_id");
+                });
+
+            modelBuilder.Entity("Devlivery.Features.Orders.Domain.Order", b =>
+                {
+                    b.HasOne("Devlivery.Features.Establishments.Domain.Establishment", null)
+                        .WithMany()
+                        .HasForeignKey("EstablishmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_orders_establishments_establishment_id");
                 });
 
             modelBuilder.Entity("Devlivery.Features.Products.Domain.Product", b =>
@@ -517,6 +668,11 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
             modelBuilder.Entity("Devlivery.Features.CashRegister.Domain.CashSession", b =>
                 {
                     b.Navigation("Deposits");
+                });
+
+            modelBuilder.Entity("Devlivery.Features.Expenses.Domain.Aggregates.Categories.Category", b =>
+                {
+                    b.Navigation("Subcategories");
                 });
 
             modelBuilder.Entity("Devlivery.Features.Orders.Domain.Order", b =>

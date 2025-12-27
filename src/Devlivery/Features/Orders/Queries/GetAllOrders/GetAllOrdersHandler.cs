@@ -3,13 +3,18 @@ using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
 
+using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Orders.Queries.GetAllOrders;
 
 public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
+    : IQueryHandler<GetAllOrdersQuery, Result<List<GetAllOrdersResponse>>>
 {
-    public async Task<Result<List<GetAllOrdersResponse>>> HandleAsync(GetAllOrdersQuery query, CancellationToken cancellationToken = default)
+    public async ValueTask<Result<List<GetAllOrdersResponse>>> Handle(
+        GetAllOrdersQuery query,
+        CancellationToken cancellationToken)
     {
         var ordersQuery = dbContext.Orders
             .AsNoTracking()
