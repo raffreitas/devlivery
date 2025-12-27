@@ -21,8 +21,8 @@ namespace Devlivery.Shared.Infrastructure.Persistence.Migrations
                 begin
                     for rec in select id from public.establishments
                         loop
-                            select uuidv7() into company_expense_category_id;
-                            select uuidv7() into supplier_category_id;
+                            select gen_random_uuid() into company_expense_category_id;
+                            select gen_random_uuid() into supplier_category_id;
             
                             insert into public.expense_categories(id,
                                                                   name,
@@ -42,16 +42,16 @@ namespace Devlivery.Shared.Infrastructure.Persistence.Migrations
                                                                   created_at,
                                                                   updated_at,
                                                                   parent_category_id)
-                            values (uuidv7(), 'Aluguel', true, rec, now(), now(), company_expense_category_id),
-                                   (uuidv7(), 'Água', true, rec, now(), now(), company_expense_category_id),
-                                   (uuidv7(), 'Luz', true, rec, now(), now(), company_expense_category_id),
-                                   (uuidv7(), 'Internet', true, rec, now(), now(), company_expense_category_id),
-                                   (uuidv7(), 'Telefone', true, rec, now(), now(), company_expense_category_id),
-                                   (uuidv7(), 'Impostos', true, rec, now(), now(), company_expense_category_id),
-                                   (uuidv7(), 'Salários', true, rec, now(), now(), company_expense_category_id),
-                                   (uuidv7(), 'Manutenção', true, rec, now(), now(), company_expense_category_id),
-                                   (uuidv7(), 'Marketing', true, rec, now(), now(), company_expense_category_id),
-                                   (uuidv7(), 'Outros', true, rec, now(), now(), company_expense_category_id);
+                            values (gen_random_uuid(), 'Aluguel', true, rec, now(), now(), company_expense_category_id),
+                                   (gen_random_uuid(), 'Água', true, rec, now(), now(), company_expense_category_id),
+                                   (gen_random_uuid(), 'Luz', true, rec, now(), now(), company_expense_category_id),
+                                   (gen_random_uuid(), 'Internet', true, rec, now(), now(), company_expense_category_id),
+                                   (gen_random_uuid(), 'Telefone', true, rec, now(), now(), company_expense_category_id),
+                                   (gen_random_uuid(), 'Impostos', true, rec, now(), now(), company_expense_category_id),
+                                   (gen_random_uuid(), 'Salários', true, rec, now(), now(), company_expense_category_id),
+                                   (gen_random_uuid(), 'Manutenção', true, rec, now(), now(), company_expense_category_id),
+                                   (gen_random_uuid(), 'Marketing', true, rec, now(), now(), company_expense_category_id),
+                                   (gen_random_uuid(), 'Outros', true, rec, now(), now(), company_expense_category_id);
             
                             -- Subcategories for Supplier
                             insert into public.expense_categories(id,
@@ -61,13 +61,13 @@ namespace Devlivery.Shared.Infrastructure.Persistence.Migrations
                                                                   created_at,
                                                                   updated_at,
                                                                   parent_category_id)
-                            values (uuidv7(), 'Alimentos', true, rec, now(), now(), supplier_category_id),
-                                   (uuidv7(), 'Bebidas', true, rec, now(), now(), supplier_category_id),
-                                   (uuidv7(), 'Embalagens', true, rec, now(), now(), supplier_category_id),
-                                   (uuidv7(), 'Equipamentos', true, rec, now(), now(), supplier_category_id),
-                                   (uuidv7(), 'Produtos de Limpeza', true, rec, now(), now(), supplier_category_id),
-                                   (uuidv7(), 'Matéria Prima', true, rec, now(), now(), supplier_category_id),
-                                   (uuidv7(), 'Outros', true, rec, now(), now(), supplier_category_id);
+                            values (gen_random_uuid(), 'Alimentos', true, rec, now(), now(), supplier_category_id),
+                                   (gen_random_uuid(), 'Bebidas', true, rec, now(), now(), supplier_category_id),
+                                   (gen_random_uuid(), 'Embalagens', true, rec, now(), now(), supplier_category_id),
+                                   (gen_random_uuid(), 'Equipamentos', true, rec, now(), now(), supplier_category_id),
+                                   (gen_random_uuid(), 'Produtos de Limpeza', true, rec, now(), now(), supplier_category_id),
+                                   (gen_random_uuid(), 'Matéria Prima', true, rec, now(), now(), supplier_category_id),
+                                   (gen_random_uuid(), 'Outros', true, rec, now(), now(), supplier_category_id);
             
                         end loop;
                 end
