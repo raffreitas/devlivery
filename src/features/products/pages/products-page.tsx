@@ -1,5 +1,11 @@
-import { Filter, PlusIcon, Search } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { BottomSheet } from "@/shared/components/bottom-sheet";
+import {
+  GridSkeleton,
+  LoadingOverlay,
+  LoadingState,
+} from "@/shared/components/loading";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,17 +22,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
-import { Input } from "@/shared/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/shared/components/ui/select";
 import { Separator } from "@/shared/components/ui/separator";
-import { Spinner } from "@/shared/components/ui/spinner";
 import { ProductCard } from "../components/product-card";
 import { ProductForm } from "../components/product-form";
+import { ProductsFilters } from "../components/products-filters";
+import { ProductsFiltersContent } from "../components/products-filters-content";
 import { useProducts } from "../hooks/use-products";
 import type { Product, ProductFormData } from "../types";
 
@@ -38,6 +38,9 @@ export function ProductsPage() {
     createProduct,
     updateProduct,
     deleteProduct,
+    isCreating,
+    isUpdating,
+    isDeleting,
   } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [alert, setAlert] = useState({
@@ -47,6 +50,7 @@ export function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const handleCreateOrUpdate = (data: ProductFormData) => {
     if (editingProduct) {
@@ -66,8 +70,12 @@ export function ProductsPage() {
   const handleDelete = async () => {
     const id = alert.productId;
     if (!id) return;
-    await deleteProduct(id);
-    setAlert({ open: false, productId: null });
+    try {
+      await deleteProduct(id);
+      setAlert({ open: false, productId: null });
+    } catch {
+      // Error is handled by the mutation's onError
+    }
   };
 
   const handleCloseModal = () => {
@@ -88,9 +96,11 @@ export function ProductsPage() {
 
   return (
     <div className="space-y-6">
+      <LoadingOverlay isFetching={isFetching} position="top-bar" />
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
             Produtos
           </h1>
           <p className="text-muted-foreground">
@@ -98,12 +108,6 @@ export function ProductsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          {isFetching && (
-            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground mr-2">
-              <Spinner className="w-4 h-4" />
-              <span>Sincronizando...</span>
-            </div>
-          )}
           <Button
             onClick={() => setIsModalOpen(true)}
             className="w-full sm:w-auto"
@@ -114,77 +118,44 @@ export function ProductsPage() {
         </div>
       </div>
 
-      <div className="bg-card p-4 rounded-lg border border-border shadow-sm flex flex-col sm:flex-row gap-4 items-center">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Buscar produtos por nome..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 transition-colors"
-          />
-        </div>
+      <ProductsFilters
+        searchTerm={searchTerm}
+        filterCategory={filterCategory}
+        categories={categories}
+        onSearchChange={setSearchTerm}
+        onCategoryChange={setFilterCategory}
+        onOpenFilters={() => setIsFiltersOpen(true)}
+      />
 
-        <div className="w-full sm:w-50">
-          <Select onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-full">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Filter className="w-4 h-4" />
-                <span className="truncate text-foreground">
-                  {filterCategory === "all"
-                    ? "Todas Categorias"
-                    : filterCategory}
-                </span>
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all" onSelect={() => setFilterCategory("all")}>
-                Todas as categorias
-              </SelectItem>
-              {categories.map((category) => (
-                <SelectItem
-                  key={category}
-                  value={category}
-                  onSelect={() => setFilterCategory(category)}
-                  className="cursor-pointer"
-                >
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {loading && products.length === 0 ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="text-xl text-secondary-foreground">Carregando...</div>
-        </div>
-      ) : filteredProducts.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">
-            {products.length === 0
-              ? "Nenhum produto cadastrado. Comece criando um novo produto!"
-              : "Nenhum produto encontrado com os filtros aplicados."}
-          </p>
-        </div>
-      ) : (
-        <div
-          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 transition-opacity duration-200 ${
-            isFetching ? "opacity-60" : "opacity-100"
-          }`}
-        >
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onEdit={handleEdit}
-              onDelete={(productId) => setAlert({ open: true, productId })}
-            />
-          ))}
-        </div>
-      )}
+      <LoadingState
+        isLoading={loading && products.length === 0}
+        skeleton={<GridSkeleton items={10} columns={5} />}
+      >
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">
+              {products.length === 0
+                ? "Nenhum produto cadastrado. Comece criando um novo produto!"
+                : "Nenhum produto encontrado com os filtros aplicados."}
+            </p>
+          </div>
+        ) : (
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 transition-opacity duration-200 ${
+              isFetching ? "opacity-60" : "opacity-100"
+            }`}
+          >
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onEdit={handleEdit}
+                onDelete={(productId) => setAlert({ open: true, productId })}
+              />
+            ))}
+          </div>
+        )}
+      </LoadingState>
 
       <AlertDialog
         open={alert.open}
@@ -197,9 +168,14 @@ export function ProductsPage() {
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDelete()}>
-              Confirmar
+            <AlertDialogCancel disabled={isDeleting}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleDelete()}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Excluindo..." : "Confirmar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -220,9 +196,32 @@ export function ProductsPage() {
             onSubmit={handleCreateOrUpdate}
             onCancel={handleCloseModal}
             categoryOptions={categories.map((c) => ({ value: c, label: c }))}
+            isSubmitting={isCreating || isUpdating}
           />
         </DialogContent>
       </Dialog>
+
+      <BottomSheet
+        isOpen={isFiltersOpen}
+        onClose={() => setIsFiltersOpen(false)}
+        title="Filtros"
+      >
+        <div className="space-y-4">
+          <ProductsFiltersContent
+            searchTerm={searchTerm}
+            filterCategory={filterCategory}
+            categories={categories}
+            onSearchChange={setSearchTerm}
+            onCategoryChange={setFilterCategory}
+          />
+
+          <div className="pt-4 pb-2 border-t border-gray-200">
+            <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
+              Aplicar Filtros
+            </Button>
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 }

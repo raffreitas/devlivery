@@ -1,3 +1,4 @@
+import { TableSkeleton } from "@/shared/components/loading";
 import {
   Card,
   CardContent,
@@ -26,11 +27,14 @@ export function CashDepositsList({
 }: CashDepositsListProps) {
   if (isLoading) {
     return (
-      <div className="space-y-2 p-4">
-        <div className="h-10 bg-gray-100 rounded w-full animate-pulse" />
-        <div className="h-10 bg-gray-100 rounded w-full animate-pulse" />
-        <div className="h-10 bg-gray-100 rounded w-full animate-pulse" />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Histórico de Aportes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TableSkeleton rows={3} columns={4} />
+        </CardContent>
+      </Card>
     );
   }
 

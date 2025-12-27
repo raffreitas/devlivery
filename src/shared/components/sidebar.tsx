@@ -38,6 +38,11 @@ export function Sidebar() {
       icon: Package,
       path: "/products",
     },
+    // {
+    //   label: "Despesas",
+    //   icon: Receipt,
+    //   path: "/expenses",
+    // },
     // Future Menu Placeholders
     // {
     //   label: "Cardápio",

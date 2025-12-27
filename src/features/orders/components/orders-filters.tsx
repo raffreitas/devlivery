@@ -57,8 +57,8 @@ export function OrdersFilters({
 
       {/* Desktop: Inline Filters */}
       <div className="hidden sm:block bg-card rounded-lg border border-border shadow-sm p-4">
-        <div className="flex items-end gap-4 pb-2 sm:pb-1 px-1">
-          <div className="flex-1 min-w-[200px] flex flex-col gap-1.5">
+        <div className="flex flex-col sm:flex-row items-end gap-2 sm:gap-4 pb-2 sm:pb-1 px-1">
+          <div className="w-full sm:flex-1 sm:min-w-[200px] flex flex-col gap-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
               Status do Pedido
             </Label>
@@ -88,7 +88,7 @@ export function OrdersFilters({
             </Select>
           </div>
 
-          <div className="flex-1 min-w-[200px] flex flex-col gap-1.5">
+          <div className="w-full sm:flex-1 sm:min-w-[200px] flex flex-col gap-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
               Forma de Pagamento
             </Label>
@@ -118,7 +118,7 @@ export function OrdersFilters({
             </Select>
           </div>
 
-          <div className="flex flex-col gap-1.5 min-w-60">
+          <div className="w-full sm:w-auto sm:min-w-[240px] flex flex-col gap-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
               Período
             </Label>

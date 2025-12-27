@@ -161,7 +161,7 @@ export const cashService = {
       notes: dto.notes,
     };
 
-    const response = await api.put<ApiResponse<CashSessionDto>>(
+    const response = await api.patch<ApiResponse<CashSessionDto>>(
       `/api/cash-register/sessions/${id}/close`,
       payload,
     );

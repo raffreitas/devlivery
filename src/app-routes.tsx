@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { LoginPage } from "./features/auth/pages/login-page";
 import { CashPage } from "./features/cash/pages/cash-page";
 import { DashboardPage } from "./features/dashboard/pages/dashboard-page";
+import { ExpensesPage } from "./features/expenses/pages/expenses-page";
 import { OrdersPage } from "./features/orders/pages/orders-page";
 import { ProductsPage } from "./features/products/pages/products-page";
 import { Layout } from "./shared/components/layout";
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
           { path: "orders", element: <OrdersPage /> },
           { path: "cash", element: <CashPage /> },
           { path: "products", element: <ProductsPage /> },
+          { path: "expenses", element: <ExpensesPage /> },
         ],
       },
     ],

@@ -43,5 +43,8 @@ export function useProducts() {
     updateProduct: (id: string, data: ProductFormData) =>
       updateMutation.mutateAsync({ id, data }),
     deleteProduct: (id: string) => deleteMutation.mutateAsync(id),
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
   };
 }

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { LoadingButton } from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import {
   Form,
@@ -95,13 +96,14 @@ export function CashDepositForm({
           >
             Limpar
           </Button>
-          <Button
+          <LoadingButton
             type="submit"
-            disabled={isLoading}
+            isLoading={isLoading}
+            loadingText="Adicionando..."
             className="flex-1 bg-green-600 hover:bg-green-700"
           >
-            {isLoading ? "Adicionando..." : "Adicionar Aporte"}
-          </Button>
+            Adicionar Aporte
+          </LoadingButton>
         </div>
       </form>
     </Form>

@@ -53,7 +53,11 @@ export function CloseCashForm({
         notes: data.notes?.trim() || undefined,
       });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao fechar caixa");
+      toast.error(
+        err instanceof Error && err.message
+          ? err.message
+          : "Erro ao fechar caixa",
+      );
       throw err;
     }
   };

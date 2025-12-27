@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { LoadingButton } from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Combobox } from "@/shared/components/ui/combobox";
@@ -13,15 +14,15 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { InputMoney } from "@/shared/components/ui/input-money";
-import { Spinner } from "@/shared/components/ui/spinner";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { type ProductFormData, productFormSchema } from "../types";
 
 interface ProductFormProps {
   initialData: (ProductFormData & { id?: string }) | null;
-  onSubmit: (data: ProductFormData) => void;
+  onSubmit: (data: ProductFormData) => void | Promise<void>;
   onCancel: () => void;
   categoryOptions?: { value: string; label: string }[];
+  isSubmitting?: boolean;
 }
 
 export function ProductForm({
@@ -29,6 +30,7 @@ export function ProductForm({
   onSubmit,
   onCancel,
   categoryOptions,
+  isSubmitting: externalIsSubmitting,
 }: ProductFormProps) {
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
@@ -132,10 +134,15 @@ export function ProductForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button type="submit">
-            {form.formState.isSubmitting && <Spinner />}
+          <LoadingButton
+            type="submit"
+            isLoading={
+              form.formState.isSubmitting || externalIsSubmitting === true
+            }
+            loadingText={initialData?.id ? "Atualizando..." : "Criando..."}
+          >
             {initialData?.id ? "Atualizar" : "Criar"} Produto
-          </Button>
+          </LoadingButton>
         </div>
       </form>
     </Form>
