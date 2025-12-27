@@ -88,8 +88,7 @@ export function CreateCategoryDialog({
 
   const categoryType = form.watch("categoryType");
   // Se escolheu "subcategory" no tipo, precisa selecionar categoria pai
-  const needsParentSelection =
-    !isSubcategory && categoryType === "subcategory";
+  const needsParentSelection = !isSubcategory && categoryType === "subcategory";
 
   const handleSubmit = async (data: CreateCategoryFormData) => {
     try {
