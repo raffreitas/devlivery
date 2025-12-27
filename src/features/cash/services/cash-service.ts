@@ -69,7 +69,7 @@ function mapDtoToDomain(dto: CashSessionDto): CashSession {
     startAt: dto.startAt,
     endAt: dto.endAt ?? undefined,
     notes: dto.notes ?? undefined,
-    status: dto.status as "open" | "closed",
+    status: dto.status as "Open" | "Closed",
     salesTotals: {
       totalRevenue: dto.totalRevenue,
       totalOrders: dto.totalOrders,
@@ -161,7 +161,7 @@ export const cashService = {
       notes: dto.notes,
     };
 
-    const response = await api.post<ApiResponse<CashSessionDto>>(
+    const response = await api.patch<ApiResponse<CashSessionDto>>(
       `/api/cash-register/sessions/${id}/close`,
       payload,
     );

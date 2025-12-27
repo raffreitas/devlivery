@@ -26,7 +26,6 @@ import { ExpensesOverTimeChart } from "../components/expenses-over-time-chart";
 import { PaymentBreakdownCard } from "../components/payment-breakdown-card";
 import { RevenueVsExpensesChart } from "../components/revenue-vs-expenses-chart";
 import { SalesChart } from "../components/sales-chart";
-import { StatusDistributionChart } from "../components/status-distribution-chart";
 import { TopProductsCard } from "../components/top-products-card";
 import { useDashboardExpenses } from "../hooks/use-dashboard-expenses";
 import { useDashboardOverview } from "../hooks/use-dashboard-overview";
@@ -180,14 +179,6 @@ export function DashboardPage() {
               }`}
             >
               <SalesChart data={salesOverTime} />
-              <StatusDistributionChart
-                data={Object.entries(sales.ordersByStatus).map(
-                  ([status, count]) => ({
-                    status,
-                    count,
-                  }),
-                )}
-              />
             </div>
             <div
               className={`grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 transition-opacity duration-200 ${

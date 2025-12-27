@@ -14,14 +14,6 @@ export function useDashboardSales(
     placeholderData: (previousData) => previousData,
   });
 
-  const ordersByStatusQuery = useQuery({
-    queryKey: ["dashboard", "orders-by-status", { startDate, endDate }],
-    queryFn: () => dashboardService.getOrdersByStatus(startDate, endDate),
-    enabled,
-    staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
-  });
-
   const topProductsQuery = useQuery({
     queryKey: ["dashboard", "top-products", { startDate, endDate }],
     queryFn: () => dashboardService.getTopProducts(startDate, endDate),
@@ -40,7 +32,6 @@ export function useDashboardSales(
 
   const isFetching =
     paymentBreakdownQuery.isFetching ||
-    ordersByStatusQuery.isFetching ||
     topProductsQuery.isFetching ||
     salesOverTimeQuery.isFetching;
 
@@ -49,16 +40,8 @@ export function useDashboardSales(
       breakdown: { Cash: 0, CreditCard: 0, DebitCard: 0, Pix: 0 },
       total: 0,
     },
-    ordersByStatus: ordersByStatusQuery.data ?? {
-      Pending: 0,
-      Preparing: 0,
-      Ready: 0,
-      Delivered: 0,
-      Canceled: 0,
-    },
     topProducts: topProductsQuery.data ?? [],
     salesOverTime: salesOverTimeQuery.data ?? [],
     isFetching,
   };
 }
-
