@@ -54,7 +54,7 @@ public sealed class Expense : Entity
     }
 
     public void Update(
-        Guid? categoryId,
+        Guid? categoryId = null,
         decimal? amount = null,
         DateOnly? dueDate = null,
         string? supplier = null,
