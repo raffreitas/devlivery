@@ -3,7 +3,6 @@ import {
   ChevronRight,
   LayoutDashboard,
   Package,
-  Receipt,
   ShoppingCart,
   Wallet,
 } from "lucide-react";
