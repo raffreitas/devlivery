@@ -51,6 +51,10 @@ export function OrdersPage() {
     updateOrder,
     updateOrderStatus,
     deleteOrder,
+    isCreating,
+    isUpdating,
+    isUpdatingStatus,
+    isDeleting,
   } = useOrders(
     period?.from,
     period?.to,
@@ -63,17 +67,21 @@ export function OrdersPage() {
     "all",
   );
 
-  const handleCreateOrUpdateOrder = (data: OrderFormData) => {
-    if (editingOrder) {
-      updateOrder(editingOrder.id, data);
-    } else {
-      createOrder(data);
+  const handleCreateOrUpdateOrder = async (data: OrderFormData) => {
+    try {
+      if (editingOrder) {
+        await updateOrder(editingOrder.id, data);
+      } else {
+        await createOrder(data);
+      }
+      setIsModalOpen(false);
+      setEditingOrder(null);
+      toast.success(
+        `Pedido ${editingOrder ? "atualizado" : "criado"} com sucesso!`,
+      );
+    } catch {
+      // Error is handled by the mutation's onError or toast
     }
-    setIsModalOpen(false);
-    setEditingOrder(null);
-    toast.success(
-      `Pedido ${editingOrder ? "atualizado" : "criado"} com sucesso!`,
-    );
   };
 
   const handleEditOrder = (order: Order) => {
@@ -183,6 +191,7 @@ export function OrdersPage() {
             initialData={editingOrder ? { ...editingOrder } : undefined}
             onSubmit={handleCreateOrUpdateOrder}
             onCancel={handleCloseModal}
+            isSubmitting={isCreating || isUpdating}
           />
         </DialogContent>
       </Dialog>

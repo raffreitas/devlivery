@@ -13,6 +13,7 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { InputMoney } from "@/shared/components/ui/input-money";
+import { LoadingButton } from "@/shared/components/loading";
 import {
   Select,
   SelectContent,
@@ -29,11 +30,17 @@ import { ProductSelector } from "./order-form-product-selector";
 
 interface OrderFormProps {
   initialData?: OrderFormData & { id?: string };
-  onSubmit: (data: OrderFormData) => void;
+  onSubmit: (data: OrderFormData) => void | Promise<void>;
   onCancel: () => void;
+  isSubmitting?: boolean;
 }
 
-export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
+export function OrderForm({
+  initialData,
+  onSubmit,
+  onCancel,
+  isSubmitting: externalIsSubmitting,
+}: OrderFormProps) {
   const { products } = useProducts();
   const [selectedProductId, setSelectedProductId] = useState<
     string | undefined
@@ -257,12 +264,21 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
         </div>
 
         <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={form.formState.isSubmitting || externalIsSubmitting === true}
+          >
             Cancelar
           </Button>
-          <Button type="submit">
+          <LoadingButton
+            type="submit"
+            isLoading={form.formState.isSubmitting || externalIsSubmitting === true}
+            loadingText={initialData?.id ? "Atualizando..." : "Criando..."}
+          >
             {initialData?.id ? "Atualizar" : "Criar"} Pedido
-          </Button>
+          </LoadingButton>
         </div>
       </form>
     </Form>

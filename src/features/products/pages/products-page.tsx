@@ -38,6 +38,9 @@ export function ProductsPage() {
     createProduct,
     updateProduct,
     deleteProduct,
+    isCreating,
+    isUpdating,
+    isDeleting,
   } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [alert, setAlert] = useState({
@@ -67,8 +70,12 @@ export function ProductsPage() {
   const handleDelete = async () => {
     const id = alert.productId;
     if (!id) return;
-    await deleteProduct(id);
-    setAlert({ open: false, productId: null });
+    try {
+      await deleteProduct(id);
+      setAlert({ open: false, productId: null });
+    } catch {
+      // Error is handled by the mutation's onError
+    }
   };
 
   const handleCloseModal = () => {
@@ -161,9 +168,9 @@ export function ProductsPage() {
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDelete()}>
-              Confirmar
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleDelete()} disabled={isDeleting}>
+              {isDeleting ? "Excluindo..." : "Confirmar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -184,6 +191,7 @@ export function ProductsPage() {
             onSubmit={handleCreateOrUpdate}
             onCancel={handleCloseModal}
             categoryOptions={categories.map((c) => ({ value: c, label: c }))}
+            isSubmitting={isCreating || isUpdating}
           />
         </DialogContent>
       </Dialog>

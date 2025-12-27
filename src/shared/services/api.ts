@@ -71,7 +71,9 @@ async function request<T>(
     json = await res.json();
   } catch {
     if (!res.ok) {
-      if (res.status === 401) throw new UnauthorizedError(res.statusText);
+      if (res.status === 401) {
+        throw new UnauthorizedError("Sua sessão expirou. Por favor, faça login novamente.");
+      }
       throw new ApiError(res.statusText, res.status);
     }
 
@@ -93,7 +95,9 @@ async function request<T>(
     }
 
     if (res.status === 401) {
-      throw new UnauthorizedError(String(errMsg), json);
+      // Provide a more user-friendly message for expired tokens
+      const friendlyMessage = errMsg || "Sua sessão expirou. Por favor, faça login novamente.";
+      throw new UnauthorizedError(friendlyMessage, json);
     }
 
     throw new ApiError(String(errMsg), res.status, json);

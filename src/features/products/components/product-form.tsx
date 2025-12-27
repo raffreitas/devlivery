@@ -19,9 +19,10 @@ import { type ProductFormData, productFormSchema } from "../types";
 
 interface ProductFormProps {
   initialData: (ProductFormData & { id?: string }) | null;
-  onSubmit: (data: ProductFormData) => void;
+  onSubmit: (data: ProductFormData) => void | Promise<void>;
   onCancel: () => void;
   categoryOptions?: { value: string; label: string }[];
+  isSubmitting?: boolean;
 }
 
 export function ProductForm({
@@ -29,6 +30,7 @@ export function ProductForm({
   onSubmit,
   onCancel,
   categoryOptions,
+  isSubmitting: externalIsSubmitting,
 }: ProductFormProps) {
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
@@ -134,7 +136,7 @@ export function ProductForm({
           </Button>
           <LoadingButton
             type="submit"
-            isLoading={form.formState.isSubmitting}
+            isLoading={form.formState.isSubmitting || externalIsSubmitting === true}
             loadingText={initialData?.id ? "Atualizando..." : "Criando..."}
           >
             {initialData?.id ? "Atualizar" : "Criar"} Produto
