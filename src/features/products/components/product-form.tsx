@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { LoadingButton } from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Combobox } from "@/shared/components/ui/combobox";
@@ -13,7 +14,6 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { InputMoney } from "@/shared/components/ui/input-money";
-import { LoadingButton } from "@/shared/components/loading";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { type ProductFormData, productFormSchema } from "../types";
 

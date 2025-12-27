@@ -2,6 +2,11 @@ import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { BottomSheet } from "@/shared/components/bottom-sheet";
+import {
+  GridSkeleton,
+  LoadingOverlay,
+  LoadingState,
+} from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -10,11 +15,6 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Separator } from "@/shared/components/ui/separator";
-import {
-  GridSkeleton,
-  LoadingOverlay,
-  LoadingState,
-} from "@/shared/components/loading";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
 import { OrdersFilters } from "../components/orders-filters";
@@ -53,8 +53,6 @@ export function OrdersPage() {
     deleteOrder,
     isCreating,
     isUpdating,
-    isUpdatingStatus,
-    isDeleting,
   } = useOrders(
     period?.from,
     period?.to,

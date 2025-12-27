@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Button } from "@/shared/components/ui/button";
+import { LoadingButton } from "@/shared/components/loading";
 import { Card } from "@/shared/components/ui/card";
 import {
   Form,
@@ -13,7 +13,6 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
-import { LoadingButton } from "@/shared/components/loading";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { type AuthFormData, authFormSchema } from "../types";
 

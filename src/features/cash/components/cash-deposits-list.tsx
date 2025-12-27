@@ -1,3 +1,4 @@
+import { TableSkeleton } from "@/shared/components/loading";
 import {
   Card,
   CardContent,
@@ -12,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
-import { TableSkeleton } from "@/shared/components/loading";
 import { formatMoney } from "@/shared/utils/formatters";
 import type { CashDeposit } from "../types";
 

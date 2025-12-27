@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button } from "@/shared/components/ui/button";
 import { LoadingButton } from "@/shared/components/loading";
+import { Button } from "@/shared/components/ui/button";
 import {
   Form,
   FormControl,

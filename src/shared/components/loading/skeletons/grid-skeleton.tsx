@@ -29,7 +29,10 @@ export function GridSkeleton({
       className={`grid ${gridCols[columns as keyof typeof gridCols] ?? gridCols[4]} gap-6 ${className ?? ""}`}
     >
       {Array.from({ length: items }).map((_, i) => (
-        <CardSkeleton key={`card-${i}`} showImage={showImage} />
+        <CardSkeleton
+          key={`card-${Math.random() * i * 10000}`}
+          showImage={showImage}
+        />
       ))}
     </div>
   );

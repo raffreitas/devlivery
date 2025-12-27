@@ -21,7 +21,7 @@ export function CardSkeleton({
         <Skeleton className="h-5 w-3/4" />
         {Array.from({ length: lines }).map((_, i) => (
           <Skeleton
-            key={`line-${i}`}
+            key={`line-${Math.random() * i * 10000}`}
             className={i === lines - 1 ? "h-4 w-1/2" : "h-4 w-full"}
           />
         ))}
