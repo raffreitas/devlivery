@@ -15,13 +15,6 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { InputMoney } from "@/shared/components/ui/input-money";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { useExpenseCategories } from "../hooks/use-expenses";
 import type { Expense, ExpenseFormData } from "../types";

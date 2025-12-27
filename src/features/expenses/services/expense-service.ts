@@ -174,10 +174,11 @@ export const expenseService = {
     if (data.parentCategoryId) {
       payload.parentCategoryId = data.parentCategoryId;
     }
-    const res = await api.post<
-      ApiResponse<{ categoryId: string }>
-    >("/api/expenses/categories", payload);
-    
+    const res = await api.post<ApiResponse<{ categoryId: string }>>(
+      "/api/expenses/categories",
+      payload,
+    );
+
     if (!res.data?.categoryId) {
       throw new Error("Erro ao criar categoria: ID não retornado");
     }

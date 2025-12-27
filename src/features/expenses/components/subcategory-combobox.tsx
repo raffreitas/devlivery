@@ -17,7 +17,10 @@ import {
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
 import { cn } from "@/shared/lib/utils";
-import { useExpenseCategories, useExpenseCategoriesManagement } from "../hooks/use-expenses";
+import {
+  useExpenseCategories,
+  useExpenseCategoriesManagement,
+} from "../hooks/use-expenses";
 
 interface SubcategoryComboboxProps {
   value?: string;
@@ -47,7 +50,8 @@ export function SubcategoryCombobox({
 
   // Encontra a categoria pai e suas subcategorias
   const parentCategory = categories?.find((cat) => cat.id === parentCategoryId);
-  const subcategories = parentCategory?.subcategories?.filter((sub) => sub.isActive) ?? [];
+  const subcategories =
+    parentCategory?.subcategories?.filter((sub) => sub.isActive) ?? [];
 
   // Transforma subcategorias em opções do Combobox
   const options = subcategories.map((sub) => ({
@@ -55,7 +59,8 @@ export function SubcategoryCombobox({
     label: sub.name,
   }));
 
-  const selectedLabel = options.find((option) => option.value === value)?.label ?? value;
+  const selectedLabel =
+    options.find((option) => option.value === value)?.label ?? value;
 
   const handleCreateClick = async (subcategoryName: string) => {
     if (!subcategoryName.trim() || !parentCategoryId) return;
@@ -71,9 +76,7 @@ export function SubcategoryCombobox({
       toast.success("Subcategoria criada com sucesso!");
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Erro ao criar subcategoria",
+        error instanceof Error ? error.message : "Erro ao criar subcategoria",
       );
     }
   };
@@ -108,103 +111,105 @@ export function SubcategoryCombobox({
   }
 
   return (
-    <>
-      <div className={cn("w-full space-y-2", className)}>
-        <Popover open={open && !disabled} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              id={id}
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              disabled={disabled}
-              className="bg-background hover:bg-background border-input w-full justify-between px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px] disabled:opacity-50"
-            >
-              <span className={cn("truncate", !value && "text-muted-foreground")}>
-                {value ? (
-                  selectedLabel
-                ) : (
-                  <span className="text-muted-foreground">{placeholder}</span>
-                )}
-              </span>
-              <ChevronsUpDownIcon
-                className="text-muted-foreground/80 shrink-0"
-                aria-hidden="true"
-              />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="border-input w-full min-w-(--radix-popper-anchor-width) p-0"
-            align="start"
+    <div className={cn("w-full space-y-2", className)}>
+      <Popover open={open && !disabled} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            id={id}
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            disabled={disabled}
+            className="bg-background hover:bg-background border-input w-full justify-between px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px] disabled:opacity-50"
           >
-            <Command>
-              <CommandInput
-                placeholder={placeholder}
-                onValueChange={setSearch}
-                value={search}
-              />
-              <CommandList>
-                <CommandEmpty className="p-1">
-                  {allowCreate && search.trim() && parentCategoryId ? (
-                    <Button
-                      type="button"
-                      className="w-full justify-start p-1.5! px-2! font-normal text-accent-foreground h-8"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleCreateClick(search.trim());
-                      }}
-                      variant="ghost"
+            <span className={cn("truncate", !value && "text-muted-foreground")}>
+              {value ? (
+                selectedLabel
+              ) : (
+                <span className="text-muted-foreground">{placeholder}</span>
+              )}
+            </span>
+            <ChevronsUpDownIcon
+              className="text-muted-foreground/80 shrink-0"
+              aria-hidden="true"
+            />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="border-input w-full min-w-(--radix-popper-anchor-width) p-0"
+          align="start"
+        >
+          <Command>
+            <CommandInput
+              placeholder={placeholder}
+              onValueChange={setSearch}
+              value={search}
+            />
+            <CommandList>
+              <CommandEmpty className="p-1">
+                {allowCreate && search.trim() && parentCategoryId ? (
+                  <Button
+                    type="button"
+                    className="w-full justify-start p-1.5! px-2! font-normal text-accent-foreground h-8"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleCreateClick(search.trim());
+                    }}
+                    variant="ghost"
+                    disabled={isCreating}
+                  >
+                    <PlusIcon className="mr-2 size-4 text-muted-foreground" />
+                    {isCreating
+                      ? "Criando..."
+                      : `Criar subcategoria "${search.trim()}"`}
+                  </Button>
+                ) : (
+                  <p className="text-muted-foreground text-center text-sm py-2">
+                    {parentCategoryId
+                      ? "Nenhuma subcategoria encontrada."
+                      : "Selecione uma categoria primeiro."}
+                  </p>
+                )}
+              </CommandEmpty>
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.label}
+                    onSelect={() => {
+                      onChange?.(option.value);
+                      setSearch("");
+                      setOpen(false);
+                    }}
+                  >
+                    {option.label}
+                    {value === option.value && (
+                      <CheckIcon size={16} className="ml-auto" />
+                    )}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              {showCreateOption && (
+                <>
+                  <CommandSeparator />
+                  <CommandGroup>
+                    <CommandItem
+                      onSelect={() => handleCreateClick(search.trim())}
                       disabled={isCreating}
                     >
-                      <PlusIcon className="mr-2 size-4 text-muted-foreground" />
-                      {isCreating ? "Criando..." : `Criar subcategoria "${search.trim()}"`}
-                    </Button>
-                  ) : (
-                    <p className="text-muted-foreground text-center text-sm py-2">
-                      {parentCategoryId
-                        ? "Nenhuma subcategoria encontrada."
-                        : "Selecione uma categoria primeiro."}
-                    </p>
-                  )}
-                </CommandEmpty>
-                <CommandGroup>
-                  {options.map((option) => (
-                    <CommandItem
-                      key={option.value}
-                      value={option.label}
-                      onSelect={() => {
-                        onChange?.(option.value);
-                        setSearch("");
-                        setOpen(false);
-                      }}
-                    >
-                      {option.label}
-                      {value === option.value && (
-                        <CheckIcon size={16} className="ml-auto" />
-                      )}
+                      <PlusIcon className="mr-2 size-4" />
+                      {isCreating
+                        ? "Criando..."
+                        : `Criar subcategoria "${search.trim()}"`}
                     </CommandItem>
-                  ))}
-                </CommandGroup>
-                {showCreateOption && (
-                  <>
-                    <CommandSeparator />
-                    <CommandGroup>
-                      <CommandItem
-                        onSelect={() => handleCreateClick(search.trim())}
-                        disabled={isCreating}
-                      >
-                        <PlusIcon className="mr-2 size-4" />
-                        {isCreating ? "Criando..." : `Criar subcategoria "${search.trim()}"`}
-                      </CommandItem>
-                    </CommandGroup>
-                  </>
-                )}
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
-    </>
+                  </CommandGroup>
+                </>
+              )}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
