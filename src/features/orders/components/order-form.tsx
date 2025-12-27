@@ -102,11 +102,11 @@ export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
     onSubmit(data);
   };
 
-  const deliveryFee = useWatch({
-    control: form.control,
-    name: "deliveryFee",
-    defaultValue: 0,
-  });
+  const deliveryFee =
+    useWatch({
+      control: form.control,
+      name: "deliveryFee",
+    }) ?? 0;
 
   const subtotal = fields.reduce(
     (sum, item) => sum + item.product.price * item.quantity,

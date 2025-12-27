@@ -1,8 +1,8 @@
 import { CheckCircle2, XCircle } from "lucide-react";
-import { useCashSessions } from "@/features/cash/hooks/use-cash-sessions";
+import { useCurrentCashSession } from "@/features/cash/hooks/use-current-cash-session";
 
 export function CashStatusBadge() {
-  const { currentSession } = useCashSessions();
+  const { currentSession } = useCurrentCashSession();
   const isOpen = !!currentSession;
 
   return (

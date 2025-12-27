@@ -26,7 +26,10 @@ export function useOrders(
     mutationFn: orderService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["cash-sessions"] });
+      queryClient.invalidateQueries({
+        queryKey: ["cash-sessions", "current"],
+        exact: true,
+      });
     },
   });
 
@@ -35,7 +38,10 @@ export function useOrders(
       orderService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["cash-sessions"] });
+      // queryClient.invalidateQueries({
+      //   queryKey: ["cash-sessions", "current"],
+      //   exact: true,
+      // });
     },
   });
 
@@ -44,7 +50,6 @@ export function useOrders(
       orderService.updateStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["cash-sessions"] });
     },
   });
 
@@ -52,7 +57,10 @@ export function useOrders(
     mutationFn: (id: string) => orderService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["cash-sessions"] });
+      // queryClient.invalidateQueries({
+      //   queryKey: ["cash-sessions", "current"],
+      //   exact: true,
+      // });
     },
   });
 

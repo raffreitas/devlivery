@@ -1,71 +1,82 @@
-# Devlivery Webapp
+# Devlivery WebApp
 
-Aplicação web para gestão de produtos e pedidos de delivery.
+Devlivery WebApp é a interface web para gerenciamento de entregas, permitindo controle de pedidos, produtos, fluxo de caixa e visualização de métricas importantes através de um dashboard intuitivo.
 
-## Stack
+## 🚀 Tecnologias
 
-- React 19 + TypeScript + Vite
-- TailwindCSS
-- React Router
-- React Query (TanStack) para estado do servidor e cache
-- Biome para lint/format
+Este projeto foi desenvolvido utilizando as seguintes tecnologias:
 
-## Backend / API
+- **Core**: [React 19](https://react.dev/), [Vite](https://vitejs.dev/)
+- **Linguagem**: [TypeScript](https://www.typescriptlang.org/)
+- **Estilização**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Roteamento**: [React Router 7](https://reactrouter.com/)
+- **Gerenciamento de Estado/Server State**: [TanStack Query](https://tanstack.com/query/latest)
+- **Formulários**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- **UI Components**: [Radix UI](https://www.radix-ui.com/), [Lucide React](https://lucide.dev/), [Sonner](https://sonner.emilkowal.ski/)
+- **Gráficos**: [Recharts](https://recharts.org/)
+- **Linting & Formatting**: [Biome](https://biomejs.dev/)
 
-- Base URL configurável via variável de ambiente: `VITE_API_URL`
-- Endpoints (resumo, conforme OpenAPI):
-	- Auth: `POST /api/auth/login`
-	- Products: `GET/POST /api/products`, `GET/PUT/DELETE /api/products/{id}`
-	- Orders: `GET/POST /api/orders`, `GET/DELETE /api/orders/{id}`, `PATCH /api/orders/{id}/status`
-	- Dashboard: `GET /api/dashboard/stats`
+## ✨ Funcionalidades
 
-## Configuração
+O sistema está modularizado em:
 
-1) Instalar dependências
+- **Auth**: Autenticação e controle de acesso.
+- **Dashboard**: Visão geral e métricas de desempenho.
+- **Orders**: Gerenciamento de pedidos de entrega.
+- **Products**: Cadastro e manutenção de produtos/menu.
+- **Cash**: Controle de fluxo de caixa.
 
-```pwsh
+## 📦 Como rodar o projeto
+
+### Pré-requisitos
+
+Certifique-se de ter o [Node.js](https://nodejs.org/) instalado em sua máquina.
+
+### Instalação
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/raffreitas/devlivery-webapp.git
+cd devlivery-webapp
+```
+
+2. Instale as dependências:
+```bash
+npm install
+# ou
 pnpm install
+# ou
+yarn
 ```
 
-2) Configurar a URL da API no arquivo `.env` (ou `.env.local`)
+3. Configure as variáveis de ambiente:
+Crie um arquivo `.env` na raiz do projeto baseado no `.env.example`.
+```bash
+cp .env.example .env
+```
+Ajuste a variável `VITE_API_URL` para apontar para o seu backend.
 
-```dotenv
-VITE_API_URL=https://localhost:7141
+4. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
 ```
 
-3) Rodar em desenvolvimento
+O projeto estará rodando em `http://localhost:5173`.
 
-```pwsh
-pnpm dev
+## 🛠 Scripts Disponíveis
+
+- `npm run dev`: Inicia o servidor de desenvolvimento.
+- `npm run build`: Compila o projeto para produção.
+- `npm run preview`: Visualiza a versão de produção localmente.
+- `npm run lint`: Verifica erros de linting com Biome.
+- `npm run format`: Formata o código com Biome.
+
+## 📂 Estrutura do Projeto
+
 ```
-
-4) Build de produção
-
-```pwsh
-pnpm build
+src/
+├── features/       # Módulos de negócio (Auth, Orders, etc.)
+├── shared/         # Componentes e utilitários compartilhados
+├── app-routes.tsx  # Definição das rotas da aplicação
+└── ...
 ```
-
-5) Lint/format
-
-```pwsh
-pnpm lint
-pnpm format
-```
-
-## Arquitetura
-
-- Organização por feature: `src/features/{products,orders,dashboard,auth}`
-- Cada feature contém `components/`, `pages/`, `services/`, `types/`, `hooks/`
-- `src/shared/` contém componentes UI, serviços compartilhados e contextos (Auth)
-- Cliente HTTP em `src/shared/services/api.ts` (fetch + baseURL + Authorization)
-- React Query configurado em `src/main.tsx` com `QueryClientProvider`
-
-## Estado
-
-- Estado do servidor (produtos/pedidos/dashboard) via React Query (hooks por feature)
-- Autenticação: `AuthContext` mantém `{ user, token }` após login e persiste no localStorage
-
-## Notas
-
-- Páginas e componentes usam hooks de feature: `useProducts`, `useOrders`
-- Atualizações (create/update/delete) invalidam automaticamente os caches
