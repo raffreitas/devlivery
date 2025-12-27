@@ -8,8 +8,8 @@ namespace Devlivery.Features.Orders.Domain;
 
 public sealed class Order : Entity
 {
-    public CustomerInfo Customer { get; private set; }
-    public DeliveryAddress DeliveryAddress { get; private set; }
+    public CustomerInfo Customer { get; private set; } = null!;
+    public DeliveryAddress DeliveryAddress { get; private set; } = null!;
     public PaymentMethod PaymentMethod { get; private set; }
     public OrderStatus Status { get; private set; }
     public decimal Total { get; private set; }

@@ -2,13 +2,9 @@ using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Features.Orders.Domain.ValueObjects;
 
-/// <summary>
-/// Value Object representing customer information in an order.
-/// Encapsulates customer data with validation.
-/// </summary>
 public sealed record CustomerInfo
 {
-    public string Name { get; private init; }
+    public string Name { get; private init; } = null!;
     public PhoneNumber? Phone { get; private init; }
 
     private CustomerInfo()
