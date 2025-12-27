@@ -14,6 +14,12 @@ public sealed class CategoryRepository(ApplicationDbContext dbContext) : ICatego
             .FirstOrDefaultAsync(c => c.Id == id, ct);
     }
 
+    public Task<bool> ExistsWithName(string name, Guid? parentId = null, CancellationToken ct = default)
+    {
+        return dbContext.ExpenseCategories
+            .AnyAsync(c => c.Name == name && c.ParentCategoryId == parentId, ct);
+    }
+
     public async Task<List<Category>> GetAllAsync(CancellationToken ct = default)
     {
         return await dbContext.ExpenseCategories
