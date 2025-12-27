@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import { Separator } from "@/shared/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -117,14 +118,130 @@ export function ExpenseList({
   }
 
   return (
-    <>
-      {/* Desktop Table */}
-      <div className="hidden lg:block">
-        <Card>
-          <CardHeader>
-            <CardTitle>Despesas</CardTitle>
-          </CardHeader>
-          <CardContent>
+    <div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Despesas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Mobile: Card View */}
+          <div className="md:hidden space-y-4">
+            {expenses.map((expense) => {
+              const config = statusConfig[expense.status];
+              const StatusIcon = config.icon;
+
+              return (
+                <Card key={expense.id} className="p-4 gap-2">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-base truncate">
+                          {expense.description || expense.category.name}
+                        </h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {expense.category.name}
+                        {expense.category.subcategories?.[0]?.name &&
+                          ` • ${expense.category.subcategories[0].name}`}
+                      </p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={deletingId === expense.id}
+                          className="h-8 w-8 p-0"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => onEdit(expense)}
+                          disabled={
+                            expense.status === ExpenseStatus.PAID ||
+                            expense.status === ExpenseStatus.CANCELLED
+                          }
+                        >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                        {expense.status !== ExpenseStatus.PAID &&
+                          expense.status !== ExpenseStatus.CANCELLED && (
+                            <DropdownMenuItem
+                              onClick={() => handleMarkAsPaid(expense)}
+                            >
+                              <CheckCircle2 className="mr-2 h-4 w-4" />
+                              Marcar como Pago
+                            </DropdownMenuItem>
+                          )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(expense.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <Separator className="my-3" />
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        Fornecedor
+                      </span>
+                      <span className="text-sm font-medium truncate ml-2 max-w-[60%]">
+                        {expense.supplier || "-"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        Valor
+                      </span>
+                      <span className="text-base font-semibold">
+                        {formatMoney(expense.amount)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        Vencimento
+                      </span>
+                      <span className="text-sm">
+                        {format(expense.dueDate, "dd/MM/yyyy")}
+                      </span>
+                    </div>
+                    {expense.paymentDate && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          Pagamento
+                        </span>
+                        <span className="text-sm">
+                          {format(expense.paymentDate, "dd/MM/yyyy")}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="text-sm text-muted-foreground">
+                        Status
+                      </span>
+                      <Badge className={config.className}>
+                        <StatusIcon className="mr-1 h-3 w-3" />
+                        {config.label}
+                      </Badge>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Desktop: Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -220,119 +337,9 @@ export function ExpenseList({
                 })}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Mobile Cards */}
-      <div className="lg:hidden space-y-4">
-        {expenses.map((expense) => {
-          const config = statusConfig[expense.status];
-          const StatusIcon = config.icon;
-
-          return (
-            <Card key={expense.id}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-base">
-                      {expense.category.subcategories?.[0]?.name || "-"}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {expense.category.name}
-                    </p>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={deletingId === expense.id}
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => onEdit(expense)}
-                        disabled={
-                          expense.status === ExpenseStatus.PAID ||
-                          expense.status === ExpenseStatus.CANCELLED
-                        }
-                      >
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Editar
-                      </DropdownMenuItem>
-                      {expense.status !== ExpenseStatus.PAID &&
-                        expense.status !== ExpenseStatus.CANCELLED && (
-                          <DropdownMenuItem
-                            onClick={() => handleMarkAsPaid(expense)}
-                          >
-                            <CheckCircle2 className="mr-2 h-4 w-4" />
-                            Marcar como Pago
-                          </DropdownMenuItem>
-                        )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => handleDelete(expense.id)}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {expense.supplier && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Fornecedor</p>
-                    <p className="text-sm font-medium">{expense.supplier}</p>
-                  </div>
-                )}
-                {expense.description && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Descrição</p>
-                    <p className="text-sm">{expense.description}</p>
-                  </div>
-                )}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Valor</p>
-                    <p className="text-base font-semibold">
-                      {formatMoney(expense.amount)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <Badge className={config.className}>
-                      <StatusIcon className="mr-1 h-3 w-3" />
-                      {config.label}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Vencimento</p>
-                    <p className="text-sm">
-                      {format(expense.dueDate, "dd/MM/yyyy")}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Pagamento</p>
-                    <p className="text-sm">
-                      {expense.paymentDate
-                        ? format(expense.paymentDate, "dd/MM/yyyy")
-                        : "-"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    </>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
