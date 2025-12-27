@@ -36,6 +36,15 @@ public sealed class UpdateOrderHandler(
         if (products.Count != productIds.Count)
             return Result.Fail(new NotFoundError("Um ou mais produtos não foram encontrados"));
 
+        // Verify all products are available
+        var unavailableProducts = products.Where(p => !p.Available).ToList();
+        if (unavailableProducts.Count != 0)
+        {
+            var productNames = string.Join(", ", unavailableProducts.Select(p => p.Name));
+            return Result.Fail(
+                new DomainRuleError($"Os seguintes produtos estão indisponíveis: {productNames}"));
+        }
+
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
         if (order.PaymentMethod != command.PaymentMethod)

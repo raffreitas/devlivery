@@ -26,7 +26,7 @@ public sealed class CreateCashSessionHandler(
         if (existingOpen is not null)
         {
             return Result.Fail<CreateCashSessionResponse>(
-                new DomainRuleError("J� existe um caixa aberto. Feche o caixa atual antes de abrir um novo."));
+                new DomainRuleError("Já existe um caixa aberto. Feche o caixa atual antes de abrir um novo."));
         }
 
         var cashSession = new CashSession(

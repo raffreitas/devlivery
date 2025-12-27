@@ -40,7 +40,10 @@ public sealed class CreateOrderCommandValidator : AbstractValidator<CreateOrderC
         When(x => !string.IsNullOrWhiteSpace(x.CustomerPhone), () =>
         {
             RuleFor(x => x.CustomerPhone)
-                .MaximumLength(20).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+                .MaximumLength(20).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.")
+                .Must(phone => IsValidBrazilianPhone(phone!))
+                .WithMessage(
+                    "O campo '{PropertyName}' deve ser um telefone válido (formato: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX).");
         });
 
         RuleFor(x => x.PaymentMethod)
@@ -60,5 +63,31 @@ public sealed class CreateOrderCommandValidator : AbstractValidator<CreateOrderC
             RuleFor(x => x.Notes).MaximumLength(500)
                 .WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
         });
+    }
+
+    private static bool IsValidBrazilianPhone(string phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone))
+            return false;
+
+        // Remove formatting characters
+        var cleaned = new string(phone.Where(char.IsDigit).ToArray());
+
+        // Brazilian phone numbers: 10 digits (landline) or 11 digits (mobile with area code)
+        // Format: (XX) XXXXX-XXXX (11 digits) or (XX) XXXX-XXXX (10 digits)
+        if (cleaned.Length is < 10 or > 11)
+            return false;
+
+        // First two digits should be area code (11-99 for valid Brazilian area codes)
+        if (cleaned.Length >= 2)
+        {
+            if (!int.TryParse(cleaned[..2], out var areaCode))
+                return false;
+
+            if (areaCode is < 11 or > 99)
+                return false;
+        }
+
+        return true;
     }
 }
