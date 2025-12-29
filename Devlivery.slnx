@@ -1,15 +1,10 @@
 <Solution>
     <Folder Name="/Solution Items/">
-        <File Path=".config/dotnet-tools.json"/>
-        <File Path="docker-compose.yml"/>
-        <File Path="Makefile"/>
-        <File Path="README.md"/>
+        <File Path="Makefile" />
+        <File Path="README.md" />
     </Folder>
-    <Folder Name="/Solution Items/Github/"/>
-    <Folder Name="/Solution Items/Github/Workflows/">
-        <File Path=".github/workflows/main-build-deploy.yml"/>
-        <File Path=".github/workflows/pr-validation.yml"/>
-    </Folder>
-    <Project Path="src/Devlivery/Devlivery.csproj"/>
-    <Project Path="test/Devlivery.Tests/Devlivery.Tests.csproj"/>
+    <Project Path="src/Devlivery.AppHost/Devlivery.AppHost.csproj" />
+
+    <Project Path="src/Devlivery/Devlivery.csproj" />
+    <Project Path="test/Devlivery.Tests/Devlivery.Tests.csproj" />
 </Solution>
