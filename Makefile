@@ -28,6 +28,9 @@ help:
 	@echo    make build             - Build the solution
 	@echo    make clean             - Remove build artifacts
 	@echo.
+	@echo  DATABASE:
+	@echo    make migrate-all       - Apply all migrations (App + Identity)
+	@echo.
 	@echo  DATABASE (App):
 	@echo    make db-add V=XXX      - Add migration (Ex: make db-add V=001)
 	@echo    make db-update         - Apply migrations
@@ -55,6 +58,11 @@ build:
 clean:
 	$(DOTNET_CMD) clean
 	@if exist TestResults rmdir /s /q TestResults
+
+# --- Database Migrations ---
+migrate-all: 
+	make db-update && make id-update
+	@echo All migrations applied successfully.
 
 # --- Database Migrations (App) ---
 

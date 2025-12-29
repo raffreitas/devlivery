@@ -55,7 +55,7 @@ public static class CreateProductEndpoint
             .WithTags("Products");
     }
 
-    private static async Task<Results<Created<ApiResponse<CreateProductResponse>>, BadRequest<ApiResponse>>> Handle(
+    private static async Task<IResult> Handle(
         CreateProductCommand command,
         ISender sender,  // ← Mediator
         CancellationToken ct)
@@ -94,7 +94,7 @@ app.MapProductEndpoints();
 - Classe estática com método `MapEndpoint(IEndpointRouteBuilder)`
 - Método `Handle` privado com parâmetros tipados
 - Usa `ISender` (Mediator) para enviar commands/queries
-- Retorna `Results<T1, T2>` para múltiplos tipos de resposta
+- Retorna `IResult` para múltiplos tipos de resposta
 - Define tipos de resposta com `.Produces<T>()`
 
 **Vantagens sobre Controllers:**

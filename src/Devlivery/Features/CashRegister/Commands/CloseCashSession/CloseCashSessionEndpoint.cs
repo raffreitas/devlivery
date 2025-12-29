@@ -4,8 +4,6 @@ using Devlivery.Shared.Infrastructure.WebServer.Models;
 
 using Mediator;
 
-using Microsoft.AspNetCore.Http.HttpResults;
-
 namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
 
 public static class CloseCashSessionEndpoint
@@ -21,17 +19,11 @@ public static class CloseCashSessionEndpoint
             .Produces<ApiResponse>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<
-            Ok<ApiResponse<CloseCashSessionResponse>>,
-            NotFound<ApiResponse<CloseCashSessionResponse>>,
-            BadRequest<ApiResponse<CloseCashSessionResponse>>,
-            Conflict<ApiResponse<CloseCashSessionResponse>>,
-            InternalServerError>>
-        Handle(
-            Guid id,
-            CloseCashSessionRequest request,
-            ISender sender,
-            CancellationToken ct)
+    private static async Task<IResult> Handle(
+        Guid id,
+        CloseCashSessionRequest request,
+        ISender sender,
+        CancellationToken ct)
     {
         var command = new CloseCashSessionCommand(id, request.ClosingAmount, request.Notes);
 

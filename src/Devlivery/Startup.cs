@@ -9,19 +9,14 @@ using Devlivery.Features.Products;
 using Devlivery.Shared.Application.Abstractions;
 using Devlivery.Shared.Infrastructure.Authorization;
 using Devlivery.Shared.Infrastructure.Identity;
-using Devlivery.Shared.Infrastructure.Identity.Users.Models;
+using Devlivery.Shared.Infrastructure.Networking;
 using Devlivery.Shared.Infrastructure.Observability;
 using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
-using Devlivery.Shared.Infrastructure.Persistence.Seeder;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using Devlivery.Shared.Infrastructure.Time;
 using Devlivery.Shared.Infrastructure.WebServer;
 
 using FluentValidation;
-
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery;
 
@@ -31,6 +26,8 @@ public static class Startup
     {
         var services = builder.Services;
         var configuration = builder.Configuration;
+
+        builder.Services.AddNetworkingFeature();
 
         builder.Services.ConfigureHttpJsonOptions(options =>
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -82,14 +79,7 @@ public static class Startup
     {
         app.UseOpenApiConfiguration();
 
-        if (app.Environment.IsDevelopment())
-        {
-            using var scope = app.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            db.Database.Migrate();
-            DatabaseSeeder.SeedAsync(db, userManager).GetAwaiter().GetResult();
-        }
+        app.UseDatabaseFeature();
 
         app.UseExceptionHandler();
 
@@ -109,7 +99,7 @@ public static class Startup
         app.UseObservabilityFeature();
 
         // Endpoints
-        app.MapHealthChecks("/health").AllowAnonymous();
+        app.MapHealthCheckEndpoints();
         app.MapAuthEndpoints();
         app.MapProductEndpoints();
         app.MapOrderEndpoints();

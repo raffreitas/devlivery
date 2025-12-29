@@ -2,6 +2,9 @@
 
 using Grafana.OpenTelemetry;
 
+using Npgsql;
+
+using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -18,6 +21,15 @@ public static class ObservabilityFeature
 
         var services = builder.Services;
 
+        var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+        if (string.IsNullOrEmpty(otlpEndpoint)) return services;
+
+        builder.Logging.AddOpenTelemetry(logging =>
+        {
+            logging.IncludeFormattedMessage = true;
+            logging.IncludeScopes = true;
+        });
+
         services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(
                 serviceName: serviceName,
@@ -25,32 +37,39 @@ public static class ObservabilityFeature
                 serviceNamespace: serviceNamespace,
                 serviceInstanceId: Environment.MachineName
             ))
-            .WithTracing(tracingBuilder => tracingBuilder
-                .AddSource(serviceName)
-                .AddAspNetCoreInstrumentation(options =>
-                {
-                    options.Filter = context =>
-                        !context.Request.Path.StartsWithSegments("/health") &&
-                        !context.Request.Path.StartsWithSegments("/scalar") &&
-                        !context.Request.Path.StartsWithSegments("/openapi");
-                })
-                .AddHttpClientInstrumentation()
-                .AddEntityFrameworkCoreInstrumentation())
-            .WithMetrics(metricsBuilder => metricsBuilder
-                .AddMeter(serviceName)
-                .AddMeter()
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddRuntimeInstrumentation())
-            .UseGrafana();
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddProcessInstrumentation()
+                    .AddNpgsqlInstrumentation()
+                    .AddRuntimeInstrumentation();
+            })
+            .WithTracing(tracing =>
+            {
+                tracing.AddSource(builder.Environment.ApplicationName)
+                    .AddAspNetCoreInstrumentation(options =>
+                    {
+                        options.Filter = context =>
+                            !context.Request.Path.StartsWithSegments("/health") &&
+                            !context.Request.Path.StartsWithSegments("/alive") &&
+                            !context.Request.Path.StartsWithSegments("/scalar") &&
+                            !context.Request.Path.StartsWithSegments("/openapi");
 
-        builder.Logging.AddOpenTelemetry(options =>
+                        options.RecordException = true;
+                    })
+                    .AddHttpClientInstrumentation()
+                    .AddNpgsql();
+            });
+
+        if (otlpEndpoint.Contains("grafana"))
         {
-            options.UseGrafana();
-            options.IncludeScopes = true;
-            options.ParseStateValues = true;
-            options.IncludeFormattedMessage = true;
-        });
+            services.AddOpenTelemetry().UseGrafana();
+        }
+        else
+        {
+            services.AddOpenTelemetry().UseOtlpExporter();
+        }
 
         return services;
     }

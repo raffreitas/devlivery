@@ -128,7 +128,7 @@ public static class CreateProductEndpoint
             .Produces<ApiResponse>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Results<Created<...>, BadRequest<...>>> Handle(
+    private static async Task<IResult> Handle(
         CreateProductCommand command,
         ISender sender,  // ← Mediator
         CancellationToken ct)
