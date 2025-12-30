@@ -1,9 +1,6 @@
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetExpensesOverTime;
 
@@ -16,7 +13,7 @@ public static class GetExpensesOverTimeEndpoint
             .Produces<ApiResponse<GetExpensesOverTimeResponse>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Ok<ApiResponse<GetExpensesOverTimeResponse>>> Handle(
+    private static async Task<IResult> Handle(
         DateOnly? startDate,
         DateOnly? endDate,
         ISender sender,
@@ -25,6 +22,6 @@ public static class GetExpensesOverTimeEndpoint
         var query = new GetExpensesOverTimeQuery(startDate, endDate);
         var result = await sender.Send(query, ct);
 
-        return result.ToOk();
+        return result.ToApiResult();
     }
 }

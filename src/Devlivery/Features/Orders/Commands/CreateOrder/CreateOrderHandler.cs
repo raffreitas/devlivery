@@ -35,7 +35,7 @@ public sealed class CreateOrderHandler(
         {
             var productNames = string.Join(", ", unavailableProducts.Select(p => p.Name));
             return Result.Fail<CreateOrderResponse>(
-                new DomainRuleError($"Os seguintes produtos estão indisponíveis: {productNames}"));
+                new ValidationError($"Os seguintes produtos estão indisponíveis: {productNames}"));
         }
 
         var items = command.Items.Select(item => new OrderItem(

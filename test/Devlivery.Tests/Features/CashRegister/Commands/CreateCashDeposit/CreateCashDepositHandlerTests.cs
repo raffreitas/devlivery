@@ -172,7 +172,7 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
     }
 
     [Fact]
-    public async Task Handle_Should_Return_DomainRuleError_When_Session_Is_Closed()
+    public async Task Handle_Should_Return_ValidationError_When_Session_Is_Closed()
     {
         // Arrange
         var tenantAccessor = fixture.CreateTenantAccessorMock();

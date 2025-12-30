@@ -15,8 +15,6 @@ public static class ProductFeature
         // Register Repository
         services.AddScoped<IProductRepository, ProductRepository>();
 
-        // Commands and Queries handlers are automatically discovered by Mediator
-        // No manual registration needed when using ICommandHandler/IQueryHandler
         return services;
     }
 

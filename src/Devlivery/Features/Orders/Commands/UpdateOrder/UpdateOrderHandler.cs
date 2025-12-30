@@ -28,7 +28,7 @@ public sealed class UpdateOrderHandler(
 
         if (order.Status is OrderStatus.Canceled or OrderStatus.Delivered)
             return Result.Fail(
-                new DomainRuleError("Pedido não pode ser atualizado pois está cancelado ou já foi entregue"));
+                new ValidationError("Pedido não pode ser atualizado pois está cancelado ou já foi entregue"));
 
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
         var products = await productRepository.GetByIdsAsync(productIds, cancellationToken);
@@ -42,7 +42,7 @@ public sealed class UpdateOrderHandler(
         {
             var productNames = string.Join(", ", unavailableProducts.Select(p => p.Name));
             return Result.Fail(
-                new DomainRuleError($"Os seguintes produtos estão indisponíveis: {productNames}"));
+                new ValidationError($"Os seguintes produtos estão indisponíveis: {productNames}"));
         }
 
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);

@@ -1,10 +1,6 @@
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Expenses.Commands.UpdateCategory;
 
@@ -18,10 +14,7 @@ public static class UpdateCategoryEndpoint
             .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>>> Handle(
-        Guid categoryId,
-        UpdateCategoryRequest request,
-        ISender sender,
+    private static async Task<IResult> Handle(Guid categoryId, UpdateCategoryRequest request, ISender sender,
         CancellationToken ct)
     {
         var command = new UpdateCategoryCommand(
@@ -32,21 +25,8 @@ public static class UpdateCategoryEndpoint
 
         var result = await sender.Send(command, ct);
 
-        if (result.IsSuccess)
-        {
-            return result.ToNoContent();
-        }
-
-        var error = result.GetError();
-        if (error is NotFoundError)
-        {
-            return result.ToNotFound();
-        }
-
-        return result.ToBadRequest();
+        return result.ToApiResult(TypedResults.NoContent);
     }
 }
 
-public sealed record UpdateCategoryRequest(
-    string? Name,
-    bool? IsActive);
+public sealed record UpdateCategoryRequest(string? Name, bool? IsActive);

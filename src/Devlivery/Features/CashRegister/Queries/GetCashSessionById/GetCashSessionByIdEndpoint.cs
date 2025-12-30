@@ -1,7 +1,6 @@
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
-using Microsoft.AspNetCore.Http.HttpResults;
+using Mediator;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 
@@ -14,16 +13,11 @@ public static class GetCashSessionByIdEndpoint
             .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<Ok<ApiResponse<GetCashSessionByIdResponse>>, NotFound<ApiResponse<GetCashSessionByIdResponse>>>> Handle(
-        Guid id,
-        GetCashSessionByIdHandler handler,
-        CancellationToken ct)
+    private static async Task<IResult> Handle(Guid id, ISender sender, CancellationToken ct)
     {
         var query = new GetCashSessionByIdQuery(id);
-        var result = await handler.HandleAsync(query, ct);
+        var result = await sender.Send(query, ct);
 
-        return result.IsSuccess
-            ? result.ToOk()
-            : result.ToNotFound();
+        return result.ToApiResult();
     }
 }

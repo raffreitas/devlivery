@@ -1,7 +1,5 @@
-using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
-using Microsoft.AspNetCore.Http.HttpResults;
+using Mediator;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
 
@@ -13,14 +11,11 @@ public static class GetCashSessionDepositsEndpoint
             .Produces<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>();
     }
 
-    private static async Task<Ok<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>> Handle(
-        Guid cashSessionId,
-        GetCashSessionDepositsHandler handler,
-        CancellationToken ct)
+    private static async Task<IResult> Handle(Guid cashSessionId, ISender sender, CancellationToken ct)
     {
         var query = new GetCashSessionDepositsQuery(cashSessionId);
-        var result = await handler.HandleAsync(query, ct);
+        var result = await sender.Send(query, ct);
 
-        return result.ToOk();
+        return TypedResults.Ok(result);
     }
 }

@@ -1,17 +1,15 @@
 using Devlivery.Shared.Extensions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
-
-using FluentResults;
-
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessions;
 
 public sealed class GetCashSessionsHandler(ApplicationDbContext dbContext)
+    : IQueryHandler<GetCashSessionsQuery, GetCashSessionsResponse[]>
 {
-    public async Task<Result<List<GetCashSessionsResponse>>> HandleAsync(
-        GetCashSessionsQuery query,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<GetCashSessionsResponse[]> Handle(GetCashSessionsQuery query,
+        CancellationToken cancellationToken)
     {
         var sessionsQuery = dbContext.CashSessions
             .AsNoTracking()
@@ -29,10 +27,8 @@ public sealed class GetCashSessionsHandler(ApplicationDbContext dbContext)
             .OrderByDescending(cs => cs.StartAt)
             .ToListAsync(cancellationToken);
 
-        var response = sessions
+        return sessions
             .Select(s => GetCashSessionsResponse.FromDomain(s))
-            .ToList();
-
-        return Result.Ok(response);
+            .ToArray();
     }
 }

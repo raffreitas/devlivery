@@ -31,7 +31,7 @@ public sealed class CreateCashDepositHandler(
         if (cashSession.Status != CashSessionStatus.Open)
         {
             return Result.Fail<CreateCashDepositResponse>(
-                new DomainRuleError("N�o � poss�vel adicionar aporte a um caixa fechado."));
+                new ValidationError("N�o � poss�vel adicionar aporte a um caixa fechado."));
         }
 
         // Create the deposit

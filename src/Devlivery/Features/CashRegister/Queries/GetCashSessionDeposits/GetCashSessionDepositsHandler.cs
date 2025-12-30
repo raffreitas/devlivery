@@ -1,25 +1,21 @@
 using Devlivery.Shared.Infrastructure.Persistence.Context;
-
-using FluentResults;
-
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
 
 public sealed class GetCashSessionDepositsHandler(ApplicationDbContext dbContext)
+    : IQueryHandler<GetCashSessionDepositsQuery, GetCashSessionDepositsResponse[]>
 {
-    public async Task<Result<IEnumerable<GetCashSessionDepositsResponse>>> HandleAsync(
-        GetCashSessionDepositsQuery query,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<GetCashSessionDepositsResponse[]> Handle(GetCashSessionDepositsQuery query,
+        CancellationToken cancellationToken)
     {
         var deposits = await dbContext.CashDeposits
             .AsNoTracking()
             .Where(cd => cd.CashSessionId == query.CashSessionId)
             .OrderBy(cd => cd.DepositedAt)
-            .ToListAsync(cancellationToken);
+            .ToArrayAsync(cancellationToken);
 
-        var responses = deposits.Select(GetCashSessionDepositsResponse.FromDomain).ToList();
-
-        return Result.Ok(responses.AsEnumerable());
+        return deposits.Select(GetCashSessionDepositsResponse.FromDomain).ToArray();
     }
 }

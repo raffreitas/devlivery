@@ -1,9 +1,6 @@
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetExpensesByCategory;
 
@@ -16,15 +13,12 @@ public static class GetExpensesByCategoryEndpoint
             .Produces<ApiResponse<GetExpensesByCategoryResponse>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Ok<ApiResponse<GetExpensesByCategoryResponse>>> Handle(
-        DateOnly? startDate,
-        DateOnly? endDate,
-        ISender sender,
+    private static async Task<IResult> Handle(DateOnly? startDate, DateOnly? endDate, ISender sender,
         CancellationToken ct)
     {
         var query = new GetExpensesByCategoryQuery(startDate, endDate);
         var result = await sender.Send(query, ct);
 
-        return result.ToOk();
+        return result.ToApiResult();
     }
 }

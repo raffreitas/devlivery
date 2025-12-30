@@ -1,8 +1,7 @@
 using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
-
 using FluentResults;
-
 using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.MarkExpenseAsPaid;
@@ -16,7 +15,7 @@ public sealed class MarkExpenseAsPaidHandler(
         var expense = await expenseRepository.GetByIdAsync(command.ExpenseId, cancellationToken);
         if (expense is null)
         {
-            return Result.Fail("Expense not found.");
+            return Result.Fail(new NotFoundError("Expense not found."));
         }
 
         expense.MarkAsPaid(command.PaymentDate);

@@ -45,7 +45,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
     }
 
     [Fact]
-    public async Task Handle_Should_Return_DomainRuleError_When_Order_Is_Canceled()
+    public async Task Handle_Should_Return_ValidationError_When_Order_Is_Canceled()
     {
         // Arrange
         var order = fixture.CreateOrder(status: OrderStatus.Canceled);
@@ -73,11 +73,11 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is DomainRuleError);
+        result.Errors.ShouldContain(e => e is ValidationError);
     }
 
     [Fact]
-    public async Task Handle_Should_Return_DomainRuleError_When_Order_Is_Delivered()
+    public async Task Handle_Should_Return_ValidationError_When_Order_Is_Delivered()
     {
         // Arrange
         var order = fixture.CreateOrder(status: OrderStatus.Delivered);
@@ -105,7 +105,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is DomainRuleError);
+        result.Errors.ShouldContain(e => e is ValidationError);
     }
 
     [Fact]
