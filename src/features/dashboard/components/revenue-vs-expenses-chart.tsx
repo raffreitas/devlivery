@@ -65,7 +65,7 @@ export function RevenueVsExpensesChart({
         <CardTitle>Receitas vs Despesas</CardTitle>
       </CardHeader>
       <CardContent className="pl-2">
-        <div className="h-[300px] w-full">
+        <div className="h-75 w-full">
           {combinedData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={combinedData}>
