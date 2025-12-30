@@ -30,15 +30,15 @@ export function useCashSessions() {
   // Create new session
   const createMutation = useMutation({
     mutationFn: (dto: CreateCashSessionFormData) => cashService.create(dto),
-    onSuccess: () => {
-      // Invalidate both current and all sessions since a new one was opened
+    onSuccess: (data) => {
+      // If backend returned the created session, update the `current` cache immediately
+      if (data) {
+        queryClient.setQueryData([...CASH_SESSIONS_QUERY_KEY, "current"], data);
+      }
+      // Ensure session lists and current session are refetched
+      queryClient.invalidateQueries({ queryKey: CASH_SESSIONS_QUERY_KEY });
       queryClient.invalidateQueries({
         queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
-        exact: true,
-      });
-      queryClient.invalidateQueries({
-        queryKey: CASH_SESSIONS_QUERY_KEY,
-        exact: true,
       });
     },
   });
@@ -48,14 +48,13 @@ export function useCashSessions() {
     mutationFn: ({ id, dto }: { id: string; dto: CloseCashSessionFormData }) =>
       cashService.close(id, dto),
     onSuccess: () => {
-      // Invalidate both current and all sessions since session was closed
+      // After closing a session there's no active session — set `current` to null
+      queryClient.setQueryData([...CASH_SESSIONS_QUERY_KEY, "current"], null);
+      // Refetch sessions list to reflect the closed session
+      queryClient.invalidateQueries({ queryKey: CASH_SESSIONS_QUERY_KEY });
+      // Also clear/refetch any deposits cache
       queryClient.invalidateQueries({
-        queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
-        exact: true,
-      });
-      queryClient.invalidateQueries({
-        queryKey: CASH_SESSIONS_QUERY_KEY,
-        exact: true,
+        queryKey: [...CASH_SESSIONS_QUERY_KEY, "deposits"],
       });
     },
   });
@@ -98,15 +97,12 @@ export function useCashSessions() {
       dto: CreateCashDepositFormData;
     }) => cashService.createDeposit(sessionId, dto),
     onSuccess: (_data, variables) => {
-      // Invalidate deposits list for this session
+      // Refetch deposits for this session and the current session totals
       queryClient.invalidateQueries({
         queryKey: [...CASH_SESSIONS_QUERY_KEY, "deposits", variables.sessionId],
-        exact: true,
       });
-      // Invalidate current session to update totals
       queryClient.invalidateQueries({
         queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
-        exact: true,
       });
     },
   });

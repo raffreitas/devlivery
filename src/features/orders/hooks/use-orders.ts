@@ -26,10 +26,6 @@ export function useOrders(
     mutationFn: orderService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({
-        queryKey: ["cash-sessions", "current"],
-        exact: true,
-      });
     },
   });
 
