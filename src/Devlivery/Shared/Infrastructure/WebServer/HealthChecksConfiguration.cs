@@ -20,8 +20,6 @@ public static class HealthChecksConfiguration
 
     public static WebApplication MapHealthCheckEndpoints(this WebApplication app)
     {
-        if (!app.Environment.IsDevelopment()) return app;
-
         app.MapHealthChecks("/health").AllowAnonymous();
         app.MapHealthChecks("/alive", new HealthCheckOptions { Predicate = r => r.Tags.Contains("live") })
             .AllowAnonymous();
