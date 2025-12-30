@@ -18,7 +18,7 @@ public static class GetActiveCashSessionEndpoint
         var result = await sender.Send(query, ct);
 
         return result.IsSuccess
-            ? TypedResults.Ok(result.Value)
+            ? TypedResults.Ok(ApiResponse<GetActiveCashSessionResponse>.Success(result.Value))
             : TypedResults.NoContent();
     }
 }

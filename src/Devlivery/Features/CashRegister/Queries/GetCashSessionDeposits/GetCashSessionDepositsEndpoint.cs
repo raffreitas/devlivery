@@ -1,4 +1,5 @@
 using Devlivery.Shared.Infrastructure.WebServer.Models;
+
 using Mediator;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
@@ -16,6 +17,6 @@ public static class GetCashSessionDepositsEndpoint
         var query = new GetCashSessionDepositsQuery(cashSessionId);
         var result = await sender.Send(query, ct);
 
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(ApiResponse<GetCashSessionDepositsResponse[]>.Success(result));
     }
 }
