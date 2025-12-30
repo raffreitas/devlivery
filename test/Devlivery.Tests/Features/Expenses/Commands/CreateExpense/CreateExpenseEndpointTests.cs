@@ -74,7 +74,14 @@ public sealed class CreateExpenseEndpointTests(ExpensesWebApplicationFactory fac
         var response = await PostAsync("/api/expenses", request, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        await using var responseBody = await response.Content.ReadAsStreamAsync();
+        var responseData = await JsonDocument.ParseAsync(responseBody);
+        responseData.RootElement.TryGetProperty("success", out var success).ShouldBeTrue();
+        success.GetBoolean().ShouldBeFalse();
+        responseData.RootElement.TryGetProperty("errors", out var errors).ShouldBeTrue();
+        errors.ValueKind.ShouldBe(JsonValueKind.Array);
+        errors.GetArrayLength().ShouldBeGreaterThan(0);
     }
 
     [Fact]
@@ -108,6 +115,13 @@ public sealed class CreateExpenseEndpointTests(ExpensesWebApplicationFactory fac
         var response = await PostAsync("/api/expenses", request, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        await using var responseBody = await response.Content.ReadAsStreamAsync();
+        var responseData = await JsonDocument.ParseAsync(responseBody);
+        responseData.RootElement.TryGetProperty("success", out var success).ShouldBeTrue();
+        success.GetBoolean().ShouldBeFalse();
+        responseData.RootElement.TryGetProperty("errors", out var errors).ShouldBeTrue();
+        errors.ValueKind.ShouldBe(JsonValueKind.Array);
+        errors.GetArrayLength().ShouldBeGreaterThan(0);
     }
 }

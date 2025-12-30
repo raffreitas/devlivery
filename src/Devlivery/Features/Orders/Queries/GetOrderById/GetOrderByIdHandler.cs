@@ -1,9 +1,7 @@
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
-
 using FluentResults;
-
 using Mediator;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Orders.Queries.GetOrderById;
@@ -21,7 +19,7 @@ public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext)
             .FirstOrDefaultAsync(o => o.Id == query.Id, cancellationToken);
 
         if (order is null)
-            return Result.Fail("Pedido não encontrado");
+            return Result.Fail<GetOrderByIdResponse>(new NotFoundError("Pedido não encontrado"));
 
         var productIds = order.Items
             .Select(i => i.ProductId)

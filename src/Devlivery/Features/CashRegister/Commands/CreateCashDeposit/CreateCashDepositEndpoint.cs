@@ -1,10 +1,7 @@
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
@@ -25,12 +22,7 @@ public static class CreateCashDepositEndpoint
             .Produces<ApiResponse>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<Created<ApiResponse<CreateCashDepositResponse>>,
-        BadRequest<ApiResponse<CreateCashDepositResponse>>, NotFound<ApiResponse<CreateCashDepositResponse>>,
-        Conflict<ApiResponse<CreateCashDepositResponse>>>> Handle(
-        Guid cashSessionId,
-        CreateCashDepositRequest request,
-        ISender sender,
+    private static async Task<IResult> Handle(Guid cashSessionId, CreateCashDepositRequest request, ISender sender,
         CancellationToken ct)
     {
         var command = new CreateCashDepositCommand(
@@ -42,14 +34,8 @@ public static class CreateCashDepositEndpoint
 
         var result = await sender.Send(command, ct);
 
-        return result.IsSuccess
-            ? result.ToCreated($"/api/cash-register/sessions/{cashSessionId}/deposits/{result.Value.Id}")
-            : result.GetError() switch
-            {
-                ValidationError => result.ToBadRequest(),
-                NotFoundError => result.ToNotFound(),
-                DomainRuleError => result.ToConflict(),
-                _ => result.ToBadRequest()
-            };
+        return result.ToApiResult(onSuccess: data =>
+            TypedResults.Created($"/api/cash-register/sessions/{cashSessionId}/deposits/{result.Value.Id}",
+                ApiResponse<CreateCashDepositResponse>.Success(data)));
     }
 }

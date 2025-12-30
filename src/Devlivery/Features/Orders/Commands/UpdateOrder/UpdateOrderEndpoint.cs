@@ -1,11 +1,7 @@
 ﻿using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
@@ -30,12 +26,7 @@ public static class UpdateOrderEndpoint
             .Produces<ApiResponse>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>, Conflict<ApiResponse>>>
-        Handle(
-            Guid id,
-            UpdateOrderRequest request,
-            ISender sender,
-            CancellationToken ct)
+    private static async Task<IResult> Handle(Guid id, UpdateOrderRequest request, ISender sender, CancellationToken ct)
     {
         var command = new UpdateOrderCommand(
             id,
@@ -50,14 +41,6 @@ public static class UpdateOrderEndpoint
 
         var result = await sender.Send(command, ct);
 
-        return result.IsSuccess
-            ? result.ToNoContent()
-            : result.GetError() switch
-            {
-                ValidationError => result.ToBadRequest(),
-                NotFoundError => result.ToNotFound(),
-                DomainRuleError => result.ToConflict(),
-                _ => result.ToBadRequest()
-            };
+        return result.ToApiResult(TypedResults.NoContent);
     }
 }

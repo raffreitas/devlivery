@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json;
 
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using Devlivery.Tests.Common;
@@ -85,6 +86,13 @@ public sealed class UpdateCategoryEndpointTests(ExpensesWebApplicationFactory fa
         var response = await PutAsync($"/api/expenses/categories/{category.Id}", request, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        await using var responseBody = await response.Content.ReadAsStreamAsync();
+        var responseData = await JsonDocument.ParseAsync(responseBody);
+        responseData.RootElement.TryGetProperty("success", out var success).ShouldBeTrue();
+        success.GetBoolean().ShouldBeFalse();
+        responseData.RootElement.TryGetProperty("errors", out var errors).ShouldBeTrue();
+        errors.ValueKind.ShouldBe(JsonValueKind.Array);
+        errors.GetArrayLength().ShouldBeGreaterThan(0);
     }
 }

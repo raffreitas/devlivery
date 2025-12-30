@@ -1,9 +1,6 @@
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Expenses.Commands.DeleteExpense;
 
@@ -16,7 +13,7 @@ public static class DeleteExpenseEndpoint
             .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<NoContent, NotFound<ApiResponse>>> Handle(
+    private static async Task<IResult> Handle(
         Guid expenseId,
         ISender sender,
         CancellationToken ct)
@@ -24,8 +21,6 @@ public static class DeleteExpenseEndpoint
         var command = new DeleteExpenseCommand(expenseId);
         var result = await sender.Send(command, ct);
 
-        return result.IsSuccess
-            ? result.ToNoContent()
-            : result.ToNotFound();
+        return result.ToApiResult(TypedResults.NoContent);
     }
 }

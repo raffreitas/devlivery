@@ -1,10 +1,6 @@
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashSession;
 
@@ -18,21 +14,12 @@ public static class CreateCashSessionEndpoint
             .Produces<ApiResponse>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<Results<Created<ApiResponse<CreateCashSessionResponse>>,
-        BadRequest<ApiResponse<CreateCashSessionResponse>>, Conflict<ApiResponse<CreateCashSessionResponse>>>> Handle(
-        CreateCashSessionCommand command,
-        ISender sender,
-        CancellationToken ct)
+    private static async Task<IResult> Handle(CreateCashSessionCommand command, ISender sender, CancellationToken ct)
     {
         var result = await sender.Send(command, ct);
 
-        return result.IsSuccess
-            ? result.ToCreated($"/api/cash-register/sessions/{result.Value.Id}")
-            : result.GetError() switch
-            {
-                ValidationError => result.ToBadRequest(),
-                DomainRuleError => result.ToConflict(),
-                _ => result.ToBadRequest()
-            };
+        return result.ToApiResult(data =>
+            TypedResults.Created($"/api/cash-register/sessions/{data.Id}",
+                ApiResponse<CreateCashSessionResponse>.Success(data)));
     }
 }

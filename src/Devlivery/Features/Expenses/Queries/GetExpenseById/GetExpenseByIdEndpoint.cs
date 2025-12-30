@@ -1,9 +1,6 @@
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Expenses.Queries.GetExpenseById;
 
@@ -16,17 +13,11 @@ public static class GetExpenseByIdEndpoint
             .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
-    private static async
-        Task<Results<Ok<ApiResponse<GetExpenseByIdResponse>>, BadRequest<ApiResponse<GetExpenseByIdResponse>>>> Handle(
-            Guid expenseId,
-            ISender sender,
-            CancellationToken ct)
+    private static async Task<IResult> Handle(Guid expenseId, ISender sender, CancellationToken ct)
     {
         var query = new GetExpenseByIdQuery(expenseId);
         var result = await sender.Send(query, ct);
 
-        return result.IsSuccess
-            ? result.ToOk()
-            : result.ToBadRequest();
+        return result.ToApiResult();
     }
 }

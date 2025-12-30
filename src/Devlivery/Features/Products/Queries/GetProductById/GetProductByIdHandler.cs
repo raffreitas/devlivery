@@ -1,9 +1,7 @@
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
-
 using FluentResults;
-
 using Mediator;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Products.Queries.GetProductById;
@@ -29,6 +27,8 @@ public sealed class GetProductByIdHandler(ApplicationDbContext dbContext)
                 p.UpdatedAt))
             .FirstOrDefaultAsync(cancellationToken);
 
-        return product is null ? Result.Fail("Produto não encontrado") : Result.Ok(product);
+        return product is null
+            ? Result.Fail<GetProductByIdResponse>(new NotFoundError("Produto não encontrado"))
+            : Result.Ok(product);
     }
 }

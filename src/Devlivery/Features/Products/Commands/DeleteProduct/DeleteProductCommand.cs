@@ -6,7 +6,7 @@ using Mediator;
 
 namespace Devlivery.Features.Products.Commands.DeleteProduct;
 
-public sealed record DeleteProductCommand(Guid Id) : ICommand<Result<DeleteProductResponse>>;
+public sealed record DeleteProductCommand(Guid Id) : ICommand<Result>;
 
 public sealed class DeleteProductCommandValidator : AbstractValidator<DeleteProductCommand>
 {

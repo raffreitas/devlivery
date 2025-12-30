@@ -1,10 +1,8 @@
 using System.Net;
 using System.Text.Json;
-
 using Devlivery.Features.CashRegister.Commands.CloseCashSession;
 using Devlivery.Features.CashRegister.Commands.CreateCashSession;
 using Devlivery.Tests.Common;
-
 using Shouldly;
 
 namespace Devlivery.Tests.Features.CashRegister.Commands.CloseCashSession;
@@ -52,7 +50,7 @@ public sealed class CloseCashSessionEndpointTests(CashRegisterWebApplicationFact
     }
 
     [Fact]
-    public async Task CloseCashSession_WithInvalidData_ReturnsValidationProblem()
+    public async Task CloseCashSession_WithInvalidData_ReturnsUnprocessableEntity()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -65,7 +63,7 @@ public sealed class CloseCashSessionEndpointTests(CashRegisterWebApplicationFact
         var response = await PatchAsync($"/api/cash-register/sessions/{cashSessionId}/close", command, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         await using var responseBody = await response.Content.ReadAsStreamAsync();
         var responseData = await JsonDocument.ParseAsync(responseBody);
         responseData.RootElement.TryGetProperty("success", out var success).ShouldBeTrue();
@@ -90,7 +88,7 @@ public sealed class CloseCashSessionEndpointTests(CashRegisterWebApplicationFact
     }
 
     [Fact]
-    public async Task CloseCashSession_WhenAlreadyClosed_ReturnsBadRequest()
+    public async Task CloseCashSession_WhenAlreadyClosed_ReturnsUnprocessableEntity()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -119,6 +117,6 @@ public sealed class CloseCashSessionEndpointTests(CashRegisterWebApplicationFact
             accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
     }
 }

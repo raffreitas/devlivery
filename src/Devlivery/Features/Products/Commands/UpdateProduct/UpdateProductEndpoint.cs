@@ -1,10 +1,6 @@
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Products.Commands.UpdateProduct;
 
@@ -25,10 +21,7 @@ public static class UpdateProductEndpoint
             .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>>> Handle(
-        Guid id,
-        UpdateProductRequest request,
-        ISender sender,
+    private static async Task<IResult> Handle(Guid id, UpdateProductRequest request, ISender sender,
         CancellationToken ct)
     {
         var command = new UpdateProductCommand(
@@ -41,13 +34,6 @@ public static class UpdateProductEndpoint
 
         var result = await sender.Send(command, ct);
 
-        return result.IsSuccess
-            ? result.ToNoContent()
-            : result.GetError() switch
-            {
-                ValidationError => result.ToBadRequest(),
-                NotFoundError => result.ToNotFound(),
-                _ => result.ToBadRequest()
-            };
+        return result.ToApiResult(TypedResults.NoContent);
     }
 }

@@ -1,9 +1,6 @@
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Products.Queries.GetProductById;
 
@@ -16,16 +13,11 @@ public static class GetProductByIdEndpoint
             .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<Ok<ApiResponse<GetProductByIdResponse>>, NotFound<ApiResponse<GetProductByIdResponse>>>> Handle(
-        Guid id,
-        ISender sender,
-        CancellationToken ct)
+    private static async Task<IResult> Handle(Guid id, ISender sender, CancellationToken ct)
     {
         var query = new GetProductByIdQuery(id);
         var result = await sender.Send(query, ct);
 
-        return result.IsSuccess
-            ? result.ToOk()
-            : result.ToNotFound();
+        return result.ToApiResult();
     }
 }

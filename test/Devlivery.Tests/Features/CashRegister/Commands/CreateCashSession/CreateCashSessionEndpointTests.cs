@@ -54,7 +54,7 @@ public sealed class CreateCashSessionEndpointTests(CashRegisterWebApplicationFac
         var response = await PostAsync("/api/cash-register/sessions", command, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         await using var responseBody = await response.Content.ReadAsStreamAsync();
         var responseData = await JsonDocument.ParseAsync(responseBody);
         responseData.RootElement.TryGetProperty("success", out var success).ShouldBeTrue();
@@ -65,7 +65,7 @@ public sealed class CreateCashSessionEndpointTests(CashRegisterWebApplicationFac
     }
 
     [Fact]
-    public async Task CreateCashSession_WhenActiveCashSessionExists_ReturnsBadRequest()
+    public async Task CreateCashSession_WhenActiveCashSessionExists_UnprocessableEntity()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -84,6 +84,6 @@ public sealed class CreateCashSessionEndpointTests(CashRegisterWebApplicationFac
         var response = await PostAsync("/api/cash-register/sessions", secondCommand, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
     }
 }

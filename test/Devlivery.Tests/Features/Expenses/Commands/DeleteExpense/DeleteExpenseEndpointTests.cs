@@ -45,7 +45,7 @@ public sealed class DeleteExpenseEndpointTests(ExpensesWebApplicationFactory fac
     }
 
     [Fact]
-    public async Task DeleteExpense_WithInvalidId_ReturnsNotFound()
+    public async Task DeleteExpense_WithInvalidId_ReturnsUnprocessableEntity()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -55,6 +55,6 @@ public sealed class DeleteExpenseEndpointTests(ExpensesWebApplicationFactory fac
         var response = await DeleteAsync("/api/expenses/00000000-0000-0000-0000-000000000000", accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
     }
 }

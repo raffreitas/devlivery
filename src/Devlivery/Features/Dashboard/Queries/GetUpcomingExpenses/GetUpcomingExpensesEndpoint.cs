@@ -1,9 +1,6 @@
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetUpcomingExpenses;
 
@@ -16,14 +13,11 @@ public static class GetUpcomingExpensesEndpoint
             .Produces<ApiResponse<GetUpcomingExpensesResponse>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Ok<ApiResponse<GetUpcomingExpensesResponse>>> Handle(
-        int days,
-        ISender sender,
-        CancellationToken ct)
+    private static async Task<IResult> Handle(int days, ISender sender, CancellationToken ct)
     {
         var query = new GetUpcomingExpensesQuery(days);
         var result = await sender.Send(query, ct);
 
-        return result.ToOk();
+        return result.ToApiResult();
     }
 }

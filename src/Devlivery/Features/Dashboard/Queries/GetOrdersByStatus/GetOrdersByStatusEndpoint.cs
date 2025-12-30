@@ -1,9 +1,6 @@
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetOrdersByStatus;
 
@@ -16,7 +13,7 @@ public static class GetOrdersByStatusEndpoint
             .Produces<ApiResponse<GetOrdersByStatusResponse>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Ok<ApiResponse<GetOrdersByStatusResponse>>> Handle(
+    private static async Task<IResult> Handle(
         DateTime? startDate,
         DateTime? endDate,
         ISender sender,
@@ -25,6 +22,6 @@ public static class GetOrdersByStatusEndpoint
         var query = new GetOrdersByStatusQuery(startDate, endDate);
         var result = await sender.Send(query, ct);
 
-        return result.ToOk();
+        return result.ToApiResult();
     }
 }

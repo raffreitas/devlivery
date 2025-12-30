@@ -1,10 +1,6 @@
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Expenses.Commands.DeleteCategory;
 
@@ -18,7 +14,7 @@ public static class DeleteCategoryEndpoint
             .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<NoContent, BadRequest<ApiResponse>, NotFound<ApiResponse>>> Handle(
+    private static async Task<IResult> Handle(
         Guid categoryId,
         ISender sender,
         CancellationToken ct)
@@ -26,17 +22,6 @@ public static class DeleteCategoryEndpoint
         var command = new DeleteCategoryCommand(categoryId);
         var result = await sender.Send(command, ct);
 
-        if (result.IsSuccess)
-        {
-            return result.ToNoContent();
-        }
-
-        var error = result.GetError();
-        if (error is NotFoundError)
-        {
-            return result.ToNotFound();
-        }
-
-        return result.ToBadRequest();
+        return result.ToApiResult(TypedResults.NoContent);
     }
 }

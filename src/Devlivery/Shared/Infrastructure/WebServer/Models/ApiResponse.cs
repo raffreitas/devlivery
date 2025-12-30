@@ -18,6 +18,7 @@ public sealed record ApiResponse<T>
     /// The actual data returned by the operation
     /// </summary>
     [JsonPropertyName("data")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public T? Data { get; init; }
 
     /// <summary>

@@ -29,7 +29,7 @@ public sealed class CloseCashSessionHandler(
 
         if (cashSession.Status == CashSessionStatus.Closed)
         {
-            return Result.Fail<CloseCashSessionResponse>(new DomainRuleError("O caixa já está fechado."));
+            return Result.Fail<CloseCashSessionResponse>(new ValidationError("O caixa já está fechado."));
         }
 
         // Get all orders within the cash session period (exclude canceled)

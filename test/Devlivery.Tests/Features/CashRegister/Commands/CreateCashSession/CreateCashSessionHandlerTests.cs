@@ -106,7 +106,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
     }
 
     [Fact]
-    public async Task Handle_Should_Return_DomainRuleError_When_Active_Session_Exists()
+    public async Task Handle_Should_Return_ValidationError_When_Active_Session_Exists()
     {
         // Arrange
         var tenantAccessor = fixture.CreateTenantAccessorMock();

@@ -1,10 +1,7 @@
 using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
-
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Orders.Queries.GetAllOrders;
 
@@ -19,16 +16,13 @@ public static class GetAllOrdersEndpoint
             .Produces<ApiResponse<List<GetAllOrdersResponse>>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Ok<ApiResponse<List<GetAllOrdersResponse>>>> Handle(
-        DateTime? start,
-        DateTime? end,
-        PaymentMethod? paymentMethod,
+    private static async Task<IResult> Handle(DateTime? start, DateTime? end, PaymentMethod? paymentMethod,
         ISender sender,
         CancellationToken ct)
     {
         var query = new GetAllOrdersQuery(start, end, paymentMethod);
         var result = await sender.Send(query, ct);
 
-        return result.ToOk();
+        return result.ToApiResult();
     }
 }
