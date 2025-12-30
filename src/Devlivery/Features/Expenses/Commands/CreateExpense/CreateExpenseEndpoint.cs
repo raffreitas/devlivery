@@ -17,6 +17,6 @@ public static class CreateExpenseEndpoint
     {
         var result = await sender.Send(command, ct);
 
-        return result.ToApiResult(data => TypedResults.Created($"/api/expenses/{result.Value.ExpenseId}", data));
+        return result.ToApiResult(data => TypedResults.Created($"/api/expenses/{result.Value.ExpenseId}", ApiResponse<CreateExpenseResponse>.Success(data)));
     }
 }

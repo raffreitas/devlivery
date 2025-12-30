@@ -119,7 +119,7 @@ public sealed class UpdateOrderEndpointTests(OrdersWebApplicationFactory factory
         var response = await PutAsync($"/api/orders/{order.Id}", request, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
     }
 
     [Fact]

@@ -18,6 +18,6 @@ public static class CreateCategoryEndpoint
     {
         var result = await sender.Send(command, ct);
 
-        return result.ToApiResult(data => TypedResults.Created($"/api/expenses/categories/{data.CategoryId}", data));
+        return result.ToApiResult(data => TypedResults.Created($"/api/expenses/categories/{data.CategoryId}", ApiResponse<CreateCategoryResponse>.Success(data)));
     }
 }

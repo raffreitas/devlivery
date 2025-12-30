@@ -88,7 +88,7 @@ public sealed class CloseCashSessionEndpointTests(CashRegisterWebApplicationFact
     }
 
     [Fact]
-    public async Task CloseCashSession_WhenAlreadyClosed_ReturnsBadRequest()
+    public async Task CloseCashSession_WhenAlreadyClosed_ReturnsUnprocessableEntity()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -117,6 +117,6 @@ public sealed class CloseCashSessionEndpointTests(CashRegisterWebApplicationFact
             accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
     }
 }

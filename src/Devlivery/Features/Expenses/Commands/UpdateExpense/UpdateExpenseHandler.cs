@@ -1,9 +1,8 @@
 using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
 using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
+using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
-
 using FluentResults;
-
 using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.UpdateExpense;
@@ -20,7 +19,7 @@ public sealed class UpdateExpenseHandler(
         var expense = await expenseRepository.GetByIdAsync(command.ExpenseId, cancellationToken);
         if (expense is null)
         {
-            return Result.Fail("Expense not found.");
+            return Result.Fail(new NotFoundError("Expense not found."));
         }
 
         // Validate subcategory if changed
@@ -29,7 +28,7 @@ public sealed class UpdateExpenseHandler(
             var category = await categoryRepository.GetByIdAsync(command.CategoryId.Value, cancellationToken);
             if (category is null || !category.IsActive)
             {
-                return Result.Fail("subcategory not found or inactive.");
+                return Result.Fail(new NotFoundError("subcategory not found or inactive."));
             }
         }
 

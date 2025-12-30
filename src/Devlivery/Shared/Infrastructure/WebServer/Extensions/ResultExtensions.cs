@@ -42,8 +42,8 @@ public static class ResultExtensions
 
         return firstError switch
         {
-            ValidationError => TypedResults.UnprocessableEntity(response),
             NotFoundError => TypedResults.NotFound(response),
+            ValidationError => TypedResults.UnprocessableEntity(response),
             UnauthorizedError => TypedResults.Unauthorized(),
             ForbiddenError _ => TypedResults.Forbid(),
             _ => TypedResults.InternalServerError()

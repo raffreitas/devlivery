@@ -25,13 +25,13 @@ public sealed class CreateCashDepositHandler(
 
         if (cashSession is null)
         {
-            return Result.Fail<CreateCashDepositResponse>(new NotFoundError("Caixa n�o encontrado."));
+            return Result.Fail<CreateCashDepositResponse>(new NotFoundError("Caixa não encontrado."));
         }
 
         if (cashSession.Status != CashSessionStatus.Open)
         {
             return Result.Fail<CreateCashDepositResponse>(
-                new ValidationError("N�o � poss�vel adicionar aporte a um caixa fechado."));
+                new ValidationError("Não é possível adicionar aporte a um caixa fechado."));
         }
 
         // Create the deposit

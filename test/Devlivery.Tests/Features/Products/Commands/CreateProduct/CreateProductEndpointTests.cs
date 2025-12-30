@@ -52,7 +52,7 @@ public sealed class CreateProductEndpointTests(ProductsWebApplicationFactory fac
         var response = await PostAsync("/api/products", command, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         await using var responseBody = await response.Content.ReadAsStreamAsync();
         var responseData = await JsonDocument.ParseAsync(responseBody);
         responseData.RootElement.TryGetProperty("success", out var success).ShouldBeTrue();

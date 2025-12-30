@@ -17,6 +17,6 @@ public static class CreateProductEndpoint
     {
         var result = await sender.Send(command, ct);
 
-        return result.ToApiResult(data => TypedResults.Created($"/api/products/{result.Value.ProductId}", data));
+        return result.ToApiResult(data => TypedResults.Created($"/api/products/{result.Value.ProductId}", ApiResponse<CreateProductResponse>.Success(data)));
     }
 }

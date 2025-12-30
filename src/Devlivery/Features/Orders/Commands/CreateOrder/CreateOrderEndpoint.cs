@@ -18,6 +18,6 @@ public static class CreateOrderEndpoint
     private static async Task<IResult> Handle(CreateOrderCommand command, ISender sender, CancellationToken ct)
     {
         var result = await sender.Send(command, ct);
-        return result.ToApiResult(data => TypedResults.Created("/api/orders", data));
+        return result.ToApiResult(data => TypedResults.Created("/api/orders", ApiResponse<CreateOrderResponse>.Success(data)));
     }
 }

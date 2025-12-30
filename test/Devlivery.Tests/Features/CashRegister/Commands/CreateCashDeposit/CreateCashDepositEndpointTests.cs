@@ -54,7 +54,7 @@ public sealed class CreateCashDepositEndpointTests(CashRegisterWebApplicationFac
     }
 
     [Fact]
-    public async Task CreateCashDeposit_WithInvalidData_ReturnsValidationProblem()
+    public async Task CreateCashDeposit_WithInvalidData_ReturnsUnprocessableEntity()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -66,7 +66,7 @@ public sealed class CreateCashDepositEndpointTests(CashRegisterWebApplicationFac
         var response = await PostAsync($"/api/cash-register/sessions/{Guid.NewGuid()}/deposits", command, accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         await using var responseBody = await response.Content.ReadAsStreamAsync();
         var responseData = await JsonDocument.ParseAsync(responseBody);
         responseData.RootElement.TryGetProperty("success", out var success).ShouldBeTrue();
@@ -86,10 +86,7 @@ public sealed class CreateCashDepositEndpointTests(CashRegisterWebApplicationFac
         var nonExistentCashSessionId = Guid.NewGuid();
         var command = new
         {
-            AttendantId = Guid.NewGuid(),
-            AttendantName = Faker.Name.FullName(),
-            Amount = 50m,
-            Notes = (string?)null
+            AttendantId = Guid.NewGuid(), AttendantName = Faker.Name.FullName(), Amount = 50m, Notes = (string?)null
         };
 
         // Act

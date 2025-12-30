@@ -1,5 +1,6 @@
 using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
+
 using Mediator;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
@@ -34,6 +35,7 @@ public static class CreateCashDepositEndpoint
         var result = await sender.Send(command, ct);
 
         return result.ToApiResult(onSuccess: data =>
-            TypedResults.Created($"/api/cash-register/sessions/{cashSessionId}/deposits/{result.Value.Id}", data));
+            TypedResults.Created($"/api/cash-register/sessions/{cashSessionId}/deposits/{result.Value.Id}",
+                ApiResponse<CreateCashDepositResponse>.Success(data)));
     }
 }

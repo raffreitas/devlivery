@@ -62,6 +62,6 @@ public sealed class GetExpenseByIdEndpointTests(ExpensesWebApplicationFactory fa
         var response = await GetAsync($"/api/expenses/{invalidId}", accessToken);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 }
