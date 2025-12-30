@@ -1,4 +1,6 @@
+using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
+
 using Mediator;
 
 namespace Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
@@ -9,16 +11,13 @@ public static class GetActiveCashSessionEndpoint
     {
         app.MapGet("sessions/active", Handle)
             .Produces<ApiResponse<GetActiveCashSessionResponse>>()
-            .Produces<ApiResponse<GetActiveCashSessionResponse>>(StatusCodes.Status204NoContent);
+            .Produces<ApiResponse>(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> Handle(ISender sender, CancellationToken ct)
     {
         var query = new GetActiveCashSessionQuery();
         var result = await sender.Send(query, ct);
-
-        return result.IsSuccess
-            ? TypedResults.Ok(ApiResponse<GetActiveCashSessionResponse>.Success(result.Value))
-            : TypedResults.NoContent();
+        return result.ToApiResult();
     }
 }

@@ -134,9 +134,7 @@ public static class CreateProductEndpoint
         CancellationToken ct)
     {
         var result = await sender.Send(command, ct);
-        return result.IsSuccess 
-            ? result.ToCreated($"/api/products/{result.Value.ProductId}") 
-            : result.ToBadRequest();
+        return result.ToApiResult(data => TypedResults.Created($"/api/products/{result.Value.ProductId}", data));
     }
 }
 ```
