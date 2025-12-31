@@ -35,6 +35,10 @@ export function CashSummaryCard({
     ? session.closingAmount - expectedCashAmount
     : 0;
 
+  const cashSalesAmount = session.paymentBreakdown.find(
+    (payment) => payment.method === "Cash",
+  )?.amount;
+
   const startDate = new Date(session.startAt);
   const endDate = session.endAt ? new Date(session.endAt) : null;
 
@@ -164,9 +168,7 @@ export function CashSummaryCard({
             Vendas em Dinheiro
           </span>
           <span className="text-base font-medium">
-            {formatMoney(
-              expectedCashAmount - session.openingAmount - totalDeposits,
-            )}
+            {formatMoney(cashSalesAmount ?? 0)}
           </span>
         </div>
 

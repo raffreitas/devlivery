@@ -11,10 +11,7 @@ interface OrderCardHeaderProps {
 }
 
 export function OrderCardHeader({ order }: OrderCardHeaderProps) {
-  const paymentStyle = PAYMENT_METHOD_STYLES[order.paymentMethod];
-  const PaymentIcon = paymentStyle.icon;
   const statusStyle = ORDER_STATUS_STYLES[order.status];
-
   return (
     <CardHeader className="p-0 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start">
       <div className="flex-1 min-w-0">
@@ -22,14 +19,21 @@ export function OrderCardHeader({ order }: OrderCardHeaderProps) {
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
             {order.customerName}
           </h3>
-          <span
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${paymentStyle.bg} ${paymentStyle.text} ${paymentStyle.border} shrink-0`}
-          >
-            <PaymentIcon className="w-3 h-3" />
-            <span className="hidden sm:inline">
-              {getPaymentOptionLabel(order.paymentMethod)}
-            </span>
-          </span>
+          {order.payments.map((payment) => {
+            const paymentStyle = PAYMENT_METHOD_STYLES[payment.method];
+            const PaymentIcon = paymentStyle.icon;
+            return (
+              <span
+                key={payment.id}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${paymentStyle.bg} ${paymentStyle.text} ${paymentStyle.border} shrink-0`}
+              >
+                <PaymentIcon className="w-3 h-3" />
+                <span className="hidden sm:inline">
+                  {getPaymentOptionLabel(payment.method)}
+                </span>
+              </span>
+            );
+          })}
         </div>
         {order.customerPhone && (
           <p className="text-xs sm:text-sm text-secondary-foreground truncate">

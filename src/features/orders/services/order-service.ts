@@ -19,6 +19,12 @@ interface OrderItemDto {
   notes?: string | null;
 }
 
+interface OrderPaymentDto {
+  id: string;
+  paymentMethod: string;
+  amount: number;
+}
+
 interface OrderDto {
   id: string;
   items: OrderItemDto[];
@@ -26,7 +32,7 @@ interface OrderDto {
   customerPhone?: string;
   deliveryAddress: string;
   status: Order["status"] | string;
-  paymentMethod: string;
+  payments: OrderPaymentDto[];
   total: number;
   deliveryFee: number;
   notes?: string | null;
@@ -59,7 +65,11 @@ function mapOrder(dto: OrderDto): Order {
     customerPhone: dto.customerPhone,
     deliveryAddress: dto.deliveryAddress,
     status: dto.status as Order["status"],
-    paymentMethod: dto.paymentMethod as PaymentMethod,
+    payments: dto.payments.map((p) => ({
+      id: p.id,
+      method: p.paymentMethod as PaymentMethod,
+      amount: p.amount,
+    })),
     total: dto.total,
     deliveryFee: dto.deliveryFee,
     notes: dto.notes ?? undefined,
@@ -116,7 +126,11 @@ export const orderService = {
       customerPhone: data.customerPhone,
       deliveryAddress: data.deliveryAddress,
       deliveryFee: data.deliveryFee,
-      paymentMethod: data.paymentMethod,
+      payments: data.payments.map((p) => ({
+        id: p.id,
+        method: p.method,
+        amount: p.amount,
+      })),
       notes: data.notes ?? null,
     };
     await api.post<void>("/api/orders", payload);
@@ -134,7 +148,11 @@ export const orderService = {
       customerPhone: data.customerPhone,
       deliveryAddress: data.deliveryAddress,
       deliveryFee: data.deliveryFee,
-      paymentMethod: data.paymentMethod,
+      payments: data.payments.map((p) => ({
+        id: p.id,
+        method: p.method,
+        amount: p.amount,
+      })),
       notes: data.notes ?? null,
     };
     await api.put<void>(`/api/orders/${id}`, payload);

@@ -59,7 +59,8 @@ export function CashPage() {
   const expectedCashAmount = currentSession?.expectedCashAmount ?? 0;
   const depositsTotal = deposits?.reduce((sum, d) => sum + d.amount, 0) ?? 0;
   const cashSales =
-    expectedCashAmount - (currentSession?.openingAmount ?? 0) - depositsTotal;
+    currentSession?.paymentBreakdown.find((p) => p.method === "Cash")?.amount ??
+    0;
 
   return (
     <>

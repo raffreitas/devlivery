@@ -1,5 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import {
+  Banknote,
+  Check,
+  CreditCard,
+  QrCode,
+  Smartphone,
+  Wallet,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useProducts } from "@/features/products/hooks/use-products";
 import { LoadingButton } from "@/shared/components/loading";
@@ -14,16 +22,13 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { InputMoney } from "@/shared/components/ui/input-money";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import { Separator } from "@/shared/components/ui/separator";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { getPaymentOptions } from "../constants/payment-methods";
+import { cn } from "@/shared/lib/utils";
+import {
+  getPaymentOptionLabel,
+  getPaymentOptions,
+} from "../constants/payment-methods";
 import { type OrderFormData, orderFormSchema } from "../types";
 import { OrderItemsTable } from "./order-form-items-table";
 import { ProductSelector } from "./order-form-product-selector";
@@ -55,7 +60,11 @@ export function OrderForm({
       customerPhone: initialData?.customerPhone ?? "",
       deliveryAddress: initialData?.deliveryAddress ?? "",
       deliveryFee: initialData?.deliveryFee ?? 0,
-      paymentMethod: initialData?.paymentMethod ?? "Cash",
+      payments: initialData?.payments.map((p) => ({
+        id: p.id,
+        method: p.method,
+        amount: p.amount,
+      })) ?? [{ method: "Cash", amount: 0 }],
       notes: initialData?.notes ?? "",
       items: initialData?.items ?? [],
     },
@@ -64,6 +73,15 @@ export function OrderForm({
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: "items",
+  });
+
+  const {
+    fields: paymentFields,
+    append: appendPayment,
+    remove: removePayment,
+  } = useFieldArray({
+    control: form.control,
+    name: "payments",
   });
 
   const handleAddItem = () => {
@@ -115,14 +133,27 @@ export function OrderForm({
       name: "deliveryFee",
     }) ?? 0;
 
+  const payments = useWatch({
+    control: form.control,
+    name: "payments",
+  });
+
   const subtotal = fields.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0,
   );
 
-  const availableProducts = products.filter((p) => p.available);
-
   const total = subtotal + deliveryFee;
+
+  const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) ?? 0;
+  const remainingAmount = total - totalPaid;
+
+  // Efeito para sincronizar automaticamente o valor se houver apenas um pagamento
+  useEffect(() => {
+    if (paymentFields.length === 1 && payments?.[0]?.amount !== total) {
+      form.setValue(`payments.0.amount`, total, { shouldValidate: true });
+    }
+  }, [total, paymentFields.length, form, payments]);
 
   return (
     <Form {...form}>
@@ -162,50 +193,6 @@ export function OrderForm({
               )}
             />
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <FormField
-                control={form.control}
-                name="deliveryFee"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Taxa de Entrega</FormLabel>
-                    <FormControl className="w-full">
-                      <InputMoney {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="paymentMethod"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Método de Pagamento</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecione um método de pagamento" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {getPaymentOptions().map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             <FormField
               control={form.control}
               name="notes"
@@ -232,7 +219,7 @@ export function OrderForm({
             </h3>
 
             <ProductSelector
-              products={availableProducts}
+              products={products.filter((p) => p.available)}
               selectedProductId={selectedProductId}
               quantity={quantity}
               notes={notes}
@@ -241,25 +228,154 @@ export function OrderForm({
               onNotesChange={setNotes}
               onAddItem={handleAddItem}
             />
+          </div>
 
-            <OrderItemsTable
-              items={fields.map((field) => ({
-                ...field,
-                fieldId: field.id,
-              }))}
-              subtotal={subtotal}
-              deliveryFee={deliveryFee}
-              total={total}
-              onRemoveItem={(index) => {
-                remove(index);
-              }}
-            />
-            {form.formState.errors.items && (
-              <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.items.message}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between border-b pb-2">
+              <h3 className="text-base sm:text-lg font-semibold">
+                Fechamento e Pagamento
+              </h3>
+
+              <FormField
+                control={form.control}
+                name="deliveryFee"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-2 space-y-0">
+                    <FormLabel className="truncate">Taxa de entrega:</FormLabel>
+                    <FormControl>
+                      <InputMoney {...field} className="h-8 w-24" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-1.5">
+              {getPaymentOptions().map((option) => {
+                const isSelected = paymentFields.some(
+                  (p) => p.method === option.value,
+                );
+
+                const Icon =
+                  {
+                    Cash: Banknote,
+                    CreditCard: CreditCard,
+                    DebitCard: Wallet,
+                    Pix: QrCode,
+                  }[option.value] || Smartphone;
+
+                return (
+                  <Button
+                    key={option.value}
+                    type="button"
+                    variant={isSelected ? "default" : "outline"}
+                    size="sm"
+                    className={cn(
+                      "rounded-full px-3 h-7 gap-1.5 transition-all duration-200 border",
+                      isSelected
+                        ? "bg-primary border-primary hover:bg-primary/90"
+                        : "hover:border-primary/50 hover:bg-primary/5 text-muted-foreground",
+                    )}
+                    onClick={() => {
+                      if (isSelected) {
+                        if (paymentFields.length > 1) {
+                          const index = paymentFields.findIndex(
+                            (p) => p.method === option.value,
+                          );
+                          removePayment(index);
+                        }
+                      } else {
+                        appendPayment({
+                          method: option.value,
+                          amount: remainingAmount,
+                        });
+                      }
+                    }}
+                  >
+                    <Icon className="size-3.5" />
+                    <span className="text-xs">{option.label}</span>
+                    {isSelected && <Check className="size-3" />}
+                  </Button>
+                );
+              })}
+            </div>
+            {paymentFields.length > 1 && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                  {paymentFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="group relative flex flex-col p-2 rounded-lg border bg-muted/20 hover:border-primary/20 transition-colors shadow-none"
+                    >
+                      <div className="flex items-center justify-between px-1 mb-0.5">
+                        <span className="text-[9px] font-bold tracking-tight text-muted-foreground uppercase">
+                          {getPaymentOptionLabel(field.method)}
+                        </span>
+                      </div>
+                      <FormField
+                        control={form.control}
+                        name={`payments.${index}.amount`}
+                        render={({ field }) => (
+                          <FormItem className="space-y-0">
+                            <FormControl>
+                              <InputMoney {...field} />
+                            </FormControl>
+                            <FormMessage className="text-[10px]" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col gap-1.5 pt-1 border-t border-dashed mt-2">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-muted-foreground">
+                      Total Pedido: R$ {total.toFixed(2)}
+                    </span>
+                    {remainingAmount > 0 ? (
+                      <span className="text-amber-600 font-bold flex items-center gap-1">
+                        <div className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        Falta: R$ {remainingAmount.toFixed(2)}
+                      </span>
+                    ) : remainingAmount < 0 ? (
+                      <span className="text-blue-600 font-bold">
+                        Troco: R$ {Math.abs(remainingAmount).toFixed(2)}
+                      </span>
+                    ) : (
+                      <span className="text-green-600 font-bold flex items-center gap-1">
+                        <Check className="size-3" /> PAGO
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {form.formState.errors.payments && (
+              <p className="text-sm font-medium text-destructive mt-1">
+                {form.formState.errors.payments.message}
               </p>
             )}
           </div>
+
+          <OrderItemsTable
+            items={fields.map((field) => ({
+              ...field,
+              fieldId: field.id,
+            }))}
+            subtotal={subtotal}
+            deliveryFee={deliveryFee}
+            total={total}
+            onRemoveItem={(index) => {
+              remove(index);
+            }}
+          />
+          {form.formState.errors.items && (
+            <p className="text-sm font-medium text-destructive">
+              {form.formState.errors.items.message}
+            </p>
+          )}
+
           <Separator />
         </div>
 
