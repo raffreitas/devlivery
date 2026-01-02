@@ -11,22 +11,20 @@ public sealed class CashSession : Entity
 
     public Guid EstablishmentId { get; private set; }
     public Guid AttendantId { get; private set; }
-    public string AttendantName { get; private set; } = string.Empty;
+    public string AttendantName { get; private set; } = null!;
     public decimal OpeningAmount { get; private set; }
     public decimal? ClosingAmount { get; private set; }
     public DateTime StartAt { get; private set; }
     public DateTime? EndAt { get; private set; }
     public CashSessionStatus Status { get; private set; }
     public string? Notes { get; private set; }
-
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
     public IReadOnlyCollection<CashSessionMovement> Movements => _movements.AsReadOnly();
     public decimal TotalRevenue => _movements.Where(m => m.EntryType == CashSessionEntryType.Payment).Sum(m => m.Amount)
         - _movements.Where(m => m.EntryType == CashSessionEntryType.Refund).Sum(m => m.Amount);
-
     public int TotalOrders => _movements.Where(m => m.OrderPaymentId != null).Select(x => x.OrderPaymentId).Distinct().Count();
     public decimal ExpectedCashAmount => OpeningAmount + TotalDeposits() + TotalCashPayments();
-    public DateTime CreatedAt { get; private set; }
-    public DateTime UpdatedAt { get; private set; }
 
     private CashSession()
     {
@@ -50,7 +48,6 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-
     public void AddPayment(Guid orderPaymentId, decimal amount, PaymentMethod paymentMethod, Guid relatedOrderId)
     {
         if (Status != CashSessionStatus.Open)
@@ -72,14 +69,7 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public bool HasReversalFor(Guid originalOrderPaymentId)
-    {
-        return _movements.Any(m =>
-            m.EntryType == CashSessionEntryType.Refund && m.OrderPaymentId == originalOrderPaymentId);
-    }
-
-    public void AddReversal(Guid originalOrderPaymentId, decimal amount, PaymentMethod paymentMethod, string reason,
-        Guid relatedOrderId)
+    public void AddReversal(Guid originalOrderPaymentId, decimal amount, PaymentMethod paymentMethod, string reason, Guid relatedOrderId)
     {
         if (Status != CashSessionStatus.Open)
             throw new InvalidOperationException("Não é possível adicionar reversões a um caixa fechado.");
@@ -101,14 +91,6 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    // Idempotent check for existing change entry for an order
-    public bool HasChangeFor(Guid orderId)
-    {
-        return _movements.Any(p =>
-            p.EntryType == CashSessionEntryType.Change && p.RelatedOrderId == orderId);
-    }
-
-    // Adds a change (troco) entry to the session. Amount must be positive.
     public void AddChange(Guid relatedOrderId, decimal changeAmount, PaymentMethod paymentMethod = PaymentMethod.Cash)
     {
         if (Status != CashSessionStatus.Open)
@@ -133,7 +115,6 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-
     public CashSessionMovement AddDeposit(decimal amount, Guid createdBy, string? reason)
     {
         var movement = new CashSessionMovement(
@@ -151,6 +132,12 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
         return movement;
     }
+
+    public bool HasReversalFor(Guid originalOrderPaymentId)
+        => _movements.Any(m => m.EntryType == CashSessionEntryType.Refund && m.OrderPaymentId == originalOrderPaymentId);
+
+    public bool HasChangeFor(Guid orderId)
+        => _movements.Any(p => p.EntryType == CashSessionEntryType.Change && p.RelatedOrderId == orderId);
 
     public void Close(decimal closingAmount, string? notes)
     {

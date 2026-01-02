@@ -8,6 +8,9 @@ namespace Devlivery.Features.Orders.Domain;
 
 public sealed class Order : Entity
 {
+    private readonly List<OrderItem> _items = [];
+    private readonly List<OrderPayment> _payments = [];
+
     public CustomerInfo Customer { get; private set; } = null!;
     public DeliveryAddress DeliveryAddress { get; private set; } = null!;
     public OrderStatus Status { get; private set; }
@@ -18,11 +21,7 @@ public sealed class Order : Entity
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public string? Notes { get; private set; }
-
-    private readonly List<OrderItem> _items = [];
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
-
-    private readonly List<OrderPayment> _payments = [];
     public IReadOnlyCollection<OrderPayment> Payments => _payments.AsReadOnly();
 
     private Order()
@@ -66,7 +65,6 @@ public sealed class Order : Entity
 
     public void UpdateStatus(OrderStatus newStatus)
     {
-        // Validate state transitions
         if (Status == OrderStatus.Canceled)
         {
             throw new DomainException("Não é possível alterar o status de um pedido cancelado.");
@@ -79,14 +77,12 @@ public sealed class Order : Entity
 
         if (newStatus == OrderStatus.Delivered)
         {
-            // Ensure payments cover the order total and calculate change (overpayment allowed)
             var paymentsTotal = _payments.Where(x => x.PaymentStatus != PaymentStatus.Cancelled).Sum(x => x.Amount);
             if (paymentsTotal < Total)
             {
                 throw new InvalidOperationException($"O total dos pagamentos ({paymentsTotal:C}) é menor que o total do pedido ({Total:C}).");
             }
 
-            // Calculate change and persist
             Change = paymentsTotal - Total;
 
             _payments.ForEach(ConfirmPayment);
@@ -128,12 +124,10 @@ public sealed class Order : Entity
         if (Status == OrderStatus.Delivered || Status == OrderStatus.Canceled)
             throw new InvalidOperationException("Não é possível adicionar pagamentos a um pedido finalizado.");
 
-        var currentTotal = _payments.Sum(p => p.Amount) + payment.Amount;
-        // allow adding overpayment; final validation occurs on deliver
         _payments.Add(payment);
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new Events.OrderPaymentAddedEvent(Id, payment.Id, EstablishmentId, payment.PaymentMethod, payment.Amount, payment.CreatedAt));
+        AddDomainEvent(new OrderPaymentAddedEvent(Id, payment.Id, EstablishmentId, payment.PaymentMethod, payment.Amount, payment.CreatedAt));
     }
 
     public void RemovePayment(Guid paymentId)
@@ -146,16 +140,6 @@ public sealed class Order : Entity
 
         _payments.Remove(payment);
         UpdatedAt = DateTime.UtcNow;
-    }
-
-    private void ValidatePaymentsTotal()
-    {
-        var paymentsTotal = _payments.Sum(p => p.Amount);
-        if (paymentsTotal != Total)
-        {
-            throw new InvalidOperationException(
-                $"O total dos pagamentos ({paymentsTotal:C}) diverge do total do pedido ({Total:C}).");
-        }
     }
 
     public void Delete()
@@ -197,12 +181,11 @@ public sealed class Order : Entity
 
     public void ReconcilePayments(IEnumerable<OrderPaymentUpdate> incoming)
     {
-        if (incoming is null) incoming = Array.Empty<OrderPaymentUpdate>();
+        incoming ??= [];
 
         var incomingList = incoming.ToList();
         var existingById = _payments.ToDictionary(p => p.Id, p => p);
 
-        // Process incoming: update existing or add new
         foreach (var p in incomingList)
         {
             if (p.Id is not null && existingById.TryGetValue(p.Id.Value, out var existing))
@@ -215,7 +198,7 @@ public sealed class Order : Entity
                 else
                 {
                     existing.Update(p.Method, p.Amount);
-                    AddDomainEvent(new Events.OrderPaymentUpdatedEvent(Id, existing.Id, EstablishmentId, existing.PaymentMethod, existing.Amount, existing.UpdatedAt));
+                    AddDomainEvent(new OrderPaymentUpdatedEvent(Id, existing.Id, EstablishmentId, existing.PaymentMethod, existing.Amount, existing.UpdatedAt));
                 }
 
                 existingById.Remove(p.Id.Value);
@@ -227,23 +210,18 @@ public sealed class Order : Entity
             }
         }
 
-        // Remaining existing payments that were not included -> cancel if pending
-        foreach (var kv in existingById)
+        foreach (var payment in existingById.Select(kv => kv.Value))
         {
-            var payment = kv.Value;
             if (payment.PaymentStatus == PaymentStatus.Pending)
             {
                 payment.Cancel();
-                AddDomainEvent(new Events.OrderPaymentCancelledEvent(Id, payment.Id, EstablishmentId, DateTime.UtcNow));
+                AddDomainEvent(new OrderPaymentCancelledEvent(Id, payment.Id, EstablishmentId, DateTime.UtcNow));
             }
             else
             {
-                throw new InvalidOperationException("Não é possível remover pagamento já confirmado. Realize estorno antes de remover.");
+                throw new DomainException("Não é possível remover pagamento já confirmado. Realize estorno antes de remover.");
             }
         }
-
-        // Allow overpayment during reconciliation; final validation happens on deliver
-        // (paymentsTotal may be > Total and Change will be calculated when delivering)
 
         UpdatedAt = DateTime.UtcNow;
     }
