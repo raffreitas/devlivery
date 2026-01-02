@@ -11,17 +11,17 @@ import {
 } from "@/shared/components/ui/select";
 import { getOrderStatusOptionLabel } from "../constants/order-status";
 import { getPaymentOptionLabel } from "../constants/payment-methods";
-import type { Order } from "../types";
+import type { OrderStatus, PaymentMethod } from "../types";
 
 interface OrdersFiltersProps {
-  statusFilter: Order["status"] | "all";
-  paymentFilter: Order["paymentMethod"] | "all";
-  statusOptions: Array<Order["status"] | "all">;
-  paymentOptions: Array<Order["paymentMethod"] | "all">;
+  statusFilter: OrderStatus | "all";
+  paymentFilter: PaymentMethod | "all";
+  statusOptions: Array<OrderStatus | "all">;
+  paymentOptions: Array<PaymentMethod | "all">;
   period?: DateRange;
   onDateChange: (date: DateRange | undefined) => void;
-  onStatusChange: (status: Order["status"] | "all") => void;
-  onPaymentChange: (payment: Order["paymentMethod"] | "all") => void;
+  onStatusChange: (status: OrderStatus | "all") => void;
+  onPaymentChange: (payment: PaymentMethod | "all") => void;
   onOpenFilters: () => void;
 }
 
@@ -58,7 +58,7 @@ export function OrdersFilters({
       {/* Desktop: Inline Filters */}
       <div className="hidden sm:block bg-card rounded-lg border border-border shadow-sm p-4">
         <div className="flex flex-col sm:flex-row items-end gap-2 sm:gap-4 pb-2 sm:pb-1 px-1">
-          <div className="w-full sm:flex-1 sm:min-w-[200px] flex flex-col gap-1.5">
+          <div className="w-full sm:flex-1 sm:min-w-50 flex flex-col gap-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
               Status do Pedido
             </Label>
@@ -88,7 +88,7 @@ export function OrdersFilters({
             </Select>
           </div>
 
-          <div className="w-full sm:flex-1 sm:min-w-[200px] flex flex-col gap-1.5">
+          <div className="w-full sm:flex-1 sm:min-w-50 flex flex-col gap-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
               Forma de Pagamento
             </Label>
@@ -118,7 +118,7 @@ export function OrdersFilters({
             </Select>
           </div>
 
-          <div className="w-full sm:w-auto sm:min-w-[240px] flex flex-col gap-1.5">
+          <div className="w-full sm:w-auto sm:min-w-60 flex flex-col gap-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
               Período
             </Label>

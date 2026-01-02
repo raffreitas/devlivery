@@ -12,7 +12,7 @@ import {
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Separator } from "@/shared/components/ui/separator";
 import { usePrintOrder } from "../hooks/use-print-order";
-import type { Order } from "../types";
+import type { Order, OrderStatus } from "../types";
 import { OrderCardActions } from "./order-card-actions";
 import { OrderCardHeader } from "./order-card-header";
 import { OrderCardItems } from "./order-card-items";
@@ -22,11 +22,11 @@ import { OrderPrint } from "./order-print";
 interface OrderCardProps {
   order: Order;
   onEdit: (order: Order) => void;
-  onUpdateStatus: (id: string, status: Order["status"]) => void;
+  onUpdateStatus: (id: string, status: OrderStatus) => void;
   onDelete: (id: string) => void;
 }
 
-const NEXT_STATUS: Record<Order["status"], Order["status"] | null> = {
+const NEXT_STATUS: Record<OrderStatus, OrderStatus | null> = {
   Pending: "Preparing",
   Preparing: "Ready",
   Ready: "Delivered",

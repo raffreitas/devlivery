@@ -1,10 +1,10 @@
 import { OrderCard } from "@/features/orders/components/order-card";
-import type { Order } from "@/features/orders/types";
+import type { Order, OrderStatus } from "@/features/orders/types";
 
 interface ActiveOrdersSectionProps {
   orders: Order[];
   onEdit: (order: Order) => void;
-  onUpdateStatus: (orderId: string, status: Order["status"]) => Promise<void>;
+  onUpdateStatus: (orderId: string, status: OrderStatus) => Promise<void>;
   onDelete: (orderId: string) => Promise<void>;
 }
 

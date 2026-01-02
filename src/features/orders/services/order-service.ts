@@ -1,6 +1,11 @@
 import type { Product } from "@/features/products/types";
 import { type ApiResponse, api } from "@/shared/services/api";
-import type { Order, OrderFormData, PaymentMethod } from "../types";
+import type {
+  Order,
+  OrderFormData,
+  OrderStatus,
+  PaymentMethod,
+} from "../types";
 
 interface ProductDto {
   id: string;
@@ -21,7 +26,7 @@ interface OrderItemDto {
 
 interface OrderPaymentDto {
   id: string;
-  paymentMethod: string;
+  paymentMethod: PaymentMethod | string;
   amount: number;
 }
 
@@ -31,7 +36,7 @@ interface OrderDto {
   customerName: string;
   customerPhone?: string;
   deliveryAddress: string;
-  status: Order["status"] | string;
+  status: OrderStatus | string;
   payments: OrderPaymentDto[];
   total: number;
   deliveryFee: number;
@@ -64,7 +69,7 @@ function mapOrder(dto: OrderDto): Order {
     customerName: dto.customerName,
     customerPhone: dto.customerPhone,
     deliveryAddress: dto.deliveryAddress,
-    status: dto.status as Order["status"],
+    status: dto.status as OrderStatus,
     payments: dto.payments.map((p) => ({
       id: p.id,
       method: p.paymentMethod as PaymentMethod,
@@ -160,7 +165,7 @@ export const orderService = {
     await api.put<void>(`/api/orders/${id}`, payload);
   },
 
-  updateStatus: async (id: string, status: Order["status"]): Promise<void> => {
+  updateStatus: async (id: string, status: OrderStatus): Promise<void> => {
     await api.patch<void>(`/api/orders/${id}/status`, {
       status,
     });

@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/shared/utils/formatters";
 import { orderService } from "../services/order-service";
-import type { Order, OrderFormData, PaymentMethod } from "../types";
+import type {
+  Order,
+  OrderFormData,
+  OrderStatus,
+  PaymentMethod,
+} from "../types";
 
 export function useOrders(
   startDate?: Date,
@@ -38,7 +43,7 @@ export function useOrders(
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: Order["status"] }) =>
+    mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
       orderService.updateStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
@@ -60,7 +65,7 @@ export function useOrders(
     createOrder: (data: OrderFormData) => createMutation.mutateAsync(data),
     updateOrder: (id: string, data: OrderFormData) =>
       updateMutation.mutateAsync({ id, data }),
-    updateOrderStatus: (id: string, status: Order["status"]) =>
+    updateOrderStatus: (id: string, status: OrderStatus) =>
       updateStatusMutation.mutateAsync({ id, status }),
     deleteOrder: (id: string) => deleteMutation.mutateAsync(id),
     isCreating: createMutation.isPending,
