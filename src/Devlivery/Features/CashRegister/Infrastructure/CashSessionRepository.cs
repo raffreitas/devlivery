@@ -1,4 +1,5 @@
 using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Enums;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ public sealed class CashSessionRepository(ApplicationDbContext dbContext) : ICas
     public async Task<CashSession?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await dbContext.CashSessions
-            .Include(cs => cs.Deposits)
+            .Include(cs => cs.Movements)
             .FirstOrDefaultAsync(cs => cs.Id == id, ct);
     }
 
@@ -27,6 +28,7 @@ public sealed class CashSessionRepository(ApplicationDbContext dbContext) : ICas
     public async Task<CashSession?> GetActiveSessionAsync(CancellationToken ct = default)
     {
         return await dbContext.CashSessions
+            .Include(x => x.Movements)
             .Where(cs => cs.Status == CashSessionStatus.Open)
             .OrderByDescending(cs => cs.StartAt)
             .FirstOrDefaultAsync(ct);

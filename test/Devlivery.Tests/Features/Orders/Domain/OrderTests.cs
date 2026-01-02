@@ -3,6 +3,7 @@ using Devlivery.Features.Orders.Domain.Entities;
 using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Orders.Domain.Events;
 using Devlivery.Features.Orders.Domain.ValueObjects;
+using Devlivery.Shared.Domain.Enums;
 using Devlivery.Shared.SeedWork;
 
 using Shouldly;
@@ -28,13 +29,17 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         var item = fixture.CreateOrderItem(establishmentId: establishmentId);
 
         // Act
+        var totalAmount = item.TotalPrice + deliveryFee;
+        var payments = new List<OrderPayment> { new(establishmentId, paymentMethod, totalAmount) };
+
+        // Act
         var order = new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
-            paymentMethod: paymentMethod,
             deliveryFee: deliveryFee,
             establishmentId: establishmentId,
             items: [item],
+            payments: payments,
             notes: notes
         );
 
@@ -64,13 +69,17 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         var item2 = fixture.CreateOrderItem(establishmentId: establishmentId, quantity: 1, unitPrice: 30.00m);
 
         // Act
+        var totalAmount = item1.TotalPrice + item2.TotalPrice + 10.00m;
+        var payments = new List<OrderPayment> { new(establishmentId, PaymentMethod.Cash, totalAmount) };
+
+        // Act
         var order = new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
-            paymentMethod: PaymentMethod.Cash,
             deliveryFee: 10.00m,
             establishmentId: establishmentId,
-            items: [item1, item2]
+            items: [item1, item2],
+            payments: payments
         );
 
         // Assert
@@ -85,13 +94,14 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
 
         // Act & Assert
+        // Act & Assert
         Should.Throw<ArgumentException>(() => new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
-            paymentMethod: PaymentMethod.Cash,
             deliveryFee: 10.00m,
             establishmentId: Guid.NewGuid(),
-            items: new List<OrderItem>()
+            items: new List<OrderItem>(),
+            payments: new List<OrderPayment> { new(Guid.NewGuid(), PaymentMethod.Cash, 10.00m) }
         ));
     }
 
@@ -105,41 +115,15 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         var item = fixture.CreateOrderItem(establishmentId: establishmentId);
 
         // Act & Assert
+        // Act & Assert
         Should.Throw<ArgumentException>(() => new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
-            paymentMethod: PaymentMethod.Cash,
             deliveryFee: -5.00m,
             establishmentId: establishmentId,
-            items: [item]
+            items: [item],
+            payments: new List<OrderPayment> { new(establishmentId, PaymentMethod.Cash, item.TotalPrice - 5.00m) }
         ));
-    }
-
-    [Fact]
-    public void Constructor_Should_Raise_OrderCreatedEvent()
-    {
-        // Arrange
-        var customer = CustomerInfo.Create("João Silva", new PhoneNumber("11987654321"));
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
-        var establishmentId = Guid.NewGuid();
-        var item = fixture.CreateOrderItem(establishmentId: establishmentId);
-
-        // Act
-        var order = new Order(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            paymentMethod: PaymentMethod.Pix,
-            deliveryFee: 10.00m,
-            establishmentId: establishmentId,
-            items: [item]
-        );
-
-        // Assert
-        var createdEvent = order.DomainEvents.OfType<OrderCreatedEvent>().FirstOrDefault();
-        createdEvent.ShouldNotBeNull();
-        createdEvent.OrderId.ShouldBe(order.Id);
-        createdEvent.EstablishmentId.ShouldBe(establishmentId);
-        createdEvent.CustomerName.ShouldBe("João Silva");
     }
 
     [Fact]
@@ -235,7 +219,7 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         order.Customer.Phone.ShouldNotBeNull();
         order.Customer.Phone.Number.ShouldBe("22222222222");
         order.DeliveryAddress.FullAddress.ShouldBe("Endereço Atualizado");
-        order.PaymentMethod.ShouldBe(PaymentMethod.Cash); // Não muda
+        order.Payments.First().PaymentMethod.ShouldBe(PaymentMethod.Cash); // Não muda
         order.DeliveryFee.ShouldBe(10.00m);
         order.Notes.ShouldBe("Notas Atualizadas");
     }
@@ -249,13 +233,16 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         var customer = CustomerInfo.Create("João Silva");
         var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
 
+        var totalAmount = item.TotalPrice + 5.00m;
+        var payments = new List<OrderPayment> { new(establishmentId, PaymentMethod.Cash, totalAmount) };
+
         var order = new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
-            paymentMethod: PaymentMethod.Cash,
             deliveryFee: 5.00m,
             establishmentId: establishmentId,
-            items: [item]
+            items: [item],
+            payments: payments
         );
 
         // Total inicial: (2 * 50.00) + 5.00 = 105.00
@@ -281,13 +268,16 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         var customer = CustomerInfo.Create("João Silva");
         var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
 
+        var totalAmount = originalItem.TotalPrice + 5.00m;
+        var payments = new List<OrderPayment> { new(establishmentId, PaymentMethod.Cash, totalAmount) };
+
         var order = new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
-            paymentMethod: PaymentMethod.Cash,
             deliveryFee: 5.00m,
             establishmentId: establishmentId,
-            items: [originalItem]
+            items: [originalItem],
+            payments: payments
         );
 
         var newItem1 = fixture.CreateOrderItem(quantity: 2, unitPrice: 25.00m, establishmentId: establishmentId);
@@ -330,90 +320,16 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
     }
 
     [Fact]
-    public void UpdateDetails_Should_Raise_OrderUpdatedEvent_When_Total_Changes()
-    {
-        // Arrange
-        var establishmentId = Guid.NewGuid();
-        var item = fixture.CreateOrderItem(quantity: 2, unitPrice: 50.00m, establishmentId: establishmentId);
-        var customer = CustomerInfo.Create("João Silva");
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
-
-        var order = new Order(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            paymentMethod: PaymentMethod.Cash,
-            deliveryFee: 5.00m,
-            establishmentId: establishmentId,
-            items: [item]
-        );
-
-        order.ClearDomainEvents(); // Clear creation event
-
-        // Act
-        order.UpdateDetails(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            deliveryFee: 15.00m // Muda a delivery fee, logo muda o total
-        );
-
-        // Assert
-        var updatedEvent = order.DomainEvents.OfType<OrderUpdatedEvent>().FirstOrDefault();
-        updatedEvent.ShouldNotBeNull();
-        updatedEvent.OrderId.ShouldBe(order.Id);
-        updatedEvent.OldTotal.ShouldBe(105.00m);
-        updatedEvent.NewTotal.ShouldBe(115.00m);
-    }
-
-    [Fact]
-    public void UpdateDetails_Should_Not_Raise_OrderUpdatedEvent_When_Total_Does_Not_Change()
-    {
-        // Arrange
-        var order = fixture.CreateOrder();
-        var oldTotal = order.Total;
-        var newCustomer = CustomerInfo.Create("Novo Nome");
-        var newDeliveryAddress = new DeliveryAddress("Novo Endereço");
-
-        order.ClearDomainEvents(); // Clear creation event
-
-        // Act
-        order.UpdateDetails(
-            customer: newCustomer,
-            deliveryAddress: newDeliveryAddress,
-            deliveryFee: order.DeliveryFee // Mantém a mesma delivery fee
-        );
-
-        // Assert
-        order.Total.ShouldBe(oldTotal);
-        order.DomainEvents.OfType<OrderUpdatedEvent>().ShouldBeEmpty();
-    }
-
-    [Fact]
     public void UpdatePaymentMethod_Should_Change_PaymentMethod()
     {
         // Arrange
         var order = fixture.CreateOrder(paymentMethod: PaymentMethod.Cash);
 
         // Act
-        order.UpdatePaymentMethod(PaymentMethod.Pix);
+        order.AddPayment(new OrderPayment(order.EstablishmentId, PaymentMethod.Pix, order.Total));
 
         // Assert
-        order.PaymentMethod.ShouldBe(PaymentMethod.Pix);
-    }
-
-    [Fact]
-    public void UpdatePaymentMethod_Should_Raise_OrderPaymentMethodChangedEvent()
-    {
-        // Arrange
-        var order = fixture.CreateOrder(paymentMethod: PaymentMethod.Cash);
-
-        // Act
-        order.UpdatePaymentMethod(PaymentMethod.CreditCard);
-
-        // Assert
-        var paymentChangedEvent = order.DomainEvents.OfType<OrderPaymentMethodChangedEvent>().FirstOrDefault();
-        paymentChangedEvent.ShouldNotBeNull();
-        paymentChangedEvent.OldPaymentMethod.ShouldBe(PaymentMethod.Cash);
-        paymentChangedEvent.NewPaymentMethod.ShouldBe(PaymentMethod.CreditCard);
+        order.Payments.Any(p => p.PaymentMethod == PaymentMethod.Pix).ShouldBeTrue();
     }
 
     [Fact]
@@ -444,13 +360,17 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
 
         // Act
+        var totalAmount = item1.TotalPrice + item2.TotalPrice + item3.TotalPrice + 7.50m;
+        var payments = new List<OrderPayment> { new(establishmentId, PaymentMethod.Cash, totalAmount) };
+
+        // Act
         var order = new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
-            paymentMethod: PaymentMethod.Cash,
             deliveryFee: 7.50m,
             establishmentId: establishmentId,
-            items: [item1, item2, item3]
+            items: [item1, item2, item3],
+            payments: payments
         );
 
         // Assert

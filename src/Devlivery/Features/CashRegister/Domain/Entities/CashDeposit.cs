@@ -1,6 +1,6 @@
 using Devlivery.Shared.SeedWork;
 
-namespace Devlivery.Features.CashRegister.Domain;
+namespace Devlivery.Features.CashRegister.Domain.Entities;
 
 public sealed class CashDeposit : Entity
 {

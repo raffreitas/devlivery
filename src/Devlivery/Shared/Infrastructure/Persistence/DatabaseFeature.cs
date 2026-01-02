@@ -1,4 +1,4 @@
-﻿using Devlivery.Shared.Extensions;
+﻿using Devlivery.Shared.CrossCutting.Extensions;
 using Devlivery.Shared.Infrastructure.Identity.Context;
 using Devlivery.Shared.Infrastructure.Identity.Users.Models;
 using Devlivery.Shared.Infrastructure.Persistence.Abstractions;

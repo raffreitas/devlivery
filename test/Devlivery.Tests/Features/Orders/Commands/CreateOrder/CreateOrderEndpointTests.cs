@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 
-using Devlivery.Features.Orders.Domain.Enums;
+using Devlivery.Shared.Domain.Enums;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 using Devlivery.Tests.Common;
 using Devlivery.Tests.Common.Builders;

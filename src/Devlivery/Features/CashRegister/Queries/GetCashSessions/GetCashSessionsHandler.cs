@@ -1,6 +1,8 @@
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.CrossCutting.Extensions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessions;

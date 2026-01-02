@@ -1,4 +1,4 @@
-using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Entities;
 using Devlivery.Features.Establishments.Domain;
 
 using Microsoft.EntityFrameworkCore;

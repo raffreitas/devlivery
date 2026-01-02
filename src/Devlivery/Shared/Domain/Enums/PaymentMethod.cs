@@ -1,4 +1,4 @@
-﻿namespace Devlivery.Features.Orders.Domain.Enums;
+﻿namespace Devlivery.Shared.Domain.Enums;
 
 public enum PaymentMethod
 {

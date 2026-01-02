@@ -12,7 +12,6 @@ public sealed record OrderStatusChangedEvent(
     Guid EstablishmentId,
     OrderStatus OldStatus,
     OrderStatus NewStatus,
-    PaymentMethod PaymentMethod,
     decimal TotalAmount,
     DateTime ChangedAt
 ) : DomainEventBase;

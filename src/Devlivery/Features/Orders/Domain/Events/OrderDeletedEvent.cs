@@ -11,7 +11,6 @@ public sealed record OrderDeletedEvent(
     Guid OrderId,
     Guid EstablishmentId,
     decimal Total,
-    PaymentMethod PaymentMethod,
     OrderStatus Status,
     DateTime DeletedAt
 ) : DomainEventBase;

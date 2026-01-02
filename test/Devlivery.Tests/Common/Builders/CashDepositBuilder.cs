@@ -1,6 +1,6 @@
 using Bogus;
 
-using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Entities;
 
 namespace Devlivery.Tests.Common.Builders;
 

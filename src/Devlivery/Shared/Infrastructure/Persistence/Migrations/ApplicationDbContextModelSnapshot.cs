@@ -23,67 +23,6 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Devlivery.Features.CashRegister.Domain.CashDeposit", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("amount");
-
-                    b.Property<Guid>("AttendantId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("attendant_id");
-
-                    b.Property<string>("AttendantName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("attendant_name");
-
-                    b.Property<Guid>("CashSessionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("cash_session_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTime>("DepositedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deposited_at");
-
-                    b.Property<Guid>("EstablishmentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("establishment_id");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("notes");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_cash_deposits");
-
-                    b.HasIndex("CashSessionId")
-                        .HasDatabaseName("ix_cash_deposits_cash_session_id");
-
-                    b.HasIndex("DepositedAt")
-                        .HasDatabaseName("ix_cash_deposits_deposited_at");
-
-                    b.HasIndex("EstablishmentId")
-                        .HasDatabaseName("ix_cash_deposits_establishment_id");
-
-                    b.ToTable("cash_deposits", (string)null);
-                });
-
             modelBuilder.Entity("Devlivery.Features.CashRegister.Domain.CashSession", b =>
                 {
                     b.Property<Guid>("Id")
@@ -117,11 +56,6 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("establishment_id");
 
-                    b.Property<decimal>("ExpectedCashAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("expected_cash_amount");
-
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)")
@@ -132,11 +66,6 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("opening_amount");
 
-                    b.Property<string>("PaymentBreakdown")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("payment_breakdown");
-
                     b.Property<DateTime>("StartAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_at");
@@ -146,19 +75,6 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("status");
-
-                    b.Property<int>("TotalOrders")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("total_orders");
-
-                    b.Property<decimal>("TotalRevenue")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasDefaultValue(0m)
-                        .HasColumnName("total_revenue");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -174,6 +90,75 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasDatabaseName("ix_cash_sessions_status");
 
                     b.ToTable("cash_sessions", (string)null);
+                });
+
+            modelBuilder.Entity("Devlivery.Features.CashRegister.Domain.Entities.CashSessionMovement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("CashSessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cash_session_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EntryType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("entry_type");
+
+                    b.Property<Guid>("EstablishmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("establishment_id");
+
+                    b.Property<Guid?>("OrderPaymentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_payment_id");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("payment_method");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid?>("RelatedOrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("related_order_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cash_session_movements");
+
+                    b.HasIndex("CashSessionId")
+                        .HasDatabaseName("ix_cash_session_movements_cash_session_id");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_cash_session_movements_created_at");
+
+                    b.HasIndex("EstablishmentId")
+                        .HasDatabaseName("ix_cash_session_movements_establishment_id");
+
+                    b.HasIndex("RelatedOrderId")
+                        .HasDatabaseName("ix_cash_session_movements_related_order_id");
+
+                    b.ToTable("cash_session_movements", (string)null);
                 });
 
             modelBuilder.Entity("Devlivery.Features.Establishments.Domain.Establishment", b =>
@@ -375,11 +360,71 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                     b.ToTable("order_items", (string)null);
                 });
 
+            modelBuilder.Entity("Devlivery.Features.Orders.Domain.Entities.OrderPayment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime?>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("EstablishmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("establishment_id");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("payment_method");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("payment_status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("order_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_order_payments");
+
+                    b.HasIndex("EstablishmentId")
+                        .HasDatabaseName("ix_order_payments_establishment_id");
+
+                    b.HasIndex("order_id")
+                        .HasDatabaseName("ix_order_payments_order_id");
+
+                    b.ToTable("order_payments", (string)null);
+                });
+
             modelBuilder.Entity("Devlivery.Features.Orders.Domain.Order", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<decimal>("Change")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("change");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -398,12 +443,6 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("notes");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("payment_method");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -551,23 +590,6 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("Devlivery.Features.CashRegister.Domain.CashDeposit", b =>
-                {
-                    b.HasOne("Devlivery.Features.CashRegister.Domain.CashSession", null)
-                        .WithMany("Deposits")
-                        .HasForeignKey("CashSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_cash_deposits_cash_sessions_cash_session_id");
-
-                    b.HasOne("Devlivery.Features.Establishments.Domain.Establishment", null)
-                        .WithMany()
-                        .HasForeignKey("EstablishmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_cash_deposits_establishments_establishment_id");
-                });
-
             modelBuilder.Entity("Devlivery.Features.CashRegister.Domain.CashSession", b =>
                 {
                     b.HasOne("Devlivery.Features.Establishments.Domain.Establishment", null)
@@ -576,6 +598,23 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_cash_sessions_establishments_establishment_id");
+                });
+
+            modelBuilder.Entity("Devlivery.Features.CashRegister.Domain.Entities.CashSessionMovement", b =>
+                {
+                    b.HasOne("Devlivery.Features.CashRegister.Domain.CashSession", null)
+                        .WithMany("Movements")
+                        .HasForeignKey("CashSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_cash_session_movements_cash_sessions_cash_session_id");
+
+                    b.HasOne("Devlivery.Features.Establishments.Domain.Establishment", null)
+                        .WithMany()
+                        .HasForeignKey("EstablishmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cash_session_movements_establishments_establishment_id");
                 });
 
             modelBuilder.Entity("Devlivery.Features.Expenses.Domain.Aggregates.Categories.Category", b =>
@@ -635,6 +674,23 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasConstraintName("fk_order_items_orders_order_id");
                 });
 
+            modelBuilder.Entity("Devlivery.Features.Orders.Domain.Entities.OrderPayment", b =>
+                {
+                    b.HasOne("Devlivery.Features.Establishments.Domain.Establishment", null)
+                        .WithMany()
+                        .HasForeignKey("EstablishmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_order_payments_establishments_establishment_id");
+
+                    b.HasOne("Devlivery.Features.Orders.Domain.Order", null)
+                        .WithMany("Payments")
+                        .HasForeignKey("order_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_order_payments_orders_order_id");
+                });
+
             modelBuilder.Entity("Devlivery.Features.Orders.Domain.Order", b =>
                 {
                     b.HasOne("Devlivery.Features.Establishments.Domain.Establishment", null)
@@ -667,7 +723,7 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
 
             modelBuilder.Entity("Devlivery.Features.CashRegister.Domain.CashSession", b =>
                 {
-                    b.Navigation("Deposits");
+                    b.Navigation("Movements");
                 });
 
             modelBuilder.Entity("Devlivery.Features.Expenses.Domain.Aggregates.Categories.Category", b =>
@@ -678,6 +734,8 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
             modelBuilder.Entity("Devlivery.Features.Orders.Domain.Order", b =>
                 {
                     b.Navigation("Items");
+
+                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }

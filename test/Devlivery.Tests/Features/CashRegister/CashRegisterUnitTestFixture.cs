@@ -1,6 +1,7 @@
 using Bogus;
 
 using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Entities;
 using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;

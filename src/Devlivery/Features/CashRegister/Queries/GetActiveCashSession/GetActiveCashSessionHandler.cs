@@ -1,8 +1,11 @@
-using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Enums;
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using FluentResults;
+
 using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
@@ -15,7 +18,7 @@ public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext)
     {
         var cashSession = await dbContext.CashSessions
             .AsNoTracking()
-            .Include(cs => cs.Deposits)
+            .Include(cs => cs.Movements)
             .Where(cs => cs.Status == CashSessionStatus.Open)
             .OrderByDescending(cs => cs.StartAt)
             .FirstOrDefaultAsync(cancellationToken);

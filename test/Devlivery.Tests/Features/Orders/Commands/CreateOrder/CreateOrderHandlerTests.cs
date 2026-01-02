@@ -3,6 +3,7 @@ using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Application.Errors;
+using Devlivery.Shared.Domain.Enums;
 
 using NSubstitute;
 

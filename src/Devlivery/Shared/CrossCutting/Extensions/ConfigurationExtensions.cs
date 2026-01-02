@@ -1,4 +1,4 @@
-﻿namespace Devlivery.Shared.Extensions;
+﻿namespace Devlivery.Shared.CrossCutting.Extensions;
 
 public static class ConfigurationExtensions
 {

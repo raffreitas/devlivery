@@ -10,9 +10,14 @@ public sealed record GetOrderByIdResponse(
     string Status,
     decimal Total,
     decimal DeliveryFee,
-    string PaymentMethod,
+    OrderPaymentDto[] Payments,
     DateTime CreatedAt,
     DateTime UpdatedAt);
+
+public sealed record OrderPaymentDto(
+    Guid Id,
+    decimal Amount,
+    string PaymentMethod);
 
 public sealed record OrderItemDto(
     ProductDto Product,

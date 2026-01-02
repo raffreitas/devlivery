@@ -47,10 +47,7 @@ public sealed class UpdateOrderHandler(
 
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
-        if (order.PaymentMethod != command.PaymentMethod)
-            order.UpdatePaymentMethod(command.PaymentMethod);
-
-        var newItens = command.Items.Select(item => new OrderItem(
+        var newItems = command.Items.Select(item => new OrderItem(
             productId: item.ProductId,
             establishmentId: order.EstablishmentId,
             quantity: item.Quantity,
@@ -65,9 +62,12 @@ public sealed class UpdateOrderHandler(
             customer: customer,
             deliveryAddress: deliveryAddress,
             deliveryFee: command.DeliveryFee,
-            items: newItens,
+            items: newItems,
             notes: command.Notes
         );
+
+        var updates = command.Payments?.Select(p => new OrderPaymentUpdate(p.Id, p.Method, p.Amount)) ?? Enumerable.Empty<OrderPaymentUpdate>();
+        order.ReconcilePayments(updates);
 
         await orderRepository.UpdateAsync(order, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

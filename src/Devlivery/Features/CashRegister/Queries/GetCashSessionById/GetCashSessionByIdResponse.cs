@@ -1,6 +1,6 @@
-using System.Collections.ObjectModel;
-
 using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Enums;
+using Devlivery.Shared.Domain.Enums;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 
@@ -14,24 +14,34 @@ public sealed record GetCashSessionByIdResponse(
     decimal TotalRevenue,
     int TotalOrders,
     IReadOnlyCollection<PaymentBreakdownDto> PaymentBreakdown,
+    IReadOnlyCollection<CashMovementDto> CashMovements,
     DateTime StartAt,
     DateTime? EndAt,
     string Status,
     string? Notes)
 {
-    public static GetCashSessionByIdResponse FromDomain(
-        CashSession cashSession,
-        decimal? expectedCashAmount = null)
+    public static GetCashSessionByIdResponse FromDomain(CashSession cashSession)
     {
-        var payments = cashSession.PaymentBreakdown
-            .Select(pb => new PaymentBreakdownDto(pb.Method, pb.Amount, pb.Count))
-            .ToList();
+        PaymentBreakdownDto[] paymentBreakdown = cashSession.Movements
+                .Where(m => m.EntryType is CashSessionEntryType.Payment or CashSessionEntryType.Refund)
+                .GroupBy(m => m.PaymentMethod)
+                .Select(g => new PaymentBreakdownDto(
+                    g.Key!.Value,
+                    g.Sum(m => m.Amount),
+                    g.Count()))
+                .Where(pb => pb.Amount > 0)
+                .ToArray();
 
-        // Calculate expected cash from payment breakdown if not provided
-        var calculatedExpectedCash = expectedCashAmount ??
-                                     cashSession.OpeningAmount + cashSession.PaymentBreakdown
-                                         .Where(pb => pb.Method.Equals("cash", StringComparison.OrdinalIgnoreCase))
-                                         .Sum(pb => pb.Amount);
+        var cashMovements = cashSession.Movements
+            .Where(m => m.EntryType is not CashSessionEntryType.Payment and not CashSessionEntryType.Refund)
+            .Select(m => new CashMovementDto(
+                m.EntryType,
+                m.Amount,
+                m.PaymentMethod,
+                m.RelatedOrderId,
+                m.OrderPaymentId,
+                m.Reason))
+            .ToArray();
 
         return new GetCashSessionByIdResponse(
             cashSession.Id,
@@ -39,13 +49,18 @@ public sealed record GetCashSessionByIdResponse(
             cashSession.AttendantName,
             cashSession.OpeningAmount,
             cashSession.ClosingAmount,
-            calculatedExpectedCash,
+            cashSession.ExpectedCashAmount,
             cashSession.TotalRevenue,
             cashSession.TotalOrders,
-            new ReadOnlyCollection<PaymentBreakdownDto>(payments),
+            paymentBreakdown,
+            cashMovements,
             cashSession.StartAt,
             cashSession.EndAt,
             cashSession.Status.ToString(),
             cashSession.Notes);
     }
 }
+
+public sealed record PaymentBreakdownDto(PaymentMethod Method, decimal Amount, int Count);
+
+public sealed record CashMovementDto(CashSessionEntryType EntryType, decimal Amount, PaymentMethod? Method, Guid? RelatedOrderId, Guid? OrderPaymentId, string? Reason);

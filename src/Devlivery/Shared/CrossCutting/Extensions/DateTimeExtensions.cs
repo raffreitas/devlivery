@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Devlivery.Shared.Extensions;
+namespace Devlivery.Shared.CrossCutting.Extensions;
 
 public static class DateTimeExtensions
 {

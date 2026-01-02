@@ -1,4 +1,4 @@
-﻿using Devlivery.Features.Orders.Domain.Enums;
+﻿using Devlivery.Shared.Domain.Enums;
 
 using FluentResults;
 
@@ -14,12 +14,14 @@ public sealed record UpdateOrderCommand(
     string CustomerName,
     string? CustomerPhone,
     string DeliveryAddress,
-    PaymentMethod PaymentMethod,
+    OrderPaymentDto[] Payments,
     decimal DeliveryFee = 0,
     string? DeliveryReference = null,
     string? Notes = null) : ICommand<Result>;
 
 public sealed record OrderItemDto(Guid ProductId, int Quantity, string? Notes);
+
+public sealed record OrderPaymentDto(Guid? Id, PaymentMethod Method, decimal Amount);
 
 public sealed class UpdateOrderCommandValidator : AbstractValidator<UpdateOrderCommand>
 {
@@ -48,9 +50,14 @@ public sealed class UpdateOrderCommandValidator : AbstractValidator<UpdateOrderC
                     "O campo '{PropertyName}' deve ser um telefone válido (formato: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX).");
         });
 
-        RuleFor(x => x.PaymentMethod)
-            .NotNull().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .IsInEnum().WithMessage("O campo '{PropertyName}' deve ser um método de pagamento válido.");
+        RuleFor(x => x.Payments)
+            .NotEmpty().WithMessage("O campo '{PropertyName}' não pode estar vazio.");
+
+        RuleForEach(x => x.Payments).ChildRules(payment =>
+        {
+            payment.RuleFor(p => p.Method).IsInEnum().WithMessage("O campo '{PropertyName}' deve ser um método de pagamento válido.");
+            payment.RuleFor(p => p.Amount).GreaterThan(0).WithMessage("O campo '{PropertyName}' deve ser maior que {ComparisonValue}.");
+        });
 
         RuleFor(x => x.DeliveryAddress)
             .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")

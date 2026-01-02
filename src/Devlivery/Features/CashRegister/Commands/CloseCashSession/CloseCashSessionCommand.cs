@@ -10,7 +10,7 @@ public sealed record CloseCashSessionCommand(
     Guid Id,
     decimal ClosingAmount,
     string? Notes
-) : ICommand<Result<CloseCashSessionResponse>>;
+) : ICommand<Result>;
 
 public sealed class CloseCashSessionValidator : AbstractValidator<CloseCashSessionCommand>
 {

@@ -20,7 +20,6 @@ public sealed class UpdateOrderStatusHandler(
             return Result.Fail(new NotFoundError("Pedido não encontrado"));
 
         order.UpdateStatus(command.Status);
-        await orderRepository.UpdateAsync(order, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Ok();

@@ -1,5 +1,4 @@
-﻿using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Shared.Infrastructure.WebServer.Extensions;
+﻿using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 using Mediator;
 
@@ -12,8 +11,8 @@ public static class UpdateOrderEndpoint
         string CustomerName,
         string? CustomerPhone,
         string DeliveryAddress,
+        OrderPaymentDto[] Payments,
         string? DeliveryReference,
-        PaymentMethod PaymentMethod,
         decimal DeliveryFee = 0,
         string? Notes = null);
 
@@ -34,7 +33,7 @@ public static class UpdateOrderEndpoint
             request.CustomerName,
             request.CustomerPhone,
             request.DeliveryAddress,
-            request.PaymentMethod,
+            request.Payments,
             request.DeliveryFee,
             request.DeliveryReference,
             request.Notes);

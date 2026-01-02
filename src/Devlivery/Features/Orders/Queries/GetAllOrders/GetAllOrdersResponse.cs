@@ -2,7 +2,7 @@ namespace Devlivery.Features.Orders.Queries.GetAllOrders;
 
 public sealed record GetAllOrdersResponse(
     Guid Id,
-    List<OrderItemDto> Items,
+    OrderItemDto[] Items,
     string CustomerName,
     string? CustomerPhone,
     string DeliveryAddress,
@@ -10,7 +10,7 @@ public sealed record GetAllOrdersResponse(
     string Status,
     decimal Total,
     decimal DeliveryFee,
-    string PaymentMethod,
+    OrderPaymentDto[] Payments,
     DateTime CreatedAt,
     DateTime UpdatedAt);
 
@@ -18,6 +18,11 @@ public sealed record OrderItemDto(
     ProductDto Product,
     int Quantity,
     string? Notes);
+
+public sealed record OrderPaymentDto(
+    Guid Id,
+    decimal Amount,
+    string PaymentMethod);
 
 public sealed record ProductDto(
     Guid Id,

@@ -9,12 +9,15 @@ public class TenantRegisterMiddleware(
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        if (
-            context.Request.Path.Value == null ||
-            context.Request.Path.Value.Contains("/scalar") ||
-            context.Request.Path.Value.Contains("/openapi") ||
-            context.Request.Path.Value.Contains("/health") ||
-            context.Request.Path.Value.Contains("/login"))
+        string[] publicEndpoints =
+        [
+            "/scalar",
+            "/openapi",
+            "/health",
+            "/alive",
+            "/api/auth/login"
+        ];
+        if (publicEndpoints.Any(endpoint => context.Request.Path.StartsWithSegments(endpoint)))
         {
             await next(context);
             return;

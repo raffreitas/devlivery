@@ -2,8 +2,8 @@
 
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Orders.Domain.ValueObjects;
+using Devlivery.Shared.Domain.Enums;
 using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Tests.Common.Builders;
@@ -16,9 +16,9 @@ public class OrderBuilder
     private string? _customerPhone;
     private string _deliveryAddress;
     private string? _deliveryReference;
-    private PaymentMethod _paymentMethod;
     private decimal _deliveryFee;
     private OrderItem[] _orderItems;
+    private readonly List<OrderPayment> _payments = [];
     private Guid _establishmentId;
     private string? _notes;
 
@@ -28,10 +28,10 @@ public class OrderBuilder
         _customerPhone = _faker.Phone.PhoneNumber("## #####-####");
         _deliveryAddress = _faker.Address.FullAddress();
         _deliveryReference = null;
-        _paymentMethod = _faker.PickRandom<PaymentMethod>();
         _deliveryFee = _faker.Random.Decimal(0.0m, 20.0m);
         _establishmentId = Guid.NewGuid();
         _orderItems = [];
+        _payments = [];
         _notes = null;
     }
 
@@ -59,9 +59,15 @@ public class OrderBuilder
         return this;
     }
 
-    public OrderBuilder WithPaymentMethod(PaymentMethod paymentMethod)
+    public OrderBuilder WithPaymentMethod(PaymentMethod paymentMethod, decimal? amount = null)
     {
-        _paymentMethod = paymentMethod;
+        _payments.Add(new OrderPayment(_establishmentId, paymentMethod, amount ?? 0));
+        return this;
+    }
+
+    public OrderBuilder WithPayment(OrderPayment payment)
+    {
+        _payments.Add(payment);
         return this;
     }
 
@@ -109,13 +115,31 @@ public class OrderBuilder
         var customer = CustomerInfo.Create(_customerName, phone);
         var deliveryAddress = new DeliveryAddress(_deliveryAddress, _deliveryReference);
 
+        var totalItems = items.Sum(i => i.TotalPrice) + _deliveryFee;
+        
+        // Se não houver pagamentos, criar um pagamento total padrão
+        if (_payments.Count == 0)
+        {
+            _payments.Add(new OrderPayment(_establishmentId, _faker.PickRandom<PaymentMethod>(), totalItems));
+        }
+        else
+        {
+            // Ajustar o valor do primeiro pagamento se ele for 0 (caso tenha sido adicionado sem valor)
+            if (_payments.Count == 1 && _payments[0].Amount == 0)
+            {
+                var p = _payments[0];
+                _payments.Clear();
+                _payments.Add(new OrderPayment(_establishmentId, p.PaymentMethod, totalItems));
+            }
+        }
+
         var order = new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
-            paymentMethod: _paymentMethod,
             deliveryFee: _deliveryFee,
             establishmentId: _establishmentId,
             items: items.ToList(),
+            payments: _payments,
             notes: _notes
         );
 

@@ -1,4 +1,4 @@
-using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Entities;
 
 using Shouldly;
 
