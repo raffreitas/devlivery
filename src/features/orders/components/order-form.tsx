@@ -29,7 +29,11 @@ import {
   getPaymentOptionLabel,
   getPaymentOptions,
 } from "../constants/payment-methods";
-import { type OrderFormData, orderFormSchema } from "../types";
+import {
+  type OrderFormData,
+  orderFormSchema,
+  type PaymentMethod,
+} from "../types";
 import { OrderItemsTable } from "./order-form-items-table";
 import { ProductSelector } from "./order-form-product-selector";
 
@@ -127,6 +131,23 @@ export function OrderForm({
     onSubmit(data);
   };
 
+  const handleAddPaymentMethod = (
+    isSelected: boolean,
+    method: PaymentMethod,
+  ) => {
+    if (isSelected) {
+      if (paymentFields.length > 1) {
+        const index = paymentFields.findIndex((p) => p.method === method);
+        removePayment(index);
+      }
+    } else {
+      appendPayment({
+        method: method,
+        amount: Math.max(0, remainingAmount),
+      });
+    }
+  };
+
   const deliveryFee =
     useWatch({
       control: form.control,
@@ -148,9 +169,12 @@ export function OrderForm({
   const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) ?? 0;
   const remainingAmount = total - totalPaid;
 
-  // Efeito para sincronizar automaticamente o valor se houver apenas um pagamento
   useEffect(() => {
-    if (paymentFields.length === 1 && payments?.[0]?.amount !== total) {
+    if (
+      paymentFields.length === 1 &&
+      payments?.[0]?.amount !== total &&
+      payments?.[0]?.method !== "Cash"
+    ) {
       form.setValue(`payments.0.amount`, total, { shouldValidate: true });
     }
   }, [total, paymentFields.length, form, payments]);
@@ -241,7 +265,9 @@ export function OrderForm({
                 name="deliveryFee"
                 render={({ field }) => (
                   <FormItem className="flex items-center gap-2 space-y-0">
-                    <FormLabel className="truncate">Taxa de entrega:</FormLabel>
+                    <FormLabel className="truncate py-0.5">
+                      Taxa de entrega:
+                    </FormLabel>
                     <FormControl>
                       <InputMoney {...field} className="h-8 w-24" />
                     </FormControl>
@@ -276,21 +302,9 @@ export function OrderForm({
                         ? "bg-primary border-primary hover:bg-primary/90"
                         : "hover:border-primary/50 hover:bg-primary/5 text-muted-foreground",
                     )}
-                    onClick={() => {
-                      if (isSelected) {
-                        if (paymentFields.length > 1) {
-                          const index = paymentFields.findIndex(
-                            (p) => p.method === option.value,
-                          );
-                          removePayment(index);
-                        }
-                      } else {
-                        appendPayment({
-                          method: option.value,
-                          amount: remainingAmount,
-                        });
-                      }
-                    }}
+                    onClick={() =>
+                      handleAddPaymentMethod(isSelected, option.value)
+                    }
                   >
                     <Icon className="size-3.5" />
                     <span className="text-xs">{option.label}</span>
@@ -299,61 +313,59 @@ export function OrderForm({
                 );
               })}
             </div>
-            {paymentFields.length > 1 && (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
-                  {paymentFields.map((field, index) => (
-                    <div
-                      key={field.id}
-                      className="group relative flex flex-col p-2 rounded-lg border bg-muted/20 hover:border-primary/20 transition-colors shadow-none"
-                    >
-                      <div className="flex items-center justify-between px-1 mb-0.5">
-                        <span className="text-[9px] font-bold tracking-tight text-muted-foreground uppercase">
-                          {getPaymentOptionLabel(field.method)}
-                        </span>
-                      </div>
-                      <FormField
-                        control={form.control}
-                        name={`payments.${index}.amount`}
-                        render={({ field }) => (
-                          <FormItem className="space-y-0">
-                            <FormControl>
-                              <InputMoney {...field} />
-                            </FormControl>
-                            <FormMessage className="text-[10px]" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="flex flex-col gap-1.5 pt-1 border-t border-dashed mt-2">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-muted-foreground">
-                      Total Pedido: R$ {total.toFixed(2)}
-                    </span>
-                    {remainingAmount > 0 ? (
-                      <span className="text-amber-600 font-bold flex items-center gap-1">
-                        <div className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
-                        Falta: R$ {remainingAmount.toFixed(2)}
-                      </span>
-                    ) : remainingAmount < 0 ? (
-                      <span className="text-blue-600 font-bold">
-                        Troco: R$ {Math.abs(remainingAmount).toFixed(2)}
-                      </span>
-                    ) : (
-                      <span className="text-green-600 font-bold flex items-center gap-1">
-                        <Check className="size-3" /> PAGO
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
 
-            {form.formState.errors.payments && (
+            <div className="flex gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+              {paymentFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="group relative flex flex-1 flex-col p-2 rounded-lg border bg-muted/20 hover:border-primary/20 transition-colors shadow-none"
+                >
+                  <div className="flex items-center justify-between px-1 mb-0.5">
+                    <span className="text-[9px] font-bold tracking-tight text-muted-foreground uppercase">
+                      {getPaymentOptionLabel(field.method)}
+                    </span>
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name={`payments.${index}.amount`}
+                    render={({ field }) => (
+                      <FormItem className="space-y-0">
+                        <FormControl>
+                          <InputMoney {...field} />
+                        </FormControl>
+                        <FormMessage className="text-[10px]" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-1.5 pt-1 border-t border-dashed mt-2">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-muted-foreground">
+                  Total Pedido: R$ {total.toFixed(2)}
+                </span>
+                {remainingAmount > 0 ? (
+                  <span className="text-amber-600 font-bold flex items-center gap-1">
+                    <div className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    Falta: R$ {remainingAmount.toFixed(2)}
+                  </span>
+                ) : remainingAmount < 0 ? (
+                  <span className="text-blue-600 font-bold">
+                    Troco: R$ {Math.abs(remainingAmount).toFixed(2)}
+                  </span>
+                ) : (
+                  <span className="text-green-600 font-bold flex items-center gap-1">
+                    <Check className="size-3" /> PAGO
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {form.formState.errors.payments?.root?.message && (
               <p className="text-sm font-medium text-destructive mt-1">
-                {form.formState.errors.payments.message}
+                {form.formState.errors.payments.root?.message}
               </p>
             )}
           </div>

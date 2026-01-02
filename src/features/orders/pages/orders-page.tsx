@@ -23,13 +23,18 @@ import { OrdersHeader } from "../components/orders-header";
 import { getOrderStatusOptions } from "../constants/order-status";
 import { getPaymentOptions } from "../constants/payment-methods";
 import { useOrders } from "../hooks/use-orders";
-import type { Order, OrderFormData } from "../types";
+import type {
+  Order,
+  OrderFormData,
+  OrderStatus,
+  PaymentMethod,
+} from "../types";
 
-const statusOptions: Array<Order["status"]> = [
+const statusOptions: Array<OrderStatus> = [
   ...getOrderStatusOptions().map((s) => s.value),
 ];
 
-const paymentOptions: Array<Order["paymentMethod"]> = [
+const paymentOptions: Array<PaymentMethod> = [
   ...getPaymentOptions().map((o) => o.value),
 ];
 
@@ -39,9 +44,9 @@ export function OrdersPage() {
     to: new Date(),
   });
 
-  const [paymentFilter, setPaymentFilter] = useState<
-    Order["paymentMethod"] | "all"
-  >("all");
+  const [paymentFilter, setPaymentFilter] = useState<PaymentMethod | "all">(
+    "all",
+  );
 
   const {
     orders,
@@ -61,9 +66,7 @@ export function OrdersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<Order["status"] | "all">(
-    "all",
-  );
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
 
   const handleCreateOrUpdateOrder = async (data: OrderFormData) => {
     try {
@@ -111,7 +114,9 @@ export function OrdersPage() {
   const filteredByPayment =
     paymentFilter === "all"
       ? filteredOrders
-      : filteredOrders.filter((order) => order.paymentMethod === paymentFilter);
+      : filteredOrders.filter((order) =>
+          order.payments.some((p) => p.method === paymentFilter),
+        );
 
   return (
     <>

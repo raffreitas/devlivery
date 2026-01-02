@@ -126,11 +126,13 @@ export const orderService = {
       customerPhone: data.customerPhone,
       deliveryAddress: data.deliveryAddress,
       deliveryFee: data.deliveryFee,
-      payments: data.payments.map((p) => ({
-        id: p.id,
-        method: p.method,
-        amount: p.amount,
-      })),
+      payments: data.payments
+        .filter((p) => p.amount > 0)
+        .map((p) => ({
+          id: p.id,
+          method: p.method,
+          amount: p.amount,
+        })),
       notes: data.notes ?? null,
     };
     await api.post<void>("/api/orders", payload);
