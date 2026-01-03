@@ -1,19 +1,12 @@
-import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
-import { useCurrentCashSession } from "@/features/cash/hooks/use-current-cash-session";
 import { BottomSheet } from "@/shared/components/bottom-sheet";
 import {
   GridSkeleton,
   LoadingOverlay,
   LoadingState,
 } from "@/shared/components/loading";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -46,7 +39,6 @@ const paymentOptions: Array<PaymentMethod> = [
 ];
 
 export function OrdersPage() {
-  const { currentSession } = useCurrentCashSession();
   const [period, setPeriod] = useState<DateRange | undefined>({
     from: new Date(),
     to: new Date(),
@@ -137,17 +129,6 @@ export function OrdersPage() {
             onNewOrder={() => setIsModalOpen(true)}
           />
         </div>
-
-        {!currentSession && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Caixa Fechado</AlertTitle>
-            <AlertDescription>
-              O caixa está fechado. Abra o caixa para criar novos pedidos e
-              registrar vendas.
-            </AlertDescription>
-          </Alert>
-        )}
 
         <OrdersFilters
           statusFilter={statusFilter}

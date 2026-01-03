@@ -34,7 +34,7 @@ export function ExpensesByCategoryChart({
         <CardTitle>Despesas por Categoria</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] w-full">
+        <div className="h-75 w-full">
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
