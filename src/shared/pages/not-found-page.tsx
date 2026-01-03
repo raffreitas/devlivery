@@ -4,12 +4,12 @@ import { Button } from "../components/ui/button";
 
 export function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="text-center">
-        <h1 className="text-9xl sm:text-[12rem] font-bold text-orange-600 mb-4">
+        <h1 className="text-9xl sm:text-[12rem] font-bold text-primary mb-4">
           404
         </h1>
-        <p className="text-lg sm:text-xl text-gray-600 mb-8">
+        <p className="text-lg sm:text-xl text-muted-foreground mb-8">
           Página não encontrada
         </p>
         <Button asChild size="lg">

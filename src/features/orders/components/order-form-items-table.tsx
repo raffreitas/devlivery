@@ -36,19 +36,22 @@ export function OrderItemsTable({
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="border border-border rounded-lg overflow-hidden flex flex-col">
       {/* Mobile view */}
-      <div className="sm:hidden">
-        <div className="divide-y divide-gray-200">
+      <div className="sm:hidden flex-1 overflow-y-auto">
+        <div className="divide-y divide-border">
           {items.map((item, index) => (
-            <div key={item.fieldId} className="p-3 bg-white">
+            <div
+              key={item.fieldId}
+              className="p-3 bg-card hover:bg-accent/50 transition-colors"
+            >
               <div className="flex justify-between items-start mb-2">
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900 text-sm">
+                  <div className="font-medium text-foreground text-sm">
                     {item.product.name}
                   </div>
                   {item.notes && (
-                    <div className="text-gray-500 text-xs mt-1">
+                    <div className="text-muted-foreground text-xs mt-1">
                       Obs: {item.notes}
                     </div>
                   )}
@@ -56,16 +59,17 @@ export function OrderItemsTable({
                 <Button
                   type="button"
                   size="icon"
-                  variant="destructive"
+                  variant="ghost"
+                  className="ml-2"
                   onClick={() => onRemoveItem(index)}
                 >
-                  <XIcon />
+                  <XIcon className="w-4 h-4 text-destructive" />
                 </Button>
               </div>
               <div className="flex justify-between text-xs text-secondary-foreground">
                 <span>Qtd: {item.quantity}</span>
                 <span>Unit: {formatMoney(item.product.price)}</span>
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-foreground">
                   {formatMoney(item.product.price * item.quantity)}
                 </span>
               </div>
@@ -75,88 +79,94 @@ export function OrderItemsTable({
       </div>
 
       {/* Desktop view */}
-      <div className="hidden sm:block overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Produto
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Qtd
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Preço Unit.
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Subtotal
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ações
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {items.map((item, index) => (
-              <tr key={item.fieldId}>
-                <td className="px-4 py-3 text-sm">
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {item.product.name}
-                    </div>
-                    {item.notes && (
-                      <div className="text-gray-500 text-xs">
-                        Obs: {item.notes}
-                      </div>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-900">
-                  {item.quantity}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-900">
-                  {formatMoney(item.product.price)}
-                </td>
-                <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                  {formatMoney(item.product.price * item.quantity)}
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="destructive"
-                    onClick={() => onRemoveItem(index)}
-                  >
-                    <TrashIcon />
-                  </Button>
-                </td>
+      <div className="hidden sm:flex flex-col flex-1">
+        <div className="overflow-x-auto overflow-y-auto flex-1">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted/60 sticky top-0 z-10">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Produto
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Qtd
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Preço Unit.
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Subtotal
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Ações
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {items.map((item, index) => (
+                <tr
+                  key={item.fieldId}
+                  className="hover:bg-accent/50 transition-colors"
+                >
+                  <td className="px-4 py-3 text-sm">
+                    <div>
+                      <div className="font-medium text-foreground">
+                        {item.product.name}
+                      </div>
+                      {item.notes && (
+                        <div className="text-muted-foreground text-xs mt-1">
+                          Obs: {item.notes}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-foreground text-center">
+                    {item.quantity}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-foreground text-right">
+                    {formatMoney(item.product.price)}
+                  </td>
+                  <td className="px-4 py-3 text-sm font-semibold text-foreground text-right">
+                    {formatMoney(item.product.price * item.quantity)}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center">
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => onRemoveItem(index)}
+                      className="hover:bg-destructive/10"
+                    >
+                      <TrashIcon className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div className="bg-gray-50 px-3 sm:px-4 py-3">
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-xs sm:text-sm text-secondary-foreground">
+      <div className="border-t border-border bg-muted/40 px-3 sm:px-4 py-3 space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-xs sm:text-sm text-muted-foreground font-medium">
             Subtotal
           </span>
-          <span className="text-xs sm:text-sm font-medium text-gray-900">
+          <span className="text-xs sm:text-sm font-semibold text-foreground">
             {formatMoney(subtotal)}
           </span>
         </div>
 
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-xs sm:text-sm text-secondary-foreground">
+        <div className="flex justify-between items-center">
+          <span className="text-xs sm:text-sm text-muted-foreground font-medium">
             Taxa de Entrega
           </span>
-          <span className="text-xs sm:text-sm font-medium text-gray-900">
+          <span className="text-xs sm:text-sm font-semibold text-foreground">
             {formatMoney(deliveryFee)}
           </span>
         </div>
 
-        <div className="flex justify-between items-center">
-          <span className="text-base sm:text-lg font-semibold text-gray-900">
+        <div className="flex justify-between items-center pt-2 border-t border-border">
+          <span className="text-base sm:text-lg font-bold text-foreground">
             Total:
           </span>
           <span className="text-xl sm:text-2xl font-bold text-primary">

@@ -20,7 +20,7 @@ export function NavbarMobile({ isOpen, onToggle, onClose }: NavbarMobileProps) {
         aria-controls="mobile-menu"
         aria-expanded={isOpen}
         onClick={onToggle}
-        className="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none"
+        className="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/10 focus:outline-none"
       >
         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
@@ -28,7 +28,7 @@ export function NavbarMobile({ isOpen, onToggle, onClose }: NavbarMobileProps) {
       {/* Mobile menu panel */}
       {isOpen && (
         <div
-          className="sm:hidden absolute top-full left-0 right-0 z-50 bg-white shadow-lg border-t border-gray-200"
+          className="sm:hidden absolute top-full left-0 right-0 z-50 bg-card shadow-lg border-t border-border"
           id="mobile-menu"
         >
           <div className="px-2 pt-2 pb-3 space-y-1">
@@ -37,8 +37,8 @@ export function NavbarMobile({ isOpen, onToggle, onClose }: NavbarMobileProps) {
               onClick={onClose}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
                 isActive("/")
-                  ? "bg-orange-50 text-orange-700"
-                  : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-accent text-accent-foreground"
+                  : "text-foreground hover:bg-accent/10 hover:text-foreground"
               }`}
             >
               Dashboard
@@ -48,8 +48,8 @@ export function NavbarMobile({ isOpen, onToggle, onClose }: NavbarMobileProps) {
               onClick={onClose}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
                 isActive("/products")
-                  ? "bg-orange-50 text-orange-700"
-                  : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-accent text-accent-foreground"
+                  : "text-foreground hover:bg-accent/10 hover:text-foreground"
               }`}
             >
               Produtos
@@ -59,8 +59,8 @@ export function NavbarMobile({ isOpen, onToggle, onClose }: NavbarMobileProps) {
               onClick={onClose}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
                 isActive("/orders")
-                  ? "bg-orange-50 text-orange-700"
-                  : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-accent text-accent-foreground"
+                  : "text-foreground hover:bg-accent/10 hover:text-foreground"
               }`}
             >
               Pedidos

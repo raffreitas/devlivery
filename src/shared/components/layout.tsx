@@ -14,13 +14,13 @@ export function Layout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-background">
       {/* Sidebar for Desktop */}
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-h-screen relative">
         {/* Mobile Header */}
-        <header className="sm:hidden bg-white border-b border-gray-200 h-16 px-4 flex items-center justify-between sticky top-0 z-40">
+        <header className="sm:hidden bg-card border-b border-border h-16 px-4 flex items-center justify-between sticky top-0 z-40">
           <h1 className="text-xl font-bold text-primary">🍕 Devlivery</h1>
           <NavbarUserSection onLogout={onLogout} />
         </header>
@@ -33,8 +33,8 @@ export function Layout() {
              Wait, where is the User Profile on Desktop? The Sidebar has "Logout" but maybe not the full User Menu.
              Let's put the User Section in the top right of the main content area for Desktop as well.
          */}
-        <header className="hidden sm:flex bg-white border-b border-gray-100 h-16 px-6 items-center justify-between sticky top-0 z-40">
-          <h2 className="text-lg font-semibold text-gray-800">
+        <header className="hidden sm:flex bg-card border-b border-border h-16 px-6 items-center justify-between sticky top-0 z-40">
+          <h2 className="text-lg font-semibold text-foreground">
             {/* Contextual Title could go here, leveraging a context or route matching.
                    For now, let's leave it empty or show Breadcrumbs. */}
             Bem-vindo

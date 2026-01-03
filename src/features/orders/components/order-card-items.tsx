@@ -8,7 +8,7 @@ interface OrderCardItemsProps {
 export function OrderCardItems({ items }: OrderCardItemsProps) {
   return (
     <div>
-      <h4 className="text-xs sm:text-sm font-medium text-secondary-foreground mb-2">
+      <h4 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">
         Itens:
       </h4>
       <ul className="space-y-2">
@@ -17,16 +17,16 @@ export function OrderCardItems({ items }: OrderCardItemsProps) {
             key={`${item.product.id}-${item.quantity}`}
             className="flex justify-between gap-2 text-xs sm:text-sm"
           >
-            <span className="text-gray-700 flex-1 min-w-0">
+            <span className="text-foreground flex-1 min-w-0">
               <span className="font-medium">{item.quantity}x</span>{" "}
               {item.product.name}
               {item.notes && (
-                <span className="text-gray-500 text-xs block sm:inline sm:ml-2">
+                <span className="text-muted-foreground text-xs block sm:inline sm:ml-2">
                   ({item.notes})
                 </span>
               )}
             </span>
-            <span className="text-gray-900 font-medium shrink-0">
+            <span className="text-foreground font-medium shrink-0">
               {formatMoney(item.product.price * item.quantity)}
             </span>
           </li>

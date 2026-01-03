@@ -1,12 +1,19 @@
+import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
+import { useCurrentCashSession } from "@/features/cash/hooks/use-current-cash-session";
 import { BottomSheet } from "@/shared/components/bottom-sheet";
 import {
   GridSkeleton,
   LoadingOverlay,
   LoadingState,
 } from "@/shared/components/loading";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -39,6 +46,7 @@ const paymentOptions: Array<PaymentMethod> = [
 ];
 
 export function OrdersPage() {
+  const { currentSession } = useCurrentCashSession();
   const [period, setPeriod] = useState<DateRange | undefined>({
     from: new Date(),
     to: new Date(),
@@ -130,6 +138,17 @@ export function OrdersPage() {
           />
         </div>
 
+        {!currentSession && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Caixa Fechado</AlertTitle>
+            <AlertDescription>
+              O caixa está fechado. Abra o caixa para criar novos pedidos e
+              registrar vendas.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <OrdersFilters
           statusFilter={statusFilter}
           paymentFilter={paymentFilter}
@@ -148,7 +167,7 @@ export function OrdersPage() {
         >
           {filteredByPayment.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-sm sm:text-lg">
+              <p className="text-muted-foreground text-sm sm:text-lg">
                 {orders.length === 0
                   ? "Nenhum pedido cadastrado. Comece criando um novo pedido!"
                   : "Nenhum pedido encontrado com o filtro aplicado."}
@@ -216,7 +235,7 @@ export function OrdersPage() {
             onDateChange={handlePeriodFilterChange}
           />
 
-          <div className="pt-4 pb-2 border-t border-gray-200">
+          <div className="pt-4 pb-2 border-t border-border">
             <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
               Aplicar Filtros
             </Button>

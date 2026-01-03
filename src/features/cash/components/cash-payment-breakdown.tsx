@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { Progress } from "@/shared/components/ui/progress";
 import { PAYMENT_METHOD_STYLES } from "@/shared/constants/ui-styles";
 import { formatMoney } from "@/shared/utils/formatters";
 import type { PaymentMethodTotal } from "../types";
@@ -30,7 +31,7 @@ export function CashPaymentBreakdown({
           <CardTitle className="text-lg">Formas de Pagamento</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-500 text-center py-8">
+          <p className="text-sm text-muted-foreground text-center py-8">
             Nenhuma venda registrada neste período
           </p>
         </CardContent>
@@ -42,7 +43,7 @@ export function CashPaymentBreakdown({
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="text-lg">Formas de Pagamento</CardTitle>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Distribuição das vendas por método de pagamento.
         </p>
       </CardHeader>
@@ -63,32 +64,33 @@ export function CashPaymentBreakdown({
             <div key={item.method} className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`p-1.5 rounded-lg ${style.bg}`}>
-                    <Icon className={`w-4 h-4 ${style.text}`} />
+                  <div className={`${style.className} p-1 rounded-full`}>
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-foreground">
                     {methodLabel}
                   </span>
                 </div>
                 <div className="text-right">
-                  <div className="text-base font-bold text-gray-900">
+                  <div className="text-base font-bold text-foreground">
                     {formatMoney(item.amount)}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     {item.count} {item.count === 1 ? "pedido" : "pedidos"}
                   </div>
                 </div>
               </div>
 
               {/* Progress bar */}
-              <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-300 ${style.bg.replace("-50", "-400")}`}
+              <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                <Progress value={percentage} />
+                {/* <div
+                  className={`h-full rounded-full transition-all duration-300 ${style.className.split(" ")[0].replace("-100", "-400")}`}
                   style={{ width: `${percentage}%` }}
-                />
+                /> */}
               </div>
 
-              <div className="text-xs text-gray-500 text-right">
+              <div className="text-xs text-muted-foreground text-right">
                 {percentage.toFixed(1)}% do faturamento
               </div>
             </div>

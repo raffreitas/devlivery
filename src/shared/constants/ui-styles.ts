@@ -9,30 +9,30 @@ import {
 } from "lucide-react";
 import type { PaymentMethod } from "@/features/orders/types";
 
-// Payment Method Colors (consistentes com o dashboard)
+// Payment Method Colors (with dark mode support and visual distinction)
 export const PAYMENT_METHOD_STYLES = {
   Cash: {
-    bg: "bg-green-50",
-    text: "text-green-700",
-    border: "border-green-200",
+    variant: "default" as const,
+    className:
+      "bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-700",
     icon: Banknote,
   },
   CreditCard: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-200",
+    variant: "default" as const,
+    className:
+      "bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700",
     icon: CreditCard,
   },
   DebitCard: {
-    bg: "bg-purple-50",
-    text: "text-purple-700",
-    border: "border-purple-200",
+    variant: "default" as const,
+    className:
+      "bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-200 border border-indigo-300 dark:border-indigo-700",
     icon: CreditCard,
   },
   Pix: {
-    bg: "bg-teal-50",
-    text: "text-teal-700",
-    border: "border-teal-200",
+    variant: "default" as const,
+    className:
+      "bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-200 border border-cyan-300 dark:border-cyan-700",
     icon: Smartphone,
   },
 } as const;
@@ -41,45 +41,40 @@ export function getPaymentMethodStyle(method: PaymentMethod) {
   return PAYMENT_METHOD_STYLES[method];
 }
 
-// Order Status Colors (consistentes com o dashboard)
+// Order Status Colors (with dark mode support and visual distinction)
 export const ORDER_STATUS_STYLES = {
   Pending: {
-    bg: "bg-yellow-50",
-    text: "text-yellow-600",
-    badgeBg: "bg-yellow-100",
-    badgeText: "text-yellow-800",
+    variant: "default" as const,
+    className:
+      "bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700",
     icon: Clock,
     label: "Pendente",
   },
   Preparing: {
-    bg: "bg-blue-50",
-    text: "text-blue-600",
-    badgeBg: "bg-blue-100",
-    badgeText: "text-blue-800",
+    variant: "default" as const,
+    className:
+      "bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700",
     icon: Package,
     label: "Em Preparo",
   },
   Ready: {
-    bg: "bg-purple-50",
-    text: "text-purple-600",
-    badgeBg: "bg-purple-100",
-    badgeText: "text-purple-800",
+    variant: "default" as const,
+    className:
+      "bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-200 border border-violet-300 dark:border-violet-700",
     icon: CheckCircle,
     label: "Pronto",
   },
   Delivered: {
-    bg: "bg-green-50",
-    text: "text-green-600",
-    badgeBg: "bg-green-100",
-    badgeText: "text-green-800",
+    variant: "default" as const,
+    className:
+      "bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-700",
     icon: CheckCircle,
     label: "Entregue",
   },
   Canceled: {
-    bg: "bg-red-50",
-    text: "text-red-600",
-    badgeBg: "bg-red-100",
-    badgeText: "text-red-800",
+    variant: "default" as const,
+    className:
+      "bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-700",
     icon: CircleX,
     label: "Cancelado",
   },

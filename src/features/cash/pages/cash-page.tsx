@@ -9,6 +9,7 @@ import { useCashSessions } from "@/features/cash/hooks/use-cash-sessions";
 import type { CreateCashDepositFormData } from "@/features/cash/types";
 import { Modal } from "@/shared/components/modal";
 import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
 
 export function CashPage() {
   const [isOpenModalOpen, setIsOpenModalOpen] = useState(false);
@@ -66,10 +67,10 @@ export function CashPage() {
     <>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Controle de Caixa
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-muted-foreground mt-2">
             Gerencie abertura, fechamento e resumo de caixa
           </p>
         </div>
@@ -91,23 +92,24 @@ export function CashPage() {
               />
             </div>
           ) : (
-            <div className="p-6 sm:p-8 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-center">
-              <WalletIcon className="w-9 h-9 mx-auto text-muted-foreground mb-3" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Nenhum caixa aberto
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Abra um novo caixa para começar a registrar vendas e controlar o
-                fluxo de caixa
-              </p>
-              <Button
-                onClick={() => setIsOpenModalOpen(true)}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <WalletIcon className="w-4 h-4 mr-2" />
-                Abrir Caixa
-              </Button>
-            </div>
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-16 px-6">
+                <div className="flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-600 dark:text-orange-400 mb-4">
+                  <WalletIcon className="w-8 h-8 sm:w-10 sm:h-10" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  Nenhum caixa aberto
+                </h3>
+                <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
+                  Abra um novo caixa para começar a registrar vendas e controlar
+                  o fluxo de caixa do seu estabelecimento
+                </p>
+                <Button onClick={() => setIsOpenModalOpen(true)} size="lg">
+                  <WalletIcon className="w-4 h-4 mr-2" />
+                  Abrir Caixa
+                </Button>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>

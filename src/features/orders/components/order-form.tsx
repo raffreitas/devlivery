@@ -169,6 +169,7 @@ export function OrderForm({
   const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) ?? 0;
   const remainingAmount = total - totalPaid;
 
+  // FIXME: Melhorar essa lógica da atualização automática do pagamento
   useEffect(() => {
     if (
       paymentFields.length === 1 &&
@@ -341,27 +342,29 @@ export function OrderForm({
               ))}
             </div>
 
-            <div className="flex flex-col gap-1.5 pt-1 border-t border-dashed mt-2">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="text-muted-foreground">
-                  Total Pedido: R$ {total.toFixed(2)}
-                </span>
-                {remainingAmount > 0 ? (
-                  <span className="text-amber-600 font-bold flex items-center gap-1">
-                    <div className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
-                    Falta: R$ {remainingAmount.toFixed(2)}
+            {total > 0 && (
+              <div className="flex flex-col gap-1.5 pt-1 border-t border-dashed mt-2">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-muted-foreground">
+                    Total Pedido: R$ {total.toFixed(2)}
                   </span>
-                ) : remainingAmount < 0 ? (
-                  <span className="text-blue-600 font-bold">
-                    Troco: R$ {Math.abs(remainingAmount).toFixed(2)}
-                  </span>
-                ) : (
-                  <span className="text-green-600 font-bold flex items-center gap-1">
-                    <Check className="size-3" /> PAGO
-                  </span>
-                )}
+                  {remainingAmount > 0 ? (
+                    <span className="text-amber-600 font-bold flex items-center gap-1">
+                      <div className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      Falta: R$ {remainingAmount.toFixed(2)}
+                    </span>
+                  ) : remainingAmount < 0 ? (
+                    <span className="text-blue-600 font-bold">
+                      Troco: R$ {Math.abs(remainingAmount).toFixed(2)}
+                    </span>
+                  ) : (
+                    <span className="text-green-600 font-bold flex items-center gap-1">
+                      <Check className="size-3" /> CONFERE
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {form.formState.errors.payments?.root?.message && (
               <p className="text-sm font-medium text-destructive mt-1">

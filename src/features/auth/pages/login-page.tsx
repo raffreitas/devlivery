@@ -40,14 +40,14 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-background to-orange-50 dark:from-orange-950/20 dark:via-background dark:to-orange-950/20 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-orange-600 rounded-2xl shadow-lg mb-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-orange-600 dark:bg-orange-700 rounded-2xl shadow-lg mb-4">
             <span className="text-5xl">🍕</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Devlivery</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-2">Devlivery</h1>
           {/* <p className="text-secondary-foreground">Sistema de Gestão de Pedidos</p> */}
         </div>
 
@@ -108,7 +108,7 @@ export function LoginPage() {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           © {currentYear} Devlivery. Todos os direitos reservados.
         </p>
       </div>

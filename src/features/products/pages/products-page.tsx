@@ -100,7 +100,7 @@ export function ProductsPage() {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
             Produtos
           </h1>
           <p className="text-muted-foreground">
@@ -133,7 +133,7 @@ export function ProductsPage() {
       >
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">
+            <p className="text-muted-foreground text-lg">
               {products.length === 0
                 ? "Nenhum produto cadastrado. Comece criando um novo produto!"
                 : "Nenhum produto encontrado com os filtros aplicados."}
@@ -215,7 +215,7 @@ export function ProductsPage() {
             onCategoryChange={setFilterCategory}
           />
 
-          <div className="pt-4 pb-2 border-t border-gray-200">
+          <div className="pt-4 pb-2 border-t border-border">
             <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
               Aplicar Filtros
             </Button>

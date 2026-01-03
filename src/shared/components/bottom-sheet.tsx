@@ -44,25 +44,25 @@ export function BottomSheet({
       <div
         role="dialog"
         aria-modal="true"
-        className="fixed inset-x-0 bottom-0 z-[9999] bg-white rounded-t-2xl shadow-2xl max-h-[90vh] flex flex-col animate-slide-up"
+        className="fixed inset-x-0 bottom-0 z-[9999] bg-card rounded-t-2xl shadow-2xl max-h-[90vh] flex flex-col animate-slide-up"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-2">
-          <div className="w-12 h-1 bg-gray-300 rounded-full" />
+          <div className="w-12 h-1 bg-muted rounded-full" />
         </div>
 
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-4 pb-3 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+          <div className="flex items-center justify-between px-4 pb-3 border-b border-border">
+            <h2 className="text-lg font-semibold text-foreground">{title}</h2>
             <button
               type="button"
               onClick={onClose}
-              className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+              className="p-1 rounded-full hover:bg-accent/10 transition-colors"
               aria-label="Fechar"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
         )}

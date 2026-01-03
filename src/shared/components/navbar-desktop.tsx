@@ -12,9 +12,9 @@ export function NavbarDesktop() {
         to="/"
         className={`${
           isActive("/")
-            ? "border-orange-500 text-gray-900"
-            : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium gap-2`}
+            ? "border-primary text-foreground"
+            : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
+        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium gap-2 transition-colors`}
       >
         <LayoutDashboard className="w-4 h-4" />
         Dashboard
@@ -23,9 +23,9 @@ export function NavbarDesktop() {
         to="/products"
         className={`${
           isActive("/products")
-            ? "border-orange-500 text-gray-900"
-            : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium gap-2`}
+            ? "border-primary text-foreground"
+            : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
+        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium gap-2 transition-colors`}
       >
         <Package className="w-4 h-4" />
         Produtos
@@ -34,9 +34,9 @@ export function NavbarDesktop() {
         to="/orders"
         className={`${
           isActive("/orders")
-            ? "border-orange-500 text-gray-900"
-            : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium gap-2`}
+            ? "border-primary text-foreground"
+            : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
+        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium gap-2 transition-colors`}
       >
         <ShoppingCart className="w-4 h-4" />
         Pedidos

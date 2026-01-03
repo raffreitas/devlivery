@@ -41,7 +41,7 @@ export function PaymentBreakdownCard({
           return (
             <div
               key={method}
-              className={`flex items-center justify-between p-2 sm:p-3 rounded-lg ${style.bg} ${style.text} ${style.border}`}
+              className={`flex items-center justify-between p-2 sm:p-3 rounded-lg ${style.className}`}
             >
               <div className="flex items-center gap-2">
                 <Icon className="w-4 h-4" />

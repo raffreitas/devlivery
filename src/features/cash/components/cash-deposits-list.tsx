@@ -45,7 +45,7 @@ export function CashDepositsList({
       </CardHeader>
       <CardContent>
         {!deposits || deposits.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 border rounded-md border-dashed">
+          <div className="text-center py-8 text-muted-foreground border rounded-md border-dashed border-border">
             Nenhum aporte registrado nesta sessão.
           </div>
         ) : (
@@ -74,7 +74,7 @@ export function CashDepositsList({
                       </TableCell>
                       <TableCell>{time}</TableCell>
                       <TableCell>{deposit.attendant}</TableCell>
-                      <TableCell className="text-gray-500 italic max-w-[200px] truncate">
+                      <TableCell className="text-muted-foreground italic max-w-50 truncate">
                         {deposit.notes || "-"}
                       </TableCell>
                     </TableRow>

@@ -67,7 +67,7 @@ export function OrderCardActions({
         )}
       </div>
 
-      <div className="mt-2 sm:mt-3 text-xs text-gray-500">
+      <div className="mt-2 sm:mt-3 text-xs text-muted-foreground">
         Criado em: {new Date(order.createdAt).toLocaleString("pt-BR")}
       </div>
     </div>
