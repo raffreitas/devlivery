@@ -14,7 +14,7 @@ export function Layout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background text-foreground">
       {/* Sidebar for Desktop */}
       <Sidebar />
 
