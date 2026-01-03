@@ -169,7 +169,6 @@ export function OrderForm({
   const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) ?? 0;
   const remainingAmount = total - totalPaid;
 
-  // FIXME: Melhorar essa lógica da atualização automática do pagamento
   useEffect(() => {
     if (
       paymentFields.length === 1 &&
