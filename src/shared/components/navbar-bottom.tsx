@@ -48,7 +48,7 @@ export function NavbarBottom() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border pb-safe sm:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border pb-safe sm:hidden">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           const active = isActive(item.path);

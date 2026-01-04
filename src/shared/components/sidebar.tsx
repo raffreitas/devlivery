@@ -55,11 +55,11 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "hidden sm:flex flex-col h-screen bg-card border-r border-border transition-all duration-300 sticky top-0",
+        "hidden sm:flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 sticky top-0",
         isCollapsed ? "w-16" : "w-64",
       )}
     >
-      <div className="flex items-center justify-between p-4 h-16 border-b border-border">
+      <div className="flex items-center justify-between p-4 h-16 border-b border-sidebar-border">
         {!isCollapsed && (
           <h1 className="text-xl font-bold text-primary truncate">Devlivery</h1>
         )}
