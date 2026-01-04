@@ -1,8 +1,10 @@
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Products.Commands.DeleteProduct;
 using Devlivery.Shared.Application.Errors;
+
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
+
 using Shouldly;
 
 namespace Devlivery.Tests.Features.Products.Commands.DeleteProduct;

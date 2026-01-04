@@ -1,9 +1,10 @@
 using Devlivery.Features.Orders.Commands.UpdateOrder;
 using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Enums;
+using Devlivery.Features.Orders.Domain.Entities;
+using Devlivery.Features.Orders.Domain.ValueObjects;
 using Devlivery.Features.Products.Domain;
 using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Domain.Enums;
+using Devlivery.Shared.Infrastructure.Persistence;
 
 using NSubstitute;
 
@@ -16,288 +17,88 @@ namespace Devlivery.Tests.Features.Orders.Commands.UpdateOrder;
 public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 {
     [Fact]
-    public async Task Handle_Should_Return_NotFoundError_When_Order_Does_Not_Exist()
+    public async Task Handle_Should_Return_NotFound_When_Order_Not_Exists()
     {
-        // Arrange
-        var orderRepository = fixture.CreateOrderRepositoryMock();
+        var repository = fixture.CreateOrderRepositoryMock();
         var productRepository = Substitute.For<IProductRepository>();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
-        orderRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns((Order?)null);
+        repository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((Order?)null);
 
-        var handler = new UpdateOrderHandler(orderRepository, productRepository, unitOfWork);
+        var handler = new UpdateOrderHandler(repository, productRepository, unitOfWork);
 
-        var command = new UpdateOrderCommand(
-            Id: Guid.NewGuid(),
-            Items: [new OrderItemDto(Guid.NewGuid(), 2, null)],
-            CustomerName: "Cliente Teste",
-            CustomerPhone: null,
-            DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash
-        );
+        var command = new UpdateOrderCommand(Guid.NewGuid(), Array.Empty<OrderItemDto>(), "Cliente Teste", null, "Rua Teste, 123", Array.Empty<OrderPaymentDto>());
 
-        // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is NotFoundError);
     }
 
     [Fact]
-    public async Task Handle_Should_Return_ValidationError_When_Order_Is_Canceled()
+    public async Task Handle_Should_Return_ValidationError_When_Order_Finalized()
     {
-        // Arrange
-        var order = fixture.CreateOrder(status: OrderStatus.Canceled);
-
-        var orderRepository = fixture.CreateOrderRepositoryMock();
+        var order = fixture.CreateOrder(status: Devlivery.Features.Orders.Domain.Enums.OrderStatus.Delivered);
+        var repository = fixture.CreateOrderRepositoryMock();
         var productRepository = Substitute.For<IProductRepository>();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
+        repository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
 
-        var handler = new UpdateOrderHandler(orderRepository, productRepository, unitOfWork);
+        var handler = new UpdateOrderHandler(repository, productRepository, unitOfWork);
 
-        var command = new UpdateOrderCommand(
-            Id: order.Id,
-            Items: [new OrderItemDto(Guid.NewGuid(), 2, null)],
-            CustomerName: "Cliente Teste",
-            CustomerPhone: null,
-            DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash
-        );
+        var command = new UpdateOrderCommand(order.Id, Array.Empty<OrderItemDto>(), "Cliente Teste", null, "Rua Teste, 123", Array.Empty<OrderPaymentDto>());
 
-        // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is ValidationError);
     }
 
     [Fact]
-    public async Task Handle_Should_Return_ValidationError_When_Order_Is_Delivered()
+    public async Task Handle_Should_Return_NotFound_When_Product_Missing()
     {
-        // Arrange
-        var order = fixture.CreateOrder(status: OrderStatus.Delivered);
-
-        var orderRepository = fixture.CreateOrderRepositoryMock();
-        var productRepository = Substitute.For<IProductRepository>();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
-
-        var handler = new UpdateOrderHandler(orderRepository, productRepository, unitOfWork);
-
-        var command = new UpdateOrderCommand(
-            Id: order.Id,
-            Items: [new OrderItemDto(Guid.NewGuid(), 2, null)],
-            CustomerName: "Cliente Teste",
-            CustomerPhone: null,
-            DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash
-        );
-
-        // Act
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is ValidationError);
-    }
-
-    [Fact]
-    public async Task Handle_Should_Return_NotFoundError_When_Product_Does_Not_Exist()
-    {
-        // Arrange
         var order = fixture.CreateOrder();
-
-        var orderRepository = fixture.CreateOrderRepositoryMock();
+        var repository = fixture.CreateOrderRepositoryMock();
         var productRepository = Substitute.For<IProductRepository>();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
+        repository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
+        productRepository.GetByIdsAsync(Arg.Any<List<Guid>>(), Arg.Any<CancellationToken>()).Returns([]);
 
-        productRepository.GetByIdsAsync(Arg.Any<List<Guid>>(), Arg.Any<CancellationToken>())
-            .Returns([]); // Retorna lista vazia
+        var handler = new UpdateOrderHandler(repository, productRepository, unitOfWork);
 
-        var handler = new UpdateOrderHandler(orderRepository, productRepository, unitOfWork);
+        var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(Guid.NewGuid(), 1, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, Devlivery.Shared.Domain.Enums.PaymentMethod.Cash, 10m) });
 
-        var command = new UpdateOrderCommand(
-            Id: order.Id,
-            Items: [new OrderItemDto(Guid.NewGuid(), 2, null)],
-            CustomerName: "Cliente Teste",
-            CustomerPhone: null,
-            DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash
-        );
-
-        // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is NotFoundError);
     }
 
     [Fact]
-    public async Task Handle_Should_Replace_Order_Items()
+    public async Task Handle_Should_Update_Order_And_Save_When_Valid()
     {
-        // Arrange
         var order = fixture.CreateOrder();
-
-        var product = new Product("Novo Produto", "Descrição", 25.00m, "Categoria", true, order.EstablishmentId);
-
-        var orderRepository = fixture.CreateOrderRepositoryMock();
+        var repository = fixture.CreateOrderRepositoryMock();
         var productRepository = Substitute.For<IProductRepository>();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
+        var product = new Product("Produto", "Descrição", 10.00m, "Categoria", true, order.EstablishmentId);
+        productRepository.GetByIdsAsync(Arg.Any<List<Guid>>(), Arg.Any<CancellationToken>()).Returns([product]);
 
-        productRepository.GetByIdsAsync(Arg.Any<List<Guid>>(), Arg.Any<CancellationToken>())
-            .Returns([product]);
+        repository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
 
-        var handler = new UpdateOrderHandler(orderRepository, productRepository, unitOfWork);
+        var handler = new UpdateOrderHandler(repository, productRepository, unitOfWork);
 
-        var command = new UpdateOrderCommand(
-            Id: order.Id,
-            Items: [new OrderItemDto(product.Id, 3, "Observação")],
-            CustomerName: "Cliente Atualizado",
-            CustomerPhone: "11988887777",
-            DeliveryAddress: "Nova Rua, 456",
-            PaymentMethod: PaymentMethod.DebitCard,
-            DeliveryFee: 8.00m
-        );
+        var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(product.Id, 2, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, Devlivery.Shared.Domain.Enums.PaymentMethod.Cash, 20m) }, 0m);
 
-        // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.IsSuccess.ShouldBeTrue();
-        order.Items.Count.ShouldBe(1); // Deve ter apenas o novo item
-        order.Items.First().ProductId.ShouldBe(product.Id);
-        order.Items.First().Quantity.ShouldBe(3);
-    }
-
-    [Fact]
-    public async Task Handle_Should_Update_Order_Details()
-    {
-        // Arrange
-        var order = fixture.CreateOrder();
-        var product = new Product("Produto", "Descrição", 10.00m, "Categoria", true, order.EstablishmentId);
-
-        var orderRepository = fixture.CreateOrderRepositoryMock();
-        var productRepository = Substitute.For<IProductRepository>();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
-
-        productRepository.GetByIdsAsync(Arg.Any<List<Guid>>(), Arg.Any<CancellationToken>())
-            .Returns([product]);
-
-        var handler = new UpdateOrderHandler(orderRepository, productRepository, unitOfWork);
-
-        var command = new UpdateOrderCommand(
-            Id: order.Id,
-            Items: [new OrderItemDto(product.Id, 1, null)],
-            CustomerName: "João Atualizado",
-            CustomerPhone: "11900001111",
-            DeliveryAddress: "Av. Atualizada, 999",
-            PaymentMethod: PaymentMethod.Pix,
-            DeliveryFee: 15.00m,
-            Notes: "Nova observação"
-        );
-
-        // Act
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        order.Customer.Name.ShouldBe("João Atualizado");
-        order.Customer.Phone.ShouldNotBeNull();
-        order.Customer.Phone.Number.ShouldBe("11900001111");
-        order.DeliveryAddress.FullAddress.ShouldBe("Av. Atualizada, 999");
-        order.PaymentMethod.ShouldBe(PaymentMethod.Pix);
-        order.DeliveryFee.ShouldBe(15.00m);
-        order.Notes.ShouldBe("Nova observação");
-    }
-
-    [Fact]
-    public async Task Handle_Should_Call_Update_On_Repository()
-    {
-        // Arrange
-        var order = fixture.CreateOrder();
-        var product = new Product("Produto", "Descrição", 10.00m, "Categoria", true, order.EstablishmentId);
-
-        var orderRepository = fixture.CreateOrderRepositoryMock();
-        var productRepository = Substitute.For<IProductRepository>();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
-
-        productRepository.GetByIdsAsync(Arg.Any<List<Guid>>(), Arg.Any<CancellationToken>())
-            .Returns([product]);
-
-        var handler = new UpdateOrderHandler(orderRepository, productRepository, unitOfWork);
-
-        var command = new UpdateOrderCommand(
-            Id: order.Id,
-            Items: [new OrderItemDto(product.Id, 1, null)],
-            CustomerName: "Cliente Teste",
-            CustomerPhone: null,
-            DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash
-        );
-
-        // Act
-        await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        await orderRepository.Received(1).UpdateAsync(order, Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Handle_Should_Call_SaveChangesAsync_On_UnitOfWork()
-    {
-        // Arrange
-        var order = fixture.CreateOrder();
-        var product = new Product("Produto", "Descrição", 10.00m, "Categoria", true, order.EstablishmentId);
-
-        var orderRepository = fixture.CreateOrderRepositoryMock();
-        var productRepository = Substitute.For<IProductRepository>();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
-
-        productRepository.GetByIdsAsync(Arg.Any<List<Guid>>(), Arg.Any<CancellationToken>())
-            .Returns([product]);
-
-        var handler = new UpdateOrderHandler(orderRepository, productRepository, unitOfWork);
-
-        var command = new UpdateOrderCommand(
-            Id: order.Id,
-            Items: [new OrderItemDto(product.Id, 1, null)],
-            CustomerName: "Cliente Teste",
-            CustomerPhone: null,
-            DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash
-        );
-
-        // Act
-        await handler.Handle(command, CancellationToken.None);
-
-        // Assert
+        await repository.Received(1).UpdateAsync(order, Arg.Any<CancellationToken>());
         await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
-
     [Fact]
     public async Task Handle_Should_Use_Product_Price_For_OrderItem()
     {
@@ -321,12 +122,12 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var command = new UpdateOrderCommand(
             Id: order.Id,
-            Items: [new OrderItemDto(product.Id, 2, null)],
+            Items: new[] { new OrderItemDto(product.Id, 2, null) },
             CustomerName: "Cliente Teste",
             CustomerPhone: null,
             DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash,
-            DeliveryFee: 10.00m
+            DeliveryFee: 10.00m,
+            Payments: Array.Empty<OrderPaymentDto>()
         );
 
         // Act

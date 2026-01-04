@@ -2,8 +2,8 @@ using Devlivery.Features.Orders.Commands.CreateOrder;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Products.Domain;
-using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Domain.Enums;
+using Devlivery.Shared.Application.Errors;
 
 using NSubstitute;
 
@@ -36,9 +36,9 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: "11999999999",
             DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash,
             DeliveryFee: 5.00m,
-            Notes: null
+            Notes: null,
+            Payments: [new OrderPaymentDto(PaymentMethod.Cash, 10.00m)]
         );
 
         // Act
@@ -77,9 +77,9 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
             CustomerName: "João Silva",
             CustomerPhone: "11987654321",
             DeliveryAddress: "Av. Paulista, 1000",
-            PaymentMethod: PaymentMethod.CreditCard,
             DeliveryFee: 10.00m,
-            Notes: "Entrega rápida"
+            Notes: "Entrega rápida",
+            Payments: [new OrderPaymentDto(PaymentMethod.Cash, 80.00m)]
         );
 
         // Act
@@ -94,7 +94,6 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
                 o.Customer.Phone != null &&
                 o.Customer.Phone.Number == "11987654321" &&
                 o.DeliveryAddress == "Av. Paulista, 1000" &&
-                o.PaymentMethod == PaymentMethod.CreditCard &&
                 o.DeliveryFee == 10.00m &&
                 o.Status == OrderStatus.Pending &&
                 o.Notes == "Entrega rápida"),
@@ -128,9 +127,9 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: null,
             DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash,
             DeliveryFee: 5.00m,
-            Notes: null
+            Notes: null,
+            Payments: [new OrderPaymentDto(PaymentMethod.Cash, 100.00m)]
         );
 
         // Act
@@ -167,9 +166,9 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: null,
             DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash,
             DeliveryFee: 5.00m,
-            Notes: null
+            Notes: null,
+            Payments: [new OrderPaymentDto(PaymentMethod.Cash, 105.00m)]
         );
 
         // Act
@@ -209,7 +208,7 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: null,
             DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash
+            Payments: [new OrderPaymentDto(PaymentMethod.Cash, 10.00m)]
         );
 
         // Act
@@ -245,7 +244,7 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: null,
             DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash
+            Payments: [new OrderPaymentDto(PaymentMethod.Cash, 10.00m)]
         );
 
         // Act
@@ -276,7 +275,7 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
             CustomerName: "Cliente Teste",
             CustomerPhone: null,
             DeliveryAddress: "Rua Teste, 123",
-            PaymentMethod: PaymentMethod.Cash
+            Payments: [new OrderPaymentDto(PaymentMethod.Cash, 10.00m)]
         );
 
         // Act

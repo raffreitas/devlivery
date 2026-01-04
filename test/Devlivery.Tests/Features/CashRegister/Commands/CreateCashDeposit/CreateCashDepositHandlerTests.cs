@@ -1,22 +1,21 @@
 using Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
-using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Enums;
 
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.CashRegister.Commands.CreateCashDeposit;
 
-[Collection("CashRegister Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fixture)
+public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fixture) : IClassFixture<CashRegisterUnitTestFixture>
 {
     [Fact]
     public async Task Handle_Should_Create_Deposit_When_Session_Is_Open()
     {
         // Arrange
         var tenantId = Guid.NewGuid();
-        var tenantAccessor = fixture.CreateTenantAccessorMock(tenantId);
         var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
@@ -26,8 +25,7 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
 
         var handler = new CreateCashDepositHandler(
             cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+            unitOfWork);
 
         var command = new CreateCashDepositCommand(
             CashSessionId: cashSession.Id,
@@ -49,7 +47,6 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
     public async Task Handle_Should_Add_Deposit_To_CashSession()
     {
         // Arrange
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
         var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
@@ -59,8 +56,7 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
 
         var handler = new CreateCashDepositHandler(
             cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+            unitOfWork);
 
         var command = new CreateCashDepositCommand(
             CashSessionId: cashSession.Id,
@@ -70,18 +66,19 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
             Notes: null);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        cashSession.Deposits.Count.ShouldBe(1);
-        cashSession.Deposits.First().Amount.ShouldBe(100.00m);
+        result.IsSuccess.ShouldBeTrue();
+        cashSession.Movements.ShouldContain(m =>
+            m.EntryType == CashSessionEntryType.Deposit &&
+            m.Amount == 100.00m);
     }
 
     [Fact]
     public async Task Handle_Should_Call_UpdateAsync_On_Repository()
     {
         // Arrange
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
         var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
@@ -91,8 +88,7 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
 
         var handler = new CreateCashDepositHandler(
             cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+            unitOfWork);
 
         var command = new CreateCashDepositCommand(
             CashSessionId: cashSession.Id,
@@ -113,7 +109,6 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
     public async Task Handle_Should_Call_SaveChangesAsync_On_UnitOfWork()
     {
         // Arrange
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
         var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
@@ -123,8 +118,7 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
 
         var handler = new CreateCashDepositHandler(
             cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+            unitOfWork);
 
         var command = new CreateCashDepositCommand(
             CashSessionId: cashSession.Id,
@@ -144,17 +138,15 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
     public async Task Handle_Should_Return_NotFoundError_When_Session_Does_Not_Exist()
     {
         // Arrange
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
         var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
         cashSessionRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns((CashSession?)null);
+            .ReturnsNull();
 
         var handler = new CreateCashDepositHandler(
             cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+            unitOfWork);
 
         var command = new CreateCashDepositCommand(
             CashSessionId: Guid.NewGuid(),
@@ -175,7 +167,6 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
     public async Task Handle_Should_Return_ValidationError_When_Session_Is_Closed()
     {
         // Arrange
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
         var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
@@ -187,8 +178,7 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
 
         var handler = new CreateCashDepositHandler(
             cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+            unitOfWork);
 
         var command = new CreateCashDepositCommand(
             CashSessionId: cashSession.Id,

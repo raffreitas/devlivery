@@ -48,7 +48,6 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         order.Customer.Phone.ShouldNotBeNull();
         order.Customer.Phone.Number.ShouldBe("11987654321");
         order.DeliveryAddress.FullAddress.ShouldBe("Rua Teste, 123");
-        order.PaymentMethod.ShouldBe(paymentMethod);
         order.Status.ShouldBe(OrderStatus.Pending); // Status sempre começa como Pending
         order.DeliveryFee.ShouldBe(deliveryFee);
         order.EstablishmentId.ShouldBe(establishmentId);
@@ -100,8 +99,8 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
             deliveryAddress: deliveryAddress,
             deliveryFee: 10.00m,
             establishmentId: Guid.NewGuid(),
-            items: new List<OrderItem>(),
-            payments: new List<OrderPayment> { new(Guid.NewGuid(), PaymentMethod.Cash, 10.00m) }
+            items: [],
+            payments: [new(Guid.NewGuid(), PaymentMethod.Cash, 10.00m)]
         ));
     }
 
@@ -122,7 +121,7 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
             deliveryFee: -5.00m,
             establishmentId: establishmentId,
             items: [item],
-            payments: new List<OrderPayment> { new(establishmentId, PaymentMethod.Cash, item.TotalPrice - 5.00m) }
+            payments: [new(establishmentId, PaymentMethod.Cash, item.TotalPrice - 5.00m)]
         ));
     }
 
@@ -177,7 +176,7 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         var order = fixture.CreateOrder(status: OrderStatus.Canceled);
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => order.UpdateStatus(OrderStatus.Preparing));
+        Should.Throw<DomainException>(() => order.UpdateStatus(OrderStatus.Preparing));
     }
 
     [Fact]
@@ -187,7 +186,7 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
         var order = fixture.CreateOrder(status: OrderStatus.Delivered);
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => order.UpdateStatus(OrderStatus.Preparing));
+        Should.Throw<DomainException>(() => order.UpdateStatus(OrderStatus.Preparing));
     }
 
     [Fact]

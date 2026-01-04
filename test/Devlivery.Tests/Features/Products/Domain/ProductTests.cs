@@ -2,7 +2,7 @@ using Devlivery.Features.Products.Domain;
 
 using Shouldly;
 
-namespace Devlivery.Tests.Features.Products;
+namespace Devlivery.Tests.Features.Products.Domain;
 
 [Collection("Products Unit Tests")]
 [Trait("Category", "Unit Tests")]

@@ -4,6 +4,7 @@ using FluentValidation.TestHelper;
 
 namespace Devlivery.Tests.Features.CashRegister.Commands.CloseCashSession;
 
+[Trait("Category", "Unit Tests")]
 public sealed class CloseCashSessionValidatorTests
 {
     private readonly CloseCashSessionValidator _validator = new();

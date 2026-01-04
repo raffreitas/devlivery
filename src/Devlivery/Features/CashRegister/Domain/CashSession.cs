@@ -51,7 +51,7 @@ public sealed class CashSession : Entity
     public void AddPayment(Guid orderPaymentId, decimal amount, PaymentMethod paymentMethod, Guid relatedOrderId)
     {
         if (Status != CashSessionStatus.Open)
-            throw new InvalidOperationException("Não é possível adicionar pagamentos a um caixa fechado.");
+            throw new DomainException("Não é possível adicionar pagamentos a um caixa fechado.");
 
         if (_movements.Exists(m => m.OrderPaymentId == orderPaymentId))
             return;
@@ -60,7 +60,7 @@ public sealed class CashSession : Entity
             establishmentId: EstablishmentId,
             cashSessionId: Id,
             entryType: CashSessionEntryType.Payment,
-            amount: amount >= 0 ? amount : throw new ArgumentOutOfRangeException(nameof(amount)),
+            amount: amount >= 0 ? amount : throw new DomainException("O valor do pagamento deve ser positivo."),
             createdBy: AttendantId,
             paymentMethod: paymentMethod,
             relatedOrderId: relatedOrderId,
@@ -72,7 +72,7 @@ public sealed class CashSession : Entity
     public void AddReversal(Guid originalOrderPaymentId, decimal amount, PaymentMethod paymentMethod, string reason, Guid relatedOrderId)
     {
         if (Status != CashSessionStatus.Open)
-            throw new InvalidOperationException("Não é possível adicionar reversões a um caixa fechado.");
+            throw new DomainException("Não é possível adicionar reversões a um caixa fechado.");
 
         if (HasReversalFor(originalOrderPaymentId))
             return;
@@ -81,7 +81,7 @@ public sealed class CashSession : Entity
             establishmentId: EstablishmentId,
             cashSessionId: Id,
             entryType: CashSessionEntryType.Refund,
-            amount: amount >= 0 ? amount : throw new ArgumentOutOfRangeException(nameof(amount)),
+            amount: amount >= 0 ? amount : throw new DomainException("O valor do pagamento deve ser positivo."),
             createdBy: AttendantId,
             paymentMethod: paymentMethod,
             relatedOrderId: relatedOrderId,
@@ -94,7 +94,7 @@ public sealed class CashSession : Entity
     public void AddChange(Guid relatedOrderId, decimal changeAmount, PaymentMethod paymentMethod = PaymentMethod.Cash)
     {
         if (Status != CashSessionStatus.Open)
-            throw new InvalidOperationException("Não é possível adicionar troco a um caixa fechado.");
+            throw new DomainException("Não é possível adicionar troco a um caixa fechado.");
 
         if (changeAmount <= 0)
             return;
@@ -106,7 +106,7 @@ public sealed class CashSession : Entity
             establishmentId: EstablishmentId,
             cashSessionId: Id,
             entryType: CashSessionEntryType.Change,
-            amount: changeAmount >= 0 ? changeAmount : throw new ArgumentOutOfRangeException(nameof(changeAmount)),
+            amount: changeAmount >= 0 ? changeAmount : throw new DomainException("O valor do pagamento deve ser positivo."),
             createdBy: AttendantId,
             paymentMethod: paymentMethod,
             relatedOrderId: relatedOrderId,
@@ -121,7 +121,7 @@ public sealed class CashSession : Entity
             establishmentId: EstablishmentId,
             cashSessionId: Id,
             entryType: CashSessionEntryType.Deposit,
-            amount: amount >= 0 ? amount : throw new ArgumentOutOfRangeException(nameof(amount)),
+            amount: amount >= 0 ? amount : throw new DomainException("O valor do pagamento deve ser positivo."),
             createdBy: createdBy,
             paymentMethod: null,
             relatedOrderId: null,
@@ -143,7 +143,7 @@ public sealed class CashSession : Entity
     {
         if (Status == CashSessionStatus.Closed)
         {
-            throw new InvalidOperationException("Este caixa já está fechado.");
+            throw new DomainException("Este caixa já está fechado.");
         }
 
         ClosingAmount = closingAmount;
