@@ -44,3 +44,28 @@ export const formatMoney = (value: number | string | undefined) => {
 export const removeChars = (value: string) => {
   return value.replace(/\D/g, "");
 };
+
+/**
+ * Parses an ISO date string (yyyy-MM-dd) as a local date without UTC conversion.
+ * This prevents timezone offset issues where "2026-01-04" would be parsed as
+ * 2026-01-03 23:00 in UTC-3 timezone.
+ * @param dateString - ISO date string (yyyy-MM-dd) or legacy dd/MM format
+ * @returns Date object in local timezone, or null if invalid
+ */
+export const parseLocalDate = (dateString: string): Date | null => {
+  // Try ISO format first (yyyy-MM-dd)
+  const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
+  // Fallback for legacy dd/MM format
+  const legacyMatch = dateString.match(/^(\d{1,2})\/(\d{1,2})$/);
+  if (legacyMatch) {
+    const [, day, month] = legacyMatch;
+    return new Date(new Date().getFullYear(), Number(month) - 1, Number(day));
+  }
+
+  return null;
+};

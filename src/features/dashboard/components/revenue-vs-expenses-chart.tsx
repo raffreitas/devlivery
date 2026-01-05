@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { formatMoney } from "@/shared/utils/formatters";
+import { formatMoney, parseLocalDate } from "@/shared/utils/formatters";
 
 interface RevenueVsExpensesChartProps {
   revenueData: { date: string; total: number }[];
@@ -53,20 +53,12 @@ export function RevenueVsExpensesChart({
     });
 
     // Sort by full date. Backend now emits ISO date strings (yyyy-MM-dd).
-    const toTimestamp = (s: string) => {
-      const parsed = Date.parse(s);
-      if (!Number.isNaN(parsed)) return parsed;
-      // Fallback for legacy dd/MM strings: assume current year
-      const parts = s.split("/").map(Number);
-      const day = parts[0] ?? 1;
-      const month = (parts[1] ?? 1) - 1;
-      const year = new Date().getFullYear();
-      return new Date(year, month, day).getTime();
-    };
-
-    return Array.from(dataMap.values()).sort(
-      (a, b) => toTimestamp(a.date) - toTimestamp(b.date),
-    );
+    return Array.from(dataMap.values()).sort((a, b) => {
+      const dateA = parseLocalDate(a.date);
+      const dateB = parseLocalDate(b.date);
+      if (!dateA || !dateB) return 0;
+      return dateA.getTime() - dateB.getTime();
+    });
   }, [revenueData, expensesData]);
 
   return (
@@ -103,8 +95,8 @@ export function RevenueVsExpensesChart({
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(value) => {
-                    const d = new Date(value);
-                    if (!Number.isNaN(d.getTime())) {
+                    const d = parseLocalDate(value);
+                    if (d) {
                       return new Intl.DateTimeFormat("pt-BR", {
                         day: "2-digit",
                         month: "2-digit",
@@ -138,8 +130,8 @@ export function RevenueVsExpensesChart({
                               </span>
                               <span className="font-bold text-muted-foreground">
                                 {(() => {
-                                  const d = new Date(data.date);
-                                  if (!Number.isNaN(d.getTime())) {
+                                  const d = parseLocalDate(data.date);
+                                  if (d) {
                                     return new Intl.DateTimeFormat("pt-BR", {
                                       day: "2-digit",
                                       month: "2-digit",

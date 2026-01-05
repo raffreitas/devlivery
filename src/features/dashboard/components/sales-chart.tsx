@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { formatMoney } from "@/shared/utils/formatters";
+import { formatMoney, parseLocalDate } from "@/shared/utils/formatters";
 
 interface SalesChartProps {
   data: { date: string; total: number }[];
@@ -38,8 +38,8 @@ export function SalesChart({ data }: SalesChartProps) {
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(value) => {
-                    const d = new Date(value);
-                    if (!Number.isNaN(d.getTime())) {
+                    const d = parseLocalDate(value);
+                    if (d) {
                       return new Intl.DateTimeFormat("pt-BR", {
                         day: "2-digit",
                         month: "2-digit",
@@ -69,8 +69,8 @@ export function SalesChart({ data }: SalesChartProps) {
                               <span className="font-bold text-muted-foreground">
                                 {(() => {
                                   const v = payload[0].payload.date;
-                                  const d = new Date(v);
-                                  if (!Number.isNaN(d.getTime())) {
+                                  const d = parseLocalDate(v);
+                                  if (d) {
                                     return new Intl.DateTimeFormat("pt-BR", {
                                       day: "2-digit",
                                       month: "2-digit",
