@@ -1,7 +1,10 @@
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using FluentResults;
+
 using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionById;
@@ -14,6 +17,7 @@ public sealed class GetCashSessionByIdHandler(ApplicationDbContext dbContext)
     {
         var cashSession = await dbContext.CashSessions
             .AsNoTracking()
+            .Include(cs => cs.Movements)
             .FirstOrDefaultAsync(cs => cs.Id == query.Id, cancellationToken);
 
         return cashSession is null

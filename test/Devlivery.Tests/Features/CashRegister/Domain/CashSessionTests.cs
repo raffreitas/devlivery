@@ -1,12 +1,14 @@
 using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Enums;
+using Devlivery.Shared.Domain.Enums;
+using Devlivery.Shared.SeedWork;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.CashRegister.Domain;
 
-[Collection("CashRegister Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
+public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : IClassFixture<CashRegisterUnitTestFixture>
 {
     [Fact]
     public void Constructor_Should_Create_CashSession_With_Correct_Properties()
@@ -41,15 +43,15 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
     }
 
     [Fact]
-    public void RecordOrder_Should_Increase_Revenue_And_Order_Count()
+    public void AddPayment_Should_Increase_Revenue_And_Order_Count()
     {
         // Arrange
         var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
         const decimal orderTotal = 50.00m;
-        const string paymentMethod = "Cash";
+        const PaymentMethod paymentMethod = PaymentMethod.Cash;
 
         // Act
-        cashSession.RecordOrder(orderTotal, paymentMethod);
+        cashSession.AddPayment(Guid.NewGuid(), orderTotal, paymentMethod, Guid.NewGuid());
 
         // Assert
         cashSession.TotalRevenue.ShouldBe(50.00m);
@@ -58,108 +60,68 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
     }
 
     [Fact]
-    public void RecordOrder_Should_Update_Payment_Breakdown()
+    public void AddPayment_Should_Update_Payment_Breakdown()
     {
         // Arrange
         var cashSession = fixture.CreateCashSession();
 
         // Act
-        cashSession.RecordOrder(25.00m, "Cash");
-        cashSession.RecordOrder(30.00m, "Card");
-        cashSession.RecordOrder(15.00m, "Cash");
+        cashSession.AddPayment(Guid.NewGuid(), 25.00m, PaymentMethod.Cash, Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.CreditCard, Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 15.00m, PaymentMethod.Cash, Guid.NewGuid());
 
-        // Assert
-        cashSession.PaymentBreakdown.Count.ShouldBe(2);
-
-        var cashBreakdown = cashSession.PaymentBreakdown.Single(p => p.Method == "Cash");
-        cashBreakdown.Amount.ShouldBe(40.00m);
-        cashBreakdown.Count.ShouldBe(2);
-
-        var cardBreakdown = cashSession.PaymentBreakdown.Single(p => p.Method == "Card");
-        cardBreakdown.Amount.ShouldBe(30.00m);
-        cardBreakdown.Count.ShouldBe(1);
+        // Assert: totals and payments ledger reflect the operations
+        cashSession.TotalRevenue.ShouldBe(70.00m);
+        cashSession.Movements.Count.ShouldBe(3);
+        cashSession.Movements.Count(p => p.PaymentMethod == PaymentMethod.Cash).ShouldBe(2);
+        cashSession.Movements.Where(p => p.PaymentMethod == PaymentMethod.Cash).Sum(p => p.Amount).ShouldBe(40.00m);
+        cashSession.Movements.Where(p => p.PaymentMethod == PaymentMethod.CreditCard).Sum(p => p.Amount)
+            .ShouldBe(30.00m);
     }
 
     [Fact]
-    public void RecordOrder_With_Cash_Should_Update_Expected_Cash_Amount()
-    {
-        // Arrange
-        var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
-
-        // Act - RecordOrder atualiza ExpectedCashAmount baseado apenas na última ordem
-        cashSession.RecordOrder(50.00m, "Cash");
-
-        // Assert - Após primeira ordem
-        cashSession.ExpectedCashAmount.ShouldBe(150.00m); // 100 + 50
-
-        // Act - Segunda ordem
-        cashSession.RecordOrder(30.00m, "Cash");
-
-        // Assert - ExpectedCashAmount é recalculado mas só com a última ordem
-        cashSession.ExpectedCashAmount.ShouldBe(130.00m); // 100 + 0 (deposits) + 30 (last order)
-    }
-
-    [Fact]
-    public void RecordOrder_With_Card_Should_Not_Update_Expected_Cash_Amount()
+    public void AddPayment_With_Cash_Should_Update_Expected_Cash_Amount()
     {
         // Arrange
         var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
 
         // Act
-        cashSession.RecordOrder(50.00m, "Card");
-        cashSession.RecordOrder(30.00m, "Pix");
+        cashSession.AddPayment(Guid.NewGuid(), 50.00m, PaymentMethod.Cash, Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.Cash, Guid.NewGuid());
+
+        // Assert
+        cashSession.ExpectedCashAmount.ShouldBe(180.00m); // 100 + 50 + 30
+    }
+
+    [Fact]
+    public void AddPayment_With_Card_Should_Not_Update_Expected_Cash_Amount()
+    {
+        // Arrange
+        var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
+
+        // Act
+        cashSession.AddPayment(Guid.NewGuid(), 50.00m, PaymentMethod.CreditCard, Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.Pix, Guid.NewGuid());
 
         // Assert
         cashSession.ExpectedCashAmount.ShouldBe(100.00m); // Não muda
     }
 
     [Fact]
-    public void RemoveOrder_Should_Decrease_Revenue_And_Order_Count()
+    public void AddPayment_Should_Be_Idempotent_For_Same_OrderPaymentId()
     {
         // Arrange
         var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
-        cashSession.RecordOrder(50.00m, "Cash");
-        var expectedAfterFirst = cashSession.ExpectedCashAmount; // 150
+        var paymentId = Guid.NewGuid();
 
         // Act
-        cashSession.RemoveOrder(50.00m, "Cash");
+        cashSession.AddPayment(paymentId, 50.00m, PaymentMethod.Cash, Guid.NewGuid());
+        cashSession.AddPayment(paymentId, 50.00m, PaymentMethod.Cash, Guid.NewGuid()); // Duplicate
 
         // Assert
-        cashSession.TotalRevenue.ShouldBe(0m);
-        cashSession.TotalOrders.ShouldBe(0);
-        // Opening (100) + totalDeposits (0) - orderTotal (50) = 50
-        cashSession.ExpectedCashAmount.ShouldBe(50.00m);
-    }
-
-    [Fact]
-    public void RemoveOrder_Should_Update_Payment_Breakdown()
-    {
-        // Arrange
-        var cashSession = fixture.CreateCashSession();
-        cashSession.RecordOrder(50.00m, "Cash");
-        cashSession.RecordOrder(30.00m, "Cash");
-
-        // Act
-        cashSession.RemoveOrder(50.00m, "Cash");
-
-        // Assert
-        var cashBreakdown = cashSession.PaymentBreakdown.Single(p => p.Method == "Cash");
-        cashBreakdown.Amount.ShouldBe(30.00m);
-        cashBreakdown.Count.ShouldBe(1);
-    }
-
-    [Fact]
-    public void RemoveOrder_Should_Remove_Breakdown_Item_When_Count_Reaches_Zero()
-    {
-        // Arrange
-        var cashSession = fixture.CreateCashSession();
-        cashSession.RecordOrder(50.00m, "Cash");
-
-        // Act
-        cashSession.RemoveOrder(50.00m, "Cash");
-
-        // Assert
-        cashSession.PaymentBreakdown.ShouldBeEmpty();
+        cashSession.TotalRevenue.ShouldBe(50.00m);
+        cashSession.TotalOrders.ShouldBe(1);
+        cashSession.Movements.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -167,16 +129,14 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
     {
         // Arrange
         var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
-        var deposit = fixture.CreateCashDeposit(
-            cashSessionId: cashSession.Id,
-            amount: 50.00m);
+        var attendantId = Guid.NewGuid();
 
         // Act
-        cashSession.AddDeposit(deposit);
+        cashSession.AddDeposit(50.00m, attendantId, "Depósito inicial");
 
         // Assert
-        cashSession.Deposits.Count.ShouldBe(1);
-        cashSession.Deposits.First().ShouldBe(deposit);
+        cashSession.Movements.Count(m => m.EntryType == CashSessionEntryType.Deposit).ShouldBe(1);
+        cashSession.Movements.First(m => m.EntryType == CashSessionEntryType.Deposit).Amount.ShouldBe(50.00m);
     }
 
     [Fact]
@@ -184,15 +144,100 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
     {
         // Arrange
         var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
-        var deposit = fixture.CreateCashDeposit(
-            cashSessionId: cashSession.Id,
-            amount: 50.00m);
+        var attendantId = Guid.NewGuid();
 
         // Act
-        cashSession.AddDeposit(deposit);
+        cashSession.AddDeposit(50.00m, attendantId, "Depósito inicial");
 
         // Assert
         cashSession.ExpectedCashAmount.ShouldBe(150.00m); // 100 + 50
+    }
+
+    [Fact]
+    public void AddPayment_NegativeAmount_Throws_DomainException()
+    {
+        // Arrange
+        var cashSession = fixture.CreateCashSession();
+
+        // Act & Assert
+        Should.Throw<DomainException>(() =>
+            cashSession.AddPayment(Guid.NewGuid(), -10.00m, PaymentMethod.Cash, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void AddReversal_Should_Add_Refund_And_Adjust_Revenue()
+    {
+        // Arrange
+        var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
+        var orderPaymentId = Guid.NewGuid();
+        var relatedOrderId = Guid.NewGuid();
+
+        // A payment first
+        cashSession.AddPayment(orderPaymentId, 50.00m, PaymentMethod.Cash, relatedOrderId);
+
+        // Act: add reversal
+        cashSession.AddReversal(orderPaymentId, 50.00m, PaymentMethod.Cash, "Customer refund", relatedOrderId);
+
+        // Assert
+        cashSession.TotalRevenue.ShouldBe(0.00m);
+        cashSession.Movements.Count(m => m.EntryType == CashSessionEntryType.Refund).ShouldBe(1);
+    }
+
+    [Fact]
+    public void AddReversal_Duplicate_Is_Idempotent()
+    {
+        // Arrange
+        var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
+        var originalPaymentId = Guid.NewGuid();
+
+        // Act
+        cashSession.AddReversal(originalPaymentId, 30.00m, PaymentMethod.Cash, "reason", Guid.NewGuid());
+        cashSession.AddReversal(originalPaymentId, 30.00m, PaymentMethod.Cash, "reason", Guid.NewGuid()); // duplicate
+
+        // Assert
+        cashSession.Movements.Count(m => m.EntryType == CashSessionEntryType.Refund).ShouldBe(1);
+    }
+
+    [Fact]
+    public void AddChange_NonPositive_Does_Not_Add_Movement()
+    {
+        // Arrange
+        var cashSession = fixture.CreateCashSession();
+        var relatedOrderId = Guid.NewGuid();
+        var before = cashSession.Movements.Count;
+
+        // Act
+        cashSession.AddChange(relatedOrderId, 0m);
+        cashSession.AddChange(relatedOrderId, -5m);
+
+        // Assert
+        cashSession.Movements.Count.ShouldBe(before);
+    }
+
+    [Fact]
+    public void TotalCashPayments_Computes_Payments_Refunds_And_Change()
+    {
+        // Arrange
+        var cashSession = fixture.CreateCashSession();
+        var order1 = Guid.NewGuid();
+        var order2 = Guid.NewGuid();
+
+        cashSession.AddPayment(Guid.NewGuid(), 40.00m, PaymentMethod.Cash, order1);
+        cashSession.AddPayment(Guid.NewGuid(), 20.00m, PaymentMethod.Cash, order2);
+        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.CreditCard, Guid.NewGuid()); // non-cash
+
+        var paidId = Guid.NewGuid();
+        cashSession.AddPayment(paidId, 10.00m, PaymentMethod.Cash, Guid.NewGuid());
+        cashSession.AddReversal(paidId, 5.00m, PaymentMethod.Cash, "partial refund", Guid.NewGuid());
+
+        cashSession.AddChange(order1, 2.00m);
+
+        // Act
+        var totalCashPayments = cashSession.TotalCashPayments();
+
+        // Assert
+        // payments: 40 + 20 + 10 = 70; refunds: 5; change: 2 => 70 - 5 - 2 = 63
+        totalCashPayments.ShouldBe(63.00m);
     }
 
     [Fact]
@@ -200,13 +245,11 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
     {
         // Arrange
         var cashSession = fixture.CreateCashSession();
-        var deposit1 = fixture.CreateCashDeposit(cashSessionId: cashSession.Id, amount: 50.00m);
-        var deposit2 = fixture.CreateCashDeposit(cashSessionId: cashSession.Id, amount: 30.00m);
-        var deposit3 = fixture.CreateCashDeposit(cashSessionId: cashSession.Id, amount: 20.00m);
+        var attendantId = Guid.NewGuid();
 
-        cashSession.AddDeposit(deposit1);
-        cashSession.AddDeposit(deposit2);
-        cashSession.AddDeposit(deposit3);
+        cashSession.AddDeposit(50.00m, attendantId, "Depósito 1");
+        cashSession.AddDeposit(30.00m, attendantId, "Depósito 2");
+        cashSession.AddDeposit(20.00m, attendantId, "Depósito 3");
 
         // Act
         var total = cashSession.TotalDeposits();
@@ -255,94 +298,7 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture)
         cashSession.Close(100.00m, null);
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => cashSession.Close(100.00m, null))
+        Should.Throw<DomainException>(() => cashSession.Close(100.00m, null))
             .Message.ShouldContain("já está fechado");
-    }
-
-    [Fact]
-    public void AdjustOrderTotal_Should_Update_Revenue_When_Total_Increases()
-    {
-        // Arrange
-        var cashSession = fixture.CreateCashSession();
-        cashSession.RecordOrder(50.00m, "Cash");
-
-        // Act
-        cashSession.AdjustOrderTotal(oldTotal: 50.00m, newTotal: 75.00m, "Cash");
-
-        // Assert
-        cashSession.TotalRevenue.ShouldBe(75.00m);
-    }
-
-    [Fact]
-    public void AdjustOrderTotal_Should_Update_Revenue_When_Total_Decreases()
-    {
-        // Arrange
-        var cashSession = fixture.CreateCashSession();
-        cashSession.RecordOrder(50.00m, "Cash");
-
-        // Act
-        cashSession.AdjustOrderTotal(oldTotal: 50.00m, newTotal: 30.00m, "Cash");
-
-        // Assert
-        cashSession.TotalRevenue.ShouldBe(30.00m);
-    }
-
-    [Fact]
-    public void AdjustOrderTotal_Should_Not_Change_When_Totals_Are_Equal()
-    {
-        // Arrange
-        var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
-        cashSession.RecordOrder(50.00m, "Cash");
-        var initialRevenue = cashSession.TotalRevenue;
-        var initialExpected = cashSession.ExpectedCashAmount;
-
-        // Act
-        cashSession.AdjustOrderTotal(oldTotal: 50.00m, newTotal: 50.00m, "Cash");
-
-        // Assert
-        cashSession.TotalRevenue.ShouldBe(initialRevenue);
-        cashSession.ExpectedCashAmount.ShouldBe(initialExpected);
-    }
-
-    [Fact]
-    public void AdjustOrderTotal_With_Cash_Should_Update_Expected_Cash_Amount()
-    {
-        // Arrange
-        var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
-        cashSession.RecordOrder(50.00m, "Cash");
-
-        // Act
-        cashSession.AdjustOrderTotal(oldTotal: 50.00m, newTotal: 75.00m, "Cash");
-
-        // Assert
-        cashSession.ExpectedCashAmount.ShouldBe(175.00m); // 100 + 75
-    }
-
-    [Fact]
-    public void AdjustOrderTotal_Should_Update_Payment_Breakdown()
-    {
-        // Arrange
-        var cashSession = fixture.CreateCashSession();
-        cashSession.RecordOrder(50.00m, "Cash");
-
-        // Act
-        cashSession.AdjustOrderTotal(oldTotal: 50.00m, newTotal: 75.00m, "Cash");
-
-        // Assert
-        var breakdown = cashSession.PaymentBreakdown.Single(p => p.Method == "Cash");
-        breakdown.Amount.ShouldBe(75.00m);
-    }
-
-    [Fact]
-    public void UpdateExpectedCashAmount_Should_Update_Value()
-    {
-        // Arrange
-        var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
-
-        // Act
-        cashSession.UpdateExpectedCashAmount(250.00m);
-
-        // Assert
-        cashSession.ExpectedCashAmount.ShouldBe(250.00m);
     }
 }

@@ -1,4 +1,4 @@
-using Devlivery.Features.Orders.Domain.Enums;
+using Devlivery.Shared.Domain.Enums;
 using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
 using Mediator;

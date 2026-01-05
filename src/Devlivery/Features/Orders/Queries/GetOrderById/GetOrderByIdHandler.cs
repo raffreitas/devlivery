@@ -1,7 +1,10 @@
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using FluentResults;
+
 using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Orders.Queries.GetOrderById;
@@ -16,6 +19,7 @@ public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext)
         var order = await dbContext.Orders
             .AsNoTracking()
             .Include(o => o.Items)
+            .Include(o => o.Payments)
             .FirstOrDefaultAsync(o => o.Id == query.Id, cancellationToken);
 
         if (order is null)
@@ -51,7 +55,10 @@ public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext)
             order.Status.ToString(),
             order.Total,
             order.DeliveryFee,
-            order.PaymentMethod.ToString(),
+            order.Payments.Select(p => new OrderPaymentDto(
+                p.Id,
+                p.Amount,
+                p.PaymentMethod.ToString())).ToArray(),
             order.CreatedAt,
             order.UpdatedAt);
 

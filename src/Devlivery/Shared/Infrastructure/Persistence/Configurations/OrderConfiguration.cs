@@ -47,8 +47,8 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.Property(e => e.Status).IsRequired().HasMaxLength(20).HasConversion<string>();
         builder.Property(e => e.Total).HasPrecision(18, 2);
+        builder.Property(e => e.Change).HasPrecision(18, 2);
         builder.Property(e => e.DeliveryFee).HasPrecision(18, 2);
-        builder.Property(e => e.PaymentMethod).HasConversion<string>().HasMaxLength(20);
         builder.Property(x => x.EstablishmentId).IsRequired();
         builder.Property(e => e.Notes).HasMaxLength(500).IsRequired(false);
 
@@ -58,6 +58,14 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(a => a.Items)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasMany(e => e.Payments)
+            .WithOne()
+            .HasForeignKey("order_id").IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(a => a.Payments)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasOne<Establishment>()

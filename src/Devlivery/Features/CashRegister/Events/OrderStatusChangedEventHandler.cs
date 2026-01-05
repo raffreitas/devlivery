@@ -1,3 +1,4 @@
+using Devlivery.Features.CashRegister.Domain.Enums;
 using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Orders.Domain.Events;
@@ -8,11 +9,6 @@ using Mediator;
 
 namespace Devlivery.Features.CashRegister.Events;
 
-/// <summary>
-/// Handles OrderStatusChangedEvent to track order lifecycle in cash register.
-/// Currently processes order cancellations to adjust cash session totals.
-/// Tenant context is automatically set by DomainEventTenantBehavior.
-/// </summary>
 public sealed class OrderStatusChangedEventHandler(
     ILogger<OrderStatusChangedEventHandler> logger,
     ICashSessionRepository cashSessionRepository,
@@ -22,41 +18,49 @@ public sealed class OrderStatusChangedEventHandler(
 {
     public async ValueTask Handle(OrderStatusChangedEvent notification, CancellationToken cancellationToken)
     {
-        logger.LogInformation(
-            "Processing OrderStatusChangedEvent for Order {OrderId} ({OldStatus} -> {NewStatus}, EstablishmentId: {EstablishmentId})",
-            notification.OrderId,
-            notification.OldStatus,
-            notification.NewStatus,
-            tenantAccessor.Tenant.Id);
-
-        // Only process cancellations
         if (notification.NewStatus != OrderStatus.Canceled)
-        {
-            logger.LogDebug(
-                "Order {OrderId} status changed to {NewStatus}. No cash register action required.",
-                notification.OrderId,
-                notification.NewStatus);
             return;
-        }
+
+        logger.LogInformation(
+            "Processing OrderStatusChangedEvent (Canceled) for Order {OrderId}, Establishment {EstablishmentId}",
+            notification.OrderId,
+            tenantAccessor.Tenant.Id);
 
         var activeSession = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
         if (activeSession is null)
         {
-            logger.LogDebug(
-                "No active cash session found for establishment {EstablishmentId}. Canceled order {OrderId} will not affect cash register.",
-                tenantAccessor.Tenant.Id,
-                notification.OrderId);
+            logger.LogWarning("No active cash session found for establishment {EstablishmentId}.",
+                tenantAccessor.Tenant.Id);
             return;
         }
 
-        activeSession.RemoveOrder(notification.TotalAmount, notification.PaymentMethod.ToString());
+        var payments = activeSession.Movements.Where(p =>
+                p.EntryType == CashSessionEntryType.Payment && p.RelatedOrderId == notification.OrderId && p.OrderPaymentId != null)
+            .ToList();
+
+        if (payments.Count == 0)
+        {
+            logger.LogInformation("No payments in active session correlated to order {OrderId}.", notification.OrderId);
+            return;
+        }
+
+        foreach (var payment in payments)
+        {
+            if (payment.OrderPaymentId is null || activeSession.HasReversalFor(payment.OrderPaymentId.Value))
+                continue;
+
+            activeSession.AddReversal(
+                originalOrderPaymentId: payment.OrderPaymentId.Value,
+                amount: Math.Abs(payment.Amount),
+                paymentMethod: payment.PaymentMethod!.Value,
+                reason: "Pedido Cancelado",
+                relatedOrderId: notification.OrderId);
+        }
+
         await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation(
-            "Order {OrderId} cancellation processed in cash session {SessionId}. Reversed amount: {Amount}",
-            notification.OrderId,
-            activeSession.Id,
-            notification.TotalAmount);
+        logger.LogInformation("Recorded reversals for canceled order {OrderId} in session {SessionId}.",
+            notification.OrderId, activeSession.Id);
     }
 }

@@ -1,5 +1,8 @@
+using Devlivery.Features.CashRegister.Domain.Enums;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
+
 using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
@@ -10,12 +13,12 @@ public sealed class GetCashSessionDepositsHandler(ApplicationDbContext dbContext
     public async ValueTask<GetCashSessionDepositsResponse[]> Handle(GetCashSessionDepositsQuery query,
         CancellationToken cancellationToken)
     {
-        var deposits = await dbContext.CashDeposits
+        var deposits = await dbContext.CashSessionMovements
             .AsNoTracking()
-            .Where(cd => cd.CashSessionId == query.CashSessionId)
-            .OrderBy(cd => cd.DepositedAt)
+            .Where(m => m.CashSessionId == query.CashSessionId && m.EntryType == CashSessionEntryType.Deposit)
+            .OrderBy(m => m.CreatedAt)
             .ToArrayAsync(cancellationToken);
 
-        return deposits.Select(GetCashSessionDepositsResponse.FromDomain).ToArray();
+        return [.. deposits.Select(GetCashSessionDepositsResponse.FromDomain)];
     }
 }

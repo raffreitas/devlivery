@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.CrossCutting.Extensions;
 using Devlivery.Shared.Infrastructure.Identity.Abstractions;
 using Devlivery.Shared.Infrastructure.Identity.Authentication;
 using Devlivery.Shared.Infrastructure.Identity.Context;

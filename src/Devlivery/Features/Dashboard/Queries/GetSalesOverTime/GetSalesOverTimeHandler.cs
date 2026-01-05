@@ -1,5 +1,5 @@
 using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.CrossCutting.Extensions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
@@ -46,10 +46,10 @@ public sealed class GetSalesOverTimeHandler(ApplicationDbContext dbContext)
             .OrderBy(x => x.Date)
             .ToList();
 
-        // Format dates as "DD/MM" (pt-BR)
+        // Format dates as ISO date string (yyyy-MM-dd)
         var data = salesByDate
             .Select(x => new SalesTimeSeriesItem(
-                x.Date.ToString("dd/MM"),
+                x.Date.ToString("yyyy-MM-dd"),
                 x.Total))
             .ToList();
 

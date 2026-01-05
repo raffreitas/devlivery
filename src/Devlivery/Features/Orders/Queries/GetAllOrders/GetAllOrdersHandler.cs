@@ -1,4 +1,5 @@
-using Devlivery.Shared.Extensions;
+using Devlivery.Features.Orders.Domain.Enums;
+using Devlivery.Shared.CrossCutting.Extensions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
@@ -19,6 +20,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
         var ordersQuery = dbContext.Orders
             .AsNoTracking()
             .Include(o => o.Items)
+            .Include(o => o.Payments)
             .AsQueryable();
 
         // Date filtering: Convert local Brazil time (BRT/BRST) to UTC before querying
@@ -27,7 +29,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
 
         if (query.PaymentMethod is not null)
         {
-            ordersQuery = ordersQuery.Where(o => o.PaymentMethod == query.PaymentMethod);
+            ordersQuery = ordersQuery.Where(o => o.Payments.Any(p => p.PaymentMethod == query.PaymentMethod));
         }
 
         var orders = await ordersQuery
@@ -58,7 +60,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
                     productsDictionary[i.ProductId].CreatedAt,
                     productsDictionary[i.ProductId].UpdatedAt),
                 i.Quantity,
-                i.Notes)).OrderByDescending(x => x.Quantity).ToList(),
+                i.Notes)).OrderByDescending(x => x.Quantity).ToArray(),
             o.Customer.Name,
             o.Customer.Phone?.Number,
             o.DeliveryAddress.FullAddress,
@@ -66,7 +68,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
             o.Status.ToString(),
             o.Total,
             o.DeliveryFee,
-            o.PaymentMethod.ToString(),
+            o.Payments.Where(p => p.PaymentStatus != PaymentStatus.Cancelled).Select(p => new OrderPaymentDto(p.Id, p.Amount, p.PaymentMethod.ToString())).ToArray(),
             o.CreatedAt,
             o.UpdatedAt)).ToList();
 

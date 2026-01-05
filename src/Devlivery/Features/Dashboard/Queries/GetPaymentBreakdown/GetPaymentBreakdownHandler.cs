@@ -1,5 +1,6 @@
 using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Shared.Extensions;
+using Devlivery.Shared.CrossCutting.Extensions;
+using Devlivery.Shared.Domain.Enums;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
 using FluentResults;
@@ -18,6 +19,7 @@ public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
         CancellationToken cancellationToken)
     {
         var ordersQuery = dbContext.Orders
+            .Include(o => o.Payments)
             .AsNoTracking()
             .AsQueryable();
 
@@ -29,11 +31,11 @@ public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
 
         var orders = await ordersQuery.ToListAsync(cancellationToken);
 
-        var breakdown = orders
+        var breakdown = orders.SelectMany(o => o.Payments)
             .GroupBy(o => o.PaymentMethod)
             .ToDictionary(
                 g => g.Key,
-                g => g.Sum(o => o.Total));
+                g => g.Sum(o => o.Amount));
 
         // Ensure all payment methods are present with 0 value
         var allMethods = Enum.GetValues<PaymentMethod>();

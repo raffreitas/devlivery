@@ -29,7 +29,6 @@ public sealed class CreateOrderHandler(
         if (products.Count != productIds.Count)
             return Result.Fail<CreateOrderResponse>(new NotFoundError("Um ou mais produtos não foram encontrados"));
 
-        // Verify all products are available
         var unavailableProducts = products.Where(p => !p.Available).ToList();
         if (unavailableProducts.Count != 0)
         {
@@ -38,24 +37,29 @@ public sealed class CreateOrderHandler(
                 new ValidationError($"Os seguintes produtos estão indisponíveis: {productNames}"));
         }
 
+        var customer = CustomerInfo.Create(command.CustomerName, command.CustomerPhone);
+        var deliveryAddress = new DeliveryAddress(command.DeliveryAddress, command.DeliveryReference);
         var items = command.Items.Select(item => new OrderItem(
             productId: item.ProductId,
             establishmentId: tenantAccessor.Tenant.Id,
             quantity: item.Quantity,
             unitPrice: productsDictionary[item.ProductId].Price,
             notes: item.Notes)).ToList();
-
-        // Create Value Objects
-        var customer = CustomerInfo.Create(command.CustomerName, command.CustomerPhone);
-        var deliveryAddress = new DeliveryAddress(command.DeliveryAddress, command.DeliveryReference);
+        var payments = command.Payments
+            .Where(p => p.Amount > 0)
+            .Select(p => new OrderPayment(
+                establishmentId: tenantAccessor.Tenant.Id,
+                paymentMethod: p.Method,
+                amount: p.Amount
+            )).ToList();
 
         var order = new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
-            paymentMethod: command.PaymentMethod,
             deliveryFee: command.DeliveryFee,
             establishmentId: tenantAccessor.Tenant.Id,
             items: items,
+            payments: payments,
             notes: command.Notes
         );
 

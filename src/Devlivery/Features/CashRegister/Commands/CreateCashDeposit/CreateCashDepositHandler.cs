@@ -1,4 +1,5 @@
-using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Entities;
+using Devlivery.Features.CashRegister.Domain.Enums;
 using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
@@ -12,15 +13,12 @@ namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
 public sealed class CreateCashDepositHandler(
     ICashSessionRepository cashSessionRepository,
-    IUnitOfWork unitOfWork,
-    ITenantAccessor tenantAccessor) : ICommandHandler<CreateCashDepositCommand, Result<CreateCashDepositResponse>>
+    IUnitOfWork unitOfWork) : ICommandHandler<CreateCashDepositCommand, Result<CreateCashDepositResponse>>
 {
     public async ValueTask<Result<CreateCashDepositResponse>> Handle(
         CreateCashDepositCommand command,
         CancellationToken cancellationToken)
     {
-        var tenantId = tenantAccessor.Tenant.Id;
-
         var cashSession = await cashSessionRepository.GetByIdAsync(command.CashSessionId, cancellationToken);
 
         if (cashSession is null)
@@ -34,25 +32,16 @@ public sealed class CreateCashDepositHandler(
                 new ValidationError("Não é possível adicionar aporte a um caixa fechado."));
         }
 
-        // Create the deposit
-        var deposit = new CashDeposit(
-            cashSessionId: command.CashSessionId,
-            establishmentId: tenantId,
-            attendantId: command.AttendantId,
-            attendantName: command.AttendantName,
-            amount: command.Amount,
-            notes: command.Notes);
-
-        cashSession.AddDeposit(deposit);
+        var movement = cashSession.AddDeposit(command.Amount, command.AttendantId, command.Notes);
 
         await cashSessionRepository.UpdateAsync(cashSession, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var response = new CreateCashDepositResponse(
-            deposit.Id,
-            deposit.Amount,
-            deposit.AttendantName,
-            deposit.CreatedAt);
+            movement.Id,
+            movement.Amount,
+            command.AttendantName,
+            movement.CreatedAt);
 
         return Result.Ok(response);
     }

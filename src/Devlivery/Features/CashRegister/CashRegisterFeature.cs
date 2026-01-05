@@ -18,11 +18,10 @@ public static class CashRegisterFeature
         services.AddScoped<ICashSessionRepository, CashSessionRepository>();
 
         // Register Domain Event Handlers
-        services.AddScoped<OrderCreatedEventHandler>();
-        services.AddScoped<OrderStatusChangedEventHandler>();
-        services.AddScoped<OrderPaymentMethodChangedEventHandler>();
-        services.AddScoped<OrderUpdatedEventHandler>();
+        services.AddScoped<OrderPaymentConfirmedEventHandler>();
         services.AddScoped<OrderDeletedEventHandler>();
+        services.AddScoped<OrderStatusChangedEventHandler>();
+        services.AddScoped<OrderChangeCalculatedEventHandler>();
 
         return services;
     }

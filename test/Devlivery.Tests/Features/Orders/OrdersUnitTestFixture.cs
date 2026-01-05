@@ -4,6 +4,7 @@ using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Entities;
 using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Products.Domain;
+using Devlivery.Shared.Domain.Enums;
 using Devlivery.Shared.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Tenancy;
 using Devlivery.Tests.Common.Builders;
@@ -116,11 +117,11 @@ public sealed class OrdersUnitTestFixture : IDisposable
         string? notes = null)
     {
         return new OrderItem(
-            productId ?? Guid.NewGuid(),
-            establishmentId ?? _defaultTenantId,
-            quantity ?? Faker.Random.Int(1, 10),
-            unitPrice ?? Faker.Random.Decimal(10, 200),
-            notes
+            productId: productId ?? Guid.NewGuid(),
+            establishmentId: establishmentId ?? _defaultTenantId,
+            quantity: quantity ?? Faker.Random.Int(1, 10),
+            unitPrice: unitPrice ?? Faker.Random.Decimal(10, 200),
+            notes: notes
         );
     }
 

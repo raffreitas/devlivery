@@ -76,43 +76,8 @@ public sealed class CashRegisterUnitTestFixture : IDisposable
         return builder.Build();
     }
 
-    /// <summary>
-    /// Cria uma instância de CashDeposit para uso em testes.
-    /// Usa o CashDepositBuilder com valores padrão sensatos.
-    /// </summary>
-    public CashDeposit CreateCashDeposit(
-        Guid? cashSessionId = null,
-        Guid? establishmentId = null,
-        Guid? attendantId = null,
-        string? attendantName = null,
-        decimal? amount = null,
-        string? notes = null)
-    {
-        var builder = new CashDepositBuilder();
-
-        if (cashSessionId.HasValue)
-            builder.WithCashSessionId(cashSessionId.Value);
-
-        builder.WithEstablishmentId(establishmentId ?? _defaultTenantId);
-        builder.WithAttendantId(attendantId ?? _defaultAttendantId);
-
-        if (!string.IsNullOrEmpty(attendantName))
-            builder.WithAttendantName(attendantName);
-
-        if (amount.HasValue)
-            builder.WithAmount(amount.Value);
-
-        if (!string.IsNullOrEmpty(notes))
-            builder.WithNotes(notes);
-
-        return builder.Build();
-    }
-
     public void Dispose()
     {
         // Cleanup se necessário
     }
 }
-
-[CollectionDefinition("CashRegister Unit Tests")]
-public sealed class CashRegisterUnitTestCollection : ICollectionFixture<CashRegisterUnitTestFixture>;

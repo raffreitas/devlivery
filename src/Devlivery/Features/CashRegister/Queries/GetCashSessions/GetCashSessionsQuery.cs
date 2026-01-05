@@ -1,4 +1,5 @@
-using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Features.CashRegister.Domain.Enums;
+
 using Mediator;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessions;

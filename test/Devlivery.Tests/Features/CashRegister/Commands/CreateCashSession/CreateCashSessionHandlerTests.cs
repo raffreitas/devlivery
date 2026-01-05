@@ -8,9 +8,8 @@ using Shouldly;
 
 namespace Devlivery.Tests.Features.CashRegister.Commands.CreateCashSession;
 
-[Collection("CashRegister Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fixture)
+public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fixture) : IClassFixture<CashRegisterUnitTestFixture>
 {
     [Fact]
     public async Task Handle_Should_Create_CashSession_When_No_Active_Session_Exists()
@@ -55,7 +54,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
         cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns((CashSession?)null);
+            .ReturnsNull();
 
         var handler = new CreateCashSessionHandler(
             cashSessionRepository,
@@ -85,7 +84,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
         cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns((CashSession?)null);
+            .ReturnsNull();
 
         var handler = new CreateCashSessionHandler(
             cashSessionRepository,
@@ -178,7 +177,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
 
         CashSession? capturedSession = null;
         cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns((CashSession?)null);
+            .ReturnsNull();
 
         await cashSessionRepository.AddAsync(Arg.Do<CashSession>(s => capturedSession = s),
             Arg.Any<CancellationToken>());

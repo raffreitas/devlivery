@@ -12,6 +12,7 @@ public sealed class OrderRepository(ApplicationDbContext dbContext) : IOrderRepo
     {
         return await dbContext.Orders
             .Include(o => o.Items)
+            .Include(o => o.Payments)
             .FirstOrDefaultAsync(o => o.Id == id, ct);
     }
 

@@ -1,5 +1,6 @@
 using Devlivery.Shared.Infrastructure.WebServer.Extensions;
 using Devlivery.Shared.Infrastructure.WebServer.Models;
+
 using Mediator;
 
 namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
@@ -11,10 +12,10 @@ public static class CloseCashSessionEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPatch("sessions/{id:guid}/close", Handle)
-            .Produces<ApiResponse<CloseCashSessionResponse>>()
+            .Produces<ApiResponse>()
             .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
             .Produces<ApiResponse>(StatusCodes.Status404NotFound)
-            .Produces<ApiResponse>(StatusCodes.Status409Conflict);
+            .Produces<ApiResponse>(StatusCodes.Status422UnprocessableEntity);
     }
 
     private static async Task<IResult> Handle(Guid id, CloseCashSessionRequest request, ISender sender,
@@ -24,6 +25,6 @@ public static class CloseCashSessionEndpoint
 
         var result = await sender.Send(command, ct);
 
-        return result.ToApiResult();
+        return result.ToApiResult(TypedResults.NoContent);
     }
 }
