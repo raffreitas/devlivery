@@ -37,6 +37,16 @@ export function SalesChart({ data }: SalesChartProps) {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
+                  tickFormatter={(value) => {
+                    const d = new Date(value);
+                    if (!Number.isNaN(d.getTime())) {
+                      return new Intl.DateTimeFormat("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      }).format(d);
+                    }
+                    return value;
+                  }}
                 />
                 <YAxis
                   stroke="#888888"
@@ -57,7 +67,18 @@ export function SalesChart({ data }: SalesChartProps) {
                                 Data
                               </span>
                               <span className="font-bold text-muted-foreground">
-                                {payload[0].payload.date}
+                                {(() => {
+                                  const v = payload[0].payload.date;
+                                  const d = new Date(v);
+                                  if (!Number.isNaN(d.getTime())) {
+                                    return new Intl.DateTimeFormat("pt-BR", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                    }).format(d);
+                                  }
+                                  return v;
+                                })()}
                               </span>
                             </div>
                             <div className="flex flex-col">
