@@ -106,6 +106,17 @@ public sealed class GetAllExpensesHandler(
                     e.CreatedAt,
                     e.UpdatedAt);
             })
+            .OrderBy(e => StatusSortingValue(e.Status))
+            .ThenBy(e => e.DueDate)
             .ToList();
     }
+
+    private static int StatusSortingValue(ExpenseDisplayStatus status) => status switch
+    {
+        ExpenseDisplayStatus.Overdue => 0,
+        ExpenseDisplayStatus.DueToday => 1,
+        ExpenseDisplayStatus.Pending => 2,
+        ExpenseDisplayStatus.Paid => 3,
+        _ => 4
+    };
 }
