@@ -1,15 +1,8 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-  LayoutDashboard,
-  Package,
-  Receipt,
-  ShoppingCart,
-  Wallet,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
+import { navItems } from "@/shared/constants/nav-items";
 import { cn } from "@/shared/lib/utils";
 
 export function Sidebar() {
@@ -17,40 +10,6 @@ export function Sidebar() {
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
-
-  const mainNavItems = [
-    {
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      path: "/",
-    },
-    {
-      label: "Pedidos",
-      icon: ShoppingCart,
-      path: "/orders",
-    },
-    {
-      label: "Caixa",
-      icon: Wallet,
-      path: "/cash",
-    },
-    {
-      label: "Produtos",
-      icon: Package,
-      path: "/products",
-    },
-    {
-      label: "Despesas",
-      icon: Receipt,
-      path: "/expenses",
-    },
-    // Future Menu Placeholders
-    // {
-    //   label: "Cardápio",
-    //   icon: MenuSquare,
-    //   path: "/menu",
-    // },
-  ];
 
   return (
     <aside
@@ -85,7 +44,7 @@ export function Sidebar() {
             </h4>
           )}
           <nav className="space-y-1">
-            {mainNavItems.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}

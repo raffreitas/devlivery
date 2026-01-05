@@ -1,51 +1,11 @@
-import {
-  LayoutDashboard,
-  Package,
-  Receipt,
-  ShoppingCart,
-  Wallet,
-} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { navItems } from "@/shared/constants/nav-items";
 import { cn } from "@/shared/lib/utils";
 
 export function NavbarBottom() {
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
-
-  const navItems = [
-    {
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      path: "/",
-    },
-    {
-      label: "Pedidos",
-      icon: ShoppingCart,
-      path: "/orders",
-    },
-    {
-      label: "Caixa",
-      icon: Wallet,
-      path: "/cash",
-    },
-    {
-      label: "Produtos",
-      icon: Package,
-      path: "/products",
-    },
-    {
-      label: "Despesas",
-      icon: Receipt,
-      path: "/expenses",
-    },
-    // Future Menu Management Placeholder
-    // {
-    //   label: "Cardápio",
-    //   icon: Menu,
-    //   path: "/menu",
-    // },
-  ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border pb-safe sm:hidden">
