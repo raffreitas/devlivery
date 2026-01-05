@@ -1,3 +1,4 @@
+using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Shared.CrossCutting.Extensions;
 using Devlivery.Shared.Infrastructure.Persistence.Context;
 
@@ -67,7 +68,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
             o.Status.ToString(),
             o.Total,
             o.DeliveryFee,
-            o.Payments.Select(p => new OrderPaymentDto(p.Id, p.Amount, p.PaymentMethod.ToString())).ToArray(),
+            o.Payments.Where(p => p.PaymentStatus != PaymentStatus.Cancelled).Select(p => new OrderPaymentDto(p.Id, p.Amount, p.PaymentMethod.ToString())).ToArray(),
             o.CreatedAt,
             o.UpdatedAt)).ToList();
 
