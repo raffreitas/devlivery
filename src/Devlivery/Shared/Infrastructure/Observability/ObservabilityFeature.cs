@@ -21,54 +21,56 @@ public static class ObservabilityFeature
 
         var services = builder.Services;
 
-        var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
-        if (string.IsNullOrEmpty(otlpEndpoint)) return services;
+        if (string.IsNullOrEmpty(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]))
+            return services;
 
         builder.Logging.AddOpenTelemetry(logging =>
         {
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
+            if (builder.Environment.IsProduction())
+                logging.UseGrafana();
         });
 
-        services.AddOpenTelemetry()
-            .ConfigureResource(resource => resource.AddService(
-                serviceName: serviceName,
-                serviceVersion: serviceVersion,
-                serviceNamespace: serviceNamespace,
-                serviceInstanceId: Environment.MachineName
-            ))
-            .WithMetrics(metrics =>
-            {
-                metrics.AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddProcessInstrumentation()
-                    .AddNpgsqlInstrumentation()
-                    .AddRuntimeInstrumentation();
-            })
-            .WithTracing(tracing =>
-            {
-                tracing.AddSource(builder.Environment.ApplicationName)
-                    .AddAspNetCoreInstrumentation(options =>
-                    {
-                        options.Filter = context =>
-                            !context.Request.Path.StartsWithSegments("/health") &&
-                            !context.Request.Path.StartsWithSegments("/alive") &&
-                            !context.Request.Path.StartsWithSegments("/scalar") &&
-                            !context.Request.Path.StartsWithSegments("/openapi");
+        var otelBuilder = services.AddOpenTelemetry()
+              .ConfigureResource(resource => resource.AddService(
+                  serviceName: serviceName,
+                  serviceVersion: serviceVersion,
+                  serviceNamespace: serviceNamespace,
+                  serviceInstanceId: Environment.MachineName
+              ))
+              .WithMetrics(metrics =>
+              {
+                  metrics.AddAspNetCoreInstrumentation()
+                      .AddHttpClientInstrumentation()
+                      .AddProcessInstrumentation()
+                      .AddNpgsqlInstrumentation()
+                      .AddRuntimeInstrumentation();
+              })
+              .WithTracing(tracing =>
+              {
+                  tracing.AddSource(builder.Environment.ApplicationName)
+                      .AddAspNetCoreInstrumentation(options =>
+                      {
+                          options.Filter = context =>
+                              !context.Request.Path.StartsWithSegments("/health") &&
+                              !context.Request.Path.StartsWithSegments("/alive") &&
+                              !context.Request.Path.StartsWithSegments("/scalar") &&
+                              !context.Request.Path.StartsWithSegments("/openapi");
 
-                        options.RecordException = true;
-                    })
-                    .AddHttpClientInstrumentation()
-                    .AddNpgsql();
-            });
+                          options.RecordException = true;
+                      })
+                      .AddHttpClientInstrumentation()
+                      .AddNpgsql();
+              });
 
-        if (otlpEndpoint.Contains("grafana"))
+        if (builder.Environment.IsProduction())
         {
-            services.AddOpenTelemetry().UseGrafana();
+            otelBuilder.UseGrafana();
         }
         else
         {
-            services.AddOpenTelemetry().UseOtlpExporter();
+            otelBuilder.UseOtlpExporter();
         }
 
         return services;
