@@ -52,11 +52,21 @@ export function RevenueVsExpensesChart({
       }
     });
 
-    return Array.from(dataMap.values()).sort((a, b) => {
-      const [dayA, monthA] = a.date.split("/").map(Number);
-      const [dayB, monthB] = b.date.split("/").map(Number);
-      return monthA - monthB || dayA - dayB;
-    });
+    // Sort by full date. Backend now emits ISO date strings (yyyy-MM-dd).
+    const toTimestamp = (s: string) => {
+      const parsed = Date.parse(s);
+      if (!Number.isNaN(parsed)) return parsed;
+      // Fallback for legacy dd/MM strings: assume current year
+      const parts = s.split("/").map(Number);
+      const day = parts[0] ?? 1;
+      const month = (parts[1] ?? 1) - 1;
+      const year = new Date().getFullYear();
+      return new Date(year, month, day).getTime();
+    };
+
+    return Array.from(dataMap.values()).sort(
+      (a, b) => toTimestamp(a.date) - toTimestamp(b.date),
+    );
   }, [revenueData, expensesData]);
 
   return (
@@ -92,6 +102,16 @@ export function RevenueVsExpensesChart({
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
+                  tickFormatter={(value) => {
+                    const d = new Date(value);
+                    if (!Number.isNaN(d.getTime())) {
+                      return new Intl.DateTimeFormat("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      }).format(d);
+                    }
+                    return value;
+                  }}
                 />
                 <YAxis
                   stroke="#888888"
@@ -117,7 +137,17 @@ export function RevenueVsExpensesChart({
                                 Data
                               </span>
                               <span className="font-bold text-muted-foreground">
-                                {data.date}
+                                {(() => {
+                                  const d = new Date(data.date);
+                                  if (!Number.isNaN(d.getTime())) {
+                                    return new Intl.DateTimeFormat("pt-BR", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                    }).format(d);
+                                  }
+                                  return data.date;
+                                })()}
                               </span>
                             </div>
                             <div className="flex items-center justify-between gap-4">

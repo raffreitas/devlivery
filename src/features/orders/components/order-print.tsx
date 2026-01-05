@@ -14,11 +14,22 @@ export function OrderPrint({ order }: OrderPrintProps) {
         <p>Pedido #{order.id.slice(0, 8).toUpperCase()}</p>
       </div>
 
-      <div className="border-t-2 border-b-2 border-dashed border-gray-800 py-2 mb-3">
+      <div className="border-t-2 border-b-2 border-dashed border-foreground py-2 mb-3">
         <p className="font-semibold">Cliente: {order.customerName}</p>
         {order.customerPhone && <p>Tel: {order.customerPhone}</p>}
         <p>End: {order.deliveryAddress}</p>
-        <p>Pagamento: {getPaymentOptionLabel(order.paymentMethod)}</p>
+        {order.payments.length > 0 && (
+          <div>
+            <p className="font-semibold">
+              Pagamento{order.payments.length > 1 ? "s" : ""}:
+            </p>
+            {order.payments.map((p) => (
+              <p key={p.id} className="ml-2 text-sm flex justify-between">
+                <span>- {getPaymentOptionLabel(p.method)}</span>
+              </p>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mb-3">
@@ -39,13 +50,13 @@ export function OrderPrint({ order }: OrderPrintProps) {
       </div>
 
       {order.notes && (
-        <div className="border-t-2 border-dashed border-gray-800 py-2 mb-3">
+        <div className="border-t-2 border-dashed border-foreground py-2 mb-3">
           <p className="font-semibold text-sm">OBSERVAÇÕES:</p>
           <p className="text-sm whitespace-pre-wrap">{order.notes}</p>
         </div>
       )}
 
-      <div className="border-t-2 border-dashed border-gray-800 pt-2 mb-3">
+      <div className="border-t-2 border-dashed border-foreground pt-2 mb-3">
         {(() => {
           const subtotal = order.items.reduce(
             (s, it) => s + it.product.price * it.quantity,
@@ -72,7 +83,7 @@ export function OrderPrint({ order }: OrderPrintProps) {
         })()}
       </div>
 
-      <div className="text-center text-sm border-t border-gray-800 pt-2">
+      <div className="text-center text-sm border-t border-foreground pt-2">
         <p>Data: {new Date(order.createdAt).toLocaleString("pt-BR")}</p>
         <p className="mt-2">Obrigado pela preferência!</p>
       </div>

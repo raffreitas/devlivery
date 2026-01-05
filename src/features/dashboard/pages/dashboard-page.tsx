@@ -256,7 +256,7 @@ export function DashboardPage() {
             onDateChange={handlePeriodFilterChange}
           />
 
-          <div className="pt-4 pb-2 border-t border-gray-200">
+          <div className="pt-4 pb-2 border-t border-border">
             <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
               Aplicar Filtros
             </Button>

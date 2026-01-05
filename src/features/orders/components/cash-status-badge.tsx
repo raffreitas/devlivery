@@ -7,8 +7,10 @@ export function CashStatusBadge() {
 
   return (
     <div
-      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium w-full ${
-        isOpen ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium w-full border ${
+        isOpen
+          ? "bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-200 border-green-300 dark:border-green-700"
+          : "bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-200 border-red-300 dark:border-red-700"
       }`}
     >
       {isOpen ? (

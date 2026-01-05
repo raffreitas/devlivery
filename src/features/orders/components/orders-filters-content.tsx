@@ -9,17 +9,17 @@ import {
 } from "@/shared/components/ui/select";
 import { getOrderStatusOptionLabel } from "../constants/order-status";
 import { getPaymentOptionLabel } from "../constants/payment-methods";
-import type { Order } from "../types";
+import type { OrderStatus, PaymentMethod } from "../types";
 
 interface OrdersFiltersContentProps {
-  statusFilter: Order["status"] | "all";
-  paymentFilter: Order["paymentMethod"] | "all";
-  statusOptions: Array<Order["status"] | "all">;
-  paymentOptions: Array<Order["paymentMethod"] | "all">;
+  statusFilter: OrderStatus | "all";
+  paymentFilter: PaymentMethod | "all";
+  statusOptions: Array<OrderStatus | "all">;
+  paymentOptions: Array<PaymentMethod | "all">;
   period?: DateRange;
   onDateChange: (date: DateRange | undefined) => void;
-  onStatusChange: (status: Order["status"] | "all") => void;
-  onPaymentChange: (payment: Order["paymentMethod"] | "all") => void;
+  onStatusChange: (status: OrderStatus | "all") => void;
+  onPaymentChange: (payment: PaymentMethod | "all") => void;
 }
 
 export function OrdersFiltersContent({

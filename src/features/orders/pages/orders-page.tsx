@@ -23,13 +23,18 @@ import { OrdersHeader } from "../components/orders-header";
 import { getOrderStatusOptions } from "../constants/order-status";
 import { getPaymentOptions } from "../constants/payment-methods";
 import { useOrders } from "../hooks/use-orders";
-import type { Order, OrderFormData } from "../types";
+import type {
+  Order,
+  OrderFormData,
+  OrderStatus,
+  PaymentMethod,
+} from "../types";
 
-const statusOptions: Array<Order["status"]> = [
+const statusOptions: Array<OrderStatus> = [
   ...getOrderStatusOptions().map((s) => s.value),
 ];
 
-const paymentOptions: Array<Order["paymentMethod"]> = [
+const paymentOptions: Array<PaymentMethod> = [
   ...getPaymentOptions().map((o) => o.value),
 ];
 
@@ -39,9 +44,9 @@ export function OrdersPage() {
     to: new Date(),
   });
 
-  const [paymentFilter, setPaymentFilter] = useState<
-    Order["paymentMethod"] | "all"
-  >("all");
+  const [paymentFilter, setPaymentFilter] = useState<PaymentMethod | "all">(
+    "all",
+  );
 
   const {
     orders,
@@ -61,9 +66,7 @@ export function OrdersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<Order["status"] | "all">(
-    "all",
-  );
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
 
   const handleCreateOrUpdateOrder = async (data: OrderFormData) => {
     try {
@@ -111,7 +114,9 @@ export function OrdersPage() {
   const filteredByPayment =
     paymentFilter === "all"
       ? filteredOrders
-      : filteredOrders.filter((order) => order.paymentMethod === paymentFilter);
+      : filteredOrders.filter((order) =>
+          order.payments.some((p) => p.method === paymentFilter),
+        );
 
   return (
     <>
@@ -143,7 +148,7 @@ export function OrdersPage() {
         >
           {filteredByPayment.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-sm sm:text-lg">
+              <p className="text-muted-foreground text-sm sm:text-lg">
                 {orders.length === 0
                   ? "Nenhum pedido cadastrado. Comece criando um novo pedido!"
                   : "Nenhum pedido encontrado com o filtro aplicado."}
@@ -211,7 +216,7 @@ export function OrdersPage() {
             onDateChange={handlePeriodFilterChange}
           />
 
-          <div className="pt-4 pb-2 border-t border-gray-200">
+          <div className="pt-4 pb-2 border-t border-border">
             <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
               Aplicar Filtros
             </Button>

@@ -100,7 +100,8 @@ export function CashDepositForm({
             type="submit"
             isLoading={isLoading}
             loadingText="Adicionando..."
-            className="flex-1 bg-green-600 hover:bg-green-700"
+            variant="default"
+            className="flex-1"
           >
             Adicionar Aporte
           </LoadingButton>

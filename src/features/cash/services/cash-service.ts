@@ -155,21 +155,16 @@ export const cashService = {
     return mapDtoToDomain(response.data);
   },
 
-  async close(id: string, dto: CloseCashSessionFormData): Promise<CashSession> {
+  async close(id: string, dto: CloseCashSessionFormData): Promise<void> {
     const payload: CloseCashSessionPayload = {
       closingAmount: dto.closingAmount,
       notes: dto.notes,
     };
 
-    const response = await api.patch<ApiResponse<CashSessionDto>>(
+    await api.patch<ApiResponse<CashSessionDto>>(
       `/api/cash-register/sessions/${id}/close`,
       payload,
     );
-
-    if (!response.success || !response.data) {
-      throw new Error(response.message || "Falha ao fechar sessão de caixa");
-    }
-    return mapDtoToDomain(response.data ?? ({} as CashSessionDto));
   },
 
   async createDeposit(

@@ -32,10 +32,10 @@ export function StatCard({
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm text-secondary-foreground truncate">
+          <p className="text-xs sm:text-sm text-muted-foreground truncate">
             {title}
           </p>
-          <p className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
+          <p className="text-lg sm:text-2xl font-bold text-foreground truncate">
             {value}
           </p>
         </div>

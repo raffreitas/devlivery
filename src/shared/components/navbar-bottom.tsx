@@ -48,7 +48,7 @@ export function NavbarBottom() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 pb-safe sm:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border pb-safe sm:hidden">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           const active = isActive(item.path);
@@ -60,7 +60,7 @@ export function NavbarBottom() {
                 "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200",
                 active
                   ? "text-primary font-medium"
-                  : "text-muted-foreground hover:text-gray-900",
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <item.icon

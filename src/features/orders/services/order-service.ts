@@ -1,6 +1,11 @@
 import type { Product } from "@/features/products/types";
 import { type ApiResponse, api } from "@/shared/services/api";
-import type { Order, OrderFormData, PaymentMethod } from "../types";
+import type {
+  Order,
+  OrderFormData,
+  OrderStatus,
+  PaymentMethod,
+} from "../types";
 
 interface ProductDto {
   id: string;
@@ -19,14 +24,20 @@ interface OrderItemDto {
   notes?: string | null;
 }
 
+interface OrderPaymentDto {
+  id: string;
+  paymentMethod: PaymentMethod | string;
+  amount: number;
+}
+
 interface OrderDto {
   id: string;
   items: OrderItemDto[];
   customerName: string;
   customerPhone?: string;
   deliveryAddress: string;
-  status: Order["status"] | string;
-  paymentMethod: string;
+  status: OrderStatus | string;
+  payments: OrderPaymentDto[];
   total: number;
   deliveryFee: number;
   notes?: string | null;
@@ -58,8 +69,12 @@ function mapOrder(dto: OrderDto): Order {
     customerName: dto.customerName,
     customerPhone: dto.customerPhone,
     deliveryAddress: dto.deliveryAddress,
-    status: dto.status as Order["status"],
-    paymentMethod: dto.paymentMethod as PaymentMethod,
+    status: dto.status as OrderStatus,
+    payments: dto.payments.map((p) => ({
+      id: p.id,
+      method: p.paymentMethod as PaymentMethod,
+      amount: p.amount,
+    })),
     total: dto.total,
     deliveryFee: dto.deliveryFee,
     notes: dto.notes ?? undefined,
@@ -116,7 +131,13 @@ export const orderService = {
       customerPhone: data.customerPhone,
       deliveryAddress: data.deliveryAddress,
       deliveryFee: data.deliveryFee,
-      paymentMethod: data.paymentMethod,
+      payments: data.payments
+        .filter((p) => p.amount > 0)
+        .map((p) => ({
+          id: p.id,
+          method: p.method,
+          amount: p.amount,
+        })),
       notes: data.notes ?? null,
     };
     await api.post<void>("/api/orders", payload);
@@ -134,13 +155,17 @@ export const orderService = {
       customerPhone: data.customerPhone,
       deliveryAddress: data.deliveryAddress,
       deliveryFee: data.deliveryFee,
-      paymentMethod: data.paymentMethod,
+      payments: data.payments.map((p) => ({
+        id: p.id,
+        method: p.method,
+        amount: p.amount,
+      })),
       notes: data.notes ?? null,
     };
     await api.put<void>(`/api/orders/${id}`, payload);
   },
 
-  updateStatus: async (id: string, status: Order["status"]): Promise<void> => {
+  updateStatus: async (id: string, status: OrderStatus): Promise<void> => {
     await api.patch<void>(`/api/orders/${id}/status`, {
       status,
     });

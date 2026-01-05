@@ -1,5 +1,5 @@
 import { Button } from "@/shared/components/ui/button";
-import type { Order } from "../types";
+import type { Order, OrderStatus } from "../types";
 
 interface OrderCardActionsProps {
   order: Order;
@@ -11,8 +11,8 @@ interface OrderCardActionsProps {
   hasNextStatus: boolean;
 }
 
-function getNextStatusLabel(status: Order["status"]): string {
-  const labels: Record<Order["status"], string> = {
+function getNextStatusLabel(status: OrderStatus): string {
+  const labels: Record<OrderStatus, string> = {
     Pending: "Iniciar Preparo",
     Preparing: "Marcar como Pronto",
     Ready: "Marcar como Entregue",
@@ -67,7 +67,7 @@ export function OrderCardActions({
         )}
       </div>
 
-      <div className="mt-2 sm:mt-3 text-xs text-gray-500">
+      <div className="mt-2 sm:mt-3 text-xs text-muted-foreground">
         Criado em: {new Date(order.createdAt).toLocaleString("pt-BR")}
       </div>
     </div>

@@ -49,31 +49,36 @@ const statusConfig = {
     label: "Pago",
     variant: "default" as const,
     icon: CheckCircle2,
-    className: "bg-green-500 hover:bg-green-600",
+    className:
+      "bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-700",
   },
   [ExpenseStatus.PENDING]: {
     label: "Pendente",
     variant: "secondary" as const,
     icon: Clock,
-    className: "bg-blue-500 hover:bg-blue-600 text-white",
+    className:
+      "bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700",
   },
   [ExpenseStatus.OVERDUE]: {
     label: "Vencido",
     variant: "destructive" as const,
     icon: AlertCircle,
-    className: "bg-red-500 hover:bg-red-600",
+    className:
+      "bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-700",
   },
   [ExpenseStatus.DUE_TODAY]: {
     label: "Vence Hoje",
     variant: "outline" as const,
     icon: Calendar,
-    className: "bg-amber-500 hover:bg-amber-600 text-white",
+    className:
+      "bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700",
   },
   [ExpenseStatus.CANCELLED]: {
     label: "Cancelado",
     variant: "secondary" as const,
     icon: AlertCircle,
-    className: "bg-gray-500 hover:bg-gray-600 text-white",
+    className:
+      "bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700",
   },
 };
 

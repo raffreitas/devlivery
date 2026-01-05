@@ -62,7 +62,7 @@ export function Modal({
         <div className="space-y-4">
           {children}
           {footer && (
-            <div className="pt-4 border-t border-gray-200">{footer}</div>
+            <div className="pt-4 border-t border-border">{footer}</div>
           )}
         </div>
       </BottomSheet>

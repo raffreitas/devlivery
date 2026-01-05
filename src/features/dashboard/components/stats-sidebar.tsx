@@ -30,7 +30,7 @@ export function StatsSidebar({
           return (
             <div
               key={status}
-              className={`flex items-center justify-between p-2 sm:p-3 rounded-lg ${style.bg} ${style.text}`}
+              className={`flex items-center justify-between p-2 sm:p-3 rounded-lg ${style.className}`}
             >
               <div className="flex items-center gap-2">
                 <Icon className="w-4 h-4" />

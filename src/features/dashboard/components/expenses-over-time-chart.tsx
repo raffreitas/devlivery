@@ -27,7 +27,7 @@ export function ExpensesOverTimeChart({ data }: ExpensesOverTimeChartProps) {
         <CardTitle>Despesas no Período</CardTitle>
       </CardHeader>
       <CardContent className="pl-2">
-        <div className="h-[300px] w-full">
+        <div className="h-75 w-full">
           {data.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
@@ -38,6 +38,16 @@ export function ExpensesOverTimeChart({ data }: ExpensesOverTimeChartProps) {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
+                  tickFormatter={(value) => {
+                    const d = new Date(value);
+                    if (!Number.isNaN(d.getTime())) {
+                      return new Intl.DateTimeFormat("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      }).format(d);
+                    }
+                    return value;
+                  }}
                 />
                 <YAxis
                   stroke="#888888"
@@ -58,7 +68,18 @@ export function ExpensesOverTimeChart({ data }: ExpensesOverTimeChartProps) {
                                 Data
                               </span>
                               <span className="font-bold text-muted-foreground">
-                                {payload[0].payload.date}
+                                {(() => {
+                                  const v = payload[0].payload.date;
+                                  const d = new Date(v);
+                                  if (!Number.isNaN(d.getTime())) {
+                                    return new Intl.DateTimeFormat("pt-BR", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                    }).format(d);
+                                  }
+                                  return v;
+                                })()}
                               </span>
                             </div>
                             <div className="flex flex-col">

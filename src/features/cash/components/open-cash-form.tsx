@@ -61,7 +61,7 @@ export function OpenCashForm({
               <FormControl>
                 <InputMoney {...field} />
               </FormControl>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Informe o valor inicial em dinheiro no caixa
               </p>
               <FormMessage />
@@ -100,11 +100,7 @@ export function OpenCashForm({
           >
             Cancelar
           </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1 bg-green-600 hover:bg-green-700"
-          >
+          <Button type="submit" disabled={isSubmitting} className="flex-1">
             <Wallet className="w-4 h-4 mr-2" />
             {isSubmitting ? "Abrindo..." : "Abrir Caixa"}
           </Button>
