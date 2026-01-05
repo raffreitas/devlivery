@@ -44,10 +44,10 @@ public sealed class GetExpensesOverTimeHandler(
         await using var connection = await dbConnectionFactory.OpenConnectionAsync(cancellationToken);
         var expensesByDate = await connection.QueryAsync<(DateOnly PaymentDate, decimal Total)>(sql, parameters);
 
-        // Format dates as "DD/MM" (pt-BR)
+        // Format dates as ISO date string (yyyy-MM-dd)
         var data = expensesByDate
             .Select(x => new ExpenseTimeSeriesItem(
-                x.PaymentDate.ToString("dd/MM"),
+                x.PaymentDate.ToString("yyyy-MM-dd"),
                 x.Total))
             .ToList();
 
