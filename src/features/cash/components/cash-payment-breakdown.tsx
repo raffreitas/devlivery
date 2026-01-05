@@ -84,10 +84,6 @@ export function CashPaymentBreakdown({
               {/* Progress bar */}
               <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                 <Progress value={percentage} />
-                {/* <div
-                  className={`h-full rounded-full transition-all duration-300 ${style.className.split(" ")[0].replace("-100", "-400")}`}
-                  style={{ width: `${percentage}%` }}
-                /> */}
               </div>
 
               <div className="text-xs text-muted-foreground text-right">

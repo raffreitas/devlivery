@@ -19,7 +19,16 @@ export function OrderPrint({ order }: OrderPrintProps) {
         {order.customerPhone && <p>Tel: {order.customerPhone}</p>}
         <p>End: {order.deliveryAddress}</p>
         {order.payments.length > 0 && (
-          <p>Pagamento: {getPaymentOptionLabel(order.payments[0].method)}</p>
+          <div>
+            <p className="font-semibold">
+              Pagamento{order.payments.length > 1 ? "s" : ""}:
+            </p>
+            {order.payments.map((p) => (
+              <p key={p.id} className="ml-2 text-sm flex justify-between">
+                <span>- {getPaymentOptionLabel(p.method)}</span>
+              </p>
+            ))}
+          </div>
         )}
       </div>
 
