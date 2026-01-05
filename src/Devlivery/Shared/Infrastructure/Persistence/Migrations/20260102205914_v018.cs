@@ -11,6 +11,33 @@ namespace Devlivery.Shared.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // =========================================================================
+            // STEP 1: Backup existing payment data
+            // =========================================================================
+            migrationBuilder.Sql(@"
+                -- Create backup table for payment data migration
+                DROP TABLE IF EXISTS temp_orders_backup_v018;
+                
+                CREATE TABLE temp_orders_backup_v018 AS
+                SELECT 
+                    id,
+                    establishment_id,
+                    payment_method,
+                    total,
+                    status,
+                    created_at,
+                    updated_at
+                FROM orders
+                WHERE payment_method IS NOT NULL;
+                
+                -- Create indexes for faster migration
+                CREATE INDEX idx_temp_orders_backup_v018_id ON temp_orders_backup_v018(id);
+                CREATE INDEX idx_temp_orders_backup_v018_establishment ON temp_orders_backup_v018(establishment_id);
+            ");
+
+            // =========================================================================
+            // STEP 2: Drop old structures
+            // =========================================================================
             migrationBuilder.DropTable(
                 name: "cash_deposits");
 
@@ -136,6 +163,89 @@ namespace Devlivery.Shared.Infrastructure.Persistence.Migrations
                 name: "ix_order_payments_order_id",
                 table: "order_payments",
                 column: "order_id");
+
+            // =========================================================================
+            // STEP 3: Migrate payment data from backup to order_payments
+            // =========================================================================
+            migrationBuilder.Sql(@"
+                -- Migrate historical payment data to new order_payments table
+                INSERT INTO order_payments (
+                    id,
+                    establishment_id,
+                    payment_method,
+                    confirmed_at,
+                    payment_status,
+                    amount,
+                    created_at,
+                    updated_at,
+                    order_id
+                )
+                SELECT 
+                    gen_random_uuid() as id,
+                    t.establishment_id,
+                    t.payment_method,
+                    t.updated_at as confirmed_at,
+                    'Confirmed' as payment_status,
+                    t.total as amount,
+                    t.created_at,
+                    t.updated_at,
+                    t.id as order_id
+                FROM temp_orders_backup_v018 t
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM order_payments op WHERE op.order_id = t.id
+                );
+                
+                -- Set change to 0 for migrated orders (default value)
+                UPDATE orders 
+                SET change = 0 
+                WHERE id IN (SELECT id FROM temp_orders_backup_v018)
+                  AND change IS NULL;
+            ");
+
+            // =========================================================================
+            // STEP 4: Validation - Log migration results
+            // =========================================================================
+            migrationBuilder.Sql(@"
+                DO $$
+                DECLARE
+                    backup_count INTEGER;
+                    migrated_count INTEGER;
+                    orphan_count INTEGER;
+                BEGIN
+                    SELECT COUNT(*) INTO backup_count FROM temp_orders_backup_v018;
+                    
+                    SELECT COUNT(*) INTO migrated_count 
+                    FROM order_payments op
+                    INNER JOIN temp_orders_backup_v018 t ON t.id = op.order_id;
+                    
+                    SELECT COUNT(*) INTO orphan_count 
+                    FROM temp_orders_backup_v018 t
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM order_payments op WHERE op.order_id = t.id
+                    );
+                    
+                    RAISE NOTICE '=== Migration v018 Validation ===';
+                    RAISE NOTICE 'Orders backed up: %', backup_count;
+                    RAISE NOTICE 'Payments migrated: %', migrated_count;
+                    RAISE NOTICE 'Orders without payment: %', orphan_count;
+                    
+                    IF orphan_count > 0 THEN
+                        RAISE EXCEPTION 'Migration failed: % orders without payments!', orphan_count;
+                    END IF;
+                    
+                    IF migrated_count != backup_count THEN
+                        RAISE EXCEPTION 'Migration validation failed: expected %, got %', backup_count, migrated_count;
+                    END IF;
+                    
+                    RAISE NOTICE 'Migration v018 completed successfully';
+                END $$;
+            ");
+
+            // =========================================================================
+            // STEP 5: Keep backup table for safety (can be dropped later manually)
+            // =========================================================================
+            // The temp_orders_backup_v018 table is intentionally kept
+            // Drop it manually after validating the migration in production
         }
 
         /// <inheritdoc />
@@ -158,6 +268,26 @@ namespace Devlivery.Shared.Infrastructure.Persistence.Migrations
                 maxLength: 20,
                 nullable: false,
                 defaultValue: "");
+
+            // =========================================================================
+            // ROLLBACK: Restore payment data from backup if available
+            // =========================================================================
+            migrationBuilder.Sql(@"
+                -- Restore payment_method from backup if table exists
+                DO $$
+                BEGIN
+                    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'temp_orders_backup_v018') THEN
+                        UPDATE orders o
+                        SET payment_method = t.payment_method
+                        FROM temp_orders_backup_v018 t
+                        WHERE o.id = t.id;
+                        
+                        RAISE NOTICE 'Payment method data restored from backup';
+                    ELSE
+                        RAISE WARNING 'Backup table not found - payment_method data cannot be restored';
+                    END IF;
+                END $$;
+            ");
 
             migrationBuilder.AddColumn<decimal>(
                 name: "expected_cash_amount",
