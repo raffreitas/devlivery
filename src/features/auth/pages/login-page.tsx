@@ -17,7 +17,7 @@ import { useAuth } from "@/shared/contexts/auth-context";
 import { type AuthFormData, authFormSchema } from "../types";
 
 export function LoginPage() {
-  const { login, loading } = useAuth();
+  const { login, loading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const currentYear = new Date().getFullYear();
@@ -39,8 +39,13 @@ export function LoginPage() {
     }
   };
 
+  if (isAuthenticated) {
+    navigate("/", { replace: true });
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-background to-orange-50 dark:from-orange-950/20 dark:via-background dark:to-orange-950/20 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-orange-50 via-background to-orange-50 dark:from-orange-950/20 dark:via-background dark:to-orange-950/20 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Branding */}
         <div className="text-center mb-8">
