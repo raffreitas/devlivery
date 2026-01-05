@@ -1,8 +1,10 @@
 import { Outlet, useNavigate } from "react-router-dom";
+import { env } from "@/env";
 import { useAuth } from "../contexts/auth-context";
 import { NavbarBottom } from "./navbar-bottom";
 import { NavbarUserSection } from "./navbar-user-section";
 import { Sidebar } from "./sidebar";
+import { Badge } from "./ui/badge";
 
 export function Layout() {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ export function Layout() {
         {/* Mobile Header */}
         <header className="sm:hidden bg-sidebar border-b border-sidebar-border h-16 px-4 flex items-center justify-between sticky top-0 z-40">
           <h1 className="text-xl font-bold text-primary">🍕 Devlivery</h1>
+          {env.MODE === "development" && <Badge>DEV ENV</Badge>}
           <NavbarUserSection onLogout={onLogout} />
         </header>
 
@@ -39,6 +42,7 @@ export function Layout() {
                    For now, let's leave it empty or show Breadcrumbs. */}
             Bem-vindo
           </h2>
+          {env.MODE === "development" && <Badge>DEV ENV</Badge>}
           <div className="flex items-center gap-4">
             <NavbarUserSection onLogout={onLogout} />
           </div>
