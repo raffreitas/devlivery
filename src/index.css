@@ -164,3 +164,8 @@
     scroll-behavior: smooth;
   }
 }
+
+/* Disable browser built-in password reveal buttons */
+input[type="password"]::-ms-reveal {
+  display: none;
+}
