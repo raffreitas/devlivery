@@ -24,7 +24,7 @@ export function OrderPrint({ order }: OrderPrintProps) {
               Pagamento{order.payments.length > 1 ? "s" : ""}:
             </p>
             {order.payments.map((p) => (
-              <p key={p.id} className="ml-2 text-sm flex justify-between">
+              <p key={p.id} className="ml-2 flex justify-between">
                 <span>- {getPaymentOptionLabel(p.method)}</span>
                 {p.method !== "Pix" && <span>{formatMoney(p.amount)}</span>}
               </p>
@@ -71,7 +71,7 @@ export function OrderPrint({ order }: OrderPrintProps) {
               </div>
 
               <div className="flex justify-between">
-                <span>TAXA DE ENTREGA:</span>
+                <span>TX. ENTREGA:</span>
                 <span>{formatMoney(order.deliveryFee)}</span>
               </div>
 
