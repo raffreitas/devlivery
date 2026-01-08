@@ -26,7 +26,7 @@ export function OrderPrint({ order }: OrderPrintProps) {
             {order.payments.map((p) => (
               <p key={p.id} className="ml-2 text-sm flex justify-between">
                 <span>- {getPaymentOptionLabel(p.method)}</span>
-                {p.method === "Cash" && <span>{formatMoney(p.amount)}</span>}
+                {p.method !== "Pix" && <span>{formatMoney(p.amount)}</span>}
               </p>
             ))}
           </div>
