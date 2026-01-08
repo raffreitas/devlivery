@@ -272,10 +272,10 @@ export function ExpenseList({
                       <TableCell>
                         {expense.category.subcategories?.[0]?.name || "-"}
                       </TableCell>
-                      <TableCell className="max-w-[150px] truncate">
+                      <TableCell className="max-w-37.5 truncate">
                         {expense.supplier || "-"}
                       </TableCell>
-                      <TableCell className="max-w-[200px] truncate">
+                      <TableCell className="max-w-50 truncate">
                         {expense.description || "-"}
                       </TableCell>
                       <TableCell className="text-right font-semibold">

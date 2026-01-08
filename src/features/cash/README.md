@@ -84,7 +84,7 @@ await closeCashSession({
 
 ## Integração Backend
 
-O frontend se comunica com os endpoints `/api/cash-sessions`.
+O frontend se comunica com os endpoints `/api/cash-register/sessions`.
 Para detalhes sobre a implementação do backend, consulte `docs/cash-register-backend.md` (se disponível) ou o código da API.
 
 ### Regra de Conferência

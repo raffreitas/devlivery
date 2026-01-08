@@ -58,7 +58,7 @@ export function ProductsFilters({
             />
           </div>
 
-          <div className="w-full sm:w-[200px]">
+          <div className="w-full sm:w-50">
             <Select onValueChange={onCategoryChange} value={filterCategory}>
               <SelectTrigger className="w-full">
                 <div className="flex items-center gap-2 text-muted-foreground">
