@@ -80,12 +80,15 @@ public sealed class Order : Entity
             var paymentsTotal = _payments.Where(x => x.PaymentStatus != PaymentStatus.Cancelled).Sum(x => x.Amount);
             if (paymentsTotal < Total)
             {
-                throw new InvalidOperationException($"O total dos pagamentos ({paymentsTotal:C}) é menor que o total do pedido ({Total:C}).");
+                throw new InvalidOperationException(
+                    $"O total dos pagamentos ({paymentsTotal:C}) é menor que o total do pedido ({Total:C}).");
             }
 
             Change = paymentsTotal - Total;
 
-            _payments.ForEach(ConfirmPayment);
+            _payments.Where(p => p.PaymentStatus != PaymentStatus.Cancelled)
+                .ToList()
+                .ForEach(ConfirmPayment);
 
             AddDomainEvent(new OrderChangeCalculatedEvent(Id, EstablishmentId, Change, DateTime.UtcNow));
         }
@@ -127,7 +130,8 @@ public sealed class Order : Entity
         _payments.Add(payment);
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new OrderPaymentAddedEvent(Id, payment.Id, EstablishmentId, payment.PaymentMethod, payment.Amount, payment.CreatedAt));
+        AddDomainEvent(new OrderPaymentAddedEvent(Id, payment.Id, EstablishmentId, payment.PaymentMethod,
+            payment.Amount, payment.CreatedAt));
     }
 
     public void RemovePayment(Guid paymentId)
@@ -193,12 +197,14 @@ public sealed class Order : Entity
                 if (existing.PaymentStatus == PaymentStatus.Confirmed)
                 {
                     if (existing.Amount != p.Amount || existing.PaymentMethod != p.Method)
-                        throw new DomainException("Não é possível alterar pagamento já confirmado. Realize estorno antes de alterar.");
+                        throw new DomainException(
+                            "Não é possível alterar pagamento já confirmado. Realize estorno antes de alterar.");
                 }
                 else
                 {
                     existing.Update(p.Method, p.Amount);
-                    AddDomainEvent(new OrderPaymentUpdatedEvent(Id, existing.Id, EstablishmentId, existing.PaymentMethod, existing.Amount, existing.UpdatedAt));
+                    AddDomainEvent(new OrderPaymentUpdatedEvent(Id, existing.Id, EstablishmentId,
+                        existing.PaymentMethod, existing.Amount, existing.UpdatedAt));
                 }
 
                 existingById.Remove(p.Id.Value);
@@ -219,7 +225,8 @@ public sealed class Order : Entity
             }
             else
             {
-                throw new DomainException("Não é possível remover pagamento já confirmado. Realize estorno antes de remover.");
+                throw new DomainException(
+                    "Não é possível remover pagamento já confirmado. Realize estorno antes de remover.");
             }
         }
 
