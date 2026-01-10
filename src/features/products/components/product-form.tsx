@@ -53,7 +53,12 @@ export function ProductForm({
             <FormItem>
               <FormLabel>Nome do Produto</FormLabel>
               <FormControl>
-                <Input type="text" required {...field} />
+                <Input
+                  type="text"
+                  placeholder="Digite o nome do produto"
+                  required
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -67,7 +72,12 @@ export function ProductForm({
             <FormItem>
               <FormLabel>Descrição</FormLabel>
               <FormControl>
-                <Textarea rows={3} required {...field} />
+                <Textarea
+                  placeholder="Digite a descrição do produto"
+                  rows={3}
+                  required
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
