@@ -28,7 +28,7 @@ export function OrderCardHeader({ order }: OrderCardHeaderProps) {
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${paymentStyle.className}`}
               >
                 <PaymentIcon className="w-3 h-3" />
-                <span className="hidden sm:inline">
+                <span className="inline">
                   {getPaymentOptionLabel(payment.method)}
                 </span>
               </div>
