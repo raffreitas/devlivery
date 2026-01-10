@@ -130,12 +130,18 @@ export function ProductForm({
           )}
         />
 
-        <div className="flex justify-end space-x-3">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <div className="flex gap-2 justify-center sm:justify-end pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className="flex-1 sm:flex-initial"
+          >
             Cancelar
           </Button>
           <LoadingButton
             type="submit"
+            className="flex-1 sm:flex-initial"
             isLoading={
               form.formState.isSubmitting || externalIsSubmitting === true
             }

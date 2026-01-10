@@ -239,11 +239,12 @@ export function ExpenseForm({
           />
 
           {/* Botões */}
-          <div className="flex gap-2 justify-end pt-2">
+          <div className="flex gap-2 justify-center sm:justify-end pt-2">
             {onCancel && (
               <Button
                 type="button"
                 variant="outline"
+                className="flex-1 sm:flex-initial"
                 onClick={onCancel}
                 disabled={isSubmitting}
               >
@@ -254,6 +255,7 @@ export function ExpenseForm({
               type="submit"
               isLoading={isSubmitting}
               loadingText="Salvando..."
+              className="flex-1 sm:flex-initial"
             >
               {expense ? "Atualizar" : "Criar Despesa"}
             </LoadingButton>
