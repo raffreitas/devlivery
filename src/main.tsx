@@ -8,9 +8,9 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { Toaster } from "sonner";
 import { App } from "./app.tsx";
 import { router } from "./app-routes.tsx";
+import { Toaster } from "./shared/components/ui/sonner.tsx";
 import { UnauthorizedError } from "./shared/services/api";
 import { authEvents } from "./shared/services/auth-events";
 
