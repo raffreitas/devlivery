@@ -31,7 +31,7 @@ public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
 
         var orders = await ordersQuery.ToListAsync(cancellationToken);
 
-        var breakdown = orders.SelectMany(o => o.Payments)
+        var breakdown = orders.SelectMany(o => o.Payments.Where(p => p.PaymentStatus != PaymentStatus.Cancelled))
             .GroupBy(o => o.PaymentMethod)
             .ToDictionary(
                 g => g.Key,
