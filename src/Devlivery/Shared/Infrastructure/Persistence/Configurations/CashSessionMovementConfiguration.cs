@@ -24,6 +24,9 @@ public sealed class CashSessionMovementConfiguration : IEntityTypeConfiguration<
         builder.Property(x => x.Reason).HasMaxLength(1000).IsRequired(false);
         builder.Property(x => x.CreatedBy).IsRequired();
         builder.Property(x => x.CreatedAt).IsRequired();
+        builder.Property<byte[]>("RowVersion")
+            .IsRowVersion()
+            .HasColumnName("row_version");
 
         builder.HasOne<Establishment>()
             .WithMany()
@@ -35,5 +38,12 @@ public sealed class CashSessionMovementConfiguration : IEntityTypeConfiguration<
         builder.HasIndex(x => x.CashSessionId);
         builder.HasIndex(x => x.CreatedAt);
         builder.HasIndex(x => x.RelatedOrderId);
+
+        builder.HasIndex(x => new { x.OrderPaymentId, x.CashSessionId, x.EntryType })
+            .HasDatabaseName("idx_cash_session_movements_unique_payment")
+            .IsUnique()
+            .HasFilter("""
+                       "order_payment_id" IS NOT NULL AND "entry_type" = 'Payment'
+                       """);
     }
 }

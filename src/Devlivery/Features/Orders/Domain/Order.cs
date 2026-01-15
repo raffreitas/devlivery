@@ -86,7 +86,7 @@ public sealed class Order : Entity
 
             Change = paymentsTotal - Total;
 
-            _payments.Where(p => p.PaymentStatus != PaymentStatus.Cancelled)
+            _payments.Where(p => p.PaymentStatus == PaymentStatus.Pending)
                 .ToList()
                 .ForEach(ConfirmPayment);
 

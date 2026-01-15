@@ -25,5 +25,9 @@ public sealed class OrderPaymentConfiguration : IEntityTypeConfiguration<OrderPa
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(x => x.EstablishmentId);
+
+        builder.Property<byte[]>("RowVersion")
+            .IsRowVersion()
+            .HasColumnName("row_version");
     }
 }
