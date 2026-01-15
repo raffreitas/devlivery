@@ -74,5 +74,9 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(x => x.EstablishmentId);
+
+        builder.Property<byte[]>("RowVersion")
+            .IsRowVersion()
+            .HasColumnName("row_version");
     }
 }

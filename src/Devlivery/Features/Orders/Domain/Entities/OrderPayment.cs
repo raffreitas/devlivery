@@ -26,7 +26,8 @@ public sealed class OrderPayment : Entity
 
     public void Confirm()
     {
-        if (PaymentStatus == PaymentStatus.Confirmed) return;
+        if (PaymentStatus == PaymentStatus.Confirmed)
+            throw new InvalidOperationException("Pagamento já está confirmado.");
         if (PaymentStatus == PaymentStatus.Cancelled)
             throw new InvalidOperationException("Não é possível confirmar um pagamento cancelado..");
 

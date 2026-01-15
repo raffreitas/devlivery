@@ -70,6 +70,13 @@ public class OrderBuilder
         _payments.Add(payment);
         return this;
     }
+    
+    public OrderBuilder WithCustomPayments(IEnumerable<OrderPayment> payments)
+    {
+        _payments.Clear();
+        _payments.AddRange(payments);
+        return this;
+    }
 
     public OrderBuilder WithDeliveryFee(decimal deliveryFee)
     {
