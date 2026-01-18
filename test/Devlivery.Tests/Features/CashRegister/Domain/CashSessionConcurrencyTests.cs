@@ -77,9 +77,9 @@ public sealed class CashSessionConcurrencyTests(CashRegisterUnitTestFixture fixt
         var orderId = Guid.NewGuid();
 
         // Act: Simulate concurrent requests trying to add change for same order
-        session.AddChange(orderId, 30.00m, PaymentMethod.Cash);
-        session.AddChange(orderId, 30.00m, PaymentMethod.Cash); // Duplicate attempt 1
-        session.AddChange(orderId, 30.00m, PaymentMethod.Cash); // Duplicate attempt 2
+        session.AddChange(orderId, 30.00m);
+        session.AddChange(orderId, 30.00m); // Duplicate attempt 1
+        session.AddChange(orderId, 30.00m); // Duplicate attempt 2
 
         // Assert: Only 1 change entry created
         var changeMovements = session.Movements.Where(m =>
@@ -87,7 +87,7 @@ public sealed class CashSessionConcurrencyTests(CashRegisterUnitTestFixture fixt
             m.RelatedOrderId == orderId).ToList();
 
         changeMovements.Count.ShouldBe(1);
-        changeMovements.First().Amount.ShouldBe(30.00m);
+        changeMovements[0].Amount.ShouldBe(30.00m);
     }
 
     [Fact(DisplayName = "AddChange should not create entry when amount is zero")]
@@ -98,7 +98,7 @@ public sealed class CashSessionConcurrencyTests(CashRegisterUnitTestFixture fixt
         var orderId = Guid.NewGuid();
 
         // Act: Try to add zero change
-        session.AddChange(orderId, 0.00m, PaymentMethod.Cash);
+        session.AddChange(orderId, 0.00m);
 
         // Assert: No change entry created
         session.Movements.Count(m => m.EntryType == CashSessionEntryType.Change).ShouldBe(0);
@@ -112,7 +112,7 @@ public sealed class CashSessionConcurrencyTests(CashRegisterUnitTestFixture fixt
         var orderId = Guid.NewGuid();
 
         // Act: Try to add negative change
-        session.AddChange(orderId, -10.00m, PaymentMethod.Cash);
+        session.AddChange(orderId, -10.00m);
 
         // Assert: No change entry created
         session.Movements.Count(m => m.EntryType == CashSessionEntryType.Change).ShouldBe(0);
@@ -127,7 +127,7 @@ public sealed class CashSessionConcurrencyTests(CashRegisterUnitTestFixture fixt
 
         // Act & Assert
         Should.Throw<DomainException>(() =>
-            session.AddChange(Guid.NewGuid(), 20.00m, PaymentMethod.Cash));
+            session.AddChange(Guid.NewGuid(), 20.00m));
     }
 
     [Fact(DisplayName = "AddReversal should be idempotent for same payment")]
@@ -198,7 +198,7 @@ public sealed class CashSessionConcurrencyTests(CashRegisterUnitTestFixture fixt
         var session = fixture.CreateCashSession(openingAmount: 100.00m);
         var orderId = Guid.NewGuid();
 
-        session.AddChange(orderId, 20.00m, PaymentMethod.Cash);
+        session.AddChange(orderId, 20.00m);
 
         // Act & Assert
         session.HasChangeFor(orderId).ShouldBeTrue();
@@ -231,7 +231,7 @@ public sealed class CashSessionConcurrencyTests(CashRegisterUnitTestFixture fixt
 
         // Payment 1: Cash 80.00
         session.AddPayment(payment1Id, 80.00m, PaymentMethod.Cash, order1Id);
-        session.AddChange(order1Id, 10.00m, PaymentMethod.Cash); // Change 10.00
+        session.AddChange(order1Id, 10.00m); // Change 10.00
 
         // Payment 2: Pix 50.00
         session.AddPayment(payment2Id, 50.00m, PaymentMethod.Pix, order2Id);
@@ -244,8 +244,8 @@ public sealed class CashSessionConcurrencyTests(CashRegisterUnitTestFixture fixt
         session.AddDeposit(50.00m, Guid.NewGuid(), "Reforço");
 
         // Assert: Calculate expected values
-        // Total Revenue = 80 + 50 + 100 - 100 = 130.00
-        session.TotalRevenue.ShouldBe(130.00m);
+        // Total Revenue = 80 + 50 + 100 - 100 - 10 = 130.00
+        session.TotalRevenue.ShouldBe(120.00m);
 
         // Total Orders = 3 (payment1, payment2, payment3 - even though payment3 was reversed)
         session.TotalOrders.ShouldBe(3);
