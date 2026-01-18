@@ -21,9 +21,15 @@ public sealed class CashSession : Entity
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public IReadOnlyCollection<CashSessionMovement> Movements => _movements.AsReadOnly();
-    public decimal TotalRevenue => _movements.Where(m => m.EntryType == CashSessionEntryType.Payment).Sum(m => m.Amount)
-        - _movements.Where(m => m.EntryType == CashSessionEntryType.Refund).Sum(m => m.Amount);
-    public int TotalOrders => _movements.Where(m => m.OrderPaymentId != null).Select(x => x.OrderPaymentId).Distinct().Count();
+
+    public decimal TotalRevenue =>
+        _movements.Where(m => m.EntryType == CashSessionEntryType.Payment).Sum(m => m.Amount)
+        - _movements.Where(m => m.EntryType == CashSessionEntryType.Refund).Sum(m => m.Amount)
+        - _movements.Where(m => m.EntryType == CashSessionEntryType.Change).Sum(m => m.Amount);
+
+    public int TotalOrders =>
+        _movements.Where(m => m.OrderPaymentId != null).Select(x => x.OrderPaymentId).Distinct().Count();
+
     public decimal ExpectedCashAmount => OpeningAmount + TotalDeposits() + TotalCashPayments();
 
     private CashSession()
@@ -69,7 +75,8 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void AddReversal(Guid originalOrderPaymentId, decimal amount, PaymentMethod paymentMethod, string reason, Guid relatedOrderId)
+    public void AddReversal(Guid originalOrderPaymentId, decimal amount, PaymentMethod paymentMethod, string reason,
+        Guid relatedOrderId)
     {
         if (Status != CashSessionStatus.Open)
             throw new DomainException("Não é possível adicionar reversões a um caixa fechado.");
@@ -106,7 +113,9 @@ public sealed class CashSession : Entity
             establishmentId: EstablishmentId,
             cashSessionId: Id,
             entryType: CashSessionEntryType.Change,
-            amount: changeAmount >= 0 ? changeAmount : throw new DomainException("O valor do pagamento deve ser positivo."),
+            amount: changeAmount >= 0
+                ? changeAmount
+                : throw new DomainException("O valor do pagamento deve ser positivo."),
             createdBy: AttendantId,
             paymentMethod: paymentMethod,
             relatedOrderId: relatedOrderId,
@@ -134,7 +143,8 @@ public sealed class CashSession : Entity
     }
 
     public bool HasReversalFor(Guid originalOrderPaymentId)
-        => _movements.Any(m => m.EntryType == CashSessionEntryType.Refund && m.OrderPaymentId == originalOrderPaymentId);
+        => _movements.Any(m =>
+            m.EntryType == CashSessionEntryType.Refund && m.OrderPaymentId == originalOrderPaymentId);
 
     public bool HasChangeFor(Guid orderId)
         => _movements.Any(p => p.EntryType == CashSessionEntryType.Change && p.RelatedOrderId == orderId);
@@ -153,13 +163,20 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public decimal TotalDeposits() => Movements.Where(m => m.EntryType == CashSessionEntryType.Deposit).Sum(m => m.Amount);
+    public decimal TotalDeposits() => Movements
+        .Where(m => m.EntryType == CashSessionEntryType.Deposit)
+        .Sum(m => m.Amount);
 
     public decimal TotalCashPayments()
     {
-        var payments = Movements.Where(m => m.PaymentMethod == PaymentMethod.Cash && m.EntryType == CashSessionEntryType.Payment).Sum(m => m.Amount);
-        var refunds = Movements.Where(m => m.PaymentMethod == PaymentMethod.Cash && m.EntryType == CashSessionEntryType.Refund).Sum(m => m.Amount);
-        var change = Movements.Where(m => m.EntryType == CashSessionEntryType.Change).Sum(m => m.Amount);
+        var payments = Movements
+            .Where(m => m is { PaymentMethod: PaymentMethod.Cash, EntryType: CashSessionEntryType.Payment })
+            .Sum(m => m.Amount);
+        var refunds = Movements
+            .Where(m => m is { PaymentMethod: PaymentMethod.Cash, EntryType: CashSessionEntryType.Refund })
+            .Sum(m => m.Amount);
+        var change = Movements.Where(m => m.EntryType == CashSessionEntryType.Change)
+            .Sum(m => m.Amount);
         return payments - refunds - change;
     }
 }

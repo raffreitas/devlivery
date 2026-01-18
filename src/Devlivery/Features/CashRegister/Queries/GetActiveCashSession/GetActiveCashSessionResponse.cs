@@ -22,22 +22,30 @@ public sealed record GetActiveCashSessionResponse(
     public static GetActiveCashSessionResponse FromDomain(CashSession cashSession)
     {
         var paymentBreakdown = cashSession.Movements
-            .Where(m => (m.EntryType == CashSessionEntryType.Payment || m.EntryType == CashSessionEntryType.Refund) && m.PaymentMethod != null)
+            .Where(m => (m.EntryType
+                            is CashSessionEntryType.Payment
+                            or CashSessionEntryType.Refund
+                            or CashSessionEntryType.Change)
+                        && m.PaymentMethod != null)
             .GroupBy(m => m.PaymentMethod)
             .Select(g =>
             {
-                var payments = g.Where(m => m.EntryType == CashSessionEntryType.Payment);
-                var refunds = g.Where(m => m.EntryType == CashSessionEntryType.Refund);
-                
+                var payments = g.Where(m => m.EntryType == CashSessionEntryType.Payment).ToList();
+                var refunds = g.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
+                var changes = g.Where(m => m.EntryType == CashSessionEntryType.Change).ToList();
+                var breakdownAmount = payments.Sum(p => p.Amount)
+                                      - refunds.Sum(r => r.Amount)
+                                      - changes.Sum(c => c.Amount);
+
                 return new PaymentBreakdownDto(
                     g.Key!.Value,
-                    payments.Sum(m => m.Amount) - refunds.Sum(m => m.Amount),
-                    payments.Count() - refunds.Count());
+                    breakdownAmount,
+                    payments.Count - refunds.Count);
             })
             .Where(pb => pb.Amount > 0)
             .ToArray();
 
-        // Calcular total de pedidos líquidos (payments - refunds)
+        // Calcular total de pedidos líquidos (payments - refunds - changes)
         var totalPayments = cashSession.Movements.Count(m => m.EntryType == CashSessionEntryType.Payment);
         var totalRefunds = cashSession.Movements.Count(m => m.EntryType == CashSessionEntryType.Refund);
         var totalOrders = totalPayments - totalRefunds;
