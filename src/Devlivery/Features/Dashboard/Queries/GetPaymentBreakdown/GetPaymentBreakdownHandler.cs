@@ -31,10 +31,9 @@ public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
 
         var orders = await ordersQuery.ToListAsync(cancellationToken);
 
-        // Subtract total change (troco) from payment totals. The change is stored on orders and
-        // should not be counted as part of sales (it is money returned to customer).
+        // Consider only confirmed payments in the breakdown; unconfirmed payments are not yet received.
         var breakdown = orders
-            .SelectMany(o => o.Payments.Where(p => p.PaymentStatus != PaymentStatus.Cancelled))
+            .SelectMany(o => o.Payments.Where(p => p.PaymentStatus == PaymentStatus.Confirmed))
             .GroupBy(o => o.PaymentMethod)
             .ToDictionary(
                 g => g.Key,
