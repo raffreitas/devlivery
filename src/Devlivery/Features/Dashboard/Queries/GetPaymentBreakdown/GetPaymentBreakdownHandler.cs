@@ -31,8 +31,8 @@ public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
 
         var orders = await ordersQuery.ToListAsync(cancellationToken);
 
-        // TODO: Aqui tenho que descontar do valor total os reembolsos (refunds) e trocos (change) feitos
-        // que estão registrados nos pagamentos das orders.
+        // Subtract total change (troco) from payment totals. The change is stored on orders and
+        // should not be counted as part of sales (it is money returned to customer).
         var breakdown = orders
             .SelectMany(o => o.Payments.Where(p => p.PaymentStatus != PaymentStatus.Cancelled))
             .GroupBy(o => o.PaymentMethod)
@@ -44,7 +44,11 @@ public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
         var allMethods = Enum.GetValues<PaymentMethod>();
         var completeBreakdown = allMethods.ToDictionary(
             method => method,
-            method => breakdown.GetValueOrDefault(method, 0));
+            method => breakdown.GetValueOrDefault(method, 0m));
+
+        // Total change given back to customers should be subtracted from cash payments
+        var totalChange = orders.Sum(o => o.Change);
+        completeBreakdown[PaymentMethod.Cash] = Math.Max(0m, completeBreakdown[PaymentMethod.Cash] - totalChange);
 
         var total = completeBreakdown.Values.Sum();
 
