@@ -18,7 +18,6 @@ public sealed record GetCashSessionsResponse(
 {
     public static GetCashSessionsResponse FromDomain(CashSession cashSession)
     {
-
         return new GetCashSessionsResponse(
             cashSession.Id,
             cashSession.AttendantId,

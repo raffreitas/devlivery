@@ -23,20 +23,28 @@ public sealed record GetCashSessionByIdResponse(
     public static GetCashSessionByIdResponse FromDomain(CashSession cashSession)
     {
         PaymentBreakdownDto[] paymentBreakdown = cashSession.Movements
-                .Where(m => (m.EntryType is CashSessionEntryType.Payment or CashSessionEntryType.Refund) && m.PaymentMethod != null)
-                .GroupBy(m => m.PaymentMethod)
-                .Select(g =>
-                {
-                    var payments = g.Where(m => m.EntryType == CashSessionEntryType.Payment);
-                    var refunds = g.Where(m => m.EntryType == CashSessionEntryType.Refund);
-                    
-                    return new PaymentBreakdownDto(
-                        g.Key!.Value,
-                        payments.Sum(m => m.Amount) - refunds.Sum(m => m.Amount),
-                        payments.Count() - refunds.Count());
-                })
-                .Where(pb => pb.Amount > 0)
-                .ToArray();
+            .Where(m => (m.EntryType
+                is CashSessionEntryType.Payment
+                or CashSessionEntryType.Refund
+                or CashSessionEntryType.Change) && m.PaymentMethod != null)
+            .GroupBy(m => m.PaymentMethod)
+            .Select(g =>
+            {
+                var payments = g.Where(m => m.EntryType == CashSessionEntryType.Payment).ToList();
+                var refunds = g.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
+                var changes = g.Where(m => m.EntryType == CashSessionEntryType.Change).ToList();
+                var breakdownAmount = payments.Sum(p => p.Amount)
+                                      - refunds.Sum(r => r.Amount)
+                                      - changes.Sum(c => c.Amount);
+
+
+                return new PaymentBreakdownDto(
+                    g.Key!.Value,
+                    breakdownAmount,
+                    payments.Count - refunds.Count);
+            })
+            .Where(pb => pb.Amount > 0)
+            .ToArray();
 
         var cashMovements = cashSession.Movements
             .Where(m => m.EntryType is not CashSessionEntryType.Payment and not CashSessionEntryType.Refund)
@@ -74,4 +82,10 @@ public sealed record GetCashSessionByIdResponse(
 
 public sealed record PaymentBreakdownDto(PaymentMethod Method, decimal Amount, int Count);
 
-public sealed record CashMovementDto(CashSessionEntryType EntryType, decimal Amount, PaymentMethod? Method, Guid? RelatedOrderId, Guid? OrderPaymentId, string? Reason);
+public sealed record CashMovementDto(
+    CashSessionEntryType EntryType,
+    decimal Amount,
+    PaymentMethod? Method,
+    Guid? RelatedOrderId,
+    Guid? OrderPaymentId,
+    string? Reason);

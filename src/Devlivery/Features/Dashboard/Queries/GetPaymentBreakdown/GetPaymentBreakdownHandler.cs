@@ -31,7 +31,10 @@ public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
 
         var orders = await ordersQuery.ToListAsync(cancellationToken);
 
-        var breakdown = orders.SelectMany(o => o.Payments.Where(p => p.PaymentStatus != PaymentStatus.Cancelled))
+        // TODO: Aqui tenho que descontar do valor total os reembolsos (refunds) e trocos (change) feitos
+        // que estão registrados nos pagamentos das orders.
+        var breakdown = orders
+            .SelectMany(o => o.Payments.Where(p => p.PaymentStatus != PaymentStatus.Cancelled))
             .GroupBy(o => o.PaymentMethod)
             .ToDictionary(
                 g => g.Key,
