@@ -1,4 +1,4 @@
-namespace Devlivery.Domain.Aggregates.Orders;
+namespace Devlivery.Domain.Aggregates.Orders.Abstractions;
 
 public interface IOrderRepository
 {

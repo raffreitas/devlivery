@@ -4,7 +4,7 @@ using Devlivery.Infrastructure.Persistence.Context;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.Features.Products.Infrastructure;
+namespace Devlivery.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// Repository for Product aggregate.

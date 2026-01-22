@@ -1,6 +1,6 @@
-using Devlivery.Common.SeedWork;
+using Devlivery.Domain.SeedWork;
 
-namespace Devlivery.Features.Products.Domain;
+namespace Devlivery.Domain.Aggregates.Products;
 
 public sealed class Product : Entity
 {

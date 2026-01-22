@@ -1,4 +1,4 @@
-namespace Devlivery.Common.Domain.ValueObjects;
+namespace Devlivery.Domain.Common.ValueObjects;
 
 /// <summary>
 /// Value Object representing money in the system.

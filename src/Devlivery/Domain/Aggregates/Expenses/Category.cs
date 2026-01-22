@@ -1,6 +1,6 @@
-using Devlivery.Common.SeedWork;
+using Devlivery.Domain.SeedWork;
 
-namespace Devlivery.Features.Expenses.Domain.Aggregates.Categories;
+namespace Devlivery.Domain.Aggregates.Expenses;
 
 public sealed class Category : Entity
 {

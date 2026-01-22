@@ -1,6 +1,6 @@
 using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Orders;
 using Devlivery.Features.Orders.Commands.DeleteOrder;
-using Devlivery.Features.Orders.Domain;
 
 using NSubstitute;
 using Shouldly;

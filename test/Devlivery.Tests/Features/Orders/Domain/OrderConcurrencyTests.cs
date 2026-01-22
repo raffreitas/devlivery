@@ -1,9 +1,10 @@
-using Devlivery.Common.Domain.Enums;
-using Devlivery.Common.SeedWork;
-using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Features.Orders.Domain.Events;
+using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Aggregates.Orders.Events;
+using Devlivery.Domain.Aggregates.Orders.ValueObjects;
+using Devlivery.Domain.Common.Enums;
+using Devlivery.Domain.SeedWork;
 using Devlivery.Tests.Common.Builders;
 
 using Shouldly;

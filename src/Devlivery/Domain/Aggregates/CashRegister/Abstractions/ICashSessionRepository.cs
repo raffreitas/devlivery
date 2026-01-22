@@ -1,6 +1,4 @@
-using Devlivery.Features.CashRegister.Domain;
-
-namespace Devlivery.Features.CashRegister.Infrastructure;
+namespace Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 
 public interface ICashSessionRepository
 {

@@ -1,8 +1,10 @@
-using Devlivery.Common.Domain.Enums;
 using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Aggregates.Products;
+using Devlivery.Domain.Aggregates.Products.Abstractions;
+using Devlivery.Domain.Common.Enums;
 using Devlivery.Features.Orders.Commands.UpdateOrder;
-using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Products.Domain;
 
 using NSubstitute;
 
@@ -36,7 +38,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
     [Fact]
     public async Task Handle_Should_Return_ValidationError_When_Order_Finalized()
     {
-        var order = fixture.CreateOrder(status: Devlivery.Features.Orders.Domain.Enums.OrderStatus.Delivered);
+        var order = fixture.CreateOrder(status: OrderStatus.Delivered);
         var repository = fixture.CreateOrderRepositoryMock();
         var productRepository = Substitute.For<IProductRepository>();
         var unitOfWork = fixture.CreateUnitOfWorkMock();

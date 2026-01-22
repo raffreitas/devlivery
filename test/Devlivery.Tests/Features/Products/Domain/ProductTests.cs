@@ -1,4 +1,4 @@
-using Devlivery.Features.Products.Domain;
+using Devlivery.Domain.Aggregates.Products;
 
 using Shouldly;
 

@@ -1,7 +1,7 @@
+using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.SeedWork;
-using Devlivery.Features.Orders.Domain.Enums;
 
-namespace Devlivery.Features.Orders.Domain.Events;
+namespace Devlivery.Domain.Aggregates.Orders.Events;
 
 /// <summary>
 /// Event raised when an order status changes.

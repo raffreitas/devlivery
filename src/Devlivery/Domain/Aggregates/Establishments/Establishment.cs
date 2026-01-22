@@ -1,6 +1,6 @@
-﻿using Devlivery.Common.SeedWork;
+﻿using Devlivery.Domain.SeedWork;
 
-namespace Devlivery.Features.Establishments.Domain;
+namespace Devlivery.Domain.Aggregates.Establishments;
 
 public sealed class Establishment : Entity
 {

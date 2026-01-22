@@ -1,5 +1,5 @@
+using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Features.Orders.Commands.UpdateOrderStatus;
-using Devlivery.Features.Orders.Domain.Enums;
 
 using FluentValidation.TestHelper;
 

@@ -1,4 +1,4 @@
-namespace Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
+namespace Devlivery.Domain.Aggregates.Expenses.Enums;
 
 public enum ExpenseStatus
 {

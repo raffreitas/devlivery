@@ -1,5 +1,5 @@
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
+using Devlivery.Domain.Aggregates.Expenses;
+using Devlivery.Domain.Aggregates.Expenses.Enums;
 
 using Shouldly;
 

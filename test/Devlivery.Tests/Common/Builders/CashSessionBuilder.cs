@@ -1,8 +1,8 @@
 using Bogus;
 
-using Devlivery.Common.Domain.Enums;
-using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.Domain.Enums;
+using Devlivery.Domain.Aggregates.CashRegister;
+using Devlivery.Domain.Aggregates.CashRegister.Enums;
+using Devlivery.Domain.Common.Enums;
 
 namespace Devlivery.Tests.Common.Builders;
 

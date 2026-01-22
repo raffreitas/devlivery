@@ -1,6 +1,6 @@
 using Devlivery.Domain.Common.ValueObjects;
 
-namespace Devlivery.Features.Orders.Domain.ValueObjects;
+namespace Devlivery.Domain.Aggregates.Orders.ValueObjects;
 
 public sealed record CustomerInfo
 {

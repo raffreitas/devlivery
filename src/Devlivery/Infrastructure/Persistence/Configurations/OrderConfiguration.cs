@@ -1,6 +1,6 @@
-﻿using Devlivery.Common.Domain.ValueObjects;
-using Devlivery.Features.Establishments.Domain;
-using Devlivery.Features.Orders.Domain;
+﻿using Devlivery.Domain.Aggregates.Establishments;
+using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Common.ValueObjects;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

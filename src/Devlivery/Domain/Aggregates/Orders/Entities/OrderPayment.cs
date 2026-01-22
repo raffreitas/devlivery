@@ -1,8 +1,8 @@
-﻿using Devlivery.Domain.Common.Enums;
+﻿using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Common.Enums;
 using Devlivery.Domain.SeedWork;
-using Devlivery.Features.Orders.Domain.Enums;
 
-namespace Devlivery.Features.Orders.Domain.Entities;
+namespace Devlivery.Domain.Aggregates.Orders.Entities;
 
 public sealed class OrderPayment : Entity
 {

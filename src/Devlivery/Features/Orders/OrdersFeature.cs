@@ -1,11 +1,12 @@
-﻿using Devlivery.Features.Orders.Commands.CreateOrder;
+﻿using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Abstractions;
+using Devlivery.Features.Orders.Commands.CreateOrder;
 using Devlivery.Features.Orders.Commands.DeleteOrder;
 using Devlivery.Features.Orders.Commands.UpdateOrder;
 using Devlivery.Features.Orders.Commands.UpdateOrderStatus;
-using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Infrastructure;
 using Devlivery.Features.Orders.Queries.GetAllOrders;
 using Devlivery.Features.Orders.Queries.GetOrderById;
+using Devlivery.Infrastructure.Persistence.Repositories;
 
 namespace Devlivery.Features.Orders;
 

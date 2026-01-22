@@ -1,4 +1,4 @@
-using Devlivery.Features.CashRegister.Domain.Enums;
+using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Infrastructure.Http.Models;
 
 using Mediator;

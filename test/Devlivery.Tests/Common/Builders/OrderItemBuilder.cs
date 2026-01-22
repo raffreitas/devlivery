@@ -1,7 +1,7 @@
 ﻿using Bogus;
 
-using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Products.Domain;
+using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.Aggregates.Products;
 
 namespace Devlivery.Tests.Common.Builders;
 

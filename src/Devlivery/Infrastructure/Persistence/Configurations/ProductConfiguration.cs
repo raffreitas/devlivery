@@ -1,5 +1,5 @@
-﻿using Devlivery.Features.Establishments.Domain;
-using Devlivery.Features.Products.Domain;
+﻿using Devlivery.Domain.Aggregates.Establishments;
+using Devlivery.Domain.Aggregates.Products;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

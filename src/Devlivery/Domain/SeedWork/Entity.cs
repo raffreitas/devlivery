@@ -1,4 +1,4 @@
-﻿namespace Devlivery.Common.SeedWork;
+﻿namespace Devlivery.Domain.SeedWork;
 
 public abstract class Entity
 {

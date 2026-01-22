@@ -1,5 +1,6 @@
 using Devlivery.Common.Errors;
-using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
+using Devlivery.Domain.Aggregates.Expenses;
+using Devlivery.Domain.Aggregates.Expenses.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
 

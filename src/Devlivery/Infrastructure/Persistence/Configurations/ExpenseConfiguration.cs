@@ -1,6 +1,5 @@
-using Devlivery.Features.Establishments.Domain;
-using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
+using Devlivery.Domain.Aggregates.Establishments;
+using Devlivery.Domain.Aggregates.Expenses;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

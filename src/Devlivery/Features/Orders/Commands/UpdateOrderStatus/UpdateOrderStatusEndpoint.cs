@@ -1,4 +1,4 @@
-using Devlivery.Features.Orders.Domain.Enums;
+using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 

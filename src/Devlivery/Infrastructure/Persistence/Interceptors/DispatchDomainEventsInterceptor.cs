@@ -1,4 +1,4 @@
-using Devlivery.Common.SeedWork;
+using Devlivery.Domain.SeedWork;
 
 using Mediator;
 

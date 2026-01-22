@@ -4,7 +4,7 @@ using Devlivery.Infrastructure.Persistence.Context;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.Features.Expenses.Infrastructure;
+namespace Devlivery.Infrastructure.Persistence.Repositories;
 
 public sealed class ExpenseRepository(ApplicationDbContext dbContext) : IExpenseRepository
 {

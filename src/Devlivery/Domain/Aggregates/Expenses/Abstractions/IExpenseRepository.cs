@@ -1,4 +1,4 @@
-namespace Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
+namespace Devlivery.Domain.Aggregates.Expenses.Abstractions;
 
 public interface IExpenseRepository
 {

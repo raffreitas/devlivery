@@ -1,8 +1,9 @@
-using Devlivery.Common.Domain.Enums;
-using Devlivery.Features.CashRegister.Infrastructure;
-using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Features.Orders.Domain.Events;
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
+using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Abstractions;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Aggregates.Orders.Events;
+using Devlivery.Domain.Common.Enums;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
 

@@ -1,4 +1,4 @@
-using Devlivery.Common.Domain.Enums;
+using Devlivery.Domain.Common.Enums;
 using Devlivery.Features.Orders.Commands.CreateOrder;
 
 using Shouldly;

@@ -1,4 +1,4 @@
-namespace Devlivery.Features.Orders.Domain.ValueObjects;
+namespace Devlivery.Domain.Aggregates.Orders.ValueObjects;
 
 /// <summary>
 /// Value Object representing a delivery address.

@@ -1,9 +1,10 @@
-using Devlivery.Common.Domain.Enums;
-using Devlivery.Common.SeedWork;
-using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Orders.Domain.Events;
-using Devlivery.Features.Orders.Domain.ValueObjects;
+using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Aggregates.Orders.Events;
+using Devlivery.Domain.Aggregates.Orders.ValueObjects;
+using Devlivery.Domain.Common.Enums;
+using Devlivery.Domain.SeedWork;
 
 using Shouldly;
 
@@ -100,6 +101,6 @@ public sealed class ReconcilePaymentsTests(OrdersUnitTestFixture fixture)
         var cancelled = order.DomainEvents.OfType<OrderPaymentCancelledEvent>().Any();
         cancelled.ShouldBeTrue();
         var remaining = order.Payments.First(p => p.Id == p2.Id);
-        remaining.PaymentStatus.ShouldBe(Devlivery.Features.Orders.Domain.Enums.PaymentStatus.Cancelled);
+        remaining.PaymentStatus.ShouldBe(PaymentStatus.Cancelled);
     }
 }

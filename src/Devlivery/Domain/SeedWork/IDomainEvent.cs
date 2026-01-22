@@ -1,6 +1,6 @@
 using Mediator;
 
-namespace Devlivery.Common.SeedWork;
+namespace Devlivery.Domain.SeedWork;
 
 /// <summary>
 /// Marker interface for domain events.

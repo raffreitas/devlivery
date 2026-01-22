@@ -1,4 +1,4 @@
-namespace Devlivery.Features.Products.Domain;
+namespace Devlivery.Domain.Aggregates.Products.Abstractions;
 
 /// <summary>
 /// Repository interface for Product aggregate.

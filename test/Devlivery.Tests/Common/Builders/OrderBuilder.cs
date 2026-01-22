@@ -1,10 +1,10 @@
 ﻿using Bogus;
 
-using Devlivery.Common.Domain.Enums;
-using Devlivery.Common.Domain.ValueObjects;
-using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Orders.Domain.ValueObjects;
+using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.Aggregates.Orders.ValueObjects;
+using Devlivery.Domain.Common.Enums;
+using Devlivery.Domain.Common.ValueObjects;
 
 namespace Devlivery.Tests.Common.Builders;
 

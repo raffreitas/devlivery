@@ -1,8 +1,8 @@
-using Devlivery.Common.Domain.Enums;
-using Devlivery.Common.SeedWork;
-using Devlivery.Features.CashRegister.Domain.Enums;
+using Devlivery.Domain.Aggregates.CashRegister.Enums;
+using Devlivery.Domain.Common.Enums;
+using Devlivery.Domain.SeedWork;
 
-namespace Devlivery.Features.CashRegister.Domain.Entities;
+namespace Devlivery.Domain.Aggregates.CashRegister.Entities;
 
 public sealed class CashSessionMovement : Entity
 {

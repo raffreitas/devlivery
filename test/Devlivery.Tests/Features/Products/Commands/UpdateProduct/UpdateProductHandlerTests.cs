@@ -1,4 +1,5 @@
 using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Products;
 using Devlivery.Features.Products.Commands.UpdateProduct;
 
 using NSubstitute;
@@ -19,7 +20,7 @@ public sealed class UpdateProductHandlerTests(ProductsUnitTestFixture fixture)
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
         productRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns((Devlivery.Features.Products.Domain.Product?)null);
+            .Returns((Product?)null);
 
         var handler = new UpdateProductHandler(productRepository, unitOfWork);
 

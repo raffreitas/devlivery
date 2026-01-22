@@ -1,6 +1,6 @@
 ﻿using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Expenses;
 using Devlivery.Features.Expenses.Commands.UpdateCategory;
-using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;

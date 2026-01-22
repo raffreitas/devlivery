@@ -1,4 +1,4 @@
-﻿namespace Devlivery.Features.Orders.Domain.Enums;
+﻿namespace Devlivery.Domain.Aggregates.Orders.Enums;
 
 public enum PaymentStatus
 {

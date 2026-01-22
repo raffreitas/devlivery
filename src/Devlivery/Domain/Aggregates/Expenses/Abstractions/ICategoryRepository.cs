@@ -1,4 +1,4 @@
-namespace Devlivery.Features.Expenses.Domain.Aggregates.Categories;
+namespace Devlivery.Domain.Aggregates.Expenses.Abstractions;
 
 public interface ICategoryRepository
 {

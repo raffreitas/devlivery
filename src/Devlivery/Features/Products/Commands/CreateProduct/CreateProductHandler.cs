@@ -1,4 +1,5 @@
-using Devlivery.Features.Products.Domain;
+using Devlivery.Domain.Aggregates.Products;
+using Devlivery.Domain.Aggregates.Products.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
 

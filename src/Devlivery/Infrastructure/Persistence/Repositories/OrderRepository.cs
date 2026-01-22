@@ -5,7 +5,7 @@ using Devlivery.Infrastructure.Persistence.Context;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.Features.Orders.Infrastructure;
+namespace Devlivery.Infrastructure.Persistence.Repositories;
 
 public sealed class OrderRepository(ApplicationDbContext dbContext) : IOrderRepository
 {

@@ -1,4 +1,4 @@
-using Devlivery.Common.Domain.Enums;
+using Devlivery.Domain.Common.Enums;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 

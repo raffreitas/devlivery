@@ -1,4 +1,4 @@
-﻿namespace Devlivery.Common.Domain.Enums;
+﻿namespace Devlivery.Domain.Common.Enums;
 
 public enum PaymentMethod
 {

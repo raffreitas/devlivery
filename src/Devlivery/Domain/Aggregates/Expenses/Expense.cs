@@ -1,7 +1,7 @@
-using Devlivery.Common.SeedWork;
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
+using Devlivery.Domain.Aggregates.Expenses.Enums;
+using Devlivery.Domain.SeedWork;
 
-namespace Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
+namespace Devlivery.Domain.Aggregates.Expenses;
 
 public sealed class Expense : Entity
 {

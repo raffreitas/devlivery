@@ -1,5 +1,5 @@
+using Devlivery.Domain.Aggregates.CashRegister;
 using Devlivery.Features.CashRegister.Commands.CreateCashSession;
-using Devlivery.Features.CashRegister.Domain;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;

@@ -5,7 +5,7 @@ using Devlivery.Infrastructure.Persistence.Context;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Devlivery.Features.CashRegister.Infrastructure;
+namespace Devlivery.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// Repository for CashSession aggregate.

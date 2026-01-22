@@ -1,4 +1,4 @@
-﻿using Devlivery.Features.Establishments.Domain;
+﻿using Devlivery.Domain.Aggregates.Establishments;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

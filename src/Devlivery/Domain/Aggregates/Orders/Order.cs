@@ -1,10 +1,10 @@
+using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Aggregates.Orders.Events;
+using Devlivery.Domain.Aggregates.Orders.ValueObjects;
 using Devlivery.Domain.SeedWork;
-using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Features.Orders.Domain.Events;
-using Devlivery.Features.Orders.Domain.ValueObjects;
 
-namespace Devlivery.Features.Orders.Domain;
+namespace Devlivery.Domain.Aggregates.Orders;
 
 public sealed class Order : Entity
 {

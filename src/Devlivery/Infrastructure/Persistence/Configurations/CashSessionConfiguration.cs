@@ -1,6 +1,6 @@
-using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.Domain.Entities;
-using Devlivery.Features.Establishments.Domain;
+using Devlivery.Domain.Aggregates.CashRegister;
+using Devlivery.Domain.Aggregates.CashRegister.Entities;
+using Devlivery.Domain.Aggregates.Establishments;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

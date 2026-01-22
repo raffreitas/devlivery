@@ -1,6 +1,6 @@
-using Devlivery.Common.Domain.Enums;
 using Devlivery.Common.Extensions;
-using Devlivery.Features.Orders.Domain.Enums;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Common.Enums;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;

@@ -1,4 +1,4 @@
-﻿namespace Devlivery.Features.CashRegister.Domain.Enums;
+﻿namespace Devlivery.Domain.Aggregates.CashRegister.Enums;
 
 public enum CashSessionStatus
 {

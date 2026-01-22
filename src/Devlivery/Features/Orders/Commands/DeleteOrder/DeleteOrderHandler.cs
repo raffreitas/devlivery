@@ -1,5 +1,6 @@
 using Devlivery.Common.Errors;
-using Devlivery.Features.Orders.Domain;
+using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 
 using FluentResults;

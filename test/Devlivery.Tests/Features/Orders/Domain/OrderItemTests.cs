@@ -1,4 +1,4 @@
-using Devlivery.Features.Orders.Domain.Entities;
+using Devlivery.Domain.Aggregates.Orders.Entities;
 
 using Shouldly;
 

@@ -1,4 +1,4 @@
-using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
+using Devlivery.Domain.Aggregates.Expenses;
 
 using Shouldly;
 

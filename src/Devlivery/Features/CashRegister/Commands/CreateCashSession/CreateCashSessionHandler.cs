@@ -1,6 +1,6 @@
 using Devlivery.Common.Errors;
-using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.Infrastructure;
+using Devlivery.Domain.Aggregates.CashRegister;
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
 
