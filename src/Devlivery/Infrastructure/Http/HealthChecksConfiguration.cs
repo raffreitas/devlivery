@@ -4,7 +4,7 @@ using Devlivery.Infrastructure.Persistence.Context;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Devlivery.Infrastructure.WebServer;
+namespace Devlivery.Infrastructure.Http;
 
 public static class HealthChecksConfiguration
 {

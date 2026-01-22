@@ -3,7 +3,6 @@ using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
-using Devlivery.Shared.Infrastructure.Persistence;
 
 using FluentResults;
 

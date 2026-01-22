@@ -2,10 +2,7 @@ using Devlivery.Common.Domain.Enums;
 using Devlivery.Common.Errors;
 using Devlivery.Features.Orders.Commands.UpdateOrder;
 using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Orders.Domain.ValueObjects;
 using Devlivery.Features.Products.Domain;
-using Devlivery.Shared.Infrastructure.Persistence;
 
 using NSubstitute;
 

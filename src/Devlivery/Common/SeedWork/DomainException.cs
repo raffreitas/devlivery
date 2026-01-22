@@ -1,6 +1,3 @@
 namespace Devlivery.Common.SeedWork;
 
-public sealed class DomainException : Exception
-{
-    public DomainException(string message) : base(message) { }
-}
+public sealed class DomainException(string message) : Exception(message);

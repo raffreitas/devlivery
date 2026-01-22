@@ -3,7 +3,6 @@ using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
 using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
-using Devlivery.Shared.Infrastructure.Persistence;
 
 using FluentResults;
 

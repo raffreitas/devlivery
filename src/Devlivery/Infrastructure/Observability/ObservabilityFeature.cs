@@ -1,4 +1,4 @@
-﻿using Devlivery.Infrastructure.Observability.Middleware;
+﻿using Devlivery.Infrastructure.Http.Middlewares;
 
 using Grafana.OpenTelemetry;
 

@@ -1,4 +1,4 @@
-﻿using Devlivery.Infrastructure.Tenancy.Middleware;
+﻿using Devlivery.Infrastructure.Http.Middlewares;
 
 namespace Devlivery.Infrastructure.Tenancy;
 

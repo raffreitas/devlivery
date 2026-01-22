@@ -1,11 +1,11 @@
 using System.Net;
 
 using Devlivery.Common.Errors;
-using Devlivery.Infrastructure.WebServer.Models;
+using Devlivery.Infrastructure.Http.Models;
 
 using FluentResults;
 
-namespace Devlivery.Infrastructure.WebServer.Extensions;
+namespace Devlivery.Infrastructure.Http.Extensions;
 
 public static class ResultExtensions
 {

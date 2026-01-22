@@ -1,4 +1,4 @@
-using Devlivery.Infrastructure.WebServer.Models;
+using Devlivery.Infrastructure.Http.Models;
 
 using Mediator;
 

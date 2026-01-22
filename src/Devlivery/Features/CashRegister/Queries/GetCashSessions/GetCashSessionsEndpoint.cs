@@ -1,5 +1,5 @@
 using Devlivery.Features.CashRegister.Domain.Enums;
-using Devlivery.Infrastructure.WebServer.Models;
+using Devlivery.Infrastructure.Http.Models;
 
 using Mediator;
 

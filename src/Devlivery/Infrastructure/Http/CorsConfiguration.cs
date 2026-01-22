@@ -1,4 +1,4 @@
-﻿namespace Devlivery.Infrastructure.WebServer;
+﻿namespace Devlivery.Infrastructure.Http;
 
 public static class CorsConfiguration
 {

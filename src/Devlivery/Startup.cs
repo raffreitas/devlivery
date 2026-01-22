@@ -8,17 +8,13 @@ using Devlivery.Features.Expenses;
 using Devlivery.Features.Orders;
 using Devlivery.Features.Products;
 using Devlivery.Infrastructure.Authorization;
+using Devlivery.Infrastructure.Http;
 using Devlivery.Infrastructure.Identity;
-using Devlivery.Infrastructure.Networking;
 using Devlivery.Infrastructure.Observability;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
-using Devlivery.Infrastructure.Tenancy.Behaviors;
 using Devlivery.Infrastructure.Time;
 using Devlivery.Infrastructure.Time.Abstractions;
-using Devlivery.Infrastructure.WebServer;
-using Devlivery.Shared.Infrastructure.Identity;
-using Devlivery.Shared.Infrastructure.Persistence;
 
 using FluentValidation;
 
@@ -30,8 +26,6 @@ public static class Startup
     {
         var services = builder.Services;
         var configuration = builder.Configuration;
-
-        builder.Services.AddNetworkingFeature();
 
         builder.Services.ConfigureHttpJsonOptions(options =>
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));

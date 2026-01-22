@@ -1,7 +1,7 @@
 ﻿using Bogus;
 
 using Devlivery.Common.Domain.Enums;
-using Devlivery.Common.SeedWork;
+using Devlivery.Common.Domain.ValueObjects;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Entities;
 using Devlivery.Features.Orders.Domain.ValueObjects;

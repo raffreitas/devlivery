@@ -1,4 +1,4 @@
-using Devlivery.Common.SeedWork;
+using Devlivery.Common.Domain.ValueObjects;
 
 namespace Devlivery.Features.Orders.Domain.ValueObjects;
 

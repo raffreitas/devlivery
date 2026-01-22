@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 
-namespace Devlivery.Infrastructure.Tenancy.Middleware;
+using Devlivery.Infrastructure.Tenancy;
+
+namespace Devlivery.Infrastructure.Http.Middlewares;
 
 public class TenantRegisterMiddleware(
     ITenantLocator tenantLocator,

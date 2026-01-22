@@ -1,8 +1,9 @@
 using Devlivery.Common.SeedWork;
+using Devlivery.Infrastructure.Tenancy;
 
 using Mediator;
 
-namespace Devlivery.Infrastructure.Tenancy.Behaviors;
+namespace Devlivery.Common.Mediator.Behaviors;
 
 public sealed class DomainEventTenantBehavior<TNotification, TResponse>(
     ITenantAccessor tenantAccessor,

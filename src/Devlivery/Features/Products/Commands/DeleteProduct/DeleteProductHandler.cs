@@ -2,7 +2,7 @@ using Devlivery.Common.Errors;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Products.Domain;
 using Devlivery.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Persistence;
+
 using FluentResults;
 using Mediator;
 

@@ -1,5 +1,5 @@
-using Devlivery.Infrastructure.WebServer.Extensions;
-using Devlivery.Infrastructure.WebServer.Models;
+using Devlivery.Infrastructure.Http.Extensions;
+using Devlivery.Infrastructure.Http.Models;
 
 using Mediator;
 

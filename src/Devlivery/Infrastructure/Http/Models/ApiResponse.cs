@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Devlivery.Infrastructure.WebServer.Models;
+namespace Devlivery.Infrastructure.Http.Models;
 
 /// <summary>
 /// Standardized API response wrapper for all operations

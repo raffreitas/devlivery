@@ -1,8 +1,8 @@
-﻿using Devlivery.Infrastructure.WebServer.Models;
+﻿using Devlivery.Infrastructure.Http.Models;
 
 using Microsoft.AspNetCore.Diagnostics;
 
-namespace Devlivery.Infrastructure.WebServer;
+namespace Devlivery.Infrastructure.Http;
 
 internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {

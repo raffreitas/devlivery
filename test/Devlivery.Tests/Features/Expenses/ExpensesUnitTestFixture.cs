@@ -5,7 +5,6 @@ using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
 using Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
-using Devlivery.Shared.Infrastructure.Persistence;
 
 using NSubstitute;
 

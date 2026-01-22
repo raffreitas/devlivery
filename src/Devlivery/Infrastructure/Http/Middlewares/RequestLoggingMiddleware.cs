@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Devlivery.Infrastructure.Observability.Middleware;
+namespace Devlivery.Infrastructure.Http.Middlewares;
 
 internal sealed class RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
 {

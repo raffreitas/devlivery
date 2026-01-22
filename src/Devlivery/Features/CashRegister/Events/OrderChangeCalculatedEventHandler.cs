@@ -5,7 +5,6 @@ using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Orders.Domain.Events;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
-using Devlivery.Shared.Infrastructure.Persistence;
 
 using Mediator;
 

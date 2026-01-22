@@ -1,5 +1,5 @@
 using Devlivery.Features.CashRegister.Domain.Entities;
-using Devlivery.Features.CashRegister.Domain.Enums;
+
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
 
 public sealed record GetCashSessionDepositsResponse(
