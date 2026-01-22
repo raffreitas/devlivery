@@ -1,5 +1,8 @@
-﻿namespace Devlivery.Common.Errors;
+﻿using FluentResults;
 
-public sealed class ForbiddenError() : ErrorBase("Acesso negado", ["Você não tem permissão para acessar este recurso."])
+namespace Devlivery.Common.Errors;
+
+public sealed class ForbiddenError(string message) : Error(message)
 {
-}
+    public const string Name = nameof(ForbiddenError);
+};

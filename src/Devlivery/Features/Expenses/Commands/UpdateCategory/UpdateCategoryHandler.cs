@@ -32,8 +32,7 @@ public sealed class UpdateCategoryHandler(
             if (existingCategory)
             {
                 var categoryType = category.ParentCategoryId == null ? "categoria" : "subcategoria";
-                return Result.Fail(
-                    new ValidationError([$"Já existe uma {categoryType} com o nome '{command.Name}'."]));
+                return Result.Fail(new ValidationError($"Já existe uma {categoryType} com o nome '{command.Name}'."));
             }
         }
 

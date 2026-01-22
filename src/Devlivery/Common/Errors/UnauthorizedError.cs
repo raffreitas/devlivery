@@ -1,5 +1,8 @@
+﻿using FluentResults;
+
 namespace Devlivery.Common.Errors;
 
-public sealed class UnauthorizedError() : ErrorBase("Acesso não autorizado.", new[] { "Você não está autorizado a acessar este recurso." })
+public sealed class UnauthorizedError(string message) : Error(message)
 {
-}
+    public const string Name = nameof(UnauthorizedError);
+};

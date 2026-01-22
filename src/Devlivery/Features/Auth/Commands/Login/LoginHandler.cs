@@ -3,7 +3,9 @@ using Devlivery.Infrastructure.Identity.Abstractions;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
+
 using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Auth.Commands.Login;
@@ -24,14 +26,14 @@ public sealed class LoginHandler(
         if (user is null)
         {
             logger.LogInformation("Failed login attempt.");
-            return Result.Fail<LoginResponse>(new UnauthorizedError());
+            return Result.Fail<LoginResponse>(new UnauthorizedError("Usuário ou senha inválidos."));
         }
 
         var signInResult = await identityService.SignInAsync(user.Email, command.Password, cancellationToken);
         if (signInResult.IsFailed)
         {
             logger.LogInformation("Failed login attempt.");
-            return Result.Fail<LoginResponse>(new UnauthorizedError());
+            return Result.Fail<LoginResponse>(new UnauthorizedError("Usuário ou senha inválidos."));
         }
 
         var tokenRequest = new TokenRequest(

@@ -16,10 +16,10 @@ public static class CreateCashDepositEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("sessions/{cashSessionId:guid}/deposits", Handle)
-            .Produces<ApiResponse<CreateCashDepositResponse>>(StatusCodes.Status201Created)
-            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse>(StatusCodes.Status404NotFound)
-            .Produces<ApiResponse>(StatusCodes.Status409Conflict);
+            .Produces<ApiResource<CreateCashDepositResponse>>(StatusCodes.Status201Created)
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ApiProblemDetails>(StatusCodes.Status409Conflict);
     }
 
     private static async Task<IResult> Handle(Guid cashSessionId, CreateCashDepositRequest request, ISender sender,
@@ -31,11 +31,7 @@ public static class CreateCashDepositEndpoint
             request.AttendantName,
             request.Amount,
             request.Notes);
-
         var result = await sender.Send(command, ct);
-
-        return result.ToApiResult(onSuccess: data =>
-            TypedResults.Created($"/api/cash-register/sessions/{cashSessionId}/deposits/{result.Value.Id}",
-                ApiResponse<CreateCashDepositResponse>.Success(data)));
+        return result.ToCreated(response => $"/api/cash-register/sessions/{cashSessionId}/deposits/{response.Id}");
     }
 }

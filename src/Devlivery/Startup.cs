@@ -9,6 +9,8 @@ using Devlivery.Features.Orders;
 using Devlivery.Features.Products;
 using Devlivery.Infrastructure.Authorization;
 using Devlivery.Infrastructure.Http;
+using Devlivery.Infrastructure.Http.Configuration;
+using Devlivery.Infrastructure.Http.ExceptionHandlers;
 using Devlivery.Infrastructure.Identity;
 using Devlivery.Infrastructure.Observability;
 using Devlivery.Infrastructure.Persistence;
@@ -38,7 +40,6 @@ public static class Startup
             options.PipelineBehaviors =
             [
                 typeof(DomainEventTenantBehavior<,>),
-                typeof(ValidationPipelineBehavior<,>)
             ];
         });
 

@@ -1,5 +1,8 @@
-﻿namespace Devlivery.Common.Errors;
+﻿using FluentResults;
 
-public sealed class NotFoundError(string message) : ErrorBase("Recurso não encontrado.", new[] { message })
+namespace Devlivery.Common.Errors;
+
+public sealed class NotFoundError(string message) : Error(message)
 {
-}
+    public const string Name = nameof(NotFoundError);
+};

@@ -12,19 +12,16 @@ public static class CloseCashSessionEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPatch("sessions/{id:guid}/close", Handle)
-            .Produces<ApiResponse>()
-            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse>(StatusCodes.Status404NotFound)
-            .Produces<ApiResponse>(StatusCodes.Status422UnprocessableEntity);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ApiProblemDetails>(StatusCodes.Status422UnprocessableEntity);
     }
 
     private static async Task<IResult> Handle(Guid id, CloseCashSessionRequest request, ISender sender,
         CancellationToken ct)
     {
         var command = new CloseCashSessionCommand(id, request.ClosingAmount, request.Notes);
-
         var result = await sender.Send(command, ct);
-
-        return result.ToApiResult(TypedResults.NoContent);
+        return result.ToNoContent();
     }
 }

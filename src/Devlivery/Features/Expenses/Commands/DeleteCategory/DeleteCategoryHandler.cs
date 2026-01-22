@@ -30,7 +30,7 @@ public sealed class DeleteCategoryHandler(
         {
             var categoryType = category.ParentCategoryId == null ? "categoria" : "subcategoria";
             return Result.Fail(new ValidationError(
-                [$"Não é possível excluir a {categoryType} pois existem despesas ativas associadas a ela."]));
+                $"Não é possível excluir a {categoryType} pois existem despesas ativas associadas a ela."));
         }
 
         category.Deactivate();

@@ -1,65 +1,86 @@
 using System.Net;
 
 using Devlivery.Common.Errors;
+using Devlivery.Common.Pagination;
 using Devlivery.Infrastructure.Http.Models;
 
 using FluentResults;
+
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Infrastructure.Http.Extensions;
 
 public static class ResultExtensions
 {
-    public static IResult ToApiResult<T>(
-        this Result<T> result,
-        HttpStatusCode? statusCode = null)
+    public static IResult ToOk<T>(this Result<PaginatedResult<T>> result)
     {
-        return result.IsSuccess
-            ? HandleSuccess(result.Value, statusCode)
-            : HandleFailure(result.Errors);
+        if (result.IsFailed) return result.ToError();
+
+        var paged = result.Value;
+        var resource = new ApiResource<T[]>(paged.Items, Metadata.FromPaginationResult(paged));
+
+        return TypedResults.Ok(resource);
     }
 
-    public static IResult ToApiResult<T>(
-        this Result<T> result,
-        Func<T, IResult> onSuccess)
+    public static IResult ToOk<T>(this Result<T> result) where T : notnull
     {
-        return result.IsSuccess ? onSuccess(result.Value) : HandleFailure(result.Errors);
+        return result.IsFailed
+            ? result.ToError()
+            : TypedResults.Ok(new ApiResource<T>(result.Value));
     }
 
-    public static IResult ToApiResult(
-        this Result result,
-        Func<IResult> onSuccess)
+    public static IResult ToCreated(this Result result)
     {
-        return result.IsSuccess ? onSuccess() : HandleFailure(result.Errors);
+        return result.IsFailed
+            ? result.ToError()
+            : TypedResults.Created();
     }
 
-    private static IResult HandleFailure(IReadOnlyList<IError> errors)
+    public static IResult ToCreated<T>(this Result<T> result, Func<T, string>? locationFactory = null)
+        where T : notnull
     {
-        if (errors.Count == 0)
-            return Results.BadRequest(ApiResponse.Failure("Unknown error occurred"));
+        if (result.IsFailed)
+            return result.ToError();
 
-        var firstError = errors[0];
+        string resourceUri = locationFactory is not null
+            ? locationFactory.Invoke(result.Value)
+            : string.Empty;
 
-        var errorMessages = errors.Select(e => e.Message).ToArray();
-        var response = ApiResponse.Failure(errorMessages);
+        return TypedResults.Created(resourceUri, new ApiResource<T>(result.Value));
+    }
 
-        return firstError switch
+    public static IResult ToNoContent(this Result result)
+    {
+        return result.IsFailed ? result.ToError() : TypedResults.NoContent();
+    }
+
+    private static ProblemHttpResult ToError(this IResultBase result)
+    {
+        if (result.IsSuccess)
+            throw new InvalidOperationException("Não é possível converter um resultado bem-sucedido em um erro.");
+
+        var error = result.Errors[0];
+
+        (HttpStatusCode statusCode, string title) = error switch
         {
-            NotFoundError => TypedResults.NotFound(response),
-            ValidationError => TypedResults.UnprocessableEntity(response),
-            UnauthorizedError => TypedResults.Unauthorized(),
-            ForbiddenError _ => TypedResults.Forbid(),
-            _ => TypedResults.InternalServerError()
+            NotFoundError => (HttpStatusCode.NotFound, "Recurso não encontrado"),
+            ValidationError => (HttpStatusCode.UnprocessableEntity, "Requisição inválida"),
+            UnauthorizedError => (HttpStatusCode.Unauthorized, "Acesso não autorizado"),
+            ForbiddenError => (HttpStatusCode.Forbidden, "Acesso proibido"),
+            ConflictError => (HttpStatusCode.Conflict, "Conflito de recurso"),
+            _ => (HttpStatusCode.BadRequest, "Requisição inválida")
         };
-    }
 
-    private static IResult HandleSuccess<T>(T value, HttpStatusCode? statusCode)
-    {
-        return statusCode switch
+        var problemDetails = new ApiProblemDetails
         {
-            HttpStatusCode.OK => TypedResults.Ok(ApiResponse<T>.Success(value)),
-            HttpStatusCode.Created => TypedResults.Created(string.Empty, ApiResponse<T>.Success(value)),
-            HttpStatusCode.NoContent => TypedResults.NoContent(),
-            _ => Results.Ok(ApiResponse<T>.Success(value))
+            Title = title,
+            Detail = error.Message,
+            Status = (int)statusCode,
+            Errors = error is ValidationError err && err.Errors.Length != 0
+                ? err.Errors.DistinctBy(e => e.Field)
+                    .ToDictionary(e => e.Field.ToLowerInvariant(), e => e.Message)
+                : null
         };
+        return TypedResults.Problem(problemDetails);
     }
 }

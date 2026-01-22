@@ -1,3 +1,4 @@
+using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
 using Mediator;
@@ -9,14 +10,13 @@ public static class GetCashSessionDepositsEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("sessions/{cashSessionId:guid}/deposits", Handle)
-            .Produces<ApiResponse<IEnumerable<GetCashSessionDepositsResponse>>>();
+            .Produces<ApiResource<IEnumerable<GetCashSessionDepositsResponse>>>();
     }
 
     private static async Task<IResult> Handle(Guid cashSessionId, ISender sender, CancellationToken ct)
     {
         var query = new GetCashSessionDepositsQuery(cashSessionId);
         var result = await sender.Send(query, ct);
-
-        return TypedResults.Ok(ApiResponse<GetCashSessionDepositsResponse[]>.Success(result));
+        return result.ToOk();
     }
 }

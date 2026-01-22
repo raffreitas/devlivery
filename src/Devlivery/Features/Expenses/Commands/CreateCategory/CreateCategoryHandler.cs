@@ -28,8 +28,7 @@ public sealed class CreateCategoryHandler(
         if (existingCategory)
         {
             var categoryType = command.ParentCategoryId == null ? "categoria" : "subcategoria";
-            return Result.Fail<CreateCategoryResponse>(
-                new ValidationError([$"Já existe uma {categoryType} com o nome '{command.Name}'."]));
+            return Result.Fail(new ValidationError($"Já existe uma {categoryType} com o nome '{command.Name}'."));
         }
 
         Category category;
@@ -39,8 +38,7 @@ public sealed class CreateCategoryHandler(
                 .GetByIdAsync(command.ParentCategoryId.Value, cancellationToken);
             if (parentCategory is not { IsActive: true })
             {
-                return Result.Fail<CreateCategoryResponse>(
-                    new NotFoundError("Categoria pai não encontrada ou inativa."));
+                return Result.Fail(new NotFoundError("Categoria pai não encontrada ou inativa."));
             }
 
             category = new Category(command.Name, establishmentId);

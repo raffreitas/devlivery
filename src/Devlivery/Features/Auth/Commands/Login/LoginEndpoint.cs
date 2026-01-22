@@ -10,16 +10,15 @@ public static class LoginEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/login", Handle)
-            .Produces<ApiResponse<LoginResponse>>()
-            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces<ApiResource<LoginResponse>>()
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ApiProblemDetails>(StatusCodes.Status401Unauthorized)
             .AllowAnonymous();
     }
 
     private static async Task<IResult> Handle(LoginCommand command, ISender sender, CancellationToken ct)
     {
         var result = await sender.Send(command, ct);
-
-        return result.ToApiResult();
+        return result.ToOk();
     }
 }

@@ -17,10 +17,12 @@ internal sealed class IdentityService(
     {
         var user = await userManager.FindByEmailAsync(email);
         if (user is null)
-            return Result.Fail(new UnauthorizedError());
+            return Result.Fail(new UnauthorizedError("Usuário ou senha inválidos."));
 
         var signInResult = await signInManager.CheckPasswordSignInAsync(user, password, false);
-        return !signInResult.Succeeded ? Result.Fail(new UnauthorizedError()) : Result.Ok();
+        return !signInResult.Succeeded
+            ? Result.Fail(new UnauthorizedError("Usuário ou senha inválidos."))
+            : Result.Ok();
     }
 
     public async Task<IList<string>> GetRolesAsync(User user, CancellationToken cancellationToken = default)

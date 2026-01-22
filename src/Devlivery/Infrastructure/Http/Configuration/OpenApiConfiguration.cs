@@ -2,7 +2,7 @@
 
 using Scalar.AspNetCore;
 
-namespace Devlivery.Infrastructure.Http;
+namespace Devlivery.Infrastructure.Http.Configuration;
 
 public static class OpenApiConfiguration
 {
