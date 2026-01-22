@@ -1,9 +1,9 @@
+using Devlivery.Common.Domain.Enums;
+using Devlivery.Common.Errors;
 using Devlivery.Features.Orders.Commands.CreateOrder;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Products.Domain;
-using Devlivery.Shared.Domain.Enums;
-using Devlivery.Shared.Application.Errors;
 
 using NSubstitute;
 

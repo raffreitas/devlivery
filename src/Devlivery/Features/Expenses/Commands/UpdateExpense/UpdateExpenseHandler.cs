@@ -1,6 +1,7 @@
+using Devlivery.Common.Errors;
 using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
 using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
-using Devlivery.Shared.Application.Errors;
+using Devlivery.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Persistence;
 using FluentResults;
 using Mediator;

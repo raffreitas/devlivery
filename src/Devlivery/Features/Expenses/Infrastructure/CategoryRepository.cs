@@ -1,5 +1,5 @@
 using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Infrastructure.Persistence.Context;
 
 using Microsoft.EntityFrameworkCore;
 

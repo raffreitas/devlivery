@@ -1,6 +1,7 @@
 using Devlivery.Features.Products.Domain;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Infrastructure.Tenancy;
 using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Tenancy;
 
 using FluentResults;
 

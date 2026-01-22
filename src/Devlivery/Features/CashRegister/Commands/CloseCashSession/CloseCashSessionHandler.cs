@@ -1,6 +1,7 @@
+using Devlivery.Common.Errors;
 using Devlivery.Features.CashRegister.Domain.Enums;
 using Devlivery.Features.CashRegister.Infrastructure;
-using Devlivery.Shared.Application.Errors;
+using Devlivery.Infrastructure.Persistence;
 using Devlivery.Shared.Infrastructure.Persistence;
 
 using FluentResults;

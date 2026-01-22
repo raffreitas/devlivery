@@ -1,10 +1,11 @@
-﻿using Devlivery.Features.Orders.Domain;
+﻿using Devlivery.Common.Errors;
+using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Entities;
 using Devlivery.Features.Orders.Domain.ValueObjects;
 using Devlivery.Features.Products.Domain;
-using Devlivery.Shared.Application.Errors;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Infrastructure.Tenancy;
 using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Tenancy;
 
 using FluentResults;
 

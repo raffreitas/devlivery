@@ -1,9 +1,9 @@
 using Bogus;
 
 using Devlivery.Features.Users.Domain;
-using Devlivery.Shared.Infrastructure.Identity.Abstractions;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
-using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Infrastructure.Identity.Abstractions;
+using Devlivery.Infrastructure.Persistence.Context;
+using Devlivery.Infrastructure.Tenancy;
 using Devlivery.Tests.Common.Builders;
 
 using Microsoft.EntityFrameworkCore;

@@ -1,5 +1,5 @@
-using Devlivery.Shared.CrossCutting.Extensions;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Common.Extensions;
+using Devlivery.Infrastructure.Persistence.Context;
 
 using Mediator;
 

@@ -1,4 +1,4 @@
-using Devlivery.Shared.SeedWork;
+using Devlivery.Common.SeedWork;
 
 namespace Devlivery.Features.Expenses.Domain.Aggregates.Categories;
 

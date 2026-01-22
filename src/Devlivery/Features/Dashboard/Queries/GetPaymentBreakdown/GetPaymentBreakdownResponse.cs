@@ -1,4 +1,4 @@
-using Devlivery.Shared.Domain.Enums;
+using Devlivery.Common.Domain.Enums;
 
 namespace Devlivery.Features.Dashboard.Queries.GetPaymentBreakdown;
 

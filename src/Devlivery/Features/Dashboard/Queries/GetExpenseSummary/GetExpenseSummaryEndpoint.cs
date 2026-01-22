@@ -1,5 +1,6 @@
-using Devlivery.Shared.Infrastructure.WebServer.Extensions;
-using Devlivery.Shared.Infrastructure.WebServer.Models;
+using Devlivery.Infrastructure.WebServer.Extensions;
+using Devlivery.Infrastructure.WebServer.Models;
+
 using Mediator;
 
 namespace Devlivery.Features.Dashboard.Queries.GetExpenseSummary;

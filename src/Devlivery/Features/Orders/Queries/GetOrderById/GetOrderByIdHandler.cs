@@ -1,5 +1,5 @@
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Common.Errors;
+using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
 

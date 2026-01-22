@@ -1,10 +1,10 @@
+using Devlivery.Common.Errors;
 using Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Entities;
 using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Orders.Domain.ValueObjects;
 using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Application.Errors;
 
 using NSubstitute;
 using Shouldly;

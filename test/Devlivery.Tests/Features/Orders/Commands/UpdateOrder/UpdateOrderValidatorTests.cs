@@ -1,5 +1,5 @@
+using Devlivery.Common.Domain.Enums;
 using Devlivery.Features.Orders.Commands.UpdateOrder;
-using Devlivery.Shared.Domain.Enums;
 
 using FluentValidation.TestHelper;
 

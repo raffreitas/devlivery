@@ -4,9 +4,9 @@ using Dapper;
 
 using Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Features.Expenses.Queries.GetAllExpenses;
-using Devlivery.Shared.Application.Abstractions;
-using Devlivery.Shared.Infrastructure.Persistence.Abstractions;
-using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Infrastructure.Persistence.Abstractions;
+using Devlivery.Infrastructure.Tenancy;
+using Devlivery.Infrastructure.Time.Abstractions;
 
 using FluentResults;
 

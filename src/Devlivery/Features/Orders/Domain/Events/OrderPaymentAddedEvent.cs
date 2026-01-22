@@ -1,5 +1,5 @@
-using Devlivery.Shared.SeedWork;
-using Devlivery.Shared.Domain.Enums;
+using Devlivery.Common.Domain.Enums;
+using Devlivery.Common.SeedWork;
 
 namespace Devlivery.Features.Orders.Domain.Events;
 

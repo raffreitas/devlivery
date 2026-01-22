@@ -1,6 +1,6 @@
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Infrastructure.Persistence.Context;
 
 using Microsoft.EntityFrameworkCore;
 

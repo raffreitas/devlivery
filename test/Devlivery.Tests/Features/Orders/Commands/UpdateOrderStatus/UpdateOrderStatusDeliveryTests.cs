@@ -1,6 +1,6 @@
+using Devlivery.Common.Domain.Enums;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Events;
-using Devlivery.Shared.Domain.Enums;
 
 using Shouldly;
 

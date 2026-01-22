@@ -1,8 +1,9 @@
 using Devlivery.Features.CashRegister.Domain.Enums;
 using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Features.Orders.Domain.Events;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Infrastructure.Tenancy;
 using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Tenancy;
 
 using Mediator;
 

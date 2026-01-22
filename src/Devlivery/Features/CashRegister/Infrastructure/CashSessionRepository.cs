@@ -1,6 +1,6 @@
 using Devlivery.Features.CashRegister.Domain;
 using Devlivery.Features.CashRegister.Domain.Enums;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Infrastructure.Persistence.Context;
 
 using Microsoft.EntityFrameworkCore;
 

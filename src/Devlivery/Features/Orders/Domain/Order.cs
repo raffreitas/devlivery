@@ -1,8 +1,8 @@
+using Devlivery.Common.SeedWork;
 using Devlivery.Features.Orders.Domain.Entities;
 using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Orders.Domain.Events;
 using Devlivery.Features.Orders.Domain.ValueObjects;
-using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Features.Orders.Domain;
 

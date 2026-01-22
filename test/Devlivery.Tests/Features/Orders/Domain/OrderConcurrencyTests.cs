@@ -1,9 +1,9 @@
+using Devlivery.Common.Domain.Enums;
+using Devlivery.Common.SeedWork;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Entities;
 using Devlivery.Features.Orders.Domain.Enums;
 using Devlivery.Features.Orders.Domain.Events;
-using Devlivery.Shared.Domain.Enums;
-using Devlivery.Shared.SeedWork;
 using Devlivery.Tests.Common.Builders;
 
 using Shouldly;

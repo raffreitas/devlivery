@@ -1,9 +1,10 @@
+using Devlivery.Common.Domain.Enums;
+using Devlivery.Common.Errors;
 using Devlivery.Features.Orders.Commands.UpdateOrder;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Entities;
 using Devlivery.Features.Orders.Domain.ValueObjects;
 using Devlivery.Features.Products.Domain;
-using Devlivery.Shared.Application.Errors;
 using Devlivery.Shared.Infrastructure.Persistence;
 
 using NSubstitute;
@@ -68,7 +69,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var handler = new UpdateOrderHandler(repository, productRepository, unitOfWork);
 
-        var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(Guid.NewGuid(), 1, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, Devlivery.Shared.Domain.Enums.PaymentMethod.Cash, 10m) });
+        var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(Guid.NewGuid(), 1, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, PaymentMethod.Cash, 10m) });
 
         var result = await handler.Handle(command, CancellationToken.None);
 
@@ -91,7 +92,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var handler = new UpdateOrderHandler(repository, productRepository, unitOfWork);
 
-        var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(product.Id, 2, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, Devlivery.Shared.Domain.Enums.PaymentMethod.Cash, 20m) }, 0m);
+        var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(product.Id, 2, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, PaymentMethod.Cash, 20m) }, 0m);
 
         var result = await handler.Handle(command, CancellationToken.None);
 

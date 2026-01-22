@@ -1,6 +1,6 @@
+using Devlivery.Common.Extensions;
 using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Shared.CrossCutting.Extensions;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
 

@@ -1,7 +1,7 @@
+using Devlivery.Common.Domain.Enums;
+using Devlivery.Common.SeedWork;
 using Devlivery.Features.CashRegister.Domain.Entities;
 using Devlivery.Features.CashRegister.Domain.Enums;
-using Devlivery.Shared.Domain.Enums;
-using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Features.CashRegister.Domain;
 

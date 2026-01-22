@@ -1,10 +1,10 @@
 ﻿using Bogus;
 
+using Devlivery.Common.Domain.Enums;
+using Devlivery.Common.SeedWork;
 using Devlivery.Features.Orders.Domain;
 using Devlivery.Features.Orders.Domain.Entities;
 using Devlivery.Features.Orders.Domain.ValueObjects;
-using Devlivery.Shared.Domain.Enums;
-using Devlivery.Shared.SeedWork;
 
 namespace Devlivery.Tests.Common.Builders;
 

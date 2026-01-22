@@ -1,7 +1,7 @@
+using Devlivery.Common.Errors;
 using Devlivery.Features.Expenses.Commands.CreateExpense;
 using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
 using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
-using Devlivery.Shared.Application.Errors;
 
 using NSubstitute;
 
