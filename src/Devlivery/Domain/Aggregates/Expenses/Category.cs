@@ -27,10 +27,10 @@ public sealed class Category : Entity
     public void AddSubcategory(Category subcategory)
     {
         if (_subcategories.Contains(subcategory) || subcategory.ParentCategoryId == this.Id)
-            throw new InvalidOperationException("A subcategoria já está associada a esta categoria.");
+            throw new DomainException("A subcategoria já está associada a esta categoria.");
 
         if (subcategory.ParentCategoryId.HasValue && subcategory.ParentCategoryId != this.Id)
-            throw new InvalidOperationException("A subcategoria já está associada a outra categoria.");
+            throw new DomainException("A subcategoria já está associada a outra categoria.");
 
         subcategory.ParentCategoryId = this.Id;
         _subcategories.Add(subcategory);

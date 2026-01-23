@@ -1,4 +1,5 @@
 using Devlivery.Domain.Aggregates.Expenses;
+using Devlivery.Domain.SeedWork;
 
 using Shouldly;
 
@@ -68,7 +69,7 @@ public sealed class CategoryTests(ExpensesUnitTestFixture fixture)
         parentCategory.AddSubcategory(subcategory);
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => parentCategory.AddSubcategory(subcategory));
+        Should.Throw<DomainException>(() => parentCategory.AddSubcategory(subcategory));
     }
 
     [Fact]
@@ -82,7 +83,7 @@ public sealed class CategoryTests(ExpensesUnitTestFixture fixture)
 
         // Act & Assert
         // A subcategoria já tem um parent (parentCategory1), então não pode ser adicionada a outro parent
-        Should.Throw<InvalidOperationException>(() => parentCategory2.AddSubcategory(subcategory));
+        Should.Throw<DomainException>(() => parentCategory2.AddSubcategory(subcategory));
     }
 
     [Fact]
