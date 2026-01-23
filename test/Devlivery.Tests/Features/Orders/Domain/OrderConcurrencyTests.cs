@@ -74,7 +74,7 @@ public sealed class OrderConcurrencyTests(OrdersUnitTestFixture fixture)
         payment.ConfirmedAt.ShouldNotBeNull();
 
         // Act & Assert: Second confirmation should throw
-        var exception = Should.Throw<InvalidOperationException>(() => payment.Confirm());
+        var exception = Should.Throw<DomainException>(() => payment.Confirm());
         exception.Message.ShouldContain("já está confirmado");
     }
 
@@ -86,7 +86,7 @@ public sealed class OrderConcurrencyTests(OrdersUnitTestFixture fixture)
         payment.Cancel();
 
         // Act & Assert
-        var exception = Should.Throw<InvalidOperationException>(() => payment.Confirm());
+        var exception = Should.Throw<DomainException>(() => payment.Confirm());
         exception.Message.ShouldContain("cancelado");
     }
 
@@ -298,17 +298,6 @@ public sealed class OrderConcurrencyTests(OrdersUnitTestFixture fixture)
         payment.Confirm();
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => payment.Update(PaymentMethod.Pix, 150.00m));
-    }
-
-    [Fact(DisplayName = "Payment update should throw when cancelled")]
-    public void Update_WhenCancelled_ShouldThrowException()
-    {
-        // Arrange
-        var payment = new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 100.00m);
-        payment.Cancel();
-
-        // Act & Assert
-        Should.Throw<InvalidOperationException>(() => payment.Update(PaymentMethod.Pix, 150.00m));
+        Should.Throw<DomainException>(() => payment.Update(PaymentMethod.Pix, 150.00m));
     }
 }

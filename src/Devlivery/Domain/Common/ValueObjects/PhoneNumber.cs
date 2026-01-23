@@ -1,3 +1,5 @@
+using Devlivery.Domain.SeedWork;
+
 namespace Devlivery.Domain.Common.ValueObjects;
 
 /// <summary>
@@ -10,15 +12,13 @@ public sealed record PhoneNumber
     public PhoneNumber(string number)
     {
         if (string.IsNullOrWhiteSpace(number))
-            throw new ArgumentException("Número de telefone não pode ser vazio", nameof(number));
+            throw new DomainException("Número de telefone não pode ser vazio");
 
         // Remove formatting characters
-        var cleaned = new string(number.Where(char.IsDigit).ToArray());
+        var cleaned = new string([.. number.Where(char.IsDigit)]);
 
         if (cleaned.Length is < 10 or > 11)
-            throw new ArgumentException(
-                "Número de telefone deve ter entre 10 e 11 dígitos",
-                nameof(number));
+            throw new DomainException("Número de telefone deve ter entre 10 e 11 dígitos");
 
         Number = cleaned;
     }

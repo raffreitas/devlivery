@@ -27,9 +27,9 @@ public sealed class OrderPayment : Entity
     public void Confirm()
     {
         if (PaymentStatus == PaymentStatus.Confirmed)
-            throw new InvalidOperationException("Pagamento já está confirmado.");
+            throw new DomainException("Pagamento já está confirmado.");
         if (PaymentStatus == PaymentStatus.Cancelled)
-            throw new InvalidOperationException("Não é possível confirmar um pagamento cancelado..");
+            throw new DomainException("Não é possível confirmar um pagamento cancelado..");
 
         PaymentStatus = PaymentStatus.Confirmed;
         ConfirmedAt = DateTime.UtcNow;
@@ -46,9 +46,9 @@ public sealed class OrderPayment : Entity
     public void Update(PaymentMethod paymentMethod, decimal amount)
     {
         if (PaymentStatus == PaymentStatus.Confirmed)
-            throw new InvalidOperationException("Não é possível alterar um pagamento confirmado.");
+            throw new DomainException("Não é possível alterar um pagamento confirmado.");
         if (PaymentStatus == PaymentStatus.Cancelled)
-            throw new InvalidOperationException("Não é possível alterar um pagamento cancelado.");
+            throw new DomainException("Não é possível alterar um pagamento cancelado.");
 
         PaymentMethod = paymentMethod;
         Amount = amount;

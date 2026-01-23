@@ -1,3 +1,5 @@
+using Devlivery.Domain.SeedWork;
+
 namespace Devlivery.Domain.Common.ValueObjects;
 
 /// <summary>
@@ -12,7 +14,7 @@ public sealed record Money
     public Money(decimal amount)
     {
         if (amount < 0)
-            throw new ArgumentException("Valor não pode ser negativo", nameof(amount));
+            throw new DomainException("Valor não pode ser negativo");
 
         Amount = amount;
     }
@@ -20,20 +22,6 @@ public sealed record Money
     private Money Add(Money other) => new(Amount + other.Amount);
 
     private Money Subtract(Money other) => new(Amount - other.Amount);
-
-    private Money Multiply(int quantity)
-    {
-        return quantity < 0
-            ? throw new ArgumentException("Quantidade não pode ser negativa", nameof(quantity))
-            : new Money(Amount * quantity);
-    }
-
-    private Money Multiply(decimal factor)
-    {
-        return factor < 0
-            ? throw new ArgumentException("Fator não pode ser negativo", nameof(factor))
-            : new Money(Amount * factor);
-    }
 
     public bool IsGreaterThan(Money other) => Amount > other.Amount;
 
@@ -43,7 +31,6 @@ public sealed record Money
 
     public static Money operator +(Money left, Money right) => left.Add(right);
     public static Money operator -(Money left, Money right) => left.Subtract(right);
-    public static Money operator *(Money money, int quantity) => money.Multiply(quantity);
 
     public override string ToString() => $"R$ {Amount:N2}";
 

@@ -27,7 +27,7 @@ public sealed class Expense : Entity
     )
     {
         if (amount <= 0)
-            throw new ArgumentException("Amount must be greater than zero", nameof(amount));
+            throw new DomainException("O valor da despesa deve ser maior que zero.");
 
         CategoryId = categoryId;
         Supplier = supplier;
@@ -62,7 +62,7 @@ public sealed class Expense : Entity
     {
         if (Status != ExpenseStatus.Pending)
         {
-            throw new InvalidOperationException(
+            throw new DomainException(
                 "Não é permitido alterar uma despesa Paga ou Cancelada. Estorne o pagamento primeiro.");
         }
 
@@ -80,7 +80,7 @@ public sealed class Expense : Entity
         if (Status == ExpenseStatus.Paid) return;
 
         if (Status == ExpenseStatus.Cancelled)
-            throw new InvalidOperationException("Não é possível pagar uma despesa cancelada.");
+            throw new DomainException("Não é possível pagar uma despesa cancelada.");
 
         Status = ExpenseStatus.Paid;
         PaymentDate = paymentDate;
@@ -90,7 +90,7 @@ public sealed class Expense : Entity
     public void Cancel()
     {
         if (Status == ExpenseStatus.Paid)
-            throw new InvalidOperationException(
+            throw new DomainException(
                 "Não é possível cancelar uma despesa já paga. Faça o estorno primeiro."
             );
 

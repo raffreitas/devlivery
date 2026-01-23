@@ -4,6 +4,7 @@ using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Aggregates.Orders.ValueObjects;
 using Devlivery.Domain.Common.Enums;
+using Devlivery.Domain.SeedWork;
 
 using Shouldly;
 
@@ -46,6 +47,6 @@ public sealed class UpdateOrderStatusDeliveryTests(OrdersUnitTestFixture fixture
 
         var order = new Order(customer, address, 0m, establishmentId, [item], [p1]);
 
-        Should.Throw<InvalidOperationException>(() => order.UpdateStatus(OrderStatus.Delivered));
+        Should.Throw<DomainException>(() => order.UpdateStatus(OrderStatus.Delivered));
     }
 }

@@ -28,10 +28,10 @@ public sealed class OrderItem : Entity
     public OrderItem(Guid productId, Guid establishmentId, int quantity, decimal unitPrice, string? notes)
     {
         if (quantity <= 0)
-            throw new ArgumentException("Quantidade deve ser maior que zero", nameof(quantity));
+            throw new DomainException("Quantidade deve ser maior que zero");
 
         if (unitPrice < 0)
-            throw new ArgumentException("Preço unitário não pode ser negativo", nameof(unitPrice));
+            throw new DomainException("Preço unitário não pode ser negativo");
 
         ProductId = productId;
         EstablishmentId = establishmentId;
@@ -47,7 +47,7 @@ public sealed class OrderItem : Entity
     public void UpdateQuantity(int newQuantity)
     {
         if (newQuantity <= 0)
-            throw new ArgumentException("Quantidade deve ser maior que zero", nameof(newQuantity));
+            throw new DomainException("Quantidade deve ser maior que zero");
 
         Quantity = newQuantity;
     }
@@ -66,7 +66,7 @@ public sealed class OrderItem : Entity
     internal void UpdateUnitPrice(decimal newUnitPrice)
     {
         if (newUnitPrice < 0)
-            throw new ArgumentException("Preço unitário não pode ser negativo", nameof(newUnitPrice));
+            throw new DomainException("Preço unitário não pode ser negativo");
 
         UnitPrice = newUnitPrice;
     }

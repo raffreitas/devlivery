@@ -95,13 +95,13 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
 
         // Act & Assert
         // Act & Assert
-        Should.Throw<ArgumentException>(() => new Order(
+        Should.Throw<DomainException>(() => new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
             deliveryFee: 10.00m,
             establishmentId: Guid.NewGuid(),
             items: [],
-            payments: [new(Guid.NewGuid(), PaymentMethod.Cash, 10.00m)]
+            payments: [new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 10.00m)]
         ));
     }
 
@@ -116,13 +116,13 @@ public sealed class OrderTests(OrdersUnitTestFixture fixture)
 
         // Act & Assert
         // Act & Assert
-        Should.Throw<ArgumentException>(() => new Order(
+        Should.Throw<DomainException>(() => new Order(
             customer: customer,
             deliveryAddress: deliveryAddress,
             deliveryFee: -5.00m,
             establishmentId: establishmentId,
             items: [item],
-            payments: [new(establishmentId, PaymentMethod.Cash, item.TotalPrice - 5.00m)]
+            payments: [new OrderPayment(establishmentId, PaymentMethod.Cash, item.TotalPrice - 5.00m)]
         ));
     }
 

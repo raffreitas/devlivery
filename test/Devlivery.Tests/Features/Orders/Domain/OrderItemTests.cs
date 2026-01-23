@@ -1,4 +1,5 @@
 using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.SeedWork;
 
 using Shouldly;
 
@@ -64,7 +65,7 @@ public sealed class OrderItemTests(OrdersUnitTestFixture fixture)
     public void Constructor_Should_Throw_When_Quantity_Is_Zero()
     {
         // Arrange & Act & Assert
-        Should.Throw<ArgumentException>(() =>
+        Should.Throw<DomainException>(() =>
                 fixture.CreateOrderItem(quantity: 0, unitPrice: 50.00m))
             .Message.ShouldContain("Quantidade deve ser maior que zero");
     }

@@ -39,12 +39,13 @@ public sealed class Order : Entity
     )
     {
         if (items == null || items.Count == 0)
-            throw new ArgumentException("Pedido deve ter pelo menos um item", nameof(items));
+            throw new DomainException("Pedido deve ter pelo menos um item");
+
         if (payments == null || payments.Count == 0)
-            throw new ArgumentException("Pedido deve ter pelo menos uma forma pagamento", nameof(payments));
+            throw new DomainException("Pedido deve ter pelo menos uma forma pagamento");
 
         if (deliveryFee < 0)
-            throw new ArgumentException("Taxa de entrega não pode ser negativa", nameof(deliveryFee));
+            throw new DomainException("Taxa de entrega não pode ser negativa");
 
         Customer = customer;
         DeliveryAddress = deliveryAddress;
@@ -80,7 +81,7 @@ public sealed class Order : Entity
             var paymentsTotal = _payments.Where(x => x.PaymentStatus != PaymentStatus.Cancelled).Sum(x => x.Amount);
             if (paymentsTotal < Total)
             {
-                throw new InvalidOperationException(
+                throw new DomainException(
                     $"O total dos pagamentos ({paymentsTotal:C}) é menor que o total do pedido ({Total:C}).");
             }
 
@@ -125,7 +126,7 @@ public sealed class Order : Entity
     public void AddPayment(OrderPayment payment)
     {
         if (Status == OrderStatus.Delivered || Status == OrderStatus.Canceled)
-            throw new InvalidOperationException("Não é possível adicionar pagamentos a um pedido finalizado.");
+            throw new DomainException("Não é possível adicionar pagamentos a um pedido finalizado.");
 
         _payments.Add(payment);
         UpdatedAt = DateTime.UtcNow;
@@ -218,16 +219,15 @@ public sealed class Order : Entity
 
         foreach (var payment in existingById.Select(kv => kv.Value))
         {
-            if (payment.PaymentStatus == PaymentStatus.Pending)
-            {
-                payment.Cancel();
-                AddDomainEvent(new OrderPaymentCancelledEvent(Id, payment.Id, EstablishmentId, DateTime.UtcNow));
-            }
-            else
-            {
+            if (payment.PaymentStatus == PaymentStatus.Cancelled)
+                continue;
+
+            if (payment.PaymentStatus == PaymentStatus.Confirmed)
                 throw new DomainException(
                     "Não é possível remover pagamento já confirmado. Realize estorno antes de remover.");
-            }
+
+            payment.Cancel();
+            AddDomainEvent(new OrderPaymentCancelledEvent(Id, payment.Id, EstablishmentId, DateTime.UtcNow));
         }
 
         UpdatedAt = DateTime.UtcNow;

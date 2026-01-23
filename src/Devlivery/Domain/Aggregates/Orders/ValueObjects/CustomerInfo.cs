@@ -1,4 +1,5 @@
 using Devlivery.Domain.Common.ValueObjects;
+using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.Orders.ValueObjects;
 
@@ -14,10 +15,10 @@ public sealed record CustomerInfo
     private CustomerInfo(string name, PhoneNumber? phone = null)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Nome do cliente é obrigatório", nameof(name));
+            throw new DomainException("Nome do cliente é obrigatório");
 
         if (name.Length < 3)
-            throw new ArgumentException("Nome do cliente deve ter pelo menos 3 caracteres", nameof(name));
+            throw new DomainException("Nome do cliente deve ter pelo menos 3 caracteres");
 
         Name = name.Trim();
         Phone = phone;

@@ -18,6 +18,7 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
         switch (exception)
         {
             case DomainException domainException:
+                httpContext.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
                 await httpContext.Response.WriteAsJsonAsync(
                     new ApiProblemDetails
                     {
@@ -27,6 +28,7 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
                     }, cancellationToken: cancellationToken);
                 return true;
             case UnauthorizedException:
+                httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 await httpContext.Response.WriteAsJsonAsync(
                     new ApiProblemDetails
                     {
@@ -36,6 +38,7 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
                     }, cancellationToken: cancellationToken);
                 return true;
             default:
+                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 await httpContext.Response.WriteAsJsonAsync(
                     new ApiProblemDetails
                     {

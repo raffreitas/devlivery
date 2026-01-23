@@ -1,5 +1,6 @@
 using Devlivery.Domain.Aggregates.Expenses;
 using Devlivery.Domain.Aggregates.Expenses.Enums;
+using Devlivery.Domain.SeedWork;
 
 using Shouldly;
 
@@ -61,7 +62,7 @@ public sealed class ExpenseTests(ExpensesUnitTestFixture fixture)
     public void Constructor_Should_Throw_When_Amount_Is_Zero()
     {
         // Act & Assert
-        Should.Throw<ArgumentException>(() => new Expense(
+        Should.Throw<DomainException>(() => new Expense(
             establishmentId: Guid.NewGuid(),
             categoryId: Guid.NewGuid(),
             amount: 0,
@@ -73,7 +74,7 @@ public sealed class ExpenseTests(ExpensesUnitTestFixture fixture)
     public void Constructor_Should_Throw_When_Amount_Is_Negative()
     {
         // Act & Assert
-        Should.Throw<ArgumentException>(() => new Expense(
+        Should.Throw<DomainException>(() => new Expense(
             establishmentId: Guid.NewGuid(),
             categoryId: Guid.NewGuid(),
             amount: -10,
@@ -248,7 +249,7 @@ public sealed class ExpenseTests(ExpensesUnitTestFixture fixture)
         var expense = fixture.CreateExpense(paymentDate: DateOnly.FromDateTime(DateTime.UtcNow));
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => expense.Update(categoryId: null, amount: 200.00m));
+        Should.Throw<DomainException>(() => expense.Update(categoryId: null, amount: 200.00m));
     }
 
     [Fact]
@@ -258,7 +259,7 @@ public sealed class ExpenseTests(ExpensesUnitTestFixture fixture)
         var expense = fixture.CreateExpense(status: ExpenseStatus.Cancelled);
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => expense.Update(amount: 200.00m));
+        Should.Throw<DomainException>(() => expense.Update(amount: 200.00m));
     }
 
     [Fact]
@@ -316,7 +317,7 @@ public sealed class ExpenseTests(ExpensesUnitTestFixture fixture)
         var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => expense.MarkAsPaid(paymentDate));
+        Should.Throw<DomainException>(() => expense.MarkAsPaid(paymentDate));
     }
 
     [Fact]
@@ -354,7 +355,7 @@ public sealed class ExpenseTests(ExpensesUnitTestFixture fixture)
         var expense = fixture.CreateExpense(paymentDate: DateOnly.FromDateTime(DateTime.UtcNow));
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => expense.Cancel());
+        Should.Throw<DomainException>(() => expense.Cancel());
     }
 
     [Fact]

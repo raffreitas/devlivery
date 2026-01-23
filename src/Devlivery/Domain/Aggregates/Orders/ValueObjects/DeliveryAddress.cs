@@ -1,3 +1,5 @@
+using Devlivery.Domain.SeedWork;
+
 namespace Devlivery.Domain.Aggregates.Orders.ValueObjects;
 
 /// <summary>
@@ -12,7 +14,7 @@ public sealed record DeliveryAddress
     public DeliveryAddress(string fullAddress, string? reference = null)
     {
         if (string.IsNullOrWhiteSpace(fullAddress))
-            throw new ArgumentException("Endereço de entrega é obrigatório", nameof(fullAddress));
+            throw new DomainException("Endereço de entrega é obrigatório");
 
         FullAddress = fullAddress.Trim();
         Reference = reference?.Trim();

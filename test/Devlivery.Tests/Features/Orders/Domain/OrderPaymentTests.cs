@@ -1,6 +1,7 @@
 using Devlivery.Domain.Aggregates.Orders.Entities;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Common.Enums;
+using Devlivery.Domain.SeedWork;
 
 using Shouldly;
 
@@ -49,7 +50,7 @@ public sealed class OrderPaymentTests
         var payment = new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 10m);
         payment.Confirm();
 
-        Should.Throw<InvalidOperationException>(() => payment.Update(PaymentMethod.Pix, 5m));
+        Should.Throw<DomainException>(() => payment.Update(PaymentMethod.Pix, 5m));
     }
 
     [Fact]
@@ -58,6 +59,6 @@ public sealed class OrderPaymentTests
         var payment = new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 10m);
         payment.Cancel();
 
-        Should.Throw<InvalidOperationException>(() => payment.Confirm());
+        Should.Throw<DomainException>(() => payment.Confirm());
     }
 }
