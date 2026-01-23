@@ -78,7 +78,7 @@ public static class ResultExtensions
             Status = (int)statusCode,
             Errors = error is ValidationError err && err.Errors.Length != 0
                 ? err.Errors.DistinctBy(e => e.Field)
-                    .ToDictionary(e => e.Field.ToLowerInvariant(), e => e.Message)
+                    .ToDictionary(e => $"{char.ToLower(e.Field[0])}{e.Field[1..]}", e => e.Message)
                 : null
         };
         return TypedResults.Problem(problemDetails);
