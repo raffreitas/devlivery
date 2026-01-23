@@ -95,16 +95,7 @@ export const dashboardService = {
     if (endDate) params.set("endDate", endDate.toISOString());
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<DashboardStatsDto | null>>(url);
-    if (!res.success || !res.data) {
-      return {
-        totalOrders: 0,
-        totalRevenue: 0,
-        pendingOrders: 0,
-        deliveredOrders: 0,
-        averageOrderValue: 0,
-      };
-    }
+    const res = await api.get<ApiResponse<DashboardStatsDto>>(url);
     return res.data;
   },
 
@@ -118,13 +109,8 @@ export const dashboardService = {
     if (endDate) params.set("endDate", endDate.toISOString());
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<PaymentBreakdownDto | null>>(url);
-    if (!res.success || !res.data) {
-      return {
-        breakdown: { Cash: 0, CreditCard: 0, DebitCard: 0, Pix: 0 },
-        total: 0,
-      };
-    }
+    const res = await api.get<ApiResponse<PaymentBreakdownDto>>(url);
+
     return res.data;
   },
 
@@ -138,17 +124,7 @@ export const dashboardService = {
     if (endDate) params.set("endDate", endDate.toISOString());
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<OrdersByStatusDto | null>>(url);
-    if (!res.success || !res.data) {
-      return {
-        Pending: 0,
-        Preparing: 0,
-        Ready: 0,
-        Delivered: 0,
-        Canceled: 0,
-      };
-    }
-    // Map from snake_case to PascalCase
+    const res = await api.get<ApiResponse<OrdersByStatusDto>>(url);
     return {
       Pending: res.data.pending,
       Preparing: res.data.preparing,
@@ -168,10 +144,7 @@ export const dashboardService = {
     if (endDate) params.set("endDate", endDate.toISOString());
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<SalesOverTimeDto | null>>(url);
-    if (!res.success || !res.data) {
-      return [];
-    }
+    const res = await api.get<ApiResponse<SalesOverTimeDto>>(url);
     return res.data.data;
   },
 
@@ -185,10 +158,7 @@ export const dashboardService = {
     if (endDate) params.set("endDate", endDate.toISOString());
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<TopProductsDto | null>>(url);
-    if (!res.success || !res.data) {
-      return [];
-    }
+    const res = await api.get<ApiResponse<TopProductsDto>>(url);
     return res.data.products;
   },
 
@@ -202,10 +172,8 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<ExpensesByCategoryDto | null>>(url);
-    if (!res.success || !res.data) {
-      return [];
-    }
+    const res = await api.get<ApiResponse<ExpensesByCategoryDto>>(url);
+
     return res.data.categories;
   },
 
@@ -219,10 +187,8 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<ExpensesByStatusDto | null>>(url);
-    if (!res.success || !res.data) {
-      return [];
-    }
+    const res = await api.get<ApiResponse<ExpensesByStatusDto>>(url);
+
     return res.data.statuses;
   },
 
@@ -236,10 +202,8 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<ExpensesOverTimeDto | null>>(url);
-    if (!res.success || !res.data) {
-      return [];
-    }
+    const res = await api.get<ApiResponse<ExpensesOverTimeDto>>(url);
+
     return res.data.data;
   },
 
@@ -253,26 +217,16 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<ExpenseSummaryDto | null>>(url);
-    if (!res.success || !res.data) {
-      return {
-        total: 0,
-        paid: 0,
-        pending: 0,
-        overdue: 0,
-        count: 0,
-      };
-    }
+    const res = await api.get<ApiResponse<ExpenseSummaryDto>>(url);
+
     return res.data;
   },
 
-  async getUpcomingExpenses(days: number = 7): Promise<UpcomingExpenseDto[]> {
+  async getUpcomingExpenses(days = 7): Promise<UpcomingExpenseDto[]> {
     const url = `/api/dashboard/upcoming-expenses?days=${days}`;
 
-    const res = await api.get<ApiResponse<UpcomingExpensesDto | null>>(url);
-    if (!res.success || !res.data) {
-      return [];
-    }
+    const res = await api.get<ApiResponse<UpcomingExpensesDto>>(url);
+
     return res.data.expenses;
   },
 
