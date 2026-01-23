@@ -10,8 +10,8 @@ public static class GetExpenseSummaryEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("/expense-summary", Handle)
-            .Produces<ApiResponse<GetExpenseSummaryResponse>>()
-            .Produces<ApiResponse<GetExpenseSummaryResponse>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResource<GetExpenseSummaryResponse>>()
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> Handle(DateOnly? startDate, DateOnly? endDate, ISender sender,
@@ -20,6 +20,6 @@ public static class GetExpenseSummaryEndpoint
         var query = new GetExpenseSummaryQuery(startDate, endDate);
         var result = await sender.Send(query, ct);
 
-        return result.ToApiResult();
+        return result.ToOk();
     }
 }

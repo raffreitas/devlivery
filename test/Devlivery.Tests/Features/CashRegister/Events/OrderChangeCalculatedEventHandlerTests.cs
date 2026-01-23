@@ -1,6 +1,5 @@
 using Devlivery.Domain.Aggregates.CashRegister;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
-using Devlivery.Domain.Aggregates.Orders;
 using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Common.Enums;

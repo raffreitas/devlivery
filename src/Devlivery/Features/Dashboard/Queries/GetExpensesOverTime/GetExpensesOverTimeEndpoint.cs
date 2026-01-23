@@ -10,8 +10,8 @@ public static class GetExpensesOverTimeEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("/expenses-over-time", Handle)
-            .Produces<ApiResponse<GetExpensesOverTimeResponse>>()
-            .Produces<ApiResponse<GetExpensesOverTimeResponse>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResource<GetExpensesOverTimeResponse>>()
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> Handle(
@@ -23,6 +23,6 @@ public static class GetExpensesOverTimeEndpoint
         var query = new GetExpensesOverTimeQuery(startDate, endDate);
         var result = await sender.Send(query, ct);
 
-        return result.ToApiResult();
+        return result.ToOk();
     }
 }

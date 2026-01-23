@@ -1,5 +1,7 @@
 using Devlivery.Infrastructure.Persistence.Context;
 
+using FluentResults;
+
 using Mediator;
 
 using Microsoft.EntityFrameworkCore;
@@ -7,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Devlivery.Features.Expenses.Queries.GetAllExpenseCategories;
 
 public sealed class GetAllExpenseCategoriesHandler(ApplicationDbContext dbContext)
-    : IQueryHandler<GetAllExpenseCategoriesQuery, List<GetAllExpenseCategoriesResponse>>
+    : IQueryHandler<GetAllExpenseCategoriesQuery, Result<List<GetAllExpenseCategoriesResponse>>>
 {
-    public async ValueTask<List<GetAllExpenseCategoriesResponse>> Handle(GetAllExpenseCategoriesQuery query,
+    public async ValueTask<Result<List<GetAllExpenseCategoriesResponse>>> Handle(GetAllExpenseCategoriesQuery query,
         CancellationToken cancellationToken)
     {
         var categories = await dbContext.ExpenseCategories

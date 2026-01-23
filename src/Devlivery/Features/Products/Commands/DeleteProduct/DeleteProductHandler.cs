@@ -1,5 +1,4 @@
 using Devlivery.Common.Errors;
-using Devlivery.Domain.Aggregates.Orders;
 using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Products.Abstractions;
 using Devlivery.Infrastructure.Persistence;

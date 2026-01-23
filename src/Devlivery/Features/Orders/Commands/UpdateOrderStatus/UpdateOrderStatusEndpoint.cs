@@ -14,9 +14,9 @@ public static class UpdateOrderStatusEndpoint
     {
         app.MapPatch("{id:guid}/status", Handle)
             .Produces(StatusCodes.Status204NoContent)
-            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse>(StatusCodes.Status404NotFound)
-            .Produces<ApiResponse>(StatusCodes.Status409Conflict);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ApiProblemDetails>(StatusCodes.Status409Conflict);
     }
 
     private static async Task<IResult> Handle(Guid id, UpdateOrderStatusRequest request, ISender sender,
@@ -26,6 +26,6 @@ public static class UpdateOrderStatusEndpoint
 
         var result = await sender.Send(command, ct);
 
-        return result.ToApiResult(TypedResults.NoContent);
+        return result.ToNoContent();
     }
 }

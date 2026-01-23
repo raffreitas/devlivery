@@ -1,8 +1,7 @@
+using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
 using Mediator;
-
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Devlivery.Features.Expenses.Queries.GetAllExpenseCategories;
 
@@ -11,19 +10,16 @@ public static class GetAllExpenseCategoriesEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("/categories", Handle)
-            .Produces<ApiResponse<List<GetAllExpenseCategoriesResponse>>>()
-            .Produces<ApiResponse>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResource<List<GetAllExpenseCategoriesResponse>>>()
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Ok<ApiResponse<List<GetAllExpenseCategoriesResponse>>>> Handle(
+    private static async Task<IResult> Handle(
         ISender sender,
         CancellationToken ct)
     {
         var query = new GetAllExpenseCategoriesQuery();
         var result = await sender.Send(query, ct);
-
-        var response = ApiResponse<List<GetAllExpenseCategoriesResponse>>.Success(result);
-
-        return TypedResults.Ok(response);
+        return result.ToOk();
     }
 }

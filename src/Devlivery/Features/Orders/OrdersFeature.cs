@@ -1,5 +1,4 @@
-﻿using Devlivery.Domain.Aggregates.Orders;
-using Devlivery.Domain.Aggregates.Orders.Abstractions;
+﻿using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Features.Orders.Commands.CreateOrder;
 using Devlivery.Features.Orders.Commands.DeleteOrder;
 using Devlivery.Features.Orders.Commands.UpdateOrder;

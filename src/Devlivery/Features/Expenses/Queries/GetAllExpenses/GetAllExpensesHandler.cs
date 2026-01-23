@@ -7,6 +7,8 @@ using Devlivery.Infrastructure.Persistence.Abstractions;
 using Devlivery.Infrastructure.Tenancy;
 using Devlivery.Infrastructure.Time.Abstractions;
 
+using FluentResults;
+
 using Mediator;
 
 namespace Devlivery.Features.Expenses.Queries.GetAllExpenses;
@@ -16,9 +18,9 @@ public sealed class GetAllExpensesHandler(
     ITenantAccessor tenantAccessor,
     IDateTimeProvider dateTimeProvider
 )
-    : IQueryHandler<GetAllExpensesQuery, List<GetAllExpensesResponse>>
+    : IQueryHandler<GetAllExpensesQuery, Result<List<GetAllExpensesResponse>>>
 {
-    public async ValueTask<List<GetAllExpensesResponse>> Handle(GetAllExpensesQuery query,
+    public async ValueTask<Result<List<GetAllExpensesResponse>>> Handle(GetAllExpensesQuery query,
         CancellationToken cancellationToken)
     {
         var today = dateTimeProvider.GetLocalDate();

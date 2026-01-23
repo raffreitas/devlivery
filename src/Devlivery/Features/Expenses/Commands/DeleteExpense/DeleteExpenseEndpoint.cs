@@ -10,8 +10,8 @@ public static class DeleteExpenseEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapDelete("{expenseId:guid}", Handle)
-            .Produces<ApiResponse>(StatusCodes.Status204NoContent)
-            .Produces<ApiResponse>(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> Handle(
@@ -21,7 +21,6 @@ public static class DeleteExpenseEndpoint
     {
         var command = new DeleteExpenseCommand(expenseId);
         var result = await sender.Send(command, ct);
-
-        return result.ToApiResult(TypedResults.NoContent);
+        return result.ToNoContent();
     }
 }

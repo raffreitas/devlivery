@@ -10,9 +10,9 @@ public static class UpdateExpenseEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("{expenseId:guid}", Handle)
-            .Produces<ApiResponse>()
-            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse>(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> Handle(Guid expenseId, UpdateExpenseRequest request, ISender sender,
@@ -29,7 +29,7 @@ public static class UpdateExpenseEndpoint
 
         var result = await sender.Send(command, ct);
 
-        return result.ToApiResult(TypedResults.NoContent);
+        return result.ToNoContent();
     }
 }
 

@@ -1,4 +1,3 @@
-using Devlivery.Domain.Aggregates.Orders;
 using Devlivery.Domain.Aggregates.Orders.Entities;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
@@ -157,7 +156,7 @@ public sealed class OrderConcurrencyTests(OrdersUnitTestFixture fixture)
         // Assert: Only pending payment generated a new event
         var confirmationEvents = order.DomainEvents.OfType<OrderPaymentConfirmedEvent>().ToList();
         confirmationEvents.Count.ShouldBe(1);
-        confirmationEvents.First().PaymentId.ShouldBe(payment2.Id);
+        confirmationEvents[0].PaymentId.ShouldBe(payment2.Id);
     }
 
     [Fact(DisplayName = "Cancelled payments should not be confirmed on delivery")]
@@ -221,7 +220,7 @@ public sealed class OrderConcurrencyTests(OrdersUnitTestFixture fixture)
         // Verify only one change event
         var changeEvents = order.DomainEvents.OfType<OrderChangeCalculatedEvent>().ToList();
         changeEvents.Count.ShouldBe(1);
-        changeEvents.First().Change.ShouldBe(30.00m);
+        changeEvents[0].Change.ShouldBe(30.00m);
     }
 
     [Fact(DisplayName = "Order status should prevent multiple status transitions")]

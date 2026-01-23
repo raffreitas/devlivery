@@ -8,7 +8,6 @@ using Devlivery.Features.Expenses;
 using Devlivery.Features.Orders;
 using Devlivery.Features.Products;
 using Devlivery.Infrastructure.Authorization;
-using Devlivery.Infrastructure.Http;
 using Devlivery.Infrastructure.Http.Configuration;
 using Devlivery.Infrastructure.Http.ExceptionHandlers;
 using Devlivery.Infrastructure.Identity;

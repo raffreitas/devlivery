@@ -13,8 +13,8 @@ public static class GetAllOrdersEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("", Handle)
-            .Produces<ApiResponse<List<GetAllOrdersResponse>>>()
-            .Produces<ApiResponse<List<GetAllOrdersResponse>>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResource<List<GetAllOrdersResponse>>>()
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> Handle(DateTime? start, DateTime? end, PaymentMethod? paymentMethod,
@@ -23,7 +23,6 @@ public static class GetAllOrdersEndpoint
     {
         var query = new GetAllOrdersQuery(start, end, paymentMethod);
         var result = await sender.Send(query, ct);
-
-        return result.ToApiResult();
+        return result.ToOk();
     }
 }
