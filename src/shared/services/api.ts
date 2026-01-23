@@ -110,10 +110,16 @@ async function request<T>(
         );
       }
 
-      throw new ApiError(String(message), status, data);
+      return Promise.reject({
+        message,
+        status,
+        data,
+      });
     }
 
-    throw new ApiError(axiosErr.message, 0);
+    return Promise.reject({
+      message: axiosErr.message,
+    });
   }
 }
 
