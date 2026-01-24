@@ -1,0 +1,79 @@
+name: CI/CD Web APP
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "apps/web/**"
+  pull_request:
+    paths:
+      - "apps/web/**"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: 10
+
+jobs:
+  build-and-test:
+    name: Build & Test React
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Cache pnpm packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.local/share/pnpm/store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        working-directory: apps/web
+        run: pnpm install --frozen-lockfile
+
+      - name: Check case-sensitive filename conflicts
+        working-directory: apps/web
+        run: |
+          echo "🔍 Checking for case-sensitive filename issues..."
+          duplicates=$(find src -type f \( -iname "*.tsx" -o -iname "*.ts" \) | \
+            awk 'BEGIN{IGNORECASE=1} {count[tolower($0)]++; files[tolower($0)]=files[tolower($0)]" "$0} END{for(f in count) if(count[f]>1) print files[f]}')
+          if [ -n "$duplicates" ]; then
+            echo "❌ Found case-sensitive duplicates:"
+            echo "$duplicates"
+            exit 1
+          fi
+          echo "✅ No case-sensitive conflicts found"
+
+      - name: Type check with TypeScript
+        working-directory: apps/web
+        run: pnpm exec tsc -b
+
+      - name: Build project
+        working-directory: apps/web
+        run: pnpm run build
+
+      - name: Verify build output
+        working-directory: apps/web
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ Build failed: dist directory not found"
+            exit 1
+          fi
+          echo "✅ Build successful"
+          ls -lah dist/

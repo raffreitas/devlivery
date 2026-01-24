@@ -1,0 +1,77 @@
+name: CI/CD Tagging on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  semver-tag:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create semver tag and release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr || !pr.merged) {
+              core.info('PR not merged — skipping');
+              return;
+            }
+
+            const text = ((pr.title || '') + ' ' + (pr.body || '')).toLowerCase();
+            let bump = 'patch';
+            if (/\[major\]/i.test(text)) bump = 'major';
+            else if (/\[minor\]/i.test(text)) bump = 'minor';
+            else if (/\[patch\]/i.test(text)) bump = 'patch';
+            core.info(`Detected bump: ${bump}`);
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // List tags (first 100). If you need more tags in very large repos, consider pagination.
+            const tags = await github.rest.repos.listTags({ owner, repo, per_page: 100 });
+
+            function parseSemver(t) {
+              const m = t.match(/^v?(\d+)\.(\d+)\.(\d+)$/);
+              if (!m) return null;
+              return { major: parseInt(m[1], 10), minor: parseInt(m[2], 10), patch: parseInt(m[3], 10) };
+            }
+
+            let latest = { major: 0, minor: 0, patch: 0, raw: 'v0.0.0' };
+            for (const t of tags.data) {
+              const s = parseSemver(t.name);
+              if (!s) continue;
+              if (
+                s.major > latest.major ||
+                (s.major === latest.major && s.minor > latest.minor) ||
+                (s.major === latest.major && s.minor === latest.minor && s.patch > latest.patch)
+              ) {
+                latest = { ...s, raw: t.name.startsWith('v') ? t.name : `v${t.name}` };
+              }
+            }
+            core.info(`Latest tag: ${latest.raw}`);
+
+            let [major, minor, patch] = [latest.major, latest.minor, latest.patch];
+            if (bump === 'major') { major += 1; minor = 0; patch = 0; }
+            else if (bump === 'minor') { minor += 1; patch = 0; }
+            else { patch += 1; }
+
+            const newTag = `v${major}.${minor}.${patch}`;
+            core.info(`Creating tag ${newTag}`);
+
+            const sha = pr.merge_commit_sha || (pr.head && pr.head.sha) || context.sha;
+
+            // If tag already exists, skip creating; otherwise create ref + release
+            try {
+              await github.rest.git.getRef({ owner, repo, ref: `refs/tags/${newTag}` });
+              core.info(`Tag ${newTag} already exists — skipping creation`);
+            } catch (err) {
+              await github.rest.git.createRef({ owner, repo, ref: `refs/tags/${newTag}`, sha });
+              core.info(`Created ref refs/tags/${newTag}`);
+              await github.rest.repos.createRelease({ owner, repo, tag_name: newTag, name: newTag, body: `Release from PR #${pr.number}: ${pr.title}`, draft: false, prerelease: false });
+              core.info(`Created release ${newTag}`);
+            }
