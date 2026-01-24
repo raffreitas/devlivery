@@ -1,0 +1,10 @@
+<Solution>
+    <Folder Name="/Solution Items/">
+        <File Path="Makefile" />
+        <File Path="README.md" />
+    </Folder>
+    <Project Path="src/Devlivery.AppHost/Devlivery.AppHost.csproj" />
+
+    <Project Path="src/Devlivery/Devlivery.csproj" />
+    <Project Path="test/Devlivery.Tests/Devlivery.Tests.csproj" />
+</Solution>
