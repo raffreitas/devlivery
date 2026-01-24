@@ -6,7 +6,7 @@ Uma plataforma de delivery com arquitetura de monorepo contendo aplicações web
 
 ```
 devlivery/
-├── app/
+├── apps/
 │   ├── api/          # Backend API (.NET Core)
 │   └── web/          # Frontend Web (React)
 ├── README.md         # Este arquivo
@@ -15,7 +15,7 @@ devlivery/
 
 ## 🏗️ Aplicações
 
-### [`app/api`](./app/api) - Backend API
+### [`apps/api`](./apps/api) - Backend API
 Aplicação backend construída com .NET Core seguindo princípios de arquitetura limpa.
 
 **Stack:**
@@ -35,9 +35,9 @@ Aplicação backend construída com .NET Core seguindo princípios de arquitetur
 - Comprehensive testing com TestContainers
 - CI/CD pipeline automatizado
 
-📖 [Detalhes da API](./app/api/README.md)
+📖 [Detalhes da API](./apps/api/README.md)
 
-### [`app/web`](./app/web) - Frontend Web
+### [`apps/web`](./apps/web) - Frontend Web
 Aplicação web construída com React para interação com a API.
 
 **Stack:**
@@ -47,7 +47,7 @@ Aplicação web construída com React para interação com a API.
 - Estado gerenciado (Redux/Zustand/Context API)
 - Componentes reutilizáveis
 
-📖 [Detalhes do Web](./app/web/README.md)
+📖 [Detalhes do Web](./apps/web/README.md)
 
 ## 🚀 Getting Started
 
@@ -61,7 +61,7 @@ Aplicação web construída com React para interação com a API.
 
 #### Backend API
 ```bash
-cd app/api
+cd apps/api
 dotnet restore
 dotnet build
 dotnet ef database update
@@ -72,7 +72,7 @@ A API estará disponível em `http://localhost:5000`
 
 #### Frontend Web
 ```bash
-cd app/web
+cd apps/web
 npm install
 npm run dev
 ```
@@ -86,21 +86,21 @@ docker-compose up -d
 
 ## 📋 Documentação
 
-- **API**: [OpenAPI/Swagger](./app/api/docs) documentação disponível em `/swagger`
-- **Arquitetura**: [Architectural Decision Records](./app/api/docs/architectural-decision-records)
-- **Concorrência**: [Análise de Concorrência](./app/api/docs/CONCURRENCY_ANALYSIS.md)
+- **API**: [OpenAPI/Swagger](./apps/api/docs) documentação disponível em `/swagger`
+- **Arquitetura**: [Architectural Decision Records](./apps/api/docs/architectural-decision-records)
+- **Concorrência**: [Análise de Concorrência](./apps/api/docs/CONCURRENCY_ANALYSIS.md)
 
 ## 🧪 Testes
 
 ### API
 ```bash
-cd app/api
+cd apps/api
 dotnet test
 ```
 
 ### Web
 ```bash
-cd app/web
+cd apps/web
 npm test
 ```
 
@@ -120,10 +120,10 @@ O histórico completo de ambos foi preservado usando `git subtree`. Você pode v
 
 ```bash
 # Histórico da API
-git log --follow -- app/api/
+git log --follow -- apps/api/
 
 # Histórico do Web
-git log --follow -- app/web/
+git log --follow -- apps/web/
 ```
 
 ## 🤝 Contributing
