@@ -84,12 +84,6 @@ A aplicação estará disponível em `http://localhost:3000`
 docker-compose up -d
 ```
 
-## 📋 Documentação
-
-- **API**: [OpenAPI/Swagger](./apps/api/docs) documentação disponível em `/swagger`
-- **Arquitetura**: [Architectural Decision Records](./apps/api/docs/architectural-decision-records)
-- **Concorrência**: [Análise de Concorrência](./apps/api/docs/CONCURRENCY_ANALYSIS.md)
-
 ## 🧪 Testes
 
 ### API
@@ -110,33 +104,9 @@ Pipelines automatizadas configuradas em:
 - **API**: `.github/workflows/` (build, test, deploy)
 - **Web**: `.github/workflows/` (build, test, deploy)
 
-## 📝 Commits e Histórico
-
-Este monorepo foi criado integrando dois repositórios separados:
-- **devlivery-webapi**: Backend API original
-- **devlivery-webapp**: Frontend Web original
-
-O histórico completo de ambos foi preservado usando `git subtree`. Você pode visualizar o histórico específico de cada aplicação:
-
-```bash
-# Histórico da API
-git log --follow -- apps/api/
-
-# Histórico do Web
-git log --follow -- apps/web/
-```
-
 ## 🤝 Contributing
 
 1. Crie uma branch para sua feature: `git checkout -b feature/sua-feature`
-2. Commit suas mudanças: `git commit -m 'Add: descrição da mudança'`
+2. Commit suas mudanças: `git commit -m 'feat: descrição da mudança'`
 3. Push para a branch: `git push origin feature/sua-feature`
 4. Abra um Pull Request
-
-## 📄 License
-
-[Adicione a licença apropriada aqui]
-
-## 👥 Contato
-
-Para questões ou sugestões, abra uma issue no repositório.
