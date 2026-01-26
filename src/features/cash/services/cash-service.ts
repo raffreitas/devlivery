@@ -148,9 +148,6 @@ export const cashService = {
       "/api/cash-register/sessions",
       payload,
     );
-    if (!response.success || !response.data) {
-      throw new Error(response.message || "Falha ao criar sessão de caixa");
-    }
 
     return mapDtoToDomain(response.data);
   },
@@ -189,10 +186,6 @@ export const cashService = {
       `/api/cash-register/sessions/${sessionId}/deposits`,
       payload,
     );
-
-    if (!response.success || !response.data) {
-      throw new Error(response.message || "Falha ao criar aporte de caixa");
-    }
 
     return mapDepositDtoToDomain(response.data);
   },

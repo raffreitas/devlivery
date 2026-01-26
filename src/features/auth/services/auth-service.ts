@@ -32,10 +32,6 @@ export const authService = {
       { email, password },
     );
 
-    if (!res.success || !res.data) {
-      throw new Error(res.message || "Falha no login");
-    }
-
     const user: User = {
       id: res.data.userId,
       name: res.data.userName,

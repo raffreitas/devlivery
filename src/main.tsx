@@ -8,6 +8,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import { toast } from "sonner";
 import { App } from "./app.tsx";
 import { router } from "./app-routes.tsx";
 import { Toaster } from "./shared/components/ui/sonner.tsx";
@@ -20,7 +21,10 @@ const queryClient = new QueryClient({
       if (error instanceof UnauthorizedError) {
         authEvents.emit();
         void router.navigate("/login", { replace: true });
+        return error;
       }
+      toast.error(error.message);
+      return error;
     },
   }),
   mutationCache: new MutationCache({
@@ -28,7 +32,10 @@ const queryClient = new QueryClient({
       if (error instanceof UnauthorizedError) {
         authEvents.emit();
         void router.navigate("/login", { replace: true });
+        return error;
       }
+      toast.error(error.message);
+      return error;
     },
   }),
   defaultOptions: {
