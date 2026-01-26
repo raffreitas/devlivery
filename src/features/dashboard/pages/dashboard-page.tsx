@@ -119,7 +119,7 @@ export function DashboardPage() {
 
         {/* Cards Principais - Apenas 4 métricas essenciais */}
         <div
-          className={`grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 transition-opacity duration-200 ${
+          className={`grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4 transition-opacity duration-200 ${
             isFetching ? "opacity-60" : "opacity-100"
           }`}
         >
