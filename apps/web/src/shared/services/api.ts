@@ -1,13 +1,34 @@
+import axios, { type AxiosError } from "axios";
 import { env } from "@/env";
 import { AUTH_STORAGE_KEY } from "@/features/auth/services/auth-service";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T | null;
-  message?: string | null;
-  errors?: string[] | null;
+export type ApiProblem = {
+  title: string;
+  detail: string;
+  status: number;
+  errors: Record<string, string>;
+};
+
+export type ApiResponse<T> = {
+  data: T;
+  meta?: Metadata;
+};
+
+export interface Metadata {
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 export class ApiError extends Error {
@@ -39,6 +60,11 @@ function getAuthToken(): string | null {
   }
 }
 
+const axiosInstance = axios.create({
+  baseURL: env.VITE_API_URL.replace(/\/$/, ""),
+  headers: { "Content-Type": "application/json" },
+});
+
 async function request<T>(
   path: string,
   options: {
@@ -47,66 +73,54 @@ async function request<T>(
     headers?: Record<string, string>;
   } = {},
 ): Promise<T> {
-  const url = `${env.VITE_API_URL.replace(/\/$/, "")}${path.startsWith("/") ? "" : "/"}${path}`;
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers ?? {}),
-  };
+  const url = path.startsWith("/") ? path : `/${path}`;
 
   const token = getAuthToken();
+  const headers: Record<string, string> = {
+    ...(options.headers ?? {}),
+  };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(url, {
-    method: options.method ?? "GET",
-    headers,
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
-
-  // No content
-  if (res.status === 204) return undefined as unknown as T;
-
-  let json: unknown;
   try {
-    json = await res.json();
-  } catch {
-    if (!res.ok) {
-      if (res.status === 401) {
+    const res = await axiosInstance.request({
+      url,
+      method: options.method ?? "GET",
+      data: options.body ?? undefined,
+      headers,
+    });
+
+    if (res.status === 204) return undefined as unknown as T;
+
+    return res.data as T;
+  } catch (err) {
+    const axiosErr = err as AxiosError;
+
+    if (axiosErr.response) {
+      const status = axiosErr.response.status;
+      const data = axiosErr.response.data as ApiProblem | null;
+      const message =
+        data?.detail ||
+        data?.title ||
+        "Houve um erro ao processar sua requisição.";
+
+      if (status === 401) {
         throw new UnauthorizedError(
-          "Sua sessão expirou. Por favor, faça login novamente.",
+          message || "Sua sessão expirou. Por favor, faça login novamente.",
+          data,
         );
       }
-      throw new ApiError(res.statusText, res.status);
+
+      return Promise.reject({
+        message,
+        status,
+        data,
+      });
     }
 
-    return undefined as unknown as T;
+    return Promise.reject({
+      message: axiosErr.message,
+    });
   }
-
-  if (!res.ok) {
-    const j = (json ?? {}) as Record<string, unknown>;
-
-    // Extract error message - novo formato ApiResponse com errors array
-    let errMsg = res.statusText;
-
-    if (Array.isArray(j.errors) && j.errors.length > 0) {
-      // Se tem errors array, pega o primeiro erro
-      errMsg = String(j.errors[0]);
-    } else if (typeof j.message === "string" && j.message) {
-      // Fallback para message (caso exista)
-      errMsg = j.message;
-    }
-
-    if (res.status === 401) {
-      // Provide a more user-friendly message for expired tokens
-      const friendlyMessage =
-        errMsg || "Sua sessão expirou. Por favor, faça login novamente.";
-      throw new UnauthorizedError(friendlyMessage, json);
-    }
-
-    throw new ApiError(String(errMsg), res.status, json);
-  }
-
-  return json as T;
 }
 
 export const api = {

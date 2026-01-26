@@ -132,7 +132,7 @@ export function CashSummaryCard({
       <Alert>
         <AlertTitle>Dinheiro Esperado no Caixa:</AlertTitle>
         <AlertDescription>
-          Valor de abertura + aportes + vendas em dinheiro apenas
+          Valor de abertura + aportes + pagamentos em dinheiro apenas
         </AlertDescription>
       </Alert>
 

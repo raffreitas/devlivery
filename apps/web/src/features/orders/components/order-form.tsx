@@ -22,7 +22,6 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { InputMoney } from "@/shared/components/ui/input-money";
-import { Separator } from "@/shared/components/ui/separator";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { cn } from "@/shared/lib/utils";
 import {
@@ -183,7 +182,7 @@ export function OrderForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handlePlaceOrder)}
-        className="flex flex-col max-h-[calc(100vh-140px)]"
+        className="flex flex-col sm:max-h-[calc(100vh-140px)]"
       >
         <div className="flex-1 overflow-y-auto px-2 space-y-4">
           <div className="space-y-3">
@@ -314,7 +313,7 @@ export function OrderForm({
               })}
             </div>
 
-            <div className="flex gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="flex flex-col sm:flex-row gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
               {paymentFields.map((field, index) => (
                 <div
                   key={field.id}
@@ -389,15 +388,14 @@ export function OrderForm({
               {form.formState.errors.items.message}
             </p>
           )}
-
-          <Separator />
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
+        <div className="flex gap-2 justify-center sm:justify-end pt-2">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
+            className="flex-1 sm:flex-initial"
             disabled={
               form.formState.isSubmitting || externalIsSubmitting === true
             }
@@ -406,6 +404,7 @@ export function OrderForm({
           </Button>
           <LoadingButton
             type="submit"
+            className="flex-1 sm:flex-initial"
             isLoading={
               form.formState.isSubmitting || externalIsSubmitting === true
             }

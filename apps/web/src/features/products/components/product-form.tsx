@@ -53,7 +53,12 @@ export function ProductForm({
             <FormItem>
               <FormLabel>Nome do Produto</FormLabel>
               <FormControl>
-                <Input type="text" required {...field} />
+                <Input
+                  type="text"
+                  placeholder="Digite o nome do produto"
+                  required
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -67,7 +72,12 @@ export function ProductForm({
             <FormItem>
               <FormLabel>Descrição</FormLabel>
               <FormControl>
-                <Textarea rows={3} required {...field} />
+                <Textarea
+                  placeholder="Digite a descrição do produto"
+                  rows={3}
+                  required
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -130,12 +140,18 @@ export function ProductForm({
           )}
         />
 
-        <div className="flex justify-end space-x-3">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <div className="flex gap-2 justify-center sm:justify-end pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className="flex-1 sm:flex-initial"
+          >
             Cancelar
           </Button>
           <LoadingButton
             type="submit"
+            className="flex-1 sm:flex-initial"
             isLoading={
               form.formState.isSubmitting || externalIsSubmitting === true
             }

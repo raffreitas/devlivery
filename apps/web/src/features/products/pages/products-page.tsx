@@ -6,6 +6,7 @@ import {
   LoadingOverlay,
   LoadingState,
 } from "@/shared/components/loading";
+import { Modal } from "@/shared/components/modal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,13 +17,6 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/components/ui/dialog";
-import { Separator } from "@/shared/components/ui/separator";
 import { ProductCard } from "../components/product-card";
 import { ProductForm } from "../components/product-form";
 import { ProductsFilters } from "../components/products-filters";
@@ -181,25 +175,19 @@ export function ProductsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingProduct ? "Editar Produto" : "Novo Produto"}
-            </DialogTitle>
-          </DialogHeader>
-
-          <Separator />
-
-          <ProductForm
-            initialData={editingProduct}
-            onSubmit={handleCreateOrUpdate}
-            onCancel={handleCloseModal}
-            categoryOptions={categories.map((c) => ({ value: c, label: c }))}
-            isSubmitting={isCreating || isUpdating}
-          />
-        </DialogContent>
-      </Dialog>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title={editingProduct ? "Editar Produto" : "Novo Produto"}
+      >
+        <ProductForm
+          initialData={editingProduct}
+          onSubmit={handleCreateOrUpdate}
+          onCancel={handleCloseModal}
+          categoryOptions={categories.map((c) => ({ value: c, label: c }))}
+          isSubmitting={isCreating || isUpdating}
+        />
+      </Modal>
 
       <BottomSheet
         isOpen={isFiltersOpen}
