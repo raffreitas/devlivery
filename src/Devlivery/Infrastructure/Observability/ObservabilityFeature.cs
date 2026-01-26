@@ -15,10 +15,6 @@ public static class ObservabilityFeature
 {
     public static IServiceCollection AddObservabilityFeature(this WebApplicationBuilder builder)
     {
-        const string serviceName = "devlivery-webapi";
-        const string serviceNamespace = "devlivery";
-        const string serviceVersion = "1.0.0";
-
         var services = builder.Services;
 
         if (string.IsNullOrEmpty(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]))
@@ -33,36 +29,34 @@ public static class ObservabilityFeature
         });
 
         var otelBuilder = services.AddOpenTelemetry()
-              .ConfigureResource(resource => resource.AddService(
-                  serviceName: serviceName,
-                  serviceVersion: serviceVersion,
-                  serviceNamespace: serviceNamespace,
-                  serviceInstanceId: Environment.MachineName
-              ))
-              .WithMetrics(metrics =>
-              {
-                  metrics.AddAspNetCoreInstrumentation()
-                      .AddHttpClientInstrumentation()
-                      .AddProcessInstrumentation()
-                      .AddNpgsqlInstrumentation()
-                      .AddRuntimeInstrumentation();
-              })
-              .WithTracing(tracing =>
-              {
-                  tracing.AddSource(builder.Environment.ApplicationName)
-                      .AddAspNetCoreInstrumentation(options =>
-                      {
-                          options.Filter = context =>
-                              !context.Request.Path.StartsWithSegments("/health") &&
-                              !context.Request.Path.StartsWithSegments("/alive") &&
-                              !context.Request.Path.StartsWithSegments("/scalar") &&
-                              !context.Request.Path.StartsWithSegments("/openapi");
+            .ConfigureResource(resource => resource.AddService(
+                serviceName: AppDomain.CurrentDomain.FriendlyName,
+                serviceInstanceId: Environment.MachineName
+            ))
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddProcessInstrumentation()
+                    .AddNpgsqlInstrumentation()
+                    .AddRuntimeInstrumentation();
+            })
+            .WithTracing(tracing =>
+            {
+                tracing.AddSource(builder.Environment.ApplicationName)
+                    .AddAspNetCoreInstrumentation(options =>
+                    {
+                        options.Filter = context =>
+                            !context.Request.Path.StartsWithSegments("/health") &&
+                            !context.Request.Path.StartsWithSegments("/alive") &&
+                            !context.Request.Path.StartsWithSegments("/scalar") &&
+                            !context.Request.Path.StartsWithSegments("/openapi");
 
-                          options.RecordException = true;
-                      })
-                      .AddHttpClientInstrumentation()
-                      .AddNpgsql();
-              });
+                        options.RecordException = true;
+                    })
+                    .AddHttpClientInstrumentation()
+                    .AddNpgsql();
+            });
 
         if (builder.Environment.IsProduction())
         {
