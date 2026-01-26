@@ -1,10 +1,10 @@
+using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Aggregates.Products;
+using Devlivery.Domain.Aggregates.Products.Abstractions;
+using Devlivery.Domain.Common.Enums;
 using Devlivery.Features.Orders.Commands.UpdateOrder;
-using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Orders.Domain.ValueObjects;
-using Devlivery.Features.Products.Domain;
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Infrastructure.Persistence;
 
 using NSubstitute;
 
@@ -38,7 +38,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
     [Fact]
     public async Task Handle_Should_Return_ValidationError_When_Order_Finalized()
     {
-        var order = fixture.CreateOrder(status: Devlivery.Features.Orders.Domain.Enums.OrderStatus.Delivered);
+        var order = fixture.CreateOrder(status: OrderStatus.Delivered);
         var repository = fixture.CreateOrderRepositoryMock();
         var productRepository = Substitute.For<IProductRepository>();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
@@ -68,7 +68,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var handler = new UpdateOrderHandler(repository, productRepository, unitOfWork);
 
-        var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(Guid.NewGuid(), 1, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, Devlivery.Shared.Domain.Enums.PaymentMethod.Cash, 10m) });
+        var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(Guid.NewGuid(), 1, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, PaymentMethod.Cash, 10m) });
 
         var result = await handler.Handle(command, CancellationToken.None);
 
@@ -91,7 +91,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var handler = new UpdateOrderHandler(repository, productRepository, unitOfWork);
 
-        var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(product.Id, 2, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, Devlivery.Shared.Domain.Enums.PaymentMethod.Cash, 20m) }, 0m);
+        var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(product.Id, 2, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, PaymentMethod.Cash, 20m) }, 0m);
 
         var result = await handler.Handle(command, CancellationToken.None);
 

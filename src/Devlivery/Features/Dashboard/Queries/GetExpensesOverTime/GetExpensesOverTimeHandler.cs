@@ -2,9 +2,9 @@ using System.Data;
 
 using Dapper;
 
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
-using Devlivery.Shared.Infrastructure.Persistence.Abstractions;
-using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Domain.Aggregates.Expenses.Enums;
+using Devlivery.Infrastructure.Persistence.Abstractions;
+using Devlivery.Infrastructure.Tenancy;
 
 using FluentResults;
 

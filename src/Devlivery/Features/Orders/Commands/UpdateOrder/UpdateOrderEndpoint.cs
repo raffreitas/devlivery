@@ -1,5 +1,6 @@
-﻿using Devlivery.Shared.Infrastructure.WebServer.Extensions;
-using Devlivery.Shared.Infrastructure.WebServer.Models;
+﻿using Devlivery.Infrastructure.Http.Extensions;
+using Devlivery.Infrastructure.Http.Models;
+
 using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrder;
@@ -20,9 +21,9 @@ public static class UpdateOrderEndpoint
     {
         app.MapPut("{id:guid}", Handle)
             .Produces(StatusCodes.Status204NoContent)
-            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse>(StatusCodes.Status404NotFound)
-            .Produces<ApiResponse>(StatusCodes.Status409Conflict);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ApiProblemDetails>(StatusCodes.Status409Conflict);
     }
 
     private static async Task<IResult> Handle(Guid id, UpdateOrderRequest request, ISender sender, CancellationToken ct)
@@ -40,6 +41,6 @@ public static class UpdateOrderEndpoint
 
         var result = await sender.Send(command, ct);
 
-        return result.ToApiResult(TypedResults.NoContent);
+        return result.ToNoContent();
     }
 }

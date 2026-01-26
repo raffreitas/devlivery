@@ -11,8 +11,8 @@ CONTEXT_DB       = ApplicationDbContext
 CONTEXT_IDENTITY = ApplicationIdentityDbContext
 
 # Migrations Paths
-MIGRATIONS_DB_PATH       = ./Shared/Infrastructure/Persistence/Migrations
-MIGRATIONS_IDENTITY_PATH = ./Shared/Infrastructure/Identity/Migrations
+MIGRATIONS_DB_PATH       = ./Infrastructure/Persistence/Migrations
+MIGRATIONS_IDENTITY_PATH = ./Infrastructure/Identity/Migrations
 
 DOTNET_CMD = dotnet
 

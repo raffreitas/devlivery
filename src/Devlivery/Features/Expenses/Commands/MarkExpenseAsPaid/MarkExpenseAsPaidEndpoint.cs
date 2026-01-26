@@ -1,5 +1,6 @@
-using Devlivery.Shared.Infrastructure.WebServer.Extensions;
-using Devlivery.Shared.Infrastructure.WebServer.Models;
+using Devlivery.Infrastructure.Http.Extensions;
+using Devlivery.Infrastructure.Http.Models;
+
 using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.MarkExpenseAsPaid;
@@ -9,8 +10,8 @@ public static class MarkExpenseAsPaidEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPatch("{expenseId:guid}/mark-as-paid", Handle)
-            .Produces<ApiResponse>(StatusCodes.Status200OK)
-            .Produces<ApiResponse>(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> Handle(Guid expenseId, MarkExpenseAsPaidRequest request, ISender sender,
@@ -19,7 +20,7 @@ public static class MarkExpenseAsPaidEndpoint
         var command = new MarkExpenseAsPaidCommand(expenseId, request.PaymentDate);
         var result = await sender.Send(command, ct);
 
-        return result.ToApiResult(TypedResults.NoContent);
+        return result.ToNoContent();
     }
 }
 

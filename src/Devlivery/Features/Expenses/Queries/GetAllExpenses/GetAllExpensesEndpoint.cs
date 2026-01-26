@@ -1,4 +1,5 @@
-using Devlivery.Shared.Infrastructure.WebServer.Models;
+using Devlivery.Infrastructure.Http.Extensions;
+using Devlivery.Infrastructure.Http.Models;
 
 using Mediator;
 
@@ -12,11 +13,11 @@ public static class GetAllExpensesEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("", Handle)
-            .Produces<ApiResponse<List<GetAllExpensesResponse>>>()
-            .Produces<ApiResponse>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResource<List<GetAllExpensesResponse>>>()
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<Ok<ApiResponse<List<GetAllExpensesResponse>>>> Handle(
+    private static async Task<IResult> Handle(
         [FromQuery] Guid? categoryId,
         [FromQuery] ExpenseDisplayStatus? status,
         [FromQuery(Name = "start")] DateOnly? startDate,
@@ -26,8 +27,6 @@ public static class GetAllExpensesEndpoint
     {
         var query = new GetAllExpensesQuery(categoryId, status, startDate, endDate);
         var result = await sender.Send(query, ct);
-        var response = ApiResponse<List<GetAllExpensesResponse>>.Success(result);
-
-        return TypedResults.Ok(response);
+        return result.ToOk();
     }
 }

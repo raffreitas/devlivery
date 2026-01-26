@@ -1,5 +1,6 @@
-using Devlivery.Shared.Infrastructure.WebServer.Extensions;
-using Devlivery.Shared.Infrastructure.WebServer.Models;
+using Devlivery.Infrastructure.Http.Extensions;
+using Devlivery.Infrastructure.Http.Models;
+
 using Mediator;
 
 namespace Devlivery.Features.Products.Queries.GetAllProducts;
@@ -9,15 +10,14 @@ public static class GetAllProductsEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("", Handle)
-            .Produces<ApiResponse<List<GetAllProductsResponse>>>()
-            .Produces<ApiResponse>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResource<List<GetAllProductsResponse>>>()
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> Handle(ISender sender, CancellationToken ct)
     {
         var query = new GetAllProductsQuery();
         var result = await sender.Send(query, ct);
-
-        return result.ToApiResult();
+        return result.ToOk();
     }
 }

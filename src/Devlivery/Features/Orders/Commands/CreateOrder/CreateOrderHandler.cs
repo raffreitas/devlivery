@@ -1,10 +1,11 @@
-﻿using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Orders.Domain.ValueObjects;
-using Devlivery.Features.Products.Domain;
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Tenancy;
+﻿using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Abstractions;
+using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.Aggregates.Orders.ValueObjects;
+using Devlivery.Domain.Aggregates.Products.Abstractions;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Infrastructure.Tenancy;
 
 using FluentResults;
 

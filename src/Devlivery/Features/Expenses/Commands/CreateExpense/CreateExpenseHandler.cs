@@ -1,8 +1,8 @@
-using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Expenses;
+using Devlivery.Domain.Aggregates.Expenses.Abstractions;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Infrastructure.Tenancy;
 
 using FluentResults;
 

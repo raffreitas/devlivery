@@ -1,3 +1,4 @@
+using Devlivery.Domain.Aggregates.Expenses.Abstractions;
 using Devlivery.Features.Expenses.Commands.CreateCategory;
 using Devlivery.Features.Expenses.Commands.CreateExpense;
 using Devlivery.Features.Expenses.Commands.DeleteCategory;
@@ -5,12 +6,10 @@ using Devlivery.Features.Expenses.Commands.DeleteExpense;
 using Devlivery.Features.Expenses.Commands.MarkExpenseAsPaid;
 using Devlivery.Features.Expenses.Commands.UpdateCategory;
 using Devlivery.Features.Expenses.Commands.UpdateExpense;
-using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
-using Devlivery.Features.Expenses.Infrastructure;
 using Devlivery.Features.Expenses.Queries.GetAllExpenseCategories;
 using Devlivery.Features.Expenses.Queries.GetAllExpenses;
 using Devlivery.Features.Expenses.Queries.GetExpenseById;
+using Devlivery.Infrastructure.Persistence.Repositories;
 
 namespace Devlivery.Features.Expenses;
 

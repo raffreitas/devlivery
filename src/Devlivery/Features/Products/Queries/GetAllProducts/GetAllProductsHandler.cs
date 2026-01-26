@@ -1,4 +1,4 @@
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
 

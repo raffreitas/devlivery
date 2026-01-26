@@ -1,7 +1,7 @@
+using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Expenses;
+using Devlivery.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Features.Expenses.Commands.CreateExpense;
-using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
-using Devlivery.Shared.Application.Errors;
 
 using NSubstitute;
 
@@ -119,7 +119,7 @@ public sealed class CreateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
                 e.Supplier == supplier &&
                 e.Description == description &&
                 e.EstablishmentId == tenantAccessor.Tenant.Id &&
-                e.Status == Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums.ExpenseStatus.Pending),
+                e.Status == ExpenseStatus.Pending),
             Arg.Any<CancellationToken>()
         );
     }
@@ -158,7 +158,7 @@ public sealed class CreateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
 
         await expenseRepository.Received(1).AddAsync(
             Arg.Is<Expense>(e =>
-                e.Status == Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums.ExpenseStatus.Paid &&
+                e.Status == ExpenseStatus.Paid &&
                 e.PaymentDate == paymentDate),
             Arg.Any<CancellationToken>()
         );

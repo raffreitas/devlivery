@@ -1,5 +1,6 @@
-using Devlivery.Shared.Infrastructure.WebServer.Extensions;
-using Devlivery.Shared.Infrastructure.WebServer.Models;
+using Devlivery.Infrastructure.Http.Extensions;
+using Devlivery.Infrastructure.Http.Models;
+
 using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.DeleteCategory;
@@ -9,9 +10,9 @@ public static class DeleteCategoryEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapDelete("/categories/{categoryId:guid}", Handle)
-            .Produces<ApiResponse>(StatusCodes.Status204NoContent)
-            .Produces<ApiResponse>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse>(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> Handle(
@@ -21,7 +22,6 @@ public static class DeleteCategoryEndpoint
     {
         var command = new DeleteCategoryCommand(categoryId);
         var result = await sender.Send(command, ct);
-
-        return result.ToApiResult(TypedResults.NoContent);
+        return result.ToNoContent();
     }
 }

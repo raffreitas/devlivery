@@ -1,5 +1,5 @@
-using Devlivery.Shared.Infrastructure.WebServer.Extensions;
-using Devlivery.Shared.Infrastructure.WebServer.Models;
+using Devlivery.Infrastructure.Http.Extensions;
+using Devlivery.Infrastructure.Http.Models;
 
 using Mediator;
 
@@ -10,14 +10,14 @@ public static class GetActiveCashSessionEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("sessions/active", Handle)
-            .Produces<ApiResponse<GetActiveCashSessionResponse>>()
-            .Produces<ApiResponse>(StatusCodes.Status404NotFound);
+            .Produces<ApiResource<GetActiveCashSessionResponse>>()
+            .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> Handle(ISender sender, CancellationToken ct)
     {
         var query = new GetActiveCashSessionQuery();
         var result = await sender.Send(query, ct);
-        return result.ToApiResult();
+        return result.ToOk();
     }
 }

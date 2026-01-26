@@ -1,9 +1,9 @@
-using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.Domain.Enums;
+using Devlivery.Domain.Aggregates.CashRegister;
+using Devlivery.Domain.Aggregates.CashRegister.Enums;
+using Devlivery.Domain.Aggregates.Orders.Abstractions;
+using Devlivery.Domain.Aggregates.Orders.Events;
+using Devlivery.Domain.Common.Enums;
 using Devlivery.Features.CashRegister.Events;
-using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Events;
-using Devlivery.Shared.Domain.Enums;
 using Devlivery.Tests.Common.Builders;
 
 using Microsoft.Extensions.Logging;

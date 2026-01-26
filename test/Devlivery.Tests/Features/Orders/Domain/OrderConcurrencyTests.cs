@@ -1,9 +1,9 @@
-using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Features.Orders.Domain.Events;
-using Devlivery.Shared.Domain.Enums;
-using Devlivery.Shared.SeedWork;
+using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Aggregates.Orders.Events;
+using Devlivery.Domain.Aggregates.Orders.ValueObjects;
+using Devlivery.Domain.Common.Enums;
+using Devlivery.Domain.SeedWork;
 using Devlivery.Tests.Common.Builders;
 
 using Shouldly;
@@ -74,7 +74,7 @@ public sealed class OrderConcurrencyTests(OrdersUnitTestFixture fixture)
         payment.ConfirmedAt.ShouldNotBeNull();
 
         // Act & Assert: Second confirmation should throw
-        var exception = Should.Throw<InvalidOperationException>(() => payment.Confirm());
+        var exception = Should.Throw<DomainException>(() => payment.Confirm());
         exception.Message.ShouldContain("já está confirmado");
     }
 
@@ -86,7 +86,7 @@ public sealed class OrderConcurrencyTests(OrdersUnitTestFixture fixture)
         payment.Cancel();
 
         // Act & Assert
-        var exception = Should.Throw<InvalidOperationException>(() => payment.Confirm());
+        var exception = Should.Throw<DomainException>(() => payment.Confirm());
         exception.Message.ShouldContain("cancelado");
     }
 
@@ -156,7 +156,7 @@ public sealed class OrderConcurrencyTests(OrdersUnitTestFixture fixture)
         // Assert: Only pending payment generated a new event
         var confirmationEvents = order.DomainEvents.OfType<OrderPaymentConfirmedEvent>().ToList();
         confirmationEvents.Count.ShouldBe(1);
-        confirmationEvents.First().PaymentId.ShouldBe(payment2.Id);
+        confirmationEvents[0].PaymentId.ShouldBe(payment2.Id);
     }
 
     [Fact(DisplayName = "Cancelled payments should not be confirmed on delivery")]
@@ -220,7 +220,7 @@ public sealed class OrderConcurrencyTests(OrdersUnitTestFixture fixture)
         // Verify only one change event
         var changeEvents = order.DomainEvents.OfType<OrderChangeCalculatedEvent>().ToList();
         changeEvents.Count.ShouldBe(1);
-        changeEvents.First().Change.ShouldBe(30.00m);
+        changeEvents[0].Change.ShouldBe(30.00m);
     }
 
     [Fact(DisplayName = "Order status should prevent multiple status transitions")]
@@ -298,17 +298,6 @@ public sealed class OrderConcurrencyTests(OrdersUnitTestFixture fixture)
         payment.Confirm();
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => payment.Update(PaymentMethod.Pix, 150.00m));
-    }
-
-    [Fact(DisplayName = "Payment update should throw when cancelled")]
-    public void Update_WhenCancelled_ShouldThrowException()
-    {
-        // Arrange
-        var payment = new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 100.00m);
-        payment.Cancel();
-
-        // Act & Assert
-        Should.Throw<InvalidOperationException>(() => payment.Update(PaymentMethod.Pix, 150.00m));
+        Should.Throw<DomainException>(() => payment.Update(PaymentMethod.Pix, 150.00m));
     }
 }

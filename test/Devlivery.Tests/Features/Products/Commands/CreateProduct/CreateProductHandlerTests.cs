@@ -1,3 +1,4 @@
+using Devlivery.Domain.Aggregates.Products;
 using Devlivery.Features.Products.Commands.CreateProduct;
 
 using NSubstitute;
@@ -61,7 +62,7 @@ public sealed class CreateProductHandlerTests(ProductsUnitTestFixture fixture)
 
         // Assert
         await productRepository.Received(1).AddAsync(
-            Arg.Is<Devlivery.Features.Products.Domain.Product>(p =>
+            Arg.Is<Product>(p =>
                 p.Name == command.Name &&
                 p.Description == command.Description &&
                 p.Price == command.Price &&
@@ -122,7 +123,7 @@ public sealed class CreateProductHandlerTests(ProductsUnitTestFixture fixture)
 
         // Assert
         await productRepository.Received(1).AddAsync(
-            Arg.Is<Devlivery.Features.Products.Domain.Product>(p => p.EstablishmentId == expectedTenantId),
+            Arg.Is<Product>(p => p.EstablishmentId == expectedTenantId),
             Arg.Any<CancellationToken>()
         );
     }

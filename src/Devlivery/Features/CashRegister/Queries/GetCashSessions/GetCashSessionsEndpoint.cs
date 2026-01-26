@@ -1,5 +1,6 @@
-using Devlivery.Features.CashRegister.Domain.Enums;
-using Devlivery.Shared.Infrastructure.WebServer.Models;
+using Devlivery.Domain.Aggregates.CashRegister.Enums;
+using Devlivery.Infrastructure.Http.Extensions;
+using Devlivery.Infrastructure.Http.Models;
 
 using Mediator;
 
@@ -10,8 +11,8 @@ public static class GetCashSessionsEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("sessions", Handle)
-            .Produces<ApiResponse<GetCashSessionsResponse[]>>()
-            .Produces<ApiResponse<GetCashSessionsResponse[]>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResource<GetCashSessionsResponse[]>>()
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> Handle(DateTime? start, DateTime? end, CashSessionStatus? status, ISender sender,
@@ -19,7 +20,6 @@ public static class GetCashSessionsEndpoint
     {
         var query = new GetCashSessionsQuery(start, end, status);
         var result = await sender.Send(query, ct);
-
-        return TypedResults.Ok(ApiResponse<GetCashSessionsResponse[]>.Success(result));
+        return result.ToOk();
     }
 }

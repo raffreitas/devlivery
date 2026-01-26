@@ -1,5 +1,5 @@
-﻿using Devlivery.Features.Expenses.Commands.DeleteCategory;
-using Devlivery.Shared.Application.Errors;
+﻿using Devlivery.Common.Errors;
+using Devlivery.Features.Expenses.Commands.DeleteCategory;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
