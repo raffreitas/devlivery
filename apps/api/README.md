@@ -6,8 +6,6 @@ API Web para gestão de features relacionadas a entregas — monólito modular o
 
 - Projeto ASP.NET Core Web API (solução: Devlivery.slnx).
 - Organização por features em `src/Devlivery/Features` com testes em `test/Devlivery.Tests`.
-- Arquitetura orientada a features/vertical slice e princípios DDD tático (ver ADRs em
-  `docs/architectural-decision-records`).
 
 **Principais tecnologias**
 
