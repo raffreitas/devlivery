@@ -2,10 +2,12 @@ using System.Data;
 
 using Dapper;
 
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
-using Devlivery.Shared.Application.Abstractions;
-using Devlivery.Shared.Infrastructure.Persistence.Abstractions;
-using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Domain.Aggregates.Expenses.Enums;
+using Devlivery.Infrastructure.Persistence.Abstractions;
+using Devlivery.Infrastructure.Tenancy;
+using Devlivery.Infrastructure.Time.Abstractions;
+
+using FluentResults;
 
 using Mediator;
 
@@ -16,9 +18,9 @@ public sealed class GetAllExpensesHandler(
     ITenantAccessor tenantAccessor,
     IDateTimeProvider dateTimeProvider
 )
-    : IQueryHandler<GetAllExpensesQuery, List<GetAllExpensesResponse>>
+    : IQueryHandler<GetAllExpensesQuery, Result<List<GetAllExpensesResponse>>>
 {
-    public async ValueTask<List<GetAllExpensesResponse>> Handle(GetAllExpensesQuery query,
+    public async ValueTask<Result<List<GetAllExpensesResponse>>> Handle(GetAllExpensesQuery query,
         CancellationToken cancellationToken)
     {
         var today = dateTimeProvider.GetLocalDate();

@@ -1,6 +1,6 @@
-﻿using Devlivery.Features.Expenses.Commands.CreateCategory;
-using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
-using Devlivery.Shared.Application.Errors;
+﻿using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Expenses;
+using Devlivery.Features.Expenses.Commands.CreateCategory;
 
 using NSubstitute;
 

@@ -1,6 +1,6 @@
-using Devlivery.Features.Products.Domain;
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Infrastructure.Persistence;
+using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Products.Abstractions;
+using Devlivery.Infrastructure.Persistence;
 
 using FluentResults;
 

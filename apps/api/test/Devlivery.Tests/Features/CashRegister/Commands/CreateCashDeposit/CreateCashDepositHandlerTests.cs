@@ -1,5 +1,5 @@
+using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
-using Devlivery.Features.CashRegister.Domain.Enums;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;

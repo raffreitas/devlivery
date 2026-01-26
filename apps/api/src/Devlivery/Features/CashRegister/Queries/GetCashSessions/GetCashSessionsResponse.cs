@@ -1,4 +1,4 @@
-using Devlivery.Features.CashRegister.Domain;
+using Devlivery.Domain.Aggregates.CashRegister;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessions;
 

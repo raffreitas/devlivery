@@ -1,6 +1,10 @@
-using Devlivery.Features.Orders.Domain;
-using Devlivery.Features.Orders.Domain.Events;
-using Devlivery.Shared.Domain.Enums;
+using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Aggregates.Orders.Events;
+using Devlivery.Domain.Aggregates.Orders.ValueObjects;
+using Devlivery.Domain.Common.Enums;
+using Devlivery.Domain.SeedWork;
 
 using Shouldly;
 
@@ -15,18 +19,18 @@ public sealed class UpdateOrderStatusDeliveryTests(OrdersUnitTestFixture fixture
     {
         var establishmentId = Guid.NewGuid();
         var item = fixture.CreateOrderItem(establishmentId: establishmentId, quantity: 1, unitPrice: 20.00m);
-        var customer = Devlivery.Features.Orders.Domain.ValueObjects.CustomerInfo.Create("Cliente Teste", null);
-        var address = new Devlivery.Features.Orders.Domain.ValueObjects.DeliveryAddress("Rua Teste, 123");
+        var customer = CustomerInfo.Create("Cliente Teste", null);
+        var address = new DeliveryAddress("Rua Teste, 123");
 
         // payments sum greater than total
-        var p1 = new Devlivery.Features.Orders.Domain.Entities.OrderPayment(establishmentId, PaymentMethod.Cash, 30m);
+        var p1 = new OrderPayment(establishmentId, PaymentMethod.Cash, 30m);
 
         var order = new Order(customer, address, 0m, establishmentId, [item], [p1]);
 
-        order.UpdateStatus(Devlivery.Features.Orders.Domain.Enums.OrderStatus.Delivered);
+        order.UpdateStatus(OrderStatus.Delivered);
 
         order.Change.ShouldBe(10m); // 30 - 20
-        order.Payments.All(p => p.PaymentStatus == Devlivery.Features.Orders.Domain.Enums.PaymentStatus.Confirmed).ShouldBeTrue();
+        order.Payments.All(p => p.PaymentStatus == PaymentStatus.Confirmed).ShouldBeTrue();
         order.DomainEvents.OfType<OrderPaymentConfirmedEvent>().Any().ShouldBeTrue();
         order.DomainEvents.OfType<OrderChangeCalculatedEvent>().Any().ShouldBeTrue();
     }
@@ -36,13 +40,13 @@ public sealed class UpdateOrderStatusDeliveryTests(OrdersUnitTestFixture fixture
     {
         var establishmentId = Guid.NewGuid();
         var item = fixture.CreateOrderItem(establishmentId: establishmentId, quantity: 1, unitPrice: 50.00m);
-        var customer = Devlivery.Features.Orders.Domain.ValueObjects.CustomerInfo.Create("Cliente Teste", null);
-        var address = new Devlivery.Features.Orders.Domain.ValueObjects.DeliveryAddress("Rua Teste, 123");
+        var customer = CustomerInfo.Create("Cliente Teste", null);
+        var address = new DeliveryAddress("Rua Teste, 123");
 
-        var p1 = new Devlivery.Features.Orders.Domain.Entities.OrderPayment(establishmentId, PaymentMethod.Cash, 20m);
+        var p1 = new OrderPayment(establishmentId, PaymentMethod.Cash, 20m);
 
         var order = new Order(customer, address, 0m, establishmentId, [item], [p1]);
 
-        Should.Throw<InvalidOperationException>(() => order.UpdateStatus(Devlivery.Features.Orders.Domain.Enums.OrderStatus.Delivered));
+        Should.Throw<DomainException>(() => order.UpdateStatus(OrderStatus.Delivered));
     }
 }

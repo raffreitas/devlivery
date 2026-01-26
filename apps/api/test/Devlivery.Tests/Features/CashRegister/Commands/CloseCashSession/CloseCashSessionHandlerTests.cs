@@ -1,8 +1,7 @@
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
+using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Features.CashRegister.Commands.CloseCashSession;
-using Devlivery.Features.CashRegister.Domain;
-using Devlivery.Features.CashRegister.Domain.Enums;
-using Devlivery.Features.CashRegister.Infrastructure;
-using Devlivery.Shared.Infrastructure.Persistence;
+using Devlivery.Infrastructure.Persistence;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;

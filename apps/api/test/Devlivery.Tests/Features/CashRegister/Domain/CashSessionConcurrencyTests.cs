@@ -1,6 +1,6 @@
-using Devlivery.Features.CashRegister.Domain.Enums;
-using Devlivery.Shared.Domain.Enums;
-using Devlivery.Shared.SeedWork;
+using Devlivery.Domain.Aggregates.CashRegister.Enums;
+using Devlivery.Domain.Common.Enums;
+using Devlivery.Domain.SeedWork;
 
 using Shouldly;
 

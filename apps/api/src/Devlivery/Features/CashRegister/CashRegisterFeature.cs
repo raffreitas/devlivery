@@ -1,12 +1,13 @@
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Features.CashRegister.Commands.CloseCashSession;
 using Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 using Devlivery.Features.CashRegister.Commands.CreateCashSession;
 using Devlivery.Features.CashRegister.Events;
-using Devlivery.Features.CashRegister.Infrastructure;
 using Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
 using Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 using Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
 using Devlivery.Features.CashRegister.Queries.GetCashSessions;
+using Devlivery.Infrastructure.Persistence.Repositories;
 
 namespace Devlivery.Features.CashRegister;
 

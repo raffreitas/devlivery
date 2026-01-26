@@ -1,6 +1,6 @@
-using Devlivery.Features.Orders.Domain;
+using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Features.Products.Commands.DeleteProduct;
-using Devlivery.Shared.Application.Errors;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;

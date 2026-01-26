@@ -1,9 +1,7 @@
-using Devlivery.Features.CashRegister.Domain.Entities;
-using Devlivery.Features.CashRegister.Domain.Enums;
-using Devlivery.Features.CashRegister.Infrastructure;
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
+using Devlivery.Domain.Aggregates.CashRegister.Enums;
+using Devlivery.Infrastructure.Persistence;
 
 using FluentResults;
 

@@ -1,6 +1,6 @@
+using Devlivery.Common.Errors;
 using Devlivery.Features.Auth.Commands.Login;
-using Devlivery.Shared.Application.Errors;
-using Devlivery.Shared.Infrastructure.Identity.Abstractions;
+using Devlivery.Infrastructure.Identity.Abstractions;
 
 using FluentResults;
 

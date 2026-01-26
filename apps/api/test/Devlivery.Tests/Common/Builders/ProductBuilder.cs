@@ -1,6 +1,6 @@
 ﻿using Bogus;
 
-using Devlivery.Features.Products.Domain;
+using Devlivery.Domain.Aggregates.Products;
 
 namespace Devlivery.Tests.Common.Builders;
 

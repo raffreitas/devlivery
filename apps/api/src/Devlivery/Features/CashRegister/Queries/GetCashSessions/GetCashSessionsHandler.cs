@@ -1,5 +1,7 @@
-using Devlivery.Shared.CrossCutting.Extensions;
-using Devlivery.Shared.Infrastructure.Persistence.Context;
+using Devlivery.Common.Extensions;
+using Devlivery.Infrastructure.Persistence.Context;
+
+using FluentResults;
 
 using Mediator;
 
@@ -8,9 +10,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessions;
 
 public sealed class GetCashSessionsHandler(ApplicationDbContext dbContext)
-    : IQueryHandler<GetCashSessionsQuery, GetCashSessionsResponse[]>
+    : IQueryHandler<GetCashSessionsQuery, Result<GetCashSessionsResponse[]>>
 {
-    public async ValueTask<GetCashSessionsResponse[]> Handle(GetCashSessionsQuery query,
+    public async ValueTask<Result<GetCashSessionsResponse[]>> Handle(GetCashSessionsQuery query,
         CancellationToken cancellationToken)
     {
         var sessionsQuery = dbContext.CashSessions

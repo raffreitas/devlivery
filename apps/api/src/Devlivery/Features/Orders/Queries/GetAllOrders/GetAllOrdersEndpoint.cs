@@ -1,6 +1,7 @@
-using Devlivery.Shared.Domain.Enums;
-using Devlivery.Shared.Infrastructure.WebServer.Extensions;
-using Devlivery.Shared.Infrastructure.WebServer.Models;
+using Devlivery.Domain.Common.Enums;
+using Devlivery.Infrastructure.Http.Extensions;
+using Devlivery.Infrastructure.Http.Models;
+
 using Mediator;
 
 namespace Devlivery.Features.Orders.Queries.GetAllOrders;
@@ -12,8 +13,8 @@ public static class GetAllOrdersEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("", Handle)
-            .Produces<ApiResponse<List<GetAllOrdersResponse>>>()
-            .Produces<ApiResponse<List<GetAllOrdersResponse>>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResource<List<GetAllOrdersResponse>>>()
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> Handle(DateTime? start, DateTime? end, PaymentMethod? paymentMethod,
@@ -22,7 +23,6 @@ public static class GetAllOrdersEndpoint
     {
         var query = new GetAllOrdersQuery(start, end, paymentMethod);
         var result = await sender.Send(query, ct);
-
-        return result.ToApiResult();
+        return result.ToOk();
     }
 }

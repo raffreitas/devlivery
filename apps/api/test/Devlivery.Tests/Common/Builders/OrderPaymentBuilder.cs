@@ -1,8 +1,8 @@
 using Bogus;
 
-using Devlivery.Features.Orders.Domain.Entities;
-using Devlivery.Features.Orders.Domain.Enums;
-using Devlivery.Shared.Domain.Enums;
+using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.Common.Enums;
 
 namespace Devlivery.Tests.Common.Builders;
 

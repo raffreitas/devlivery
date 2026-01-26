@@ -1,5 +1,5 @@
+using Devlivery.Domain.Common.Enums;
 using Devlivery.Features.Orders.Commands.CreateOrder;
-using Devlivery.Shared.Domain.Enums;
 
 using Shouldly;
 

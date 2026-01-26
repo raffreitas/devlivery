@@ -1,10 +1,10 @@
 using Bogus;
 
-using Devlivery.Features.Expenses.Domain.Aggregates.Categories;
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums;
-using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Tenancy;
+using Devlivery.Domain.Aggregates.Expenses;
+using Devlivery.Domain.Aggregates.Expenses.Abstractions;
+using Devlivery.Domain.Aggregates.Expenses.Enums;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Infrastructure.Tenancy;
 
 using NSubstitute;
 

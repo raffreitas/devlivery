@@ -1,20 +1,21 @@
 ﻿using System.Text.Json.Serialization;
 
+using Devlivery.Common.Mediator.Behaviors;
 using Devlivery.Features.Auth;
 using Devlivery.Features.CashRegister;
 using Devlivery.Features.Dashboard;
 using Devlivery.Features.Expenses;
 using Devlivery.Features.Orders;
 using Devlivery.Features.Products;
-using Devlivery.Shared.Application.Abstractions;
-using Devlivery.Shared.Infrastructure.Authorization;
-using Devlivery.Shared.Infrastructure.Identity;
-using Devlivery.Shared.Infrastructure.Networking;
-using Devlivery.Shared.Infrastructure.Observability;
-using Devlivery.Shared.Infrastructure.Persistence;
-using Devlivery.Shared.Infrastructure.Tenancy;
-using Devlivery.Shared.Infrastructure.Time;
-using Devlivery.Shared.Infrastructure.WebServer;
+using Devlivery.Infrastructure.Authorization;
+using Devlivery.Infrastructure.Http.Configuration;
+using Devlivery.Infrastructure.Http.ExceptionHandlers;
+using Devlivery.Infrastructure.Identity;
+using Devlivery.Infrastructure.Observability;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Infrastructure.Tenancy;
+using Devlivery.Infrastructure.Time;
+using Devlivery.Infrastructure.Time.Abstractions;
 
 using FluentValidation;
 
@@ -27,8 +28,6 @@ public static class Startup
         var services = builder.Services;
         var configuration = builder.Configuration;
 
-        builder.Services.AddNetworkingFeature();
-
         builder.Services.ConfigureHttpJsonOptions(options =>
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
@@ -39,8 +38,7 @@ public static class Startup
             options.ServiceLifetime = ServiceLifetime.Scoped;
             options.PipelineBehaviors =
             [
-                typeof(Shared.Infrastructure.Tenancy.Behaviors.DomainEventTenantBehavior<,>),
-                typeof(Shared.Application.Behaviors.ValidationPipelineBehavior<,>)
+                typeof(DomainEventTenantBehavior<,>),
             ];
         });
 

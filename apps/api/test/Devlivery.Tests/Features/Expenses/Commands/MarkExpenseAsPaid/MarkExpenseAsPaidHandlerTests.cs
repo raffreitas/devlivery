@@ -1,5 +1,6 @@
+using Devlivery.Domain.Aggregates.Expenses;
+using Devlivery.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Features.Expenses.Commands.MarkExpenseAsPaid;
-using Devlivery.Features.Expenses.Domain.Aggregates.Expenses;
 
 using NSubstitute;
 
@@ -43,7 +44,7 @@ public sealed class MarkExpenseAsPaidHandlerTests(ExpensesUnitTestFixture fixtur
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
         var expense =
-            fixture.CreateExpense(status: Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums.ExpenseStatus
+            fixture.CreateExpense(status: ExpenseStatus
                 .Pending);
         expenseRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(expense);
@@ -62,7 +63,7 @@ public sealed class MarkExpenseAsPaidHandlerTests(ExpensesUnitTestFixture fixtur
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        expense.Status.ShouldBe(Devlivery.Features.Expenses.Domain.Aggregates.Expenses.Enums.ExpenseStatus.Paid);
+        expense.Status.ShouldBe(ExpenseStatus.Paid);
         expense.PaymentDate.ShouldBe(paymentDate);
 
         await expenseRepository.Received(1).UpdateAsync(expense, Arg.Any<CancellationToken>());
