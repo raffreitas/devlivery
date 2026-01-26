@@ -9,6 +9,15 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -89,15 +98,28 @@ export function ExpenseList({
   onMarkAsPaid,
 }: ExpenseListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{ open: boolean; id: string | null }>({
+    open: false,
+    id: null,
+  });
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Tem certeza que deseja excluir esta despesa?")) {
-      setDeletingId(id);
-      try {
-        await onDelete(id);
-      } finally {
-        setDeletingId(null);
-      }
+  // Open confirmation dialog
+  const handleDelete = (id: string) => {
+    setAlert({ open: true, id });
+  };
+
+  // Called when user confirms deletion in the dialog
+  const confirmDelete = async () => {
+    const id = alert.id;
+    if (!id) return;
+
+    setDeletingId(id);
+    setAlert({ open: false, id: null });
+
+    try {
+      await onDelete(id);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -343,6 +365,34 @@ export function ExpenseList({
               </TableBody>
             </Table>
           </div>
+
+          <AlertDialog
+            open={alert.open}
+            onOpenChange={(open) =>
+              setAlert({ open, id: open ? alert.id : null })
+            }
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Tem certeza que deseja excluir esta despesa?
+                </AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deletingId === alert.id}>
+                  Cancelar
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => confirmDelete()}
+                  disabled={deletingId === alert.id}
+                >
+                  {deletingId && deletingId === alert.id
+                    ? "Excluindo..."
+                    : "Confirmar"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardContent>
       </Card>
     </div>

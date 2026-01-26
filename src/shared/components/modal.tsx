@@ -72,7 +72,10 @@ export function Modal({
   // Desktop: shadcn Dialog
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent
+        className="sm:max-w-3xl"
+        aria-describedby={description ? "modal-description" : undefined}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}

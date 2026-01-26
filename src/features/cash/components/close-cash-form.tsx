@@ -101,7 +101,7 @@ export function CloseCashForm({
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1">
                   <TrendingUp className="w-3 h-3" />
-                  Vendas em Dinheiro
+                  Pagamentos em Dinheiro
                 </span>
                 <span className="font-medium">{formatMoney(cashSales)}</span>
               </div>

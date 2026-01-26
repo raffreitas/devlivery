@@ -7,14 +7,8 @@ import {
   LoadingOverlay,
   LoadingState,
 } from "@/shared/components/loading";
+import { Modal } from "@/shared/components/modal";
 import { Button } from "@/shared/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/components/ui/dialog";
-import { Separator } from "@/shared/components/ui/separator";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
 import { OrdersFilters } from "../components/orders-filters";
@@ -180,24 +174,18 @@ export function OrdersPage() {
         </LoadingState>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingOrder ? "Editar Pedido" : "Novo Pedido"}
-            </DialogTitle>
-          </DialogHeader>
-
-          <Separator />
-
-          <OrderForm
-            initialData={editingOrder ? { ...editingOrder } : undefined}
-            onSubmit={handleCreateOrUpdateOrder}
-            onCancel={handleCloseModal}
-            isSubmitting={isCreating || isUpdating}
-          />
-        </DialogContent>
-      </Dialog>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title={editingOrder ? "Editar Pedido" : "Novo Pedido"}
+      >
+        <OrderForm
+          initialData={editingOrder ? { ...editingOrder } : undefined}
+          onSubmit={handleCreateOrUpdateOrder}
+          onCancel={handleCloseModal}
+          isSubmitting={isCreating || isUpdating}
+        />
+      </Modal>
 
       <BottomSheet
         isOpen={isFiltersOpen}
