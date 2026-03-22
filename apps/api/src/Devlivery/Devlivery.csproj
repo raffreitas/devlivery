@@ -9,39 +9,39 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dapper" Version="2.1.66" />
-        <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
-        <PackageReference Include="FluentResults" Version="4.0.0" />
-        <PackageReference Include="FluentValidation" Version="12.1.1" />
-        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-        <PackageReference Include="Grafana.OpenTelemetry" Version="1.5.0" />
-        <PackageReference Include="Mediator.Abstractions" Version="3.0.1" />
+        <PackageReference Include="Dapper" Version="2.1.72"/>
+        <PackageReference Include="EFCore.NamingConventions" Version="10.0.1"/>
+        <PackageReference Include="FluentResults" Version="4.0.0"/>
+        <PackageReference Include="FluentValidation" Version="12.1.1"/>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1"/>
+        <PackageReference Include="Grafana.OpenTelemetry" Version="1.5.3"/>
+        <PackageReference Include="Mediator.Abstractions" Version="3.0.1"/>
         <PackageReference Include="Mediator.SourceGenerator" Version="3.0.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2">
-          <TreatAsUsed>true</TreatAsUsed>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.5"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5">
+            <TreatAsUsed>true</TreatAsUsed>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <TreatAsUsed>true</TreatAsUsed>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
-        <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.2" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-        <PackageReference Include="Npgsql.OpenTelemetry" Version="10.0.1" />
-        <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.0" />
-        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.0" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.0" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
-        <PackageReference Include="Scalar.AspNetCore" Version="2.12.14" />
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+        <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.4.0"/>
+        <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.4.0"/>
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.5"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1"/>
+        <PackageReference Include="Npgsql.OpenTelemetry" Version="10.0.2"/>
+        <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.0"/>
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.0"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0"/>
+        <PackageReference Include="Scalar.AspNetCore" Version="2.13.13"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -51,9 +51,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Common\Mediator\" />
-      <Folder Include="Domain\Common\" />
-      <Folder Include="Features\Orders\Infrastructure\" />
+        <Folder Include="Common\Mediator\"/>
+        <Folder Include="Domain\Common\"/>
+        <Folder Include="Features\Orders\Infrastructure\"/>
     </ItemGroup>
 
 </Project>
