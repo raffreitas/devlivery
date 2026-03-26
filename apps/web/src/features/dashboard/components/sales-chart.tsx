@@ -86,7 +86,7 @@ export function SalesChart({ data }: SalesChartProps) {
                                 Total
                               </span>
                               <span className="font-bold">
-                                {formatMoney(payload[0].value)}
+                                {formatMoney(payload[0].value as number)}
                               </span>
                             </div>
                           </div>
