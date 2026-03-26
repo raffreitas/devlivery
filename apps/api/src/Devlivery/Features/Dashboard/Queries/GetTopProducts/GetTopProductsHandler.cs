@@ -55,7 +55,6 @@ public sealed class GetTopProductsHandler(ApplicationDbContext dbContext)
                 Quantity = g.Sum(i => i.Quantity)
             })
             .OrderByDescending(x => x.Quantity)
-            .Take(5)
             .ToList();
 
         // Map to response with product names
