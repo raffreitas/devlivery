@@ -23,7 +23,7 @@ namespace Devlivery.Shared.Infrastructure.Persistence.Migrations
                                  WHERE cash_session_movements.id = duplicates.id
                                    AND duplicates.rn > 1;
                                  """);
-            
+
             migrationBuilder.AddColumn<byte[]>(
                 name: "row_version",
                 table: "orders",

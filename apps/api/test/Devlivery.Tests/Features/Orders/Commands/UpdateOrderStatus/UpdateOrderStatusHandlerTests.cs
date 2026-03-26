@@ -4,6 +4,7 @@ using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
 using NSubstitute;
+
 using Shouldly;
 
 namespace Devlivery.Tests.Features.Orders.Commands.UpdateOrderStatus;

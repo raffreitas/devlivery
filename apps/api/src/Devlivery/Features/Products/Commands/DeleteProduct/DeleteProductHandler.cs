@@ -4,6 +4,7 @@ using Devlivery.Domain.Aggregates.Products.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 
 using FluentResults;
+
 using Mediator;
 
 namespace Devlivery.Features.Products.Commands.DeleteProduct;
