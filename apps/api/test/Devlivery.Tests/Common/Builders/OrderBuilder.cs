@@ -70,7 +70,7 @@ public class OrderBuilder
         _payments.Add(payment);
         return this;
     }
-    
+
     public OrderBuilder WithCustomPayments(IEnumerable<OrderPayment> payments)
     {
         _payments.Clear();
@@ -123,7 +123,7 @@ public class OrderBuilder
         var deliveryAddress = new DeliveryAddress(_deliveryAddress, _deliveryReference);
 
         var totalItems = items.Sum(i => i.TotalPrice) + _deliveryFee;
-        
+
         // Se não houver pagamentos, criar um pagamento total padrão
         if (_payments.Count == 0)
         {

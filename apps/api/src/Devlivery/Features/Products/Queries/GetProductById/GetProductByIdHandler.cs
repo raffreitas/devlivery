@@ -2,7 +2,9 @@ using Devlivery.Common.Errors;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
+
 using Mediator;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Features.Products.Queries.GetProductById;

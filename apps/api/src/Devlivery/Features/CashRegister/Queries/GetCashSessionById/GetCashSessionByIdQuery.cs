@@ -1,4 +1,5 @@
 using FluentResults;
+
 using Mediator;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionById;

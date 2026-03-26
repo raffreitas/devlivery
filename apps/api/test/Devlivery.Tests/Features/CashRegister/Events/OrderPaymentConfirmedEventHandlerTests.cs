@@ -137,10 +137,10 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         cashSession.Movements.Count.ShouldBe(3);
         cashSession.TotalRevenue.ShouldBe(60m);
         cashSession.TotalOrders.ShouldBe(3); // 3 different payment IDs
-        
+
         var cashPayments = cashSession.Movements.Where(m => m.PaymentMethod == PaymentMethod.Cash).Sum(m => m.Amount);
         cashPayments.ShouldBe(30m);
-        
+
         cashSession.ExpectedCashAmount.ShouldBe(130m); // 100 + 30 (only cash)
     }
 
@@ -198,7 +198,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         await handler.Handle(new OrderPaymentConfirmedEvent(
             Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Cash, 50m, 50m),
             CancellationToken.None);
-        
+
         await handler.Handle(new OrderPaymentConfirmedEvent(
             Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.CreditCard, 30m, 30m),
             CancellationToken.None);

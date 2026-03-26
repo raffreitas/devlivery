@@ -57,7 +57,7 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
         reversals.Count.ShouldBe(1);
         reversals[0].Amount.ShouldBe(50m);
         reversals[0].Reason.ShouldBe("Pedido Cancelado");
-        
+
         cashSession.TotalRevenue.ShouldBe(0m);
 
         await repository.Received(1).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
@@ -152,7 +152,7 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
         reversals.Count.ShouldBe(3);
         reversals.Sum(r => r.Amount).ShouldBe(60m);
         reversals.All(r => r.Reason == "Pedido Cancelado").ShouldBeTrue();
-        
+
         cashSession.TotalRevenue.ShouldBe(0m);
     }
 
