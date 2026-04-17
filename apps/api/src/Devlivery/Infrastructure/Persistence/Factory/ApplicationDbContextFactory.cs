@@ -19,7 +19,7 @@ internal sealed class ApplicationDbContextFactory : IDesignTimeDbContextFactory<
             .AddEnvironmentVariables()
             .Build();
 
-        var connectionString = configuration.GetConnectionStringOrThrow("DatabaseConnection");
+        var connectionString = configuration.GetConnectionStringOrThrow("DefaultConnection");
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
         optionsBuilder.UseNpgsql(connectionString, sqlOptions =>
         {
