@@ -60,7 +60,7 @@ export const parseLocalDate = (dateString: string): Date | null => {
     return new Date(Number(year), Number(month) - 1, Number(day));
   }
 
-  // Fallback for legacy dd/MM format
+  // Fallback for legacy dd/MM format (e.g. "04/01" for January 4th)
   const legacyMatch = dateString.match(/^(\d{1,2})\/(\d{1,2})$/);
   if (legacyMatch) {
     const [, day, month] = legacyMatch;
