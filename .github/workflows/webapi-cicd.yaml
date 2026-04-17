@@ -71,6 +71,6 @@ jobs:
       - name: Run EF migrations (Apply DB migrations)
         working-directory: apps/api
         env:
-          ConnectionStrings__DatabaseConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}
           ASPNETCORE_ENVIRONMENT: Production
         run: make migrate-all
