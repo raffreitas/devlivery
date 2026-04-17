@@ -74,43 +74,56 @@ public sealed class GetAllExpensesHandler(
         await using var connection = await dbConnectionFactory.OpenConnectionAsync(cancellationToken);
         var expenses = await connection.QueryAsync<GetAllExpensesQueryDto>(sql, parameters);
 
-        return expenses
-            .Select(e =>
+        var mapped = expenses.Select(e =>
+        {
+            var category = e.ParentCategoryId is not null
+                ? new CategoryDto(
+                    e.ParentCategoryId.Value,
+                    e.ParentCategoryName!,
+                    e.ParentCategoryIsActive!.Value,
+                    [
+                        new CategoryDto(e.CategoryId, e.CategoryName, e.CategoryIsActive, [])
+                    ])
+                : new CategoryDto(e.CategoryId, e.CategoryName, e.CategoryIsActive, []);
+
+            var displayStatus = e.Status switch
             {
-                var category = e.ParentCategoryId is not null
-                    ? new CategoryDto(
-                        e.ParentCategoryId.Value,
-                        e.ParentCategoryName!,
-                        e.ParentCategoryIsActive!.Value,
-                        [
-                            new CategoryDto(e.CategoryId, e.CategoryName, e.CategoryIsActive, [])
-                        ])
-                    : new CategoryDto(e.CategoryId, e.CategoryName, e.CategoryIsActive, []);
+                nameof(ExpenseStatus.Paid) => ExpenseDisplayStatus.Paid,
+                nameof(ExpenseStatus.Cancelled) => ExpenseDisplayStatus.Cancelled,
+                nameof(ExpenseStatus.Pending) when e.DueDate < today => ExpenseDisplayStatus.Overdue,
+                nameof(ExpenseStatus.Pending) when e.DueDate == today => ExpenseDisplayStatus.DueToday,
+                _ => ExpenseDisplayStatus.Pending
+            };
 
-                var displayStatus = e.Status switch
-                {
-                    nameof(ExpenseStatus.Paid) => ExpenseDisplayStatus.Paid,
-                    nameof(ExpenseStatus.Cancelled) => ExpenseDisplayStatus.Cancelled,
-                    nameof(ExpenseStatus.Pending) when e.DueDate < today => ExpenseDisplayStatus.Overdue,
-                    nameof(ExpenseStatus.Pending) when e.DueDate == today => ExpenseDisplayStatus.DueToday,
-                    _ => ExpenseDisplayStatus.Pending
-                };
+            return new GetAllExpensesResponse(
+                e.Id,
+                category,
+                e.Supplier,
+                e.Description,
+                e.Amount,
+                e.DueDate,
+                e.PaymentDate,
+                displayStatus,
+                e.CreatedAt,
+                e.UpdatedAt);
+        }).ToList();
 
-                return new GetAllExpensesResponse(
-                    e.Id,
-                    category,
-                    e.Supplier,
-                    e.Description,
-                    e.Amount,
-                    e.DueDate,
-                    e.PaymentDate,
-                    displayStatus,
-                    e.CreatedAt,
-                    e.UpdatedAt);
-            })
+        var nonPaid = mapped
+            .Where(e => e.Status != ExpenseDisplayStatus.Paid && e.Status != ExpenseDisplayStatus.Cancelled)
             .OrderBy(e => StatusSortingValue(e.Status))
             .ThenBy(e => e.DueDate)
-            .ToList();
+            .ThenBy(e => e.CreatedAt);
+
+        var paid = mapped
+            .Where(e => e.Status == ExpenseDisplayStatus.Paid)
+            .OrderByDescending(e => e.PaymentDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.MinValue);
+
+        var cancelled = mapped
+            .Where(e => e.Status == ExpenseDisplayStatus.Cancelled)
+            .OrderBy(e => e.DueDate)
+            .ThenBy(e => e.CreatedAt);
+
+        return nonPaid.Concat(paid).Concat(cancelled).ToList();
     }
 
     private static int StatusSortingValue(ExpenseDisplayStatus status) => status switch

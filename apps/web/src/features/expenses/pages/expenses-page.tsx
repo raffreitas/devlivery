@@ -1,3 +1,4 @@
+import { addMonths, endOfMonth, startOfMonth } from "date-fns";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
@@ -14,8 +15,19 @@ import { ExpensesFiltersContent } from "../components/expenses-filters-content";
 import { useExpenses } from "../hooks/use-expenses";
 import type { Expense, ExpenseFormData, ExpenseStatus } from "../types";
 
+function getDefaultDuePeriod(): DateRange {
+  const today = new Date();
+
+  return {
+    from: startOfMonth(addMonths(today, -1)),
+    to: endOfMonth(addMonths(today, 1)),
+  };
+}
+
 export function ExpensesPage() {
-  const [duePeriod, setDuePeriod] = useState<DateRange | undefined>();
+  const [duePeriod, setDuePeriod] = useState<DateRange | undefined>(() =>
+    getDefaultDuePeriod(),
+  );
   const [categoryId, setCategoryId] = useState<string | undefined>();
   const [status, setStatus] = useState<ExpenseStatus | undefined>();
   const [isModalOpen, setIsModalOpen] = useState(false);
