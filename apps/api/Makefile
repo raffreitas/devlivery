@@ -60,9 +60,7 @@ clean:
 	@if exist TestResults rmdir /s /q TestResults
 
 # --- Database Migrations ---
-migrate-all: 
-	make db-update && make id-update
-	@echo All migrations applied successfully.
+migrate-all: db-update id-update
 
 # --- Database Migrations (App) ---
 
