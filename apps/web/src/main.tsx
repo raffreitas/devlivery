@@ -11,7 +11,6 @@ import "./index.css";
 import { toast } from "sonner";
 import { App } from "./app.tsx";
 import { router } from "./app-routes.tsx";
-import { Toaster } from "./shared/components/ui/sonner.tsx";
 import { UnauthorizedError } from "./shared/services/api";
 import { authEvents } from "./shared/services/auth-events";
 
@@ -55,7 +54,6 @@ createRoot(container).render(
     <QueryClientProvider client={queryClient}>
       <App />
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
-      <Toaster richColors />
     </QueryClientProvider>
   </StrictMode>,
 );
