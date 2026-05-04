@@ -32,6 +32,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Devlivery\Devlivery.csproj" />
+        <ProjectReference Include="..\..\src\Devlivery.BackupJob\Devlivery.BackupJob.csproj" />
     </ItemGroup>
 
 </Project>
