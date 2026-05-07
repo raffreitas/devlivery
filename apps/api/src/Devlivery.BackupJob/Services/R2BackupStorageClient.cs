@@ -30,6 +30,8 @@ public sealed class R2BackupStorageClient(
             Key = objectKey,
             FilePath = filePath,
             ContentType = contentType,
+            UseChunkEncoding = false,
+            DisablePayloadSigning = true,
         };
 
         await amazonS3.PutObjectAsync(request, cancellationToken);
@@ -50,6 +52,8 @@ public sealed class R2BackupStorageClient(
             Key = objectKey,
             ContentBody = JsonSerializer.Serialize(content, JsonSerializerOptions),
             ContentType = "application/json; charset=utf-8",
+            UseChunkEncoding = false,
+            DisablePayloadSigning = true,
         };
 
         await amazonS3.PutObjectAsync(request, cancellationToken);
