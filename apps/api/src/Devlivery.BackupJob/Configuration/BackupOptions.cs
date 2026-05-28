@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Devlivery.BackupJob.Configuration;
 
-public sealed class BackupOptions
+public sealed record BackupOptions
 {
     public const string SectionName = "Backup";
 
