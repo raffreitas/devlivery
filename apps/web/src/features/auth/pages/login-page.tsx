@@ -37,8 +37,17 @@ export function LoginPage() {
     try {
       await login({ email, password });
       navigate("/", { replace: true });
-    } catch {
-      toast.error("Credenciais inválidas");
+    } catch (error) {
+      const limited =
+        error &&
+        typeof error === "object" &&
+        "status" in error &&
+        error.status === 429;
+      toast.error(
+        limited
+          ? "Muitas tentativas. Aguarde antes de tentar novamente."
+          : "Credenciais inválidas",
+      );
     }
   };
 

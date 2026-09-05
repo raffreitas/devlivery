@@ -1,4 +1,3 @@
-import { authService } from "@/features/auth/services/auth-service";
 import { type ApiResponse, api } from "@/shared/services/api";
 import type {
   CashDeposit,
@@ -31,8 +30,6 @@ interface CashSessionDto {
 }
 
 interface CreateCashSessionPayload {
-  attendantId: string;
-  attendantName: string;
   openingAmount: number;
   notes?: string;
 }
@@ -53,8 +50,6 @@ interface CashDepositDto {
 }
 
 interface CreateCashDepositPayload {
-  attendantId: string;
-  attendantName: string;
   amount: number;
   notes?: string;
 }
@@ -129,17 +124,7 @@ export const cashService = {
   },
 
   async create(dto: CreateCashSessionFormData): Promise<CashSession> {
-    const authData = authService.getAuth();
-    if (!authData.user || !authData.token) {
-      throw new Error("Usuário não autenticado");
-    }
-
-    // TODO: In future, get user info in backend from token and remove from payload
-    const { id, name } = authData.user;
-
     const payload: CreateCashSessionPayload = {
-      attendantId: id,
-      attendantName: name,
       openingAmount: dto.openingAmount,
       notes: dto.notes,
     };
@@ -168,16 +153,7 @@ export const cashService = {
     sessionId: string,
     dto: CreateCashDepositFormData,
   ): Promise<CashDeposit> {
-    const authData = authService.getAuth();
-    if (!authData.user || !authData.token) {
-      throw new Error("Usuário não autenticado");
-    }
-
-    const { id, name } = authData.user;
-
     const payload: CreateCashDepositPayload = {
-      attendantId: id,
-      attendantName: name,
       amount: dto.amount,
       notes: dto.notes,
     };
