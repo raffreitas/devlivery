@@ -1,3 +1,4 @@
+using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Enums;
@@ -14,12 +15,14 @@ public sealed class OrderChangeCalculatedEventHandler(
     ILogger<OrderChangeCalculatedEventHandler> logger,
     ICashSessionRepository cashSessionRepository,
     IUnitOfWork unitOfWork,
+    ICurrentUserAccessor currentUserAccessor,
     ITenantAccessor tenantAccessor,
     IOrderRepository orderRepository
 ) : INotificationHandler<OrderChangeCalculatedEvent>
 {
     public async ValueTask Handle(OrderChangeCalculatedEvent notification, CancellationToken cancellationToken)
     {
+        var actor = await currentUserAccessor.ResolveAsync(cancellationToken);
         logger.LogInformation(
             "Processing OrderChangeCalculatedEvent for Order {OrderId} (Change: {Change}, EstablishmentId: {EstablishmentId})",
             notification.OrderId,
@@ -40,7 +43,8 @@ public sealed class OrderChangeCalculatedEventHandler(
             return;
         }
 
-        var hasCashPayment = order.Payments.Any(p => p.PaymentMethod == PaymentMethod.Cash && p.PaymentStatus != PaymentStatus.Cancelled && p.Amount > 0);
+        var hasCashPayment = order.Payments.Any(p =>
+            p.PaymentMethod == PaymentMethod.Cash && p.PaymentStatus != PaymentStatus.Cancelled && p.Amount > 0);
         if (!hasCashPayment)
         {
             logger.LogDebug("Order {OrderId} has no cash payment; skipping change recording.", notification.OrderId);
@@ -60,11 +64,12 @@ public sealed class OrderChangeCalculatedEventHandler(
         // Idempotency: do not create duplicate change entries for the same order
         if (activeSession.HasChangeFor(notification.OrderId))
         {
-            logger.LogInformation("Change entry for Order {OrderId} already exists in session {SessionId}", notification.OrderId, activeSession.Id);
+            logger.LogInformation("Change entry for Order {OrderId} already exists in session {SessionId}",
+                notification.OrderId, activeSession.Id);
             return;
         }
 
-        activeSession.AddChange(notification.OrderId, notification.Change, PaymentMethod.Cash);
+        activeSession.AddChange(notification.OrderId, notification.Change, actor.Id, PaymentMethod.Cash);
 
         await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -1,4 +1,4 @@
-﻿using Devlivery.Common.Errors;
+using Devlivery.Common.Errors;
 using Devlivery.Features.Users.Domain;
 using Devlivery.Infrastructure.Identity.Abstractions;
 using Devlivery.Infrastructure.Identity.Users.Models;
@@ -11,7 +11,8 @@ namespace Devlivery.Infrastructure.Identity.Users.Services;
 
 internal sealed class IdentityService(
     UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager) : IIdentityService
+    SignInManager<ApplicationUser> signInManager,
+    ILogger<IdentityService> logger) : IIdentityService
 {
     public async Task<Result> SignInAsync(string email, string password, CancellationToken cancellationToken = default)
     {
@@ -19,7 +20,9 @@ internal sealed class IdentityService(
         if (user is null)
             return Result.Fail(new UnauthorizedError("Usuário ou senha inválidos."));
 
-        var signInResult = await signInManager.CheckPasswordSignInAsync(user, password, false);
+        var signInResult = await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
+        if (signInResult.IsLockedOut)
+            logger.LogWarning("Login blocked by account lockout. UserId: {UserId}", user.UserId);
         return !signInResult.Succeeded
             ? Result.Fail(new UnauthorizedError("Usuário ou senha inválidos."))
             : Result.Ok();

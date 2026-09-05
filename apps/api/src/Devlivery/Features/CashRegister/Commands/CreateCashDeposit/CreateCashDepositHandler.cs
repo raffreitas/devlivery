@@ -1,3 +1,4 @@
+using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Common.Errors;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
@@ -11,12 +12,14 @@ namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
 public sealed class CreateCashDepositHandler(
     ICashSessionRepository cashSessionRepository,
+    ICurrentUserAccessor currentUserAccessor,
     IUnitOfWork unitOfWork) : ICommandHandler<CreateCashDepositCommand, Result<CreateCashDepositResponse>>
 {
     public async ValueTask<Result<CreateCashDepositResponse>> Handle(
         CreateCashDepositCommand command,
         CancellationToken cancellationToken)
     {
+        var actor = await currentUserAccessor.ResolveAsync(cancellationToken);
         var cashSession = await cashSessionRepository.GetByIdAsync(command.CashSessionId, cancellationToken);
 
         if (cashSession is null)
@@ -30,7 +33,7 @@ public sealed class CreateCashDepositHandler(
                 new ValidationError("Não é possível adicionar aporte a um caixa fechado."));
         }
 
-        var movement = cashSession.AddDeposit(command.Amount, command.AttendantId, command.Notes);
+        var movement = cashSession.AddDeposit(command.Amount, actor.Id, command.Notes);
 
         await cashSessionRepository.UpdateAsync(cashSession, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -38,7 +41,7 @@ public sealed class CreateCashDepositHandler(
         var response = new CreateCashDepositResponse(
             movement.Id,
             movement.Amount,
-            command.AttendantName,
+            actor.Name,
             movement.CreatedAt);
 
         return Result.Ok(response);

@@ -1,4 +1,4 @@
-﻿using Devlivery.Common.Exceptions;
+using Devlivery.Common.Exceptions;
 using Devlivery.Domain.SeedWork;
 using Devlivery.Infrastructure.Http.Models;
 
@@ -27,6 +27,7 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
                         Detail = domainException.Message
                     }, cancellationToken: cancellationToken);
                 return true;
+            case UnauthorizedAccessException:
             case UnauthorizedException:
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 await httpContext.Response.WriteAsJsonAsync(
@@ -34,7 +35,7 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
                     {
                         Title = "Acesso não autorizado",
                         Status = StatusCodes.Status401Unauthorized,
-                        Detail = exception.Message
+                        Detail = "Acesso não autorizado."
                     }, cancellationToken: cancellationToken);
                 return true;
             default:

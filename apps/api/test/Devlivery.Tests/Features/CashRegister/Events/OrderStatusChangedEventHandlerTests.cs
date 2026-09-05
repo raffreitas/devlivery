@@ -47,12 +47,18 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
             ChangedAt: DateTime.UtcNow
         );
 
-        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var actorAccessor = fixture.CreateCurrentUserAccessorMock();
+        var expectedActor = await actorAccessor.ResolveAsync();
+        expectedActor.Id.ShouldNotBe(cashSession.AttendantId);
+
+        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, actorAccessor, tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
 
         // Assert
+        cashSession.Movements.Where(x => x.EntryType == CashSessionEntryType.Refund)
+            .ShouldAllBe(x => x.CreatedBy == expectedActor.Id);
         var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
         reversals.Count.ShouldBe(1);
         reversals[0].Amount.ShouldBe(50m);
@@ -85,7 +91,7 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
         repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .Returns(cashSession);
 
-        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act - Test various non-canceled status transitions
         await handler.Handle(new OrderStatusChangedEvent(
@@ -142,7 +148,7 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
             ChangedAt: DateTime.UtcNow
         );
 
-        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -181,7 +187,7 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
             orderId, tenantAccessor.Tenant.Id, OrderStatus.Delivered, OrderStatus.Canceled, 50m, DateTime.UtcNow
         );
 
-        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None); // First time
@@ -208,7 +214,7 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
             Guid.NewGuid(), tenantAccessor.Tenant.Id, OrderStatus.Delivered, OrderStatus.Canceled, 50m, DateTime.UtcNow
         );
 
-        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -240,7 +246,7 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
             Guid.NewGuid(), tenantAccessor.Tenant.Id, OrderStatus.Delivered, OrderStatus.Canceled, 50m, DateTime.UtcNow
         );
 
-        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -273,7 +279,7 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
             orderId, tenantAccessor.Tenant.Id, OrderStatus.Delivered, OrderStatus.Canceled, 50m, DateTime.UtcNow
         );
 
-        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderStatusChangedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);

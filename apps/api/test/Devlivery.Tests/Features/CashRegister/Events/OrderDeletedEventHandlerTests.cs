@@ -47,12 +47,18 @@ public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fi
             DeletedAt: DateTime.UtcNow
         );
 
-        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var actorAccessor = fixture.CreateCurrentUserAccessorMock();
+        var expectedActor = await actorAccessor.ResolveAsync();
+        expectedActor.Id.ShouldNotBe(cashSession.AttendantId);
+
+        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, actorAccessor, tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
 
         // Assert
+        cashSession.Movements.Where(x => x.EntryType == CashSessionEntryType.Refund)
+            .ShouldAllBe(x => x.CreatedBy == expectedActor.Id);
         var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
         reversals.Count.ShouldBe(1);
         reversals[0].Amount.ShouldBe(50m);
@@ -98,7 +104,7 @@ public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fi
             DeletedAt: DateTime.UtcNow
         );
 
-        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -143,7 +149,7 @@ public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fi
             DeletedAt: DateTime.UtcNow
         );
 
-        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None); // First time
@@ -177,7 +183,7 @@ public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fi
             DeletedAt: DateTime.UtcNow
         );
 
-        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -213,7 +219,7 @@ public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fi
             DeletedAt: DateTime.UtcNow
         );
 
-        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -241,7 +247,7 @@ public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fi
             Guid.NewGuid(), tenantAccessor.Tenant.Id, 50m, OrderStatus.Delivered, DateTime.UtcNow
         );
 
-        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderDeletedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);

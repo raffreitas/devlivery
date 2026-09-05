@@ -1,3 +1,4 @@
+using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Domain.Aggregates.Orders.Enums;
@@ -13,11 +14,13 @@ public sealed class OrderStatusChangedEventHandler(
     ILogger<OrderStatusChangedEventHandler> logger,
     ICashSessionRepository cashSessionRepository,
     IUnitOfWork unitOfWork,
+    ICurrentUserAccessor currentUserAccessor,
     ITenantAccessor tenantAccessor
 ) : INotificationHandler<OrderStatusChangedEvent>
 {
     public async ValueTask Handle(OrderStatusChangedEvent notification, CancellationToken cancellationToken)
     {
+        var actor = await currentUserAccessor.ResolveAsync(cancellationToken);
         if (notification.NewStatus != OrderStatus.Canceled)
             return;
 
@@ -35,7 +38,8 @@ public sealed class OrderStatusChangedEventHandler(
         }
 
         var payments = activeSession.Movements.Where(p =>
-                p.EntryType == CashSessionEntryType.Payment && p.RelatedOrderId == notification.OrderId && p.OrderPaymentId != null)
+                p.EntryType == CashSessionEntryType.Payment && p.RelatedOrderId == notification.OrderId &&
+                p.OrderPaymentId != null)
             .ToList();
 
         if (payments.Count == 0)
@@ -54,6 +58,7 @@ public sealed class OrderStatusChangedEventHandler(
                 amount: Math.Abs(payment.Amount),
                 paymentMethod: payment.PaymentMethod!.Value,
                 reason: "Pedido Cancelado",
+                createdBy: actor.Id,
                 relatedOrderId: notification.OrderId);
         }
 

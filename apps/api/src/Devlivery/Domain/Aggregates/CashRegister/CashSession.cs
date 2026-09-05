@@ -54,8 +54,9 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void AddPayment(Guid orderPaymentId, decimal amount, PaymentMethod paymentMethod, Guid relatedOrderId)
+    public void AddPayment(Guid orderPaymentId, decimal amount, PaymentMethod paymentMethod, Guid relatedOrderId, Guid createdBy)
     {
+        if (createdBy == Guid.Empty) throw new DomainException("O autor é obrigatório.");
         if (Status != CashSessionStatus.Open)
             throw new DomainException("Não é possível adicionar pagamentos a um caixa fechado.");
 
@@ -67,7 +68,7 @@ public sealed class CashSession : Entity
             cashSessionId: Id,
             entryType: CashSessionEntryType.Payment,
             amount: amount >= 0 ? amount : throw new DomainException("O valor do pagamento deve ser positivo."),
-            createdBy: AttendantId,
+            createdBy: createdBy,
             paymentMethod: paymentMethod,
             relatedOrderId: relatedOrderId,
             orderPaymentId: orderPaymentId));
@@ -76,8 +77,9 @@ public sealed class CashSession : Entity
     }
 
     public void AddReversal(Guid originalOrderPaymentId, decimal amount, PaymentMethod paymentMethod, string reason,
-        Guid relatedOrderId)
+        Guid relatedOrderId, Guid createdBy)
     {
+        if (createdBy == Guid.Empty) throw new DomainException("O autor é obrigatório.");
         if (Status != CashSessionStatus.Open)
             throw new DomainException("Não é possível adicionar reversões a um caixa fechado.");
 
@@ -89,7 +91,7 @@ public sealed class CashSession : Entity
             cashSessionId: Id,
             entryType: CashSessionEntryType.Refund,
             amount: amount >= 0 ? amount : throw new DomainException("O valor do pagamento deve ser positivo."),
-            createdBy: AttendantId,
+            createdBy: createdBy,
             paymentMethod: paymentMethod,
             relatedOrderId: relatedOrderId,
             orderPaymentId: originalOrderPaymentId,
@@ -98,8 +100,9 @@ public sealed class CashSession : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void AddChange(Guid relatedOrderId, decimal changeAmount, PaymentMethod paymentMethod = PaymentMethod.Cash)
+    public void AddChange(Guid relatedOrderId, decimal changeAmount, Guid createdBy, PaymentMethod paymentMethod = PaymentMethod.Cash)
     {
+        if (createdBy == Guid.Empty) throw new DomainException("O autor é obrigatório.");
         if (Status != CashSessionStatus.Open)
             throw new DomainException("Não é possível adicionar troco a um caixa fechado.");
 
@@ -116,7 +119,7 @@ public sealed class CashSession : Entity
             amount: changeAmount >= 0
                 ? changeAmount
                 : throw new DomainException("O valor do pagamento deve ser positivo."),
-            createdBy: AttendantId,
+            createdBy: createdBy,
             paymentMethod: paymentMethod,
             relatedOrderId: relatedOrderId,
             orderPaymentId: null));
@@ -126,6 +129,7 @@ public sealed class CashSession : Entity
 
     public CashSessionMovement AddDeposit(decimal amount, Guid createdBy, string? reason)
     {
+        if (createdBy == Guid.Empty) throw new DomainException("O autor é obrigatório.");
         var movement = new CashSessionMovement(
             establishmentId: EstablishmentId,
             cashSessionId: Id,

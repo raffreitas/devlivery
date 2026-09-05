@@ -80,9 +80,11 @@ public static class Startup
         app.UseDatabaseFeature();
 
         app.UseExceptionHandler();
+        app.UseRouting();
 
         // CORS
         app.UseCorsConfiguration();
+        app.UseRateLimiter();
 
         // Security
         if (!app.Environment.IsDevelopment())

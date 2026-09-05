@@ -11,13 +11,13 @@ public sealed record GetCashSessionDepositsResponse(
     DateTime DepositedAt,
     string? Notes)
 {
-    public static GetCashSessionDepositsResponse FromDomain(CashSessionMovement m)
+    public static GetCashSessionDepositsResponse FromDomain(CashSessionMovement m, string authorName)
     {
         return new GetCashSessionDepositsResponse(
             m.Id,
             m.CashSessionId,
             m.CreatedBy,
-            string.Empty, // TODO: Buscar o nome do atendente
+            authorName,
             m.Amount,
             m.CreatedAt,
             m.Reason);

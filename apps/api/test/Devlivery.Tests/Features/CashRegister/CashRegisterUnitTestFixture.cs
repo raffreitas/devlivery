@@ -1,3 +1,4 @@
+using Devlivery.Infrastructure.Identity.Authentication;
 using Bogus;
 
 using Devlivery.Domain.Aggregates.CashRegister;
@@ -16,6 +17,13 @@ namespace Devlivery.Tests.Features.CashRegister;
 /// </summary>
 public sealed class CashRegisterUnitTestFixture : IDisposable
 {
+    public ICurrentUserAccessor CreateCurrentUserAccessorMock()
+    {
+        var mock = Substitute.For<ICurrentUserAccessor>();
+        mock.ResolveAsync(Arg.Any<CancellationToken>()).Returns(new ResolvedCurrentUser(_defaultAttendantId, "João Silva"));
+        return mock;
+    }
+
     public Faker Faker { get; } = new("pt_BR");
 
     private readonly Guid _defaultTenantId = Guid.NewGuid();

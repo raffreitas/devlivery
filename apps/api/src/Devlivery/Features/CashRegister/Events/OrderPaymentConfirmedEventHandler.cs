@@ -1,3 +1,4 @@
+using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Infrastructure.Persistence;
@@ -16,11 +17,13 @@ public sealed class OrderPaymentConfirmedEventHandler(
     ILogger<OrderPaymentConfirmedEventHandler> logger,
     ICashSessionRepository cashSessionRepository,
     IUnitOfWork unitOfWork,
+    ICurrentUserAccessor currentUserAccessor,
     ITenantAccessor tenantAccessor
 ) : INotificationHandler<OrderPaymentConfirmedEvent>
 {
     public async ValueTask Handle(OrderPaymentConfirmedEvent notification, CancellationToken cancellationToken)
     {
+        var actor = await currentUserAccessor.ResolveAsync(cancellationToken);
         logger.LogInformation(
             "Processing OrderPaymentConfirmedEvent for Order {OrderId}, Payment {PaymentId} (Amount: {Amount}, Method: {PaymentMethod}, EstablishmentId: {EstablishmentId})",
             notification.OrderId,
@@ -44,6 +47,7 @@ public sealed class OrderPaymentConfirmedEventHandler(
             orderPaymentId: notification.PaymentId,
             amount: notification.Amount,
             paymentMethod: notification.PaymentMethod,
+            createdBy: actor.Id,
             relatedOrderId: notification.OrderId
         );
 
