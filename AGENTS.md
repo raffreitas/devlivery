@@ -1,64 +1,51 @@
-# Project: Devlivery
+# Repository Guidelines
 
-## Project Overview
+## Project Structure & Module Organization
 
-This is a monorepo project for a delivery platform named **Devlivery**. It consists of two main applications: a backend API and a frontend web application.
+Devlivery is a delivery-management monorepo:
 
-- **Backend API (`apps/api`)**: A .NET Core application built with a focus on clean architecture, vertical slices, and Domain-Driven Design (DDD). It uses ASP.NET Core Minimal APIs, Entity Framework Core, Dapper, and PostgreSQL. It supports multi-tenancy and uses JWT for authentication.
+- `apps/api/src/Devlivery/`: .NET 10 API. Keep vertical slices in `Features`, business rules in `Domain`, adapters in `Infrastructure`, and shared plumbing in `Common`.
+- `apps/api/src/Devlivery.BackupJob/`: PostgreSQL backup worker.
+- `apps/api/test/Devlivery.Tests/`: backend tests, organized by feature and behavior.
+- `apps/web/src/features/`: React/TypeScript features; `src/shared/` contains reusable components, hooks, and services. Static assets belong in `apps/web/public/`.
+- `docs/`: architecture, configuration, development, and deployment guides.
 
-- **Frontend Web (`apps/web`)**: A React application built with TypeScript and Vite. It uses TanStack Query for state management, React Hook Form for forms, and Tailwind CSS for styling. It is modularized by features and includes authentication, a dashboard, and management for orders, products, and cash flow.
+## Build, Test, and Development Commands
 
-## Building and Running
+Use .NET 10 SDK, Node.js 24, pnpm 10, and Docker. From `apps/api`:
 
-### Prerequisites
-
-- Node.js 18+
-- .NET 8+ SDK
-- Docker & Docker Compose (recommended)
-- PostgreSQL 15+ (or via Docker)
-
-### Local Setup
-
-#### Backend API
-
-To run the backend API, follow these steps:
-
-```bash
-cd apps/api
-dotnet restore
-dotnet build
-dotnet ef database update
+```powershell
+docker compose up -d postgres
+dotnet tool restore
+dotnet restore Devlivery.slnx
+dotnet build Devlivery.slnx --no-restore
 dotnet run --project src/Devlivery
 ```
 
-#### Frontend Web
+These start PostgreSQL, restore tooling/dependencies, build, and launch the API. Before first launch, apply migrations with `dotnet ef database update --project src/Devlivery --context <Context>` for both `ApplicationDbContext` and `ApplicationIdentityDbContext`.
 
-To run the frontend web application, follow these steps:
+From `apps/web`, run `pnpm install --frozen-lockfile`, then `pnpm dev`. Use `pnpm lint` for Biome checks, `pnpm format` to rewrite formatting, and `pnpm build` for TypeScript validation and production output.
 
-```bash
-cd apps/web
-npm install
-npm run dev
+## Coding Style & Naming Conventions
+
+Follow each application's `.editorconfig`. C# uses four spaces, PascalCase types/methods, `I`-prefixed interfaces, and file-scoped namespaces. Keep namespaces aligned with folders. Web code uses two spaces, double quotes, and Biome import organization; follow existing kebab-case filenames such as `use-date-range-filter.ts` and PascalCase React component names.
+
+## Testing Guidelines
+
+Backend tests use xUnit, Shouldly, NSubstitute, and PostgreSQL Testcontainers; keep Docker running for container-backed tests. Mirror feature folders, name classes `*Tests`, and use descriptive names such as `Handle_Should_Create_Product_With_Correct_Properties` with Arrange/Act/Assert sections.
+
+From the repository root, run:
+
+```powershell
+dotnet test apps/api/Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
 ```
 
-### With Docker Compose
+Add regression tests for changed behavior. No numeric coverage threshold is configured in CI. The web package has no test script; run lint/build and manually verify affected flows.
 
-To run both applications using Docker Compose, use the following command from the root directory:
+## Commit & Pull Request Guidelines
 
-```bash
-docker-compose up -d
-```
+Follow recent scoped commits: `fix(api): ...`, `feat(expenses): ...`, or `chore(ci): ...`. Keep changes focused. Describe behavior, validation, and related issues; include screenshots for UI changes. PRs targeting `main` must contain exactly one release marker—`[Patch]`, `[Minor]`, or `[Major]`—across the title and body.
 
-## Development Conventions
+## Security & Configuration
 
-### Backend (API)
-
-- **Architecture**: The API follows Vertical Slice Architecture, with features organized in `src/Devlivery/Features`.
-- **Testing**: Tests are located in `test/Devlivery.Tests`. To run the tests, use the command `dotnet test test/Devlivery.Tests`.
-- **Commits**: The commit history from the original `devlivery-webapi` repository is preserved.
-
-### Frontend (Web)
-
-- **Structure**: The project is organized by features under the `src/features` directory. Shared components and utilities are in `src/shared`.
-- **Linting and Formatting**: The project uses Biome for linting and formatting. Use `npm run lint` and `npm run format` to check and format the code.
-- **Commits**: The commit history from the original `devlivery-webapp` repository is preserved.
+Keep credentials out of commits; use environment variables or .NET user secrets. Preserve tenant isolation and authenticated operator attribution. Consult `docs/configuration.md` before changing configuration.
