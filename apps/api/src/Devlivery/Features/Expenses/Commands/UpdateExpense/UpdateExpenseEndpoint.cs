@@ -24,7 +24,8 @@ public static class UpdateExpenseEndpoint
             request.Amount,
             request.DueDate,
             request.Supplier,
-            request.Description
+            request.Description,
+            request.PaymentDate
         );
 
         var result = await sender.Send(command, ct);
@@ -38,4 +39,5 @@ public sealed record UpdateExpenseRequest(
     decimal? Amount,
     DateOnly? DueDate,
     string? Supplier,
-    string? Description);
+    string? Description,
+    DateOnly? PaymentDate = null);

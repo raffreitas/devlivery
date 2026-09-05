@@ -11,6 +11,17 @@ public sealed class UpdateExpenseValidatorTests
     private readonly UpdateExpenseCommandValidator _validator = new();
 
     [Fact]
+    public void Validate_Should_Fail_When_PaymentDate_Is_Default()
+    {
+        var command = new UpdateExpenseCommand(Guid.NewGuid(), null, null, null, null, null,
+            DateOnly.MinValue);
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.PaymentDate!.Value);
+    }
+
+    [Fact]
     public void Validate_Should_Pass_When_Command_Is_Valid()
     {
         // Arrange
@@ -20,7 +31,8 @@ public sealed class UpdateExpenseValidatorTests
             Amount: 200.00m,
             DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)),
             Supplier: "Fornecedor Atualizado",
-            Description: "Descrição Atualizada"
+            Description: "Descrição Atualizada",
+            PaymentDate: new DateOnly(2026, 9, 2)
         );
 
         // Act

@@ -113,17 +113,18 @@ public sealed class UpdateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
-    public async Task Handle_Should_Update_Expense_With_Correct_Properties()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Handle_Should_Update_Expense_With_Correct_Properties(bool isPaid)
     {
         // Arrange
         var expenseRepository = fixture.CreateExpenseRepositoryMock();
         var categoryRepository = fixture.CreateCategoryRepositoryMock();
         var unitOfWork = fixture.CreateUnitOfWorkMock();
 
-        var expense =
-            fixture.CreateExpense(status: ExpenseStatus
-                .Pending);
+        DateOnly? paymentDate = isPaid ? DateOnly.FromDateTime(DateTime.UtcNow) : null;
+        var expense = fixture.CreateExpense(paymentDate: paymentDate);
         expenseRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(expense);
 
@@ -137,6 +138,7 @@ public sealed class UpdateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
         var newDueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14));
         const string newSupplier = "Novo Fornecedor";
         const string newDescription = "Nova Descrição";
+        DateOnly? correctedPaymentDate = isPaid ? paymentDate!.Value.AddDays(-1) : null;
 
         var command = new UpdateExpenseCommand(
             ExpenseId: expense.Id,
@@ -144,7 +146,8 @@ public sealed class UpdateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
             Amount: newAmount,
             DueDate: newDueDate,
             Supplier: newSupplier,
-            Description: newDescription
+            Description: newDescription,
+            PaymentDate: correctedPaymentDate
         );
 
         // Act
@@ -157,7 +160,10 @@ public sealed class UpdateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
         expense.Supplier.ShouldBe(newSupplier);
         expense.Description.ShouldBe(newDescription);
         expense.CategoryId.ShouldBe(newCategory.Id);
+        expense.Status.ShouldBe(isPaid ? ExpenseStatus.Paid : ExpenseStatus.Pending);
+        expense.PaymentDate.ShouldBe(correctedPaymentDate);
 
         await expenseRepository.Received(1).UpdateAsync(expense, Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

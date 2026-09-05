@@ -243,13 +243,66 @@ public sealed class ExpenseTests(ExpensesUnitTestFixture fixture)
     }
 
     [Fact]
-    public void Update_Should_Throw_When_Expense_Is_Paid()
+    public void Update_Should_Update_When_Expense_Is_Paid()
     {
         // Arrange
-        var expense = fixture.CreateExpense(paymentDate: DateOnly.FromDateTime(DateTime.UtcNow));
+        var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var expense = fixture.CreateExpense(amount: 100.00m, paymentDate: paymentDate);
 
-        // Act & Assert
-        Should.Throw<DomainException>(() => expense.Update(categoryId: null, amount: 200.00m));
+        // Act
+        expense.Update(categoryId: null, amount: 200.00m);
+
+        // Assert
+        expense.Amount.ShouldBe(200.00m);
+        expense.Status.ShouldBe(ExpenseStatus.Paid);
+        expense.PaymentDate.ShouldBe(paymentDate);
+    }
+
+    [Fact]
+    public void Update_Should_Correct_PaymentDate_When_Paid()
+    {
+        // Arrange
+        var expense = fixture.CreateExpense(paymentDate: new DateOnly(2026, 9, 1));
+        var correctedDate = new DateOnly(2026, 9, 2);
+
+        // Act
+        expense.Update(paymentDate: correctedDate);
+
+        // Assert
+        expense.PaymentDate.ShouldBe(correctedDate);
+        expense.Status.ShouldBe(ExpenseStatus.Paid);
+    }
+
+    [Theory]
+    [InlineData(ExpenseStatus.Pending)]
+    [InlineData(ExpenseStatus.Cancelled)]
+    public void Update_Should_Reject_PaymentDate_When_Not_Paid(ExpenseStatus status)
+    {
+        // Arrange
+        var expense = fixture.CreateExpense(amount: 100m, status: status);
+
+        // Act
+        Should.Throw<DomainException>(() =>
+            expense.Update(amount: 200m, paymentDate: new DateOnly(2026, 9, 2)));
+
+        // Assert
+        expense.Amount.ShouldBe(100m);
+        expense.PaymentDate.ShouldBeNull();
+        expense.Status.ShouldBe(status);
+    }
+
+    [Fact]
+    public void Update_Should_Reject_Default_PaymentDate()
+    {
+        // Arrange
+        var originalDate = new DateOnly(2026, 9, 1);
+        var expense = fixture.CreateExpense(paymentDate: originalDate);
+
+        // Act
+        Should.Throw<DomainException>(() => expense.Update(paymentDate: DateOnly.MinValue));
+
+        // Assert
+        expense.PaymentDate.ShouldBe(originalDate);
     }
 
     [Fact]

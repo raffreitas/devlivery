@@ -57,8 +57,9 @@ export function ExpensesPage() {
     } catch (error) {
       // Tratamento de erros específicos do backend
       const errorMessage =
-        error instanceof Error && error.message.includes("Paga ou Cancelada")
-          ? "Não é permitido alterar uma despesa paga ou cancelada. Estorne o pagamento primeiro."
+        error instanceof Error &&
+        error.message.includes("Só é possível atualizar uma despesa")
+          ? "Não é permitido editar uma despesa cancelada."
           : "Erro ao salvar despesa";
       toast.error(errorMessage);
       console.error(error);
@@ -66,13 +67,9 @@ export function ExpensesPage() {
   };
 
   const handleEdit = (expense: Expense) => {
-    // Validação de regra de negócio: não permite editar despesas pagas ou canceladas
-    if (expense.status === "Paid" || expense.status === "Cancelled") {
-      toast.error(
-        expense.status === "Paid"
-          ? "Não é permitido editar uma despesa paga. Estorne o pagamento primeiro."
-          : "Não é permitido editar uma despesa cancelada.",
-      );
+    // Despesas canceladas não podem ser editadas.
+    if (expense.status === "Cancelled") {
+      toast.error("Não é permitido editar uma despesa cancelada.");
       return;
     }
     setEditingExpense(expense);

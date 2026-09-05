@@ -186,10 +186,7 @@ export function ExpenseList({
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() => onEdit(expense)}
-                          disabled={
-                            expense.status === ExpenseStatus.PAID ||
-                            expense.status === ExpenseStatus.CANCELLED
-                          }
+                          disabled={expense.status === ExpenseStatus.CANCELLED}
                         >
                           <Pencil className="mr-2 h-4 w-4" />
                           Editar
@@ -332,7 +329,6 @@ export function ExpenseList({
                             <DropdownMenuItem
                               onClick={() => onEdit(expense)}
                               disabled={
-                                expense.status === ExpenseStatus.PAID ||
                                 expense.status === ExpenseStatus.CANCELLED
                               }
                             >
