@@ -12,7 +12,8 @@ public sealed record UpdateExpenseCommand(
     decimal? Amount,
     DateOnly? DueDate,
     string? Supplier,
-    string? Description) : ICommand<Result>;
+    string? Description,
+    DateOnly? PaymentDate = null) : ICommand<Result>;
 
 public sealed class UpdateExpenseCommandValidator : AbstractValidator<UpdateExpenseCommand>
 {
@@ -20,6 +21,12 @@ public sealed class UpdateExpenseCommandValidator : AbstractValidator<UpdateExpe
     {
         RuleFor(x => x.ExpenseId)
             .NotEmpty().WithMessage("ExpenseId é obrigatório.");
+
+        When(x => x.PaymentDate.HasValue, () =>
+        {
+            RuleFor(x => x.PaymentDate!.Value)
+                .NotEmpty().WithMessage("PaymentDate deve ser uma data válida.");
+        });
 
         When(x => x.Amount.HasValue, () =>
         {

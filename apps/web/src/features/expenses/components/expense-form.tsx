@@ -86,6 +86,10 @@ export function ExpenseForm({
   }, [selectedCategoryId, subcategories, form, loadingCategories]);
 
   const handleSubmit = async (data: ExpenseFormData) => {
+    if (expense?.status === "Paid" && !data.paymentDate) {
+      form.setError("paymentDate", { message: "Informe a data de pagamento." });
+      return;
+    }
     try {
       await onSubmit(data);
       if (!expense) {
@@ -229,9 +233,21 @@ export function ExpenseForm({
             name="paymentDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Data de Pagamento (opcional)</FormLabel>
+                <FormLabel>
+                  Data de Pagamento{" "}
+                  {expense?.status === "Paid"
+                    ? "(obrigatória)"
+                    : expense
+                      ? "(somente leitura)"
+                      : "(opcional)"}
+                </FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} value={field.value ?? ""} />
+                  <Input
+                    type="date"
+                    {...field}
+                    value={field.value ?? ""}
+                    readOnly={!!expense && expense.status !== "Paid"}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

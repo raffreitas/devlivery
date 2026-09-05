@@ -133,9 +133,10 @@ export const expenseService = {
   update: async (id: string, data: Partial<ExpenseFormData>): Promise<void> => {
     const payload = {
       expenseId: id,
-      categoryId: data.categoryId || undefined,
+      subcategoryId: data.subcategoryId || data.categoryId || undefined,
       amount: data.amount || undefined,
       dueDate: data.dueDate || undefined,
+      paymentDate: data.paymentDate || undefined,
       supplier: data.supplier || null,
       description: data.description || null,
     };

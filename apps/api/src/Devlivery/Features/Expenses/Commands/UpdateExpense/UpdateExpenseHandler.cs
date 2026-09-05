@@ -38,7 +38,8 @@ public sealed class UpdateExpenseHandler(
             amount: command.Amount,
             dueDate: command.DueDate,
             supplier: command.Supplier,
-            description: command.Description
+            description: command.Description,
+            paymentDate: command.PaymentDate
         );
 
         await expenseRepository.UpdateAsync(expense, cancellationToken);

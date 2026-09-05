@@ -58,14 +58,21 @@ public sealed class Expense : Entity
         decimal? amount = null,
         DateOnly? dueDate = null,
         string? supplier = null,
-        string? description = null)
+        string? description = null,
+        DateOnly? paymentDate = null)
     {
-        if (Status != ExpenseStatus.Pending)
+        if (Status is not (ExpenseStatus.Pending or ExpenseStatus.Paid))
         {
-            throw new DomainException(
-                "Não é permitido alterar uma despesa Paga ou Cancelada. Estorne o pagamento primeiro.");
+            throw new DomainException("Só é possível atualizar uma despesa Pendente ou já Paga");
         }
 
+        if (paymentDate.HasValue && Status != ExpenseStatus.Paid)
+            throw new DomainException("Só é possível corrigir a data de pagamento de uma despesa paga.");
+
+        if (paymentDate == DateOnly.MinValue)
+            throw new DomainException("A data de pagamento deve ser válida.");
+
+        PaymentDate = paymentDate ?? PaymentDate;
         Description = description ?? Description;
         Amount = amount ?? Amount;
         DueDate = dueDate ?? DueDate;
