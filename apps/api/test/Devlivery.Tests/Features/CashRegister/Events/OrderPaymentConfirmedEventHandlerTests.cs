@@ -42,12 +42,18 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
             OrderTotal: 50m
         );
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var actorAccessor = fixture.CreateCurrentUserAccessorMock();
+        var expectedActor = await actorAccessor.ResolveAsync();
+        expectedActor.Id.ShouldNotBe(cashSession.AttendantId);
+
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, actorAccessor, tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
 
         // Assert
+        cashSession.Movements.Where(x => x.EntryType == CashSessionEntryType.Payment)
+            .ShouldAllBe(x => x.CreatedBy == expectedActor.Id);
         cashSession.Movements.Count.ShouldBe(1);
         cashSession.Movements.First().EntryType.ShouldBe(CashSessionEntryType.Payment);
         cashSession.Movements.First().Amount.ShouldBe(50m);
@@ -87,7 +93,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
             OrderTotal: 75m
         );
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None); // First time
@@ -118,7 +124,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .Returns(cashSession);
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         var events = new[]
         {
@@ -165,7 +171,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
             OrderTotal: 50m
         );
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -192,7 +198,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .Returns(cashSession);
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(new OrderPaymentConfirmedEvent(
@@ -228,7 +234,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
             Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Cash, 50m, 50m
         );
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -258,7 +264,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
             Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Cash, 50m, 50m
         );
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);

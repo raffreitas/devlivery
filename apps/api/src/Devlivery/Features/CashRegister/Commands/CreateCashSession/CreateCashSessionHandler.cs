@@ -1,3 +1,4 @@
+using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Common.Errors;
 using Devlivery.Domain.Aggregates.CashRegister;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
@@ -12,6 +13,7 @@ namespace Devlivery.Features.CashRegister.Commands.CreateCashSession;
 
 public sealed class CreateCashSessionHandler(
     ICashSessionRepository cashSessionRepository,
+    ICurrentUserAccessor currentUserAccessor,
     IUnitOfWork unitOfWork,
     ITenantAccessor tenantAccessor) : ICommandHandler<CreateCashSessionCommand, Result<CreateCashSessionResponse>>
 {
@@ -19,6 +21,7 @@ public sealed class CreateCashSessionHandler(
         CreateCashSessionCommand command,
         CancellationToken cancellationToken)
     {
+        var actor = await currentUserAccessor.ResolveAsync(cancellationToken);
         var tenantId = tenantAccessor.Tenant.Id;
 
         var existingOpen = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
@@ -31,8 +34,8 @@ public sealed class CreateCashSessionHandler(
 
         var cashSession = new CashSession(
             establishmentId: tenantId,
-            attendantId: command.AttendantId,
-            attendantName: command.AttendantName,
+            attendantId: actor.Id,
+            attendantName: actor.Name,
             openingAmount: command.OpeningAmount,
             notes: command.Notes);
 

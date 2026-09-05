@@ -1,3 +1,4 @@
+using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
@@ -12,11 +13,13 @@ public sealed class OrderDeletedEventHandler(
     ILogger<OrderDeletedEventHandler> logger,
     ICashSessionRepository cashSessionRepository,
     IUnitOfWork unitOfWork,
+    ICurrentUserAccessor currentUserAccessor,
     ITenantAccessor tenantAccessor
 ) : INotificationHandler<OrderDeletedEvent>
 {
     public async ValueTask Handle(OrderDeletedEvent notification, CancellationToken cancellationToken)
     {
+        var actor = await currentUserAccessor.ResolveAsync(cancellationToken);
         logger.LogInformation(
             "Processing OrderDeletedEvent for Order {OrderId} (Total: {Total}, EstablishmentId: {EstablishmentId})",
             notification.OrderId,
@@ -56,6 +59,7 @@ public sealed class OrderDeletedEventHandler(
                 amount: Math.Abs(payment.Amount),
                 paymentMethod: payment.PaymentMethod!.Value,
                 reason: "Pedido Excluído",
+                createdBy: actor.Id,
                 relatedOrderId: notification.OrderId);
         }
 

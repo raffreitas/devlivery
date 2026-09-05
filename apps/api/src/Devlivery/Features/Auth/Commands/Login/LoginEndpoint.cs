@@ -13,6 +13,8 @@ public static class LoginEndpoint
             .Produces<ApiResource<LoginResponse>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status401Unauthorized)
+            .RequireRateLimiting("login")
+            .Produces<ApiProblemDetails>(StatusCodes.Status429TooManyRequests)
             .AllowAnonymous();
     }
 

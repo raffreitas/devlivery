@@ -51,7 +51,7 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : ICla
         const PaymentMethod paymentMethod = PaymentMethod.Cash;
 
         // Act
-        cashSession.AddPayment(Guid.NewGuid(), orderTotal, paymentMethod, Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), orderTotal, paymentMethod, Guid.NewGuid(), createdBy: Guid.NewGuid());
 
         // Assert
         cashSession.TotalRevenue.ShouldBe(50.00m);
@@ -66,9 +66,9 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : ICla
         var cashSession = fixture.CreateCashSession();
 
         // Act
-        cashSession.AddPayment(Guid.NewGuid(), 25.00m, PaymentMethod.Cash, Guid.NewGuid());
-        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.CreditCard, Guid.NewGuid());
-        cashSession.AddPayment(Guid.NewGuid(), 15.00m, PaymentMethod.Cash, Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 25.00m, PaymentMethod.Cash, Guid.NewGuid(), createdBy: Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.CreditCard, Guid.NewGuid(), createdBy: Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 15.00m, PaymentMethod.Cash, Guid.NewGuid(), createdBy: Guid.NewGuid());
 
         // Assert: totals and payments ledger reflect the operations
         cashSession.TotalRevenue.ShouldBe(70.00m);
@@ -86,8 +86,8 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : ICla
         var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
 
         // Act
-        cashSession.AddPayment(Guid.NewGuid(), 50.00m, PaymentMethod.Cash, Guid.NewGuid());
-        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.Cash, Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 50.00m, PaymentMethod.Cash, Guid.NewGuid(), createdBy: Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.Cash, Guid.NewGuid(), createdBy: Guid.NewGuid());
 
         // Assert
         cashSession.ExpectedCashAmount.ShouldBe(180.00m); // 100 + 50 + 30
@@ -100,8 +100,8 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : ICla
         var cashSession = fixture.CreateCashSession(openingAmount: 100.00m);
 
         // Act
-        cashSession.AddPayment(Guid.NewGuid(), 50.00m, PaymentMethod.CreditCard, Guid.NewGuid());
-        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.Pix, Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 50.00m, PaymentMethod.CreditCard, Guid.NewGuid(), createdBy: Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.Pix, Guid.NewGuid(), createdBy: Guid.NewGuid());
 
         // Assert
         cashSession.ExpectedCashAmount.ShouldBe(100.00m); // Não muda
@@ -115,8 +115,8 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : ICla
         var paymentId = Guid.NewGuid();
 
         // Act
-        cashSession.AddPayment(paymentId, 50.00m, PaymentMethod.Cash, Guid.NewGuid());
-        cashSession.AddPayment(paymentId, 50.00m, PaymentMethod.Cash, Guid.NewGuid()); // Duplicate
+        cashSession.AddPayment(paymentId, 50.00m, PaymentMethod.Cash, Guid.NewGuid(), createdBy: Guid.NewGuid());
+        cashSession.AddPayment(paymentId, 50.00m, PaymentMethod.Cash, Guid.NewGuid(), createdBy: Guid.NewGuid()); // Duplicate
 
         // Assert
         cashSession.TotalRevenue.ShouldBe(50.00m);
@@ -161,7 +161,7 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : ICla
 
         // Act & Assert
         Should.Throw<DomainException>(() =>
-            cashSession.AddPayment(Guid.NewGuid(), -10.00m, PaymentMethod.Cash, Guid.NewGuid()));
+            cashSession.AddPayment(Guid.NewGuid(), -10.00m, PaymentMethod.Cash, Guid.NewGuid(), createdBy: Guid.NewGuid()));
     }
 
     [Fact]
@@ -173,10 +173,10 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : ICla
         var relatedOrderId = Guid.NewGuid();
 
         // A payment first
-        cashSession.AddPayment(orderPaymentId, 50.00m, PaymentMethod.Cash, relatedOrderId);
+        cashSession.AddPayment(orderPaymentId, 50.00m, PaymentMethod.Cash, relatedOrderId, createdBy: Guid.NewGuid());
 
         // Act: add reversal
-        cashSession.AddReversal(orderPaymentId, 50.00m, PaymentMethod.Cash, "Customer refund", relatedOrderId);
+        cashSession.AddReversal(orderPaymentId, 50.00m, PaymentMethod.Cash, "Customer refund", relatedOrderId, createdBy: Guid.NewGuid());
 
         // Assert
         cashSession.TotalRevenue.ShouldBe(0.00m);
@@ -191,8 +191,8 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : ICla
         var originalPaymentId = Guid.NewGuid();
 
         // Act
-        cashSession.AddReversal(originalPaymentId, 30.00m, PaymentMethod.Cash, "reason", Guid.NewGuid());
-        cashSession.AddReversal(originalPaymentId, 30.00m, PaymentMethod.Cash, "reason", Guid.NewGuid()); // duplicate
+        cashSession.AddReversal(originalPaymentId, 30.00m, PaymentMethod.Cash, "reason", Guid.NewGuid(), createdBy: Guid.NewGuid());
+        cashSession.AddReversal(originalPaymentId, 30.00m, PaymentMethod.Cash, "reason", Guid.NewGuid(), createdBy: Guid.NewGuid()); // duplicate
 
         // Assert
         cashSession.Movements.Count(m => m.EntryType == CashSessionEntryType.Refund).ShouldBe(1);
@@ -207,8 +207,8 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : ICla
         var before = cashSession.Movements.Count;
 
         // Act
-        cashSession.AddChange(relatedOrderId, 0m);
-        cashSession.AddChange(relatedOrderId, -5m);
+        cashSession.AddChange(relatedOrderId, 0m, createdBy: Guid.NewGuid());
+        cashSession.AddChange(relatedOrderId, -5m, createdBy: Guid.NewGuid());
 
         // Assert
         cashSession.Movements.Count.ShouldBe(before);
@@ -222,15 +222,15 @@ public sealed class CashSessionTests(CashRegisterUnitTestFixture fixture) : ICla
         var order1 = Guid.NewGuid();
         var order2 = Guid.NewGuid();
 
-        cashSession.AddPayment(Guid.NewGuid(), 40.00m, PaymentMethod.Cash, order1);
-        cashSession.AddPayment(Guid.NewGuid(), 20.00m, PaymentMethod.Cash, order2);
-        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.CreditCard, Guid.NewGuid()); // non-cash
+        cashSession.AddPayment(Guid.NewGuid(), 40.00m, PaymentMethod.Cash, order1, createdBy: Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 20.00m, PaymentMethod.Cash, order2, createdBy: Guid.NewGuid());
+        cashSession.AddPayment(Guid.NewGuid(), 30.00m, PaymentMethod.CreditCard, Guid.NewGuid(), createdBy: Guid.NewGuid()); // non-cash
 
         var paidId = Guid.NewGuid();
-        cashSession.AddPayment(paidId, 10.00m, PaymentMethod.Cash, Guid.NewGuid());
-        cashSession.AddReversal(paidId, 5.00m, PaymentMethod.Cash, "partial refund", Guid.NewGuid());
+        cashSession.AddPayment(paidId, 10.00m, PaymentMethod.Cash, Guid.NewGuid(), createdBy: Guid.NewGuid());
+        cashSession.AddReversal(paidId, 5.00m, PaymentMethod.Cash, "partial refund", Guid.NewGuid(), createdBy: Guid.NewGuid());
 
-        cashSession.AddChange(order1, 2.00m);
+        cashSession.AddChange(order1, 2.00m, createdBy: Guid.NewGuid());
 
         // Act
         var totalCashPayments = cashSession.TotalCashPayments();

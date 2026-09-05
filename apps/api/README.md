@@ -1,119 +1,69 @@
-# Devlivery
+# Devlivery API
 
-API Web para gestão de features relacionadas a entregas — monólito modular organizado por features (vertical slice).
+API HTTP da plataforma Devlivery, construída em .NET 10 e organizada por vertical slices.
 
-**Visão geral**
+## Responsabilidades
 
-- Projeto ASP.NET Core Web API (solução: Devlivery.slnx).
-- Organização por features em `src/Devlivery/Features` com testes em `test/Devlivery.Tests`.
+- autenticação JWT e isolamento por tenant;
+- produtos, pedidos, despesas e sessões de caixa;
+- consultas de dashboard;
+- persistência com EF Core e Dapper em PostgreSQL;
+- health checks, OpenAPI em desenvolvimento e telemetria OpenTelemetry;
+- job independente de backup do PostgreSQL para Cloudflare R2.
 
-**Principais tecnologias**
+## Estrutura
 
-- .NET 10 / ASP.NET Core
-- Entity Framework Core, Dapper (persistência)
-- Minimal APIs / Features por responsabilidade
-- Docker / docker-compose para ambiente local
-
-**Pré-requisitos**
-
-- .NET SDK 10.0
-- Docker (opcional para execução em containers)
-
-**Como rodar localmente**
-
-1. Restaurar dependências e compilar:
-
-```bash
-dotnet restore
-dotnet build
+```text
+apps/api/
+├── src/Devlivery/
+│   ├── Domain/                  # agregados, entidades e regras de domínio
+│   ├── Features/                # endpoints, comandos, consultas e handlers
+│   └── Infrastructure/          # identidade, persistência, tenancy e HTTP
+├── src/Devlivery.BackupJob/     # processo executável de backup
+├── test/Devlivery.Tests/        # testes unitários e HTTP
+├── compose.yaml                 # PostgreSQL e dashboard Aspire locais
+└── Devlivery.slnx
 ```
 
-2. Executar a API (diretamente):
+Os endpoints são agrupados em `/api/auth`, `/api/products`, `/api/orders`, `/api/cash-register`, `/api/expenses` e `/api/dashboard`. Exceto login e health checks, a API exige um JWT válido.
 
-```bash
+## Executar
+
+Pré-requisitos: .NET 10 SDK, Docker e certificado HTTPS de desenvolvimento configurado.
+
+```powershell
+docker compose up -d postgres
+dotnet tool restore
+dotnet restore Devlivery.slnx
+dotnet ef database update --project src/Devlivery --context ApplicationDbContext
+dotnet ef database update --project src/Devlivery --context ApplicationIdentityDbContext
 dotnet run --project src/Devlivery
 ```
 
-3. Ou via Docker (docker-compose):
+Em desenvolvimento, a inicialização também aplica migrações pendentes e cria os dados locais quando o banco está vazio. A conta seed é apenas para desenvolvimento e deve ser substituída em qualquer ambiente compartilhado.
 
-```bash
-docker compose up --build -d
+Endereços locais:
+
+- API HTTPS: `https://localhost:7141`
+- API HTTP: `http://localhost:5052`
+- Scalar: `https://localhost:7141/scalar`
+- OpenAPI: `https://localhost:7141/openapi/v1.json`
+- Prontidão: `/health`
+- Vivacidade: `/alive`
+
+## Testes
+
+Os testes HTTP usam PostgreSQL via Testcontainers e precisam do Docker em execução.
+
+```powershell
+dotnet test Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
 ```
 
-**Testes**
+## Configuração e operação
 
-- Executar testes unitários/integrados:
+Não salve connection strings, chaves JWT ou credenciais do R2 no repositório. Use User Secrets localmente e variáveis de ambiente no ambiente hospedado.
 
-```bash
-dotnet test test/Devlivery.Tests
-```
-
-**Backup job**
-
-- O backup de produção deve rodar como um serviço cron dedicado, separado da API.
-- Projeto do job: `src/Devlivery.BackupJob`.
-- Imagem dedicada: `src/Devlivery.BackupJob/Dockerfile`.
-- Execução local:
-
-```bash
-dotnet run --project src/Devlivery.BackupJob
-```
-
-- Variáveis esperadas no ambiente usam o prefixo `Backup__`, por exemplo:
-	`Backup__DatabaseConnectionString`, `Backup__BucketName`, `Backup__R2Endpoint`, `Backup__AccessKeyId`, `Backup__SecretAccessKey`.
-- O container do job precisa ter `pg_dump` disponível. A imagem dedicada já instala `postgresql-client`.
-- Exemplo de cron no Railway para backup diário às 03:00 UTC: `0 3 * * *`.
-
-**Provisionamento seguro do bucket R2**
-
-- Use um bucket dedicado por ambiente. Exemplo recomendado para produção: `devlivery-prod-backups`.
-- O nome do bucket deve usar apenas letras minúsculas, números e hífens, com 3 a 63 caracteres.
-- Na criação do bucket, prefira `Automatic` como localização. Só use jurisdição `EU` se você realmente precisar de residência de dados garantida nesse escopo.
-- Mantenha o bucket privado. Não habilite `Public Development URL (r2.dev)`.
-- Não configure `Custom Domain` para esse bucket de backup.
-- Não configure `CORS` para esse bucket. CORS só faz sentido para acesso via navegador, o que não é o caso do job de backup.
-- Crie um token exclusivo para o job com permissão `Object Read & Write` e escopo restrito apenas ao bucket de backup.
-- Prefira `Account API token` em vez de `User API token`, para não atrelar a automação a um usuário específico.
-- O endpoint do job deve usar o formato `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`. Se o bucket for criado com jurisdição `EU`, use `https://<ACCOUNT_ID>.eu.r2.cloudflarestorage.com`.
-- O R2 já cifra objetos em repouso automaticamente com AES-256 e usa TLS em trânsito. Você não precisa habilitar isso manualmente.
-- Para proteção adicional contra exclusão prematura, considere adicionar `Bucket Lock` no prefixo `postgres/production/` com retenção mínima de 7 dias.
-- Se quiser um trilho extra de retenção no próprio bucket, adicione uma `Object Lifecycle Rule` no prefixo `postgres/production/` para expirar objetos com uma janela ligeiramente maior que a do job, por exemplo 8 ou 14 dias. Isso evita crescimento indefinido se a limpeza do job falhar.
-
-**Passo a passo no Cloudflare Dashboard**
-
-1. Entre em `R2 Object Storage` no painel da Cloudflare.
-2. Clique em `Create bucket`.
-3. Defina o nome do bucket, por exemplo `devlivery-prod-backups`.
-4. Em `Location`, deixe `Automatic` ou escolha `EU` apenas se houver requisito formal de residência.
-5. Crie o bucket.
-6. Abra o bucket e vá em `Settings`.
-7. Confirme que `Public Development URL` está desabilitado.
-8. Não adicione `Custom Domains`.
-9. Não adicione política de `CORS`.
-10. Em `Object Lifecycle Rules`, opcionalmente crie uma regra para o prefixo `postgres/production/` com expiração acima da retenção do job.
-11. Em `Bucket lock rules`, opcionalmente crie uma regra para o prefixo `postgres/production/` com retenção mínima de 7 dias.
-12. Volte para `R2 Overview`, abra `Manage API Tokens` e crie um token `Object Read & Write` escopado só para esse bucket.
-13. Copie o `Access Key ID`, o `Secret Access Key` e o `Account ID`.
-
-**Mapeamento para o job**
-
-```bash
-Backup__BucketName=devlivery-prod-backups
-Backup__BucketPrefix=postgres
-Backup__EnvironmentName=production
-Backup__R2Endpoint=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
-Backup__AccessKeyId=<ACCESS_KEY_ID>
-Backup__SecretAccessKey=<SECRET_ACCESS_KEY>
-```
-
-Se você habilitar jurisdição `EU`, ajuste apenas o endpoint:
-
-```bash
-Backup__R2Endpoint=https://<ACCOUNT_ID>.eu.r2.cloudflarestorage.com
-```
-
-**Estrutura importante**
-
-- `src/Devlivery` — código da aplicação (Features, Shared, Infrastructure).
-- `src/Devlivery.BackupJob` — executável de backup PostgreSQL para R2.
-- `test/Devlivery.Tests` — suíte de testes.
+- [Configuração](../../docs/configuration.md)
+- [Publicação da API](../../docs/deployment.md)
+- [Backup e recuperação](../../docs/backup-and-restore.md)
+- [Segurança do login e do caixa](../../docs/login-and-cash-security.md)

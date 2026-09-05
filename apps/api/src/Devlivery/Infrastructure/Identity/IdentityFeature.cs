@@ -1,4 +1,8 @@
-﻿using System.Text;
+using Devlivery.Infrastructure.Identity.LoginProtection;
+
+using Microsoft.Extensions.Options;
+
+using System.Text;
 
 using Devlivery.Common.Extensions;
 using Devlivery.Infrastructure.Identity.Abstractions;
@@ -21,6 +25,15 @@ public static class IdentityFeature
     public static IServiceCollection AddIdentityFeature(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
+        services.AddOptions<LoginProtectionOptions>().BindConfiguration(LoginProtectionOptions.SectionName)
+            .ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<IdentityOptions>().Configure<IOptions<LoginProtectionOptions>>((identity, protection) =>
+        {
+            identity.Lockout.AllowedForNewUsers = true;
+            identity.Lockout.MaxFailedAccessAttempts = protection.Value.MaxFailedAccessAttempts;
+            identity.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(protection.Value.LockoutMinutes);
+        });
+        services.AddRateLimiter(options => options.AddPolicy<string, LoginRateLimitPolicy>(LoginRateLimitPolicy.Name));
 
         services.AddAspNetIdentityConfiguration(configuration);
         services.AddTokensConfiguration(configuration);
@@ -49,6 +62,7 @@ public static class IdentityFeature
             })
             .AddJwtBearer(options =>
             {
+                options.MapInboundClaims = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = jwtAuthOptions.Issuer,

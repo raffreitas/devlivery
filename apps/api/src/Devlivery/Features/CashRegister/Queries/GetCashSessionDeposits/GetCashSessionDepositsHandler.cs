@@ -21,6 +21,16 @@ public sealed class GetCashSessionDepositsHandler(ApplicationDbContext dbContext
             .OrderBy(m => m.CreatedAt)
             .ToArrayAsync(cancellationToken);
 
-        return Result.Ok(deposits.Select(GetCashSessionDepositsResponse.FromDomain).ToArray());
+        var authorIds = deposits.Select(x => x.CreatedBy)
+            .Distinct()
+            .ToHashSet();
+
+        var names = await dbContext.Users
+            .AsNoTracking()
+            .Where(x => authorIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
+
+        return Result.Ok(deposits.Select(x => GetCashSessionDepositsResponse.FromDomain(
+            x, names.GetValueOrDefault(x.CreatedBy, "Usuário indisponível"))).ToArray());
     }
 }

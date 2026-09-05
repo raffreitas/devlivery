@@ -1,39 +1,49 @@
-name: CI/CD Web API
+name: API CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - "apps/api/**"
+      - ".github/workflows/api-ci.yaml"
   pull_request:
     paths:
       - "apps/api/**"
+      - ".github/workflows/api-ci.yaml"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   DOTNET_VERSION: "10.0.x"
 
+concurrency:
+  group: api-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  ci:
-    name: Build & Test .NET
+  build-and-test:
+    name: Build and Test API
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Cache NuGet packages
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.nuget/packages
             ~/.local/share/NuGet
-          key: nuget-${{ runner.os }}-dotnet-${{ hashFiles('**/*.csproj') }}
+          key: api-nuget-${{ runner.os }}-dotnet-${{ hashFiles('apps/api/**/*.csproj') }}
           restore-keys: |
-            nuget-${{ runner.os }}-dotnet-
+            api-nuget-${{ runner.os }}-dotnet-
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -52,23 +62,23 @@ jobs:
   apply-migrations:
     name: Apply DB migrations
     runs-on: ubuntu-latest
-    needs: ci
+    needs: build-and-test
     if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dotnet tools & dependencies (Makefile)
+      - name: Restore dotnet tools & dependencies
         working-directory: apps/api
         run: make setup
 
-      - name: Run EF migrations (Apply DB migrations)
+      - name: Run EF migrations
         working-directory: apps/api
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}

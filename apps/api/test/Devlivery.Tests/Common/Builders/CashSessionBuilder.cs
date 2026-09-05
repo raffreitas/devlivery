@@ -68,7 +68,8 @@ public sealed class CashSessionBuilder
         return this;
     }
 
-    public CashSessionBuilder WithPayment(decimal amount, PaymentMethod paymentMethod, Guid? orderId = null, Guid? orderPaymentId = null)
+    public CashSessionBuilder WithPayment(decimal amount, PaymentMethod paymentMethod, Guid? orderId = null,
+        Guid? orderPaymentId = null)
     {
         _movements.Add(new MovementConfig(
             CashSessionEntryType.Payment,
@@ -92,7 +93,8 @@ public sealed class CashSessionBuilder
         return this;
     }
 
-    public CashSessionBuilder WithReversal(decimal amount, PaymentMethod paymentMethod, Guid orderPaymentId, Guid? orderId = null, string? reason = null)
+    public CashSessionBuilder WithReversal(decimal amount, PaymentMethod paymentMethod, Guid orderPaymentId,
+        Guid? orderId = null, string? reason = null)
     {
         _movements.Add(new MovementConfig(
             CashSessionEntryType.Refund,
@@ -104,7 +106,8 @@ public sealed class CashSessionBuilder
         return this;
     }
 
-    public CashSessionBuilder WithChange(decimal amount, Guid? orderId = null, PaymentMethod paymentMethod = PaymentMethod.Cash)
+    public CashSessionBuilder WithChange(decimal amount, Guid? orderId = null,
+        PaymentMethod paymentMethod = PaymentMethod.Cash)
     {
         _movements.Add(new MovementConfig(
             CashSessionEntryType.Change,
@@ -122,6 +125,7 @@ public sealed class CashSessionBuilder
         {
             WithPayment(amount, method);
         }
+
         return this;
     }
 
@@ -154,11 +158,8 @@ public sealed class CashSessionBuilder
             switch (movement.EntryType)
             {
                 case CashSessionEntryType.Payment:
-                    cashSession.AddPayment(
-                        movement.OrderPaymentId!.Value,
-                        movement.Amount,
-                        movement.PaymentMethod!.Value,
-                        movement.OrderId!.Value);
+                    cashSession.AddPayment(movement.OrderPaymentId!.Value, movement.Amount,
+                        movement.PaymentMethod!.Value, movement.OrderId!.Value, createdBy: Guid.NewGuid());
                     break;
 
                 case CashSessionEntryType.Deposit:
@@ -169,18 +170,13 @@ public sealed class CashSessionBuilder
                     break;
 
                 case CashSessionEntryType.Refund:
-                    cashSession.AddReversal(
-                        movement.OrderPaymentId!.Value,
-                        movement.Amount,
-                        movement.PaymentMethod!.Value,
-                        movement.Reason ?? "Pedido cancelado",
-                        movement.OrderId!.Value);
+                    cashSession.AddReversal(movement.OrderPaymentId!.Value, movement.Amount,
+                        movement.PaymentMethod!.Value, movement.Reason ?? "Pedido cancelado", movement.OrderId!.Value,
+                        createdBy: Guid.NewGuid());
                     break;
 
                 case CashSessionEntryType.Change:
-                    cashSession.AddChange(
-                        movement.OrderId!.Value,
-                        movement.Amount,
+                    cashSession.AddChange(movement.OrderId!.Value, movement.Amount, createdBy: Guid.NewGuid(),
                         movement.PaymentMethod ?? PaymentMethod.Cash);
                     break;
             }

@@ -46,12 +46,18 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
 
         var @event = new OrderChangeCalculatedEvent(order.Id, tenantAccessor.Tenant.Id, 5m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, tenantAccessor, orderRepository);
+        var actorAccessor = fixture.CreateCurrentUserAccessorMock();
+        var expectedActor = await actorAccessor.ResolveAsync();
+        expectedActor.Id.ShouldNotBe(cashSession.AttendantId);
+
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, actorAccessor, tenantAccessor, orderRepository);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
 
         // Assert
+        cashSession.Movements.Where(x => x.EntryType == CashSessionEntryType.Change)
+            .ShouldAllBe(x => x.CreatedBy == expectedActor.Id);
         var changes = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Change).ToList();
         changes.Count.ShouldBe(1);
         changes[0].Amount.ShouldBe(5m);
@@ -73,7 +79,7 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
 
         var @event = new OrderChangeCalculatedEvent(Guid.NewGuid(), tenantAccessor.Tenant.Id, 0m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -98,7 +104,7 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
 
         var @event = new OrderChangeCalculatedEvent(Guid.NewGuid(), tenantAccessor.Tenant.Id, 5m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -136,7 +142,7 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
 
         var @event = new OrderChangeCalculatedEvent(order.Id, tenantAccessor.Tenant.Id, 5m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -170,7 +176,7 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
 
         var @event = new OrderChangeCalculatedEvent(order.Id, tenantAccessor.Tenant.Id, 5m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);
@@ -204,14 +210,14 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
             .Build();
 
         // Pre-add change to simulate existing entry
-        cashSession.AddChange(order.Id, 5m, PaymentMethod.Cash);
+        cashSession.AddChange(order.Id, 5m, createdBy: Guid.NewGuid(), PaymentMethod.Cash);
 
         repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .Returns(cashSession);
 
         var @event = new OrderChangeCalculatedEvent(order.Id, tenantAccessor.Tenant.Id, 5m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
 
         // Act
         await handler.Handle(@event, CancellationToken.None);

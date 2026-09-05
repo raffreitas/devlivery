@@ -23,16 +23,9 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .ReturnsNull();
 
-        var handler = new CreateCashSessionHandler(
-            cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
 
-        var command = new CreateCashSessionCommand(
-            AttendantId: Guid.NewGuid(),
-            AttendantName: "João Silva",
-            OpeningAmount: 100.00m,
-            Notes: null);
+        var command = new CreateCashSessionCommand(OpeningAmount: 100.00m, Notes: null);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -56,16 +49,9 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .ReturnsNull();
 
-        var handler = new CreateCashSessionHandler(
-            cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
 
-        var command = new CreateCashSessionCommand(
-            AttendantId: Guid.NewGuid(),
-            AttendantName: "Maria Santos",
-            OpeningAmount: 50.00m,
-            Notes: "Abertura");
+        var command = new CreateCashSessionCommand(OpeningAmount: 50.00m, Notes: "Abertura");
 
         // Act
         await handler.Handle(command, CancellationToken.None);
@@ -86,16 +72,9 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .ReturnsNull();
 
-        var handler = new CreateCashSessionHandler(
-            cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
 
-        var command = new CreateCashSessionCommand(
-            AttendantId: Guid.NewGuid(),
-            AttendantName: "Pedro Costa",
-            OpeningAmount: 200.00m,
-            Notes: null);
+        var command = new CreateCashSessionCommand(OpeningAmount: 200.00m, Notes: null);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
@@ -116,16 +95,9 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .Returns(activeSession);
 
-        var handler = new CreateCashSessionHandler(
-            cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
 
-        var command = new CreateCashSessionCommand(
-            AttendantId: Guid.NewGuid(),
-            AttendantName: "Ana Lima",
-            OpeningAmount: 150.00m,
-            Notes: null);
+        var command = new CreateCashSessionCommand(OpeningAmount: 150.00m, Notes: null);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -147,16 +119,9 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .Returns(activeSession);
 
-        var handler = new CreateCashSessionHandler(
-            cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
 
-        var command = new CreateCashSessionCommand(
-            AttendantId: Guid.NewGuid(),
-            AttendantName: "Carlos Souza",
-            OpeningAmount: 100.00m,
-            Notes: null);
+        var command = new CreateCashSessionCommand(OpeningAmount: 100.00m, Notes: null);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
@@ -182,16 +147,9 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         await cashSessionRepository.AddAsync(Arg.Do<CashSession>(s => capturedSession = s),
             Arg.Any<CancellationToken>());
 
-        var handler = new CreateCashSessionHandler(
-            cashSessionRepository,
-            unitOfWork,
-            tenantAccessor);
+        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
 
-        var command = new CreateCashSessionCommand(
-            AttendantId: Guid.NewGuid(),
-            AttendantName: "Teste",
-            OpeningAmount: 100.00m,
-            Notes: null);
+        var command = new CreateCashSessionCommand(OpeningAmount: 100.00m, Notes: null);
 
         // Act
         await handler.Handle(command, CancellationToken.None);

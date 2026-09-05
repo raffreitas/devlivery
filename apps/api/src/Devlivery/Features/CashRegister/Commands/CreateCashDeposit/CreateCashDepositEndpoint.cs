@@ -8,8 +8,6 @@ namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 public static class CreateCashDepositEndpoint
 {
     internal sealed record CreateCashDepositRequest(
-        Guid AttendantId,
-        string AttendantName,
         decimal Amount,
         string? Notes);
 
@@ -27,8 +25,6 @@ public static class CreateCashDepositEndpoint
     {
         var command = new CreateCashDepositCommand(
             cashSessionId,
-            request.AttendantId,
-            request.AttendantName,
             request.Amount,
             request.Notes);
         var result = await sender.Send(command, ct);
