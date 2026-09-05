@@ -1,112 +1,78 @@
-# Devlivery Monorepo
+# Devlivery
 
-Uma plataforma de delivery com arquitetura de monorepo contendo aplicações web e API backend robustas.
+Devlivery é uma plataforma de gestão para operações de delivery. O monorepo reúne uma API .NET e uma aplicação web React para administrar pedidos, produtos, despesas, caixa e indicadores operacionais.
 
-## 📦 Estrutura do Projeto
+## Visão geral
 
+A API segue arquitetura vertical slice e mantém as regras de negócio próximas de cada feature. O frontend também é organizado por feature e consome a API por contratos HTTP. PostgreSQL armazena os dados da aplicação e do ASP.NET Core Identity.
+
+## Funcionalidades
+
+- **Autenticação:** login JWT com bloqueio por falhas consecutivas e limitação por IP.
+- **Pedidos:** criação, edição, mudança de status, pagamentos, troco e cancelamento.
+- **Produtos:** catálogo, preços e disponibilidade.
+- **Caixa:** abertura, aportes, fechamento e movimentações vinculadas ao operador autenticado.
+- **Despesas:** categorias, vencimentos, pagamentos e acompanhamento operacional.
+- **Dashboard:** vendas, pedidos, produtos e despesas consolidados.
+- **Backup:** job separado para exportar o PostgreSQL e armazenar os artefatos no Cloudflare R2.
+
+## Estrutura do monorepo
+
+```text
+apps/
+├── api/                         # API, domínio, persistência, backup e testes
+│   ├── src/Devlivery
+│   ├── src/Devlivery.BackupJob
+│   └── test/Devlivery.Tests
+└── web/                         # SPA React organizada por features
+    └── src/
+        ├── features
+        └── shared
 ```
-devlivery/
-├── apps/
-│   ├── api/          # Backend API (.NET Core)
-│   └── web/          # Frontend Web (React)
-├── README.md         # Este arquivo
-└── .git/
-```
 
-## 🏗️ Aplicações
+- [API](apps/api/README.md): .NET 10, Minimal APIs, EF Core, Dapper, PostgreSQL e OpenTelemetry.
+- [Web](apps/web/README.md): React 19, TypeScript, Vite, TanStack Query e Tailwind CSS.
 
-### [`apps/api`](./apps/api) - Backend API
-Aplicação backend construída com .NET Core seguindo princípios de arquitetura limpa.
+O tenant vem do token autenticado e é aplicado aos dados da aplicação. Eventos de domínio mantêm os efeitos de pedidos e caixa dentro da mesma requisição. Consulte a [visão de arquitetura](docs/architecture.md) para os limites atuais.
 
-**Stack:**
-- .NET 8+
-- ASP.NET Core Minimal APIs
-- Entity Framework Core + Dapper
-- PostgreSQL
-- CQRS + Mediator Pattern
-- FluentValidation
-- OpenTelemetry
-- JWT Authentication
+## Executar localmente
 
-**Recursos principais:**
-- Multi-tenancy com Row-Level Security
-- Arquitetura Vertical Slice
-- Domain-Driven Design (DDD) tático
-- Comprehensive testing com TestContainers
-- CI/CD pipeline automatizado
+Pré-requisitos: .NET 10 SDK, Node.js 24, pnpm 10 e Docker em execução.
 
-📖 [Detalhes da API](./apps/api/README.md)
-
-### [`apps/web`](./apps/web) - Frontend Web
-Aplicação web construída com React para interação com a API.
-
-**Stack:**
-- React
-- TypeScript
-- Vite / Next.js
-- Estado gerenciado (Redux/Zustand/Context API)
-- Componentes reutilizáveis
-
-📖 [Detalhes do Web](./apps/web/README.md)
-
-## 🚀 Getting Started
-
-### Pré-requisitos
-- Node.js 18+ (para web)
-- .NET 8+ SDK (para API)
-- Docker & Docker Compose (recomendado)
-- PostgreSQL 15+ (ou via Docker)
-
-### Setup Local
-
-#### Backend API
-```bash
+```powershell
 cd apps/api
-dotnet restore
-dotnet build
-dotnet ef database update
-dotnet run
+docker compose up -d postgres
+dotnet tool restore
+dotnet restore Devlivery.slnx
+dotnet ef database update --project src/Devlivery --context ApplicationDbContext
+dotnet ef database update --project src/Devlivery --context ApplicationIdentityDbContext
+dotnet run --project src/Devlivery
 ```
 
-A API estará disponível em `http://localhost:5000`
+Em outro terminal:
 
-#### Frontend Web
-```bash
+```powershell
 cd apps/web
-npm install
-npm run dev
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-A aplicação estará disponível em `http://localhost:3000`
+A API usa `https://localhost:7141` e `http://localhost:5052`; o frontend usa `http://localhost:5173`. Scalar e o documento OpenAPI são disponibilizados somente em desenvolvimento.
 
-### Com Docker Compose
-```bash
-docker-compose up -d
+Para executar as verificações principais:
+
+```powershell
+dotnet test apps/api/Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
+pnpm --dir apps/web lint
+pnpm --dir apps/web build
 ```
 
-## 🧪 Testes
+## Documentação
 
-### API
-```bash
-cd apps/api
-dotnet test
-```
-
-### Web
-```bash
-cd apps/web
-npm test
-```
-
-## 🔄 CI/CD
-
-Pipelines automatizadas configuradas em:
-- **API**: `.github/workflows/` (build, test, deploy)
-- **Web**: `.github/workflows/` (build, test, deploy)
-
-## 🤝 Contributing
-
-1. Crie uma branch para sua feature: `git checkout -b feature/sua-feature`
-2. Commit suas mudanças: `git commit -m 'feat: descrição da mudança'`
-3. Push para a branch: `git push origin feature/sua-feature`
-4. Abra um Pull Request
+- [Índice da documentação](docs/README.md)
+- [Arquitetura](docs/architecture.md)
+- [Desenvolvimento local](docs/local-development.md)
+- [Configuração](docs/configuration.md)
+- [Publicação da API](docs/deployment.md)
+- [Backup e recuperação](docs/backup-and-restore.md)
+- [Segurança do login e do caixa](docs/login-and-cash-security.md)
