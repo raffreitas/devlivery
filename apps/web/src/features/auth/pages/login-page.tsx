@@ -61,11 +61,10 @@ export function LoginPage() {
       <div className="w-full max-w-md">
         {/* Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-orange-600 dark:bg-orange-700 rounded-2xl shadow-lg mb-4">
-            <span className="text-5xl">🍕</span>
-          </div>
-          <h1 className="text-4xl font-bold text-foreground mb-2">Devlivery</h1>
-          {/* <p className="text-secondary-foreground">Sistema de Gestão de Pedidos</p> */}
+          <h1 className="text-4xl font-bold tracking-[-0.048em] text-[#182230] dark:text-foreground">
+            Devlivery
+            <span className="text-[#c2410c] dark:text-orange-400">.</span>
+          </h1>
         </div>
 
         {/* Login Card */}

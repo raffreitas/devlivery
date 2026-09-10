@@ -23,7 +23,10 @@ export function Layout() {
       <div className="flex-1 flex flex-col min-h-screen relative">
         {/* Mobile Header */}
         <header className="sm:hidden bg-sidebar border-b border-sidebar-border h-16 px-4 flex items-center justify-between sticky top-0 z-40">
-          <h1 className="text-xl font-bold text-primary">🍕 Devlivery</h1>
+          <h1 className="text-xl font-bold tracking-[-0.048em] text-[#182230] dark:text-foreground">
+            Devlivery
+            <span className="text-[#c2410c] dark:text-orange-400">.</span>
+          </h1>
           {env.MODE === "development" && <Badge>DEV ENV</Badge>}
           <NavbarUserSection onLogout={onLogout} />
         </header>

@@ -20,12 +20,15 @@ export function Sidebar() {
     >
       <div className="flex items-center justify-between p-4 h-16 border-b border-sidebar-border">
         {!isCollapsed && (
-          <h1 className="text-xl font-bold text-primary truncate">Devlivery</h1>
+          <h1 className="whitespace-nowrap text-[25px] font-bold tracking-[-0.048em] text-[#182230] dark:text-foreground">
+            Devlivery
+            <span className="text-[#c2410c] dark:text-orange-400">.</span>
+          </h1>
         )}
         <Button
           variant="ghost"
           size="icon"
-          className="ml-auto"
+          className="ml-auto shrink-0"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           {isCollapsed ? (
