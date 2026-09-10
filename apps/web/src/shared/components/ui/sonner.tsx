@@ -1,4 +1,3 @@
-import { useTheme } from "@/shared/contexts/theme-context";
 import {
   CircleCheckIcon,
   InfoIcon,
@@ -7,6 +6,7 @@ import {
   TriangleAlertIcon,
 } from "lucide-react";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
+import { useTheme } from "@/shared/contexts/theme-context";
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
