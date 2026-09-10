@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { CardSkeleton } from "./card-skeleton";
 
 interface GridSkeletonProps {
@@ -16,6 +17,9 @@ export function GridSkeleton({
   className,
   showImage = false,
 }: GridSkeletonProps) {
+  const id = useId();
+  const itemKeys = Array.from({ length: items }, (_, i) => `${id}-grid-${i}`);
+
   const gridCols = {
     1: "grid-cols-1",
     2: "grid-cols-1 md:grid-cols-2",
@@ -28,11 +32,8 @@ export function GridSkeleton({
     <div
       className={`grid ${gridCols[columns as keyof typeof gridCols] ?? gridCols[4]} gap-6 ${className ?? ""}`}
     >
-      {Array.from({ length: items }).map((_, i) => (
-        <CardSkeleton
-          key={`card-${Math.random() * i * 10000}`}
-          showImage={showImage}
-        />
+      {itemKeys.map((key) => (
+        <CardSkeleton key={key} showImage={showImage} />
       ))}
     </div>
   );

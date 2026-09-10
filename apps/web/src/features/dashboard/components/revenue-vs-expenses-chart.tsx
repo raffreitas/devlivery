@@ -115,7 +115,7 @@ export function RevenueVsExpensesChart({
                 <Tooltip
                   cursor={{ stroke: "#888888", strokeWidth: 1 }}
                   content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
+                    if (active && payload?.length) {
                       const data = payload[0].payload as {
                         date: string;
                         revenue: number;

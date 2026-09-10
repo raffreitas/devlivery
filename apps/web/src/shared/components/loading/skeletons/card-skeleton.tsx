@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
 interface CardSkeletonProps {
@@ -14,14 +15,17 @@ export function CardSkeleton({
   showImage = false,
   lines = 3,
 }: CardSkeletonProps) {
+  const id = useId();
+  const lineKeys = Array.from({ length: lines }, (_, i) => `${id}-line-${i}`);
+
   return (
     <div className={className}>
       <div className="border rounded-lg p-4 space-y-3">
         {showImage && <Skeleton className="h-32 w-full rounded-md" />}
         <Skeleton className="h-5 w-3/4" />
-        {Array.from({ length: lines }).map((_, i) => (
+        {lineKeys.map((key, i) => (
           <Skeleton
-            key={`line-${Math.random() * i * 10000}`}
+            key={key}
             className={i === lines - 1 ? "h-4 w-1/2" : "h-4 w-full"}
           />
         ))}
