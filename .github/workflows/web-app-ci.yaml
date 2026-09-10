@@ -46,7 +46,6 @@ jobs:
         uses: pnpm/action-setup@v6
         with:
           version: ${{ env.PNPM_VERSION }}
-          cache: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
