@@ -87,3 +87,4 @@ jobs:
             -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
             -Dsonar.sources=src
+            -Dsonar.coverage.exclusions=**/*

@@ -56,7 +56,7 @@ export function ExpensesByCategoryChart({
                 </Pie>
                 <Tooltip
                   content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
+                    if (active && payload?.length) {
                       const data = payload[0].payload as ExpensesByCategory;
                       return (
                         <div className="rounded-lg border bg-background p-2 shadow-sm">

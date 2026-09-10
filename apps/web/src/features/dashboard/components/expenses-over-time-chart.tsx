@@ -59,7 +59,7 @@ export function ExpensesOverTimeChart({ data }: ExpensesOverTimeChartProps) {
                 <Tooltip
                   cursor={{ fill: "transparent" }}
                   content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
+                    if (active && payload?.length) {
                       return (
                         <div className="rounded-lg border bg-background p-2 shadow-sm">
                           <div className="grid grid-cols-2 gap-2">

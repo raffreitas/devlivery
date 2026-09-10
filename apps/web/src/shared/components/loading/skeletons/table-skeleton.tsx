@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
 interface TableSkeletonProps {
@@ -14,24 +15,33 @@ export function TableSkeleton({
   columns = 4,
   className,
 }: TableSkeletonProps) {
-  const genKey = (index: number) => Math.random() * index * 10000;
+  const id = useId();
+  const headerKeys = Array.from(
+    { length: columns },
+    (_, i) => `${id}-header-${i}`,
+  );
+  const rowKeys = Array.from({ length: rows }, (_, rowIndex) => ({
+    rowKey: `${id}-row-${rowIndex}`,
+    cells: Array.from(
+      { length: columns },
+      (_, colIndex) => `${id}-cell-${rowIndex}-${colIndex}`,
+    ),
+  }));
+
   return (
     <div className={className}>
       <div className="space-y-2">
         {/* Header */}
         <div className="flex gap-4 pb-2 border-b">
-          {Array.from({ length: columns }).map((_, i) => (
-            <Skeleton key={`header-${genKey(i)}`} className="h-4 flex-1" />
+          {headerKeys.map((key) => (
+            <Skeleton key={key} className="h-4 flex-1" />
           ))}
         </div>
         {/* Rows */}
-        {Array.from({ length: rows }).map((_, rowIndex) => (
-          <div key={`row-${genKey(rowIndex)}`} className="flex gap-4 py-2">
-            {Array.from({ length: columns }).map((_, colIndex) => (
-              <Skeleton
-                key={`cell-${rowIndex}-${genKey(colIndex)}`}
-                className="h-4 flex-1"
-              />
+        {rowKeys.map(({ rowKey, cells }) => (
+          <div key={rowKey} className="flex gap-4 py-2">
+            {cells.map((cellKey) => (
+              <Skeleton key={cellKey} className="h-4 flex-1" />
             ))}
           </div>
         ))}
