@@ -69,7 +69,7 @@ jobs:
         run: pnpm --filter @devlivery/web run lint
 
       - name: Check types
-        run: pnpm exec tsc -b
+        run: pnpm --filter @devlivery/web exec tsc
 
       - name: Build
         run: pnpm --filter @devlivery/web run build
