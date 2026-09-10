@@ -32,10 +32,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    defaults:
-      run:
-        working-directory: apps/web
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -52,12 +48,13 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: apps/web/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Check filename casing
+        working-directory: apps/web
         run: |
           duplicates=$(find src -type f \( -iname "*.tsx" -o -iname "*.ts" \) | \
             awk 'BEGIN{IGNORECASE=1} {count[tolower($0)]++; files[tolower($0)]=files[tolower($0)]" "$0} END{for(f in count) if(count[f]>1) print files[f]}')
@@ -69,13 +66,13 @@ jobs:
           fi
 
       - name: Lint
-        run: pnpm run lint
+        run: pnpm --filter @devlivery/web run lint
 
       - name: Check types
-        run: pnpm exec tsc -b
+        run: pnpm --filter @devlivery/web exec tsc
 
       - name: Build
-        run: pnpm run build
+        run: pnpm --filter @devlivery/web run build
 
       - name: SonarQube analysis
         uses: SonarSource/sonarqube-scan-action@v8
