@@ -7,6 +7,7 @@ on:
       - "apps/api/**"
       - ".github/workflows/api-ci.yaml"
   pull_request:
+    branches: [main]
     paths:
       - "apps/api/**"
       - ".github/workflows/api-ci.yaml"
@@ -17,20 +18,33 @@ permissions:
 
 env:
   DOTNET_VERSION: "10.0.x"
+  SONAR_PROJECT_KEY: "devlivery-api"
+  SONAR_ORGANIZATION: "raffreitas"
 
 concurrency:
   group: api-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    name: Build and Test API
+  code-analysis:
+    name: Build, Test and Code Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    defaults:
+      run:
+        working-directory: apps/api
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Cache NuGet packages
         uses: actions/cache@v6
@@ -42,31 +56,66 @@ jobs:
           restore-keys: |
             api-nuget-${{ runner.os }}-dotnet-
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v6
+      - name: Cache SonarQube packages
+        uses: actions/cache@v6
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          path: ~/.sonar/cache
+          key: sonar-${{ runner.os }}
+          restore-keys: |
+            sonar-${{ runner.os }}
 
-      - name: Restore .NET packages
-        working-directory: apps/api
+      - name: Restore .NET tools
+        run: dotnet tool restore
+
+      - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build .NET projects
-        working-directory: apps/api
-        run: dotnet build --no-restore --configuration Release --verbosity minimal
+      - name: Begin SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"${{ env.SONAR_PROJECT_KEY }}" \
+            /o:"${{ env.SONAR_ORGANIZATION }}" \
+            /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
+            /d:sonar.coverage.exclusions="**/Migrations/**"
 
-      - name: Run .NET tests
-        working-directory: apps/api
-        run: dotnet test --no-build --configuration Release --verbosity normal
+      - name: Build
+        run: |
+          dotnet build \
+            --no-restore \
+            --configuration Release \
+            --verbosity minimal \
+            --no-incremental
+
+      - name: Run tests with coverage
+        run: |
+          dotnet test \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults \
+            -- \
+            DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+      - name: End SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner end \
+            /d:sonar.token="${SONAR_TOKEN}"
 
   apply-migrations:
-    name: Apply DB migrations
+    name: Apply Database Migrations
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: code-analysis
+
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v7
 
       - name: Setup .NET SDK
@@ -74,11 +123,11 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dotnet tools & dependencies
+      - name: Restore .NET tools and dependencies
         working-directory: apps/api
         run: make setup
 
-      - name: Run EF migrations
+      - name: Apply EF Core migrations
         working-directory: apps/api
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}
