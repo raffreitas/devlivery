@@ -10,6 +10,7 @@ on:
       - "pnpm-workspace.yaml"
       - ".github/workflows/web-app-ci.yaml"
   pull_request:
+    branches: [main]
     paths:
       - "apps/web/**"
       - "package.json"
@@ -24,59 +25,71 @@ permissions:
 env:
   NODE_VERSION: 24
   PNPM_VERSION: 10
+  SONAR_PROJECT_KEY: "devlivery-web"
+  SONAR_ORGANIZATION: "raffreitas"
 
 concurrency:
   group: web-app-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  lint-and-build:
-    name: Build & Test React
+  code-analysis:
+    name: Build and Code Analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: apps/web
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Cache pnpm packages
-        uses: actions/cache@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
         with:
-          path: ~/.local/share/pnpm/store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        working-directory: apps/web
         run: pnpm install --frozen-lockfile
 
       - name: Check filename casing
-        working-directory: apps/web
         run: |
           duplicates=$(find src -type f \( -iname "*.tsx" -o -iname "*.ts" \) | \
             awk 'BEGIN{IGNORECASE=1} {count[tolower($0)]++; files[tolower($0)]=files[tolower($0)]" "$0} END{for(f in count) if(count[f]>1) print files[f]}')
+
           if [ -n "$duplicates" ]; then
             echo "Found case-sensitive duplicates:"
             echo "$duplicates"
             exit 1
           fi
 
-      - name: Check Types
-        working-directory: apps/web
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Check types
         run: pnpm exec tsc -b
 
       - name: Build
-        working-directory: apps/web
         run: pnpm run build
+
+      - name: SonarQube analysis
+        uses: SonarSource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: apps/web
+          args: >
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
+            -Dsonar.sources=src
