@@ -16,16 +16,15 @@ O Dockerfile da API está em `apps/api/src/Devlivery/Dockerfile` e espera `apps/
 
 ## Migrações
 
-Aplique os dois contextos antes de liberar tráfego para a nova versão:
+O deploy da API gera executáveis de migração para os dois contextos durante o build da imagem. No serviço da API no Railway, configure em **Settings > Deploy > Pre-deploy Command** a execução sequencial:
 
-```powershell
-cd apps/api
-dotnet tool restore
-dotnet ef database update --project src/Devlivery --context ApplicationDbContext
-dotnet ef database update --project src/Devlivery --context ApplicationIdentityDbContext
+```sh
+/app/migrations/migrate-application && /app/migrations/migrate-identity
 ```
 
-Execute migrações uma vez por publicação. A API só as aplica automaticamente em `Development`.
+Mantenha `ConnectionStrings__DefaultConnection` disponível no ambiente de deploy. Se qualquer bundle falhar, o comando retorna um status diferente de zero e impede a publicação da nova versão. Em **Settings > Deploy**, configure também um timeout de pre-deploy compatível com o volume do banco; 300 segundos é um ponto de partida razoável.
+
+As migrações são aplicadas uma vez por publicação, antes da liberação de tráfego. A API só as aplica automaticamente em `Development`. Em produção, prefira migrações compatíveis com a versão anterior da aplicação, pois o banco é atualizado antes da validação de saúde da nova versão.
 
 ## Validação pública
 

@@ -106,30 +106,3 @@ jobs:
         run: |
           dotnet sonarscanner end \
             /d:sonar.token="${SONAR_TOKEN}"
-
-  apply-migrations:
-    name: Apply Database Migrations
-    runs-on: ubuntu-latest
-    needs: code-analysis
-
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore .NET tools and dependencies
-        working-directory: apps/api
-        run: make setup
-
-      - name: Apply EF Core migrations
-        working-directory: apps/api
-        env:
-          ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_CONNECTION_STRING }}
-          ASPNETCORE_ENVIRONMENT: Production
-        run: make migrate-all

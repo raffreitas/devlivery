@@ -17,7 +17,23 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./Devlivery.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+FROM build AS migrations
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet tool restore
+RUN dotnet ef migrations bundle \
+    --project "./Devlivery.csproj" \
+    --context ApplicationDbContext \
+    --configuration $BUILD_CONFIGURATION \
+    --output /app/migrations/migrate-application
+RUN dotnet ef migrations bundle \
+    --project "./Devlivery.csproj" \
+    --context ApplicationIdentityDbContext \
+    --configuration $BUILD_CONFIGURATION \
+    --output /app/migrations/migrate-identity
+RUN chmod +x /app/migrations/migrate-application /app/migrations/migrate-identity
+
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=migrations /app/migrations ./migrations
 ENTRYPOINT ["dotnet", "Devlivery.dll"]
