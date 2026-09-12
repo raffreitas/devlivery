@@ -47,7 +47,7 @@ pnpm --dir apps/web build
 git diff --check
 ```
 
-Os testes HTTP iniciam PostgreSQL com Testcontainers. Falhas de conexão com o Docker devem ser resolvidas antes de interpretar o resultado da suíte.
+Os testes de integração que exercitam consultas PostgreSQL iniciam o banco com Testcontainers. A maior parte da suíte atual cobre domínio, validators e handlers sem infraestrutura. Falhas de conexão com o Docker devem ser resolvidas antes de interpretar os testes dependentes de container. Consulte a [estratégia de testes](testing-strategy.md).
 
 ## Migrações
 

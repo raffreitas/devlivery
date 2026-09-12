@@ -33,7 +33,7 @@ apps/
 - [API](apps/api/README.md): .NET 10, Minimal APIs, EF Core, Dapper, PostgreSQL e OpenTelemetry.
 - [Web](apps/web/README.md): React 19, TypeScript, Vite, TanStack Query e Tailwind CSS.
 
-O tenant vem do token autenticado e é aplicado aos dados da aplicação. Eventos de domínio mantêm os efeitos de pedidos e caixa dentro da mesma requisição. Consulte a [visão de arquitetura](docs/architecture.md) para os limites atuais.
+O tenant vem do token autenticado e é aplicado aos dados da aplicação. Eventos de domínio mantêm os efeitos de pedidos e caixa dentro da mesma requisição. Consulte a [visão de arquitetura](docs/architecture/overview.md) para os limites atuais.
 
 ## Executar localmente
 
@@ -70,9 +70,13 @@ pnpm --dir apps/web build
 ## Documentação
 
 - [Índice da documentação](docs/README.md)
-- [Arquitetura](docs/architecture.md)
-- [Desenvolvimento local](docs/local-development.md)
-- [Configuração](docs/configuration.md)
-- [Publicação da API](docs/deployment.md)
-- [Backup e recuperação](docs/backup-and-restore.md)
-- [Segurança do login e do caixa](docs/login-and-cash-security.md)
+- [Visão do produto](docs/product/overview.md)
+- [Modelo de domínio](docs/product/domain-model.md)
+- [Arquitetura](docs/architecture/overview.md)
+- [ADRs](docs/adrs/README.md)
+- [Estratégia de testes](docs/development/testing-strategy.md)
+- [Desenvolvimento local](docs/development/local-development.md)
+- [Configuração](docs/development/configuration.md)
+- [Publicação da API](docs/operations/deployment.md)
+- [Backup e recuperação](docs/operations/backup-and-restore.md)
+- [Segurança do login e do caixa](docs/operations/login-and-cash-security.md)

@@ -1,5 +1,7 @@
 # Recurso de Controle de Caixa (Cash Register)
 
+Este arquivo descreve a implementação da interface. A fonte de verdade para estados, cálculos e efeitos entre pedidos e caixa é o [modelo de domínio](../../../../../docs/product/domain-model.md#caixa).
+
 ## Descrição
 
 Sistema de controle de caixa integrado ao backend, permitindo ao atendente:
