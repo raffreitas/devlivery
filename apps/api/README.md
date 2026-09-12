@@ -53,17 +53,20 @@ Endereços locais:
 
 ## Testes
 
-Os testes HTTP usam PostgreSQL via Testcontainers e precisam do Docker em execução.
+A suíte cobre principalmente domínio, validators e handlers. Cenários de integração que exercitam consultas PostgreSQL usam Testcontainers e precisam do Docker em execução.
 
 ```powershell
 dotnet test Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
 ```
 
+Consulte a [estratégia de testes](../../docs/development/testing-strategy.md) para os níveis cobertos e as lacunas atuais.
+
 ## Configuração e operação
 
 Não salve connection strings, chaves JWT ou credenciais do R2 no repositório. Use User Secrets localmente e variáveis de ambiente no ambiente hospedado.
 
-- [Configuração](../../docs/configuration.md)
-- [Publicação da API](../../docs/deployment.md)
-- [Backup e recuperação](../../docs/backup-and-restore.md)
-- [Segurança do login e do caixa](../../docs/login-and-cash-security.md)
+- [Configuração](../../docs/development/configuration.md)
+- [Modelo de domínio](../../docs/product/domain-model.md)
+- [Publicação da API](../../docs/operations/deployment.md)
+- [Backup e recuperação](../../docs/operations/backup-and-restore.md)
+- [Segurança do login e do caixa](../../docs/operations/login-and-cash-security.md)

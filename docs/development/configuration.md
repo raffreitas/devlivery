@@ -27,7 +27,7 @@ OpenTelemetry é ativado quando `OTEL_EXPORTER_OTLP_ENDPOINT` está configurado.
 | `LoginProtection__WindowSeconds` | `60` | Duração da janela fixa |
 | `LoginProtection__RailwayIngress` | `false` | Usa um único `X-Real-IP` válido como origem |
 
-Não ative o modo Railway sem executar a validação descrita no [guia de segurança](login-and-cash-security.md).
+Não ative o modo Railway sem executar a validação descrita no [guia de segurança](../operations/login-and-cash-security.md).
 
 ## Frontend
 

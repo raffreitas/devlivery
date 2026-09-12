@@ -4,7 +4,7 @@ O backup roda em `Devlivery.BackupJob`, separado da API. O processo cria um dump
 
 ## Execução
 
-Use o Dockerfile `apps/api/src/Devlivery.BackupJob/Dockerfile`, com `apps/api` como contexto. A imagem instala o PostgreSQL client 17. Configure as variáveis `Backup__*` descritas em [configuração](configuration.md).
+Use o Dockerfile `apps/api/src/Devlivery.BackupJob/Dockerfile`, com `apps/api` como contexto. A imagem instala o PostgreSQL client 17. Configure as variáveis `Backup__*` descritas em [configuração](../development/configuration.md).
 
 No Railway, execute o job como serviço cron dedicado. Um exemplo de agenda diária às 03:00 UTC é:
 

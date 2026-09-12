@@ -6,7 +6,7 @@ Este guia descreve a exposição da API em uma instância Railway. Ajuste-o se o
 
 1. Execute a suíte backend e o build do frontend.
 2. Crie um PostgreSQL dedicado ao ambiente.
-3. Configure connection string, JWT, CORS e ambiente conforme [configuração](configuration.md).
+3. Configure connection string, JWT, CORS e ambiente conforme [configuração](../development/configuration.md).
 4. Gere uma chave JWT aleatória e mantenha-a apenas no secret store da plataforma.
 5. Defina `ALLOWED_ORIGINS` com a origem HTTPS exata do frontend.
 6. Mantenha `LoginProtection__RailwayIngress=false` até validar o ingresso.

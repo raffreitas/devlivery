@@ -1,18 +1,19 @@
 # Arquitetura
 
+Este documento descreve a estrutura técnica atual. Consulte a [visão do produto](../product/overview.md) para escopo, o [modelo de domínio](../product/domain-model.md) para regras e os [ADRs](../adrs/README.md) para a motivação das principais escolhas.
+
 ## Contexto
 
 Devlivery é um monorepo com dois processos de produto e um processo operacional:
 
-```text
-Browser
-   │ HTTPS
-   ▼
-React SPA ── JWT ──► ASP.NET Core API ──► PostgreSQL
-                              │
-                              └── OpenTelemetry exporter
-
-Scheduled Backup Job ── pg_dump ──► Cloudflare R2
+```mermaid
+flowchart LR
+    user[Usuário] -->|HTTPS| web[React SPA]
+    web -->|JWT via HTTPS| api[ASP.NET Core API]
+    api --> db[(PostgreSQL)]
+    api -->|OTLP| telemetry[Backend de observabilidade]
+    backup[Backup Job agendado] -->|pg_dump| db
+    backup -->|Dump e manifesto| r2[Cloudflare R2]
 ```
 
 ## API
@@ -47,3 +48,12 @@ Os endpoints `/health` e `/alive` são públicos para a plataforma de hospedagem
 ## Frontend
 
 O frontend é uma SPA dividida por feature. TanStack Query controla o estado remoto, React Hook Form e Zod tratam formulários, e um serviço compartilhado centraliza a configuração HTTP, o token e a tradução de erros.
+
+## Decisões e limites
+
+- [ADR-001: monorepo e vertical slices](../adrs/0001-monorepo-and-vertical-slices.md)
+- [ADR-002: tenant derivado do contexto autenticado](../adrs/0002-tenant-from-authenticated-context.md)
+- [ADR-003: eventos de domínio síncronos](../adrs/0003-synchronous-domain-events.md)
+- [ADR-004: contextos separados para negócio e identidade](../adrs/0004-separate-application-and-identity-contexts.md)
+
+A API é um único processo de produto e compartilha um PostgreSQL entre as features. Não há broker, cache ou rate limiter distribuído. O job de backup é um processo separado e não participa das requisições do produto.

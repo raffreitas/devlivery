@@ -48,4 +48,4 @@ Follow recent scoped commits: `fix(api): ...`, `feat(expenses): ...`, or `chore(
 
 ## Security & Configuration
 
-Keep credentials out of commits; use environment variables or .NET user secrets. Preserve tenant isolation and authenticated operator attribution. Consult `docs/configuration.md` before changing configuration.
+Keep credentials out of commits; use environment variables or .NET user secrets. Preserve tenant isolation and authenticated operator attribution. Consult `docs/development/configuration.md` before changing configuration.
