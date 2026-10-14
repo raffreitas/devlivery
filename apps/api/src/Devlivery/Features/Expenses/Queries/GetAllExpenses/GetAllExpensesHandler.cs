@@ -3,10 +3,10 @@ using System.Data;
 using Dapper;
 
 using Devlivery.Common.Handlers;
+using Devlivery.Common.Time;
 using Devlivery.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Infrastructure.Persistence.Abstractions;
 using Devlivery.Infrastructure.Tenancy;
-using Devlivery.Infrastructure.Time.Abstractions;
 
 using FluentResults;
 
@@ -15,14 +15,14 @@ namespace Devlivery.Features.Expenses.Queries.GetAllExpenses;
 public sealed class GetAllExpensesHandler(
     IDbConnectionFactory dbConnectionFactory,
     ITenantAccessor tenantAccessor,
-    IDateTimeProvider dateTimeProvider
+    TimeProvider timeProvider
 )
     : IQueryHandler<GetAllExpensesQuery, Result<List<GetAllExpensesResponse>>>
 {
     public async Task<Result<List<GetAllExpensesResponse>>> HandleAsync(GetAllExpensesQuery query,
         CancellationToken cancellationToken)
     {
-        var today = dateTimeProvider.GetLocalDate();
+        var today = timeProvider.GetBrazilToday();
 
         const string sql =
             $"""

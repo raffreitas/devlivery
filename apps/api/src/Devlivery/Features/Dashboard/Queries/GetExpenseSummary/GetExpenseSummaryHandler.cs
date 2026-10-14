@@ -3,10 +3,10 @@ using System.Data;
 using Dapper;
 
 using Devlivery.Common.Handlers;
+using Devlivery.Common.Time;
 using Devlivery.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Infrastructure.Persistence.Abstractions;
 using Devlivery.Infrastructure.Tenancy;
-using Devlivery.Infrastructure.Time.Abstractions;
 
 using FluentResults;
 
@@ -15,14 +15,14 @@ namespace Devlivery.Features.Dashboard.Queries.GetExpenseSummary;
 public sealed class GetExpenseSummaryHandler(
     IDbConnectionFactory dbConnectionFactory,
     ITenantAccessor tenantAccessor,
-    IDateTimeProvider dateTimeProvider)
+    TimeProvider timeProvider)
     : IQueryHandler<GetExpenseSummaryQuery, Result<GetExpenseSummaryResponse>>
 {
     public async Task<Result<GetExpenseSummaryResponse>> HandleAsync(
         GetExpenseSummaryQuery query,
         CancellationToken cancellationToken)
     {
-        var today = dateTimeProvider.GetLocalDate();
+        var today = timeProvider.GetBrazilToday();
 
         const string sql = """
             select 

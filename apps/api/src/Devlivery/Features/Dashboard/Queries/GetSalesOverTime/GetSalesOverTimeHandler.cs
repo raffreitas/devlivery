@@ -1,5 +1,6 @@
 using Devlivery.Common.Extensions;
 using Devlivery.Common.Handlers;
+using Devlivery.Common.Time;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Infrastructure.Persistence.Context;
 
@@ -12,8 +13,6 @@ namespace Devlivery.Features.Dashboard.Queries.GetSalesOverTime;
 public sealed class GetSalesOverTimeHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetSalesOverTimeQuery, Result<GetSalesOverTimeResponse>>
 {
-    private static readonly TimeZoneInfo BrazilTimeZone = TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
-
     public async Task<Result<GetSalesOverTimeResponse>> HandleAsync(
         GetSalesOverTimeQuery query,
         CancellationToken cancellationToken)
@@ -32,11 +31,7 @@ public sealed class GetSalesOverTimeHandler(ApplicationDbContext dbContext)
 
         // Group by date (using local Brazil timezone)
         var salesByDate = orders
-            .GroupBy(o =>
-            {
-                var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(o.CreatedAt, BrazilTimeZone);
-                return localDateTime.Date;
-            })
+            .GroupBy(o => o.CreatedAt.ToBrazilTime().Date)
             .Select(g => new
             {
                 Date = g.Key,

@@ -2,11 +2,13 @@ using System.Data.Common;
 
 using Dapper;
 
+using Devlivery.Common.Time;
 using Devlivery.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Features.Expenses.Queries.GetAllExpenses;
 using Devlivery.Infrastructure.Persistence.Abstractions;
 using Devlivery.Infrastructure.Tenancy;
-using Devlivery.Infrastructure.Time.Abstractions;
+
+using Microsoft.Extensions.Time.Testing;
 
 using Npgsql;
 
@@ -288,13 +290,13 @@ public sealed class GetAllExpensesHandlerTests : IAsyncLifetime
         var tenantAccessor = Substitute.For<ITenantAccessor>();
         tenantAccessor.Tenant.Returns(new Tenant(tenantId));
 
-        var dateTimeProvider = Substitute.For<IDateTimeProvider>();
-        dateTimeProvider.GetLocalDate().Returns(today);
+        var noonInBrazil = today.ToDateTime(new TimeOnly(12, 0));
+        var timeProvider = new FakeTimeProvider(TimeZoneInfo.ConvertTimeToUtc(noonInBrazil, BrazilTime.TimeZone));
 
         return new GetAllExpensesHandler(
             new TestDbConnectionFactory(_postgresContainer.GetConnectionString()),
             tenantAccessor,
-            dateTimeProvider);
+            timeProvider);
     }
 
     private async Task ResetDatabaseAsync()
