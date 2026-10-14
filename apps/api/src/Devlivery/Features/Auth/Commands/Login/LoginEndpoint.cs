@@ -1,4 +1,5 @@
-﻿using Devlivery.Common.Handlers;
+﻿using Devlivery.Common.Endpoints;
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Auth.Commands.Login;
 
-public static class LoginEndpoint
+public sealed class LoginEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/login", Handle)
+        app.MapPost("auth/login", Handle)
+            .WithTags(Tags.Auth)
             .Produces<ApiResource<LoginResponse>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status401Unauthorized)

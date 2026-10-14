@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,13 +7,14 @@ using FluentResults;
 
 namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
 
-public static class CloseCashSessionEndpoint
+public sealed class CloseCashSessionEndpoint : IEndpoint
 {
     internal sealed record CloseCashSessionRequest(decimal ClosingAmount, string? Notes);
 
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPatch("sessions/{id:guid}/close", Handle)
+        app.MapPatch("cash-register/sessions/{id:guid}/close", Handle)
+            .WithTags(Tags.CashRegister)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ApiProblemDetails>(StatusCodes.Status422UnprocessableEntity);

@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetExpensesByStatus;
 
-public static class GetExpensesByStatusEndpoint
+public sealed class GetExpensesByStatusEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/expenses-by-status", Handle)
+        app.MapGet("dashboard/expenses-by-status", Handle)
+            .WithTags(Tags.Dashboard)
             .Produces<ApiResource<GetExpensesByStatusResponse>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }

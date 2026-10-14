@@ -1,9 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
-using Devlivery.Features.Auth;
 using Devlivery.Features.CashRegister;
-using Devlivery.Features.Dashboard;
 using Devlivery.Features.Expenses;
 using Devlivery.Features.Orders;
 using Devlivery.Features.Products;
@@ -34,6 +33,7 @@ public static class Startup
         services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
 
         services.AddHandlers();
+        services.AddEndpoints();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
@@ -52,12 +52,10 @@ public static class Startup
         services.AddTenancyFeature();
 
         // Features
-        services.AddAuthFeature();
         services.AddOrderFeature();
         services.AddProductFeature();
         services.AddCashRegisterFeature();
         services.AddExpenseFeature();
-        services.AddDashboardFeature();
 
         // CORS
         services.AddCorsConfiguration();
@@ -93,11 +91,6 @@ public static class Startup
 
         // Endpoints
         app.MapHealthCheckEndpoints();
-        app.MapAuthEndpoints();
-        app.MapProductEndpoints();
-        app.MapOrderEndpoints();
-        app.MapCashRegisterEndpoints();
-        app.MapExpenseEndpoints();
-        app.MapDashboardEndpoints();
+        app.MapEndpoints();
     }
 }

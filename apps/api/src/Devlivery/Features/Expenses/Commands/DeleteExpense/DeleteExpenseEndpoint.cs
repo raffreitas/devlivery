@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Expenses.Commands.DeleteExpense;
 
-public static class DeleteExpenseEndpoint
+public sealed class DeleteExpenseEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("{expenseId:guid}", Handle)
+        app.MapDelete("expenses/{expenseId:guid}", Handle)
+            .WithTags(Tags.Expenses)
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }

@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetExpensesOverTime;
 
-public static class GetExpensesOverTimeEndpoint
+public sealed class GetExpensesOverTimeEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/expenses-over-time", Handle)
+        app.MapGet("dashboard/expenses-over-time", Handle)
+            .WithTags(Tags.Dashboard)
             .Produces<ApiResource<GetExpensesOverTimeResponse>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }

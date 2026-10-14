@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -9,11 +10,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Devlivery.Features.Expenses.Queries.GetAllExpenses;
 
-public static class GetAllExpensesEndpoint
+public sealed class GetAllExpensesEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("", Handle)
+        app.MapGet("expenses", Handle)
+            .WithTags(Tags.Expenses)
             .Produces<ApiResource<List<GetAllExpensesResponse>>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }

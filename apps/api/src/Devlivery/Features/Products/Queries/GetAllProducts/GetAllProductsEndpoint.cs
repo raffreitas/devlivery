@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Products.Queries.GetAllProducts;
 
-public static class GetAllProductsEndpoint
+public sealed class GetAllProductsEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("", Handle)
+        app.MapGet("products", Handle)
+            .WithTags(Tags.Products)
             .Produces<ApiResource<List<GetAllProductsResponse>>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }

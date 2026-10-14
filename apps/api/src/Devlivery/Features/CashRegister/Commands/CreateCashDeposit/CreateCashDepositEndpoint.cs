@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,15 +7,16 @@ using FluentResults;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
-public static class CreateCashDepositEndpoint
+public sealed class CreateCashDepositEndpoint : IEndpoint
 {
     internal sealed record CreateCashDepositRequest(
         decimal Amount,
         string? Notes);
 
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("sessions/{cashSessionId:guid}/deposits", Handle)
+        app.MapPost("cash-register/sessions/{cashSessionId:guid}/deposits", Handle)
+            .WithTags(Tags.CashRegister)
             .Produces<ApiResource<CreateCashDepositResponse>>(StatusCodes.Status201Created)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound)

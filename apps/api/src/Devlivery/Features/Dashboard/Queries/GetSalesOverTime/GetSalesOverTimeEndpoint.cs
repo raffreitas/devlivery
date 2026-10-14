@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetSalesOverTime;
 
-public static class GetSalesOverTimeEndpoint
+public sealed class GetSalesOverTimeEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/sales-over-time", Handle)
+        app.MapGet("dashboard/sales-over-time", Handle)
+            .WithTags(Tags.Dashboard)
             .Produces<ApiResource<GetSalesOverTimeResponse>>()
             .Produces<ApiResource<GetSalesOverTimeResponse>>(StatusCodes.Status400BadRequest);
     }

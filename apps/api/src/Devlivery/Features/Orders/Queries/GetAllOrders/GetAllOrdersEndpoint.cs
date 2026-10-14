@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Domain.Common.Enums;
 using Devlivery.Infrastructure.Http.Extensions;
@@ -7,13 +8,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Orders.Queries.GetAllOrders;
 
-public static class GetAllOrdersEndpoint
+public sealed class GetAllOrdersEndpoint : IEndpoint
 {
-    public sealed record Request(DateTime? Start, DateTime? End);
-
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("", Handle)
+        app.MapGet("orders", Handle)
+            .WithTags(Tags.Orders)
             .Produces<ApiResource<List<GetAllOrdersResponse>>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }

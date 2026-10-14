@@ -1,4 +1,5 @@
-﻿using Devlivery.Common.Handlers;
+﻿using Devlivery.Common.Endpoints;
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
@@ -6,7 +7,7 @@ using FluentResults;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
-public static class UpdateOrderEndpoint
+public sealed class UpdateOrderEndpoint : IEndpoint
 {
     internal sealed record UpdateOrderRequest(
         OrderItemDto[] Items,
@@ -18,9 +19,10 @@ public static class UpdateOrderEndpoint
         decimal DeliveryFee = 0,
         string? Notes = null);
 
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("{id:guid}", Handle)
+        app.MapPut("orders/{id:guid}", Handle)
+            .WithTags(Tags.Orders)
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound)

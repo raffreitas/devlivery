@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Infrastructure.Http.Extensions;
@@ -7,11 +8,12 @@ using FluentResults;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessions;
 
-public static class GetCashSessionsEndpoint
+public sealed class GetCashSessionsEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("sessions", Handle)
+        app.MapGet("cash-register/sessions", Handle)
+            .WithTags(Tags.CashRegister)
             .Produces<ApiResource<GetCashSessionsResponse[]>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
