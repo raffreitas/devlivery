@@ -22,7 +22,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
 
         var cashSession = new CashSessionBuilder()
@@ -46,10 +45,10 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         var expectedActor = await actorAccessor.ResolveAsync();
         expectedActor.Id.ShouldNotBe(cashSession.AttendantId);
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, actorAccessor, tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, actorAccessor, tenantAccessor);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None);
+        await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert
         cashSession.Movements.Where(x => x.EntryType == CashSessionEntryType.Payment)
@@ -63,7 +62,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         cashSession.ExpectedCashAmount.ShouldBe(150m); // 100 + 50
 
         await repository.Received(1).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -72,7 +70,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
 
         var paymentId = Guid.NewGuid();
@@ -93,17 +90,16 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
             OrderTotal: 75m
         );
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None); // First time
-        await handler.Handle(@event, CancellationToken.None); // Duplicate
+        await handler.HandleAsync(@event, CancellationToken.None); // First time
+        await handler.HandleAsync(@event, CancellationToken.None); // Duplicate
 
         // Assert - only one payment recorded
         cashSession.Movements.Count.ShouldBe(1);
         cashSession.TotalRevenue.ShouldBe(75m);
         await repository.Received(2).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
-        await unitOfWork.Received(2).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -112,7 +108,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
 
         var orderId = Guid.NewGuid();
@@ -124,7 +119,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .Returns(cashSession);
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         var events = new[]
         {
@@ -136,7 +131,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         // Act
         foreach (var @event in events)
         {
-            await handler.Handle(@event, CancellationToken.None);
+            await handler.HandleAsync(@event, CancellationToken.None);
         }
 
         // Assert
@@ -156,7 +151,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
 
         repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
@@ -171,14 +165,13 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
             OrderTotal: 50m
         );
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None);
+        await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert - no update calls
         await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
-        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -187,7 +180,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
 
         var cashSession = new CashSessionBuilder()
@@ -198,14 +190,14 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
             .Returns(cashSession);
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
-        await handler.Handle(new OrderPaymentConfirmedEvent(
+        await handler.HandleAsync(new OrderPaymentConfirmedEvent(
             Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Cash, 50m, 50m),
             CancellationToken.None);
 
-        await handler.Handle(new OrderPaymentConfirmedEvent(
+        await handler.HandleAsync(new OrderPaymentConfirmedEvent(
             Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.CreditCard, 30m, 30m),
             CancellationToken.None);
 
@@ -220,7 +212,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
 
         var cashSession = new CashSessionBuilder()
@@ -234,10 +225,10 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
             Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Cash, 50m, 50m
         );
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None);
+        await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert
         logger.Received(2).Log(
@@ -254,7 +245,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
 
         repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
@@ -264,10 +254,10 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
             Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Cash, 50m, 50m
         );
 
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None);
+        await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert
         logger.Received(1).Log(

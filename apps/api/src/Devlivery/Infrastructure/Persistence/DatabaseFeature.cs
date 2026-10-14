@@ -1,10 +1,10 @@
-﻿using Devlivery.Common.Extensions;
+﻿using Devlivery.Common.Events;
+using Devlivery.Common.Extensions;
 using Devlivery.Infrastructure.Identity.Context;
 using Devlivery.Infrastructure.Identity.Users.Models;
 using Devlivery.Infrastructure.Persistence.Abstractions;
 using Devlivery.Infrastructure.Persistence.Context;
 using Devlivery.Infrastructure.Persistence.Factory;
-using Devlivery.Infrastructure.Persistence.Interceptors;
 using Devlivery.Infrastructure.Persistence.Seeder;
 
 using Microsoft.AspNetCore.Identity;
@@ -20,22 +20,16 @@ public static class DatabaseFeature
     {
         var connectionString = configuration.GetConnectionStringOrThrow("DefaultConnection");
 
-        // Register the interceptor
-        services.AddScoped<DispatchDomainEventsInterceptor>();
-
-        services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+        services.AddDbContext<ApplicationDbContext>(options =>
         {
-            var interceptor = serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>();
-
             options.UseNpgsql(connectionString, optionsBuilder => { optionsBuilder.EnableRetryOnFailure(); })
-                .UseSnakeCaseNamingConvention()
-                .AddInterceptors(interceptor);
+                .UseSnakeCaseNamingConvention();
         });
 
         services.AddSingleton(new NpgsqlDataSourceBuilder(connectionString).Build());
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
 
-        // Register UnitOfWork
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;

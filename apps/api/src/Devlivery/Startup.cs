@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 
-using Devlivery.Common.Mediator.Behaviors;
 using Devlivery.Features.Auth;
 using Devlivery.Features.CashRegister;
 using Devlivery.Features.Dashboard;
@@ -33,14 +32,7 @@ public static class Startup
 
         services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
 
-        services.AddMediator(options =>
-        {
-            options.ServiceLifetime = ServiceLifetime.Scoped;
-            options.PipelineBehaviors =
-            [
-                typeof(DomainEventTenantBehavior<,>),
-            ];
-        });
+        services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();

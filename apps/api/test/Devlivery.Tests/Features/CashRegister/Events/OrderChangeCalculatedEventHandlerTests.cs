@@ -24,7 +24,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderChangeCalculatedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
         var orderRepository = Substitute.For<IOrderRepository>();
 
@@ -50,10 +49,10 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         var expectedActor = await actorAccessor.ResolveAsync();
         expectedActor.Id.ShouldNotBe(cashSession.AttendantId);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, actorAccessor, tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, actorAccessor, tenantAccessor, orderRepository);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None);
+        await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert
         cashSession.Movements.Where(x => x.EntryType == CashSessionEntryType.Change)
@@ -64,7 +63,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         changes[0].PaymentMethod.ShouldBe(PaymentMethod.Cash);
 
         await repository.Received(1).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -73,20 +71,18 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderChangeCalculatedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
         var orderRepository = Substitute.For<IOrderRepository>();
 
         var @event = new OrderChangeCalculatedEvent(Guid.NewGuid(), tenantAccessor.Tenant.Id, 0m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None);
+        await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert - nothing recorded
         await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
-        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -95,7 +91,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderChangeCalculatedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
         var orderRepository = Substitute.For<IOrderRepository>();
 
@@ -104,14 +99,13 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
 
         var @event = new OrderChangeCalculatedEvent(Guid.NewGuid(), tenantAccessor.Tenant.Id, 5m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None);
+        await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert
         await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
-        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -120,7 +114,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderChangeCalculatedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
         var orderRepository = Substitute.For<IOrderRepository>();
 
@@ -142,10 +135,10 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
 
         var @event = new OrderChangeCalculatedEvent(order.Id, tenantAccessor.Tenant.Id, 5m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None);
+        await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert - no change recorded
         var changes = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Change).ToList();
@@ -159,7 +152,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderChangeCalculatedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
         var orderRepository = Substitute.For<IOrderRepository>();
 
@@ -176,14 +168,13 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
 
         var @event = new OrderChangeCalculatedEvent(order.Id, tenantAccessor.Tenant.Id, 5m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None);
+        await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert - no update when no active session
         await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
-        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -192,7 +183,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         // Arrange
         var logger = Substitute.For<ILogger<OrderChangeCalculatedEventHandler>>();
         var repository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
         var tenantAccessor = fixture.CreateTenantAccessorMock();
         var orderRepository = Substitute.For<IOrderRepository>();
 
@@ -217,10 +207,10 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
 
         var @event = new OrderChangeCalculatedEvent(order.Id, tenantAccessor.Tenant.Id, 5m, DateTime.UtcNow);
 
-        var handler = new OrderChangeCalculatedEventHandler(logger, repository, unitOfWork, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
+        var handler = new OrderChangeCalculatedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor, orderRepository);
 
         // Act
-        await handler.Handle(@event, CancellationToken.None);
+        await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert - still only one change
         var changes = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Change).ToList();

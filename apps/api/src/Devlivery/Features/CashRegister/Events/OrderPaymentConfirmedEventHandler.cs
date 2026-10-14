@@ -1,35 +1,31 @@
+using Devlivery.Common.Events;
 using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Events;
-using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
-
-using Mediator;
 
 namespace Devlivery.Features.CashRegister.Events;
 
 /// <summary>
 /// Handles OrderPaymentConfirmedEvent to add payments to the CashSession ledger.
 /// This implements the Ledger Pattern - payments are only recorded when confirmed (order delivered).
-/// Tenant context is automatically set by DomainEventTenantBehavior.
 /// </summary>
 public sealed class OrderPaymentConfirmedEventHandler(
     ILogger<OrderPaymentConfirmedEventHandler> logger,
     ICashSessionRepository cashSessionRepository,
-    IUnitOfWork unitOfWork,
     ICurrentUserAccessor currentUserAccessor,
     ITenantAccessor tenantAccessor
-) : INotificationHandler<OrderPaymentConfirmedEvent>
+) : IDomainEventHandler<OrderPaymentConfirmedEvent>
 {
-    public async ValueTask Handle(OrderPaymentConfirmedEvent notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(OrderPaymentConfirmedEvent domainEvent, CancellationToken cancellationToken)
     {
         var actor = await currentUserAccessor.ResolveAsync(cancellationToken);
         logger.LogInformation(
             "Processing OrderPaymentConfirmedEvent for Order {OrderId}, Payment {PaymentId} (Amount: {Amount}, Method: {PaymentMethod}, EstablishmentId: {EstablishmentId})",
-            notification.OrderId,
-            notification.PaymentId,
-            notification.Amount,
-            notification.PaymentMethod,
+            domainEvent.OrderId,
+            domainEvent.PaymentId,
+            domainEvent.Amount,
+            domainEvent.PaymentMethod,
             tenantAccessor.Tenant.Id);
 
         var activeSession = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
@@ -38,27 +34,26 @@ public sealed class OrderPaymentConfirmedEventHandler(
             logger.LogWarning(
                 "No active cash session found for establishment {EstablishmentId}. Payment {PaymentId} will not be recorded in cash register.",
                 tenantAccessor.Tenant.Id,
-                notification.PaymentId);
+                domainEvent.PaymentId);
             return;
         }
 
         // Add payment to the ledger (immutable, idempotent)
         activeSession.AddPayment(
-            orderPaymentId: notification.PaymentId,
-            amount: notification.Amount,
-            paymentMethod: notification.PaymentMethod,
+            orderPaymentId: domainEvent.PaymentId,
+            amount: domainEvent.Amount,
+            paymentMethod: domainEvent.PaymentMethod,
             createdBy: actor.Id,
-            relatedOrderId: notification.OrderId
+            relatedOrderId: domainEvent.OrderId
         );
 
         await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation(
             "Payment {PaymentId} successfully recorded in cash session {SessionId} ledger. Amount: {Amount}, Method: {PaymentMethod}",
-            notification.PaymentId,
+            domainEvent.PaymentId,
             activeSession.Id,
-            notification.Amount,
-            notification.PaymentMethod);
+            domainEvent.Amount,
+            domainEvent.PaymentMethod);
     }
 }

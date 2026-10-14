@@ -1,32 +1,29 @@
+using Devlivery.Common.Events;
 using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
-using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
-
-using Mediator;
 
 namespace Devlivery.Features.CashRegister.Events;
 
 public sealed class OrderStatusChangedEventHandler(
     ILogger<OrderStatusChangedEventHandler> logger,
     ICashSessionRepository cashSessionRepository,
-    IUnitOfWork unitOfWork,
     ICurrentUserAccessor currentUserAccessor,
     ITenantAccessor tenantAccessor
-) : INotificationHandler<OrderStatusChangedEvent>
+) : IDomainEventHandler<OrderStatusChangedEvent>
 {
-    public async ValueTask Handle(OrderStatusChangedEvent notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(OrderStatusChangedEvent domainEvent, CancellationToken cancellationToken)
     {
         var actor = await currentUserAccessor.ResolveAsync(cancellationToken);
-        if (notification.NewStatus != OrderStatus.Canceled)
+        if (domainEvent.NewStatus != OrderStatus.Canceled)
             return;
 
         logger.LogInformation(
             "Processing OrderStatusChangedEvent (Canceled) for Order {OrderId}, Establishment {EstablishmentId}",
-            notification.OrderId,
+            domainEvent.OrderId,
             tenantAccessor.Tenant.Id);
 
         var activeSession = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
@@ -38,13 +35,13 @@ public sealed class OrderStatusChangedEventHandler(
         }
 
         var payments = activeSession.Movements.Where(p =>
-                p.EntryType == CashSessionEntryType.Payment && p.RelatedOrderId == notification.OrderId &&
+                p.EntryType == CashSessionEntryType.Payment && p.RelatedOrderId == domainEvent.OrderId &&
                 p.OrderPaymentId != null)
             .ToList();
 
         if (payments.Count == 0)
         {
-            logger.LogInformation("No payments in active session correlated to order {OrderId}.", notification.OrderId);
+            logger.LogInformation("No payments in active session correlated to order {OrderId}.", domainEvent.OrderId);
             return;
         }
 
@@ -59,13 +56,12 @@ public sealed class OrderStatusChangedEventHandler(
                 paymentMethod: payment.PaymentMethod!.Value,
                 reason: "Pedido Cancelado",
                 createdBy: actor.Id,
-                relatedOrderId: notification.OrderId);
+                relatedOrderId: domainEvent.OrderId);
         }
 
         await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Recorded reversals for canceled order {OrderId} in session {SessionId}.",
-            notification.OrderId, activeSession.Id);
+            domainEvent.OrderId, activeSession.Id);
     }
 }

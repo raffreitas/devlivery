@@ -130,9 +130,6 @@ public sealed class Order : Entity
 
         _payments.Add(payment);
         UpdatedAt = DateTime.UtcNow;
-
-        AddDomainEvent(new OrderPaymentAddedEvent(Id, payment.Id, EstablishmentId, payment.PaymentMethod,
-            payment.Amount, payment.CreatedAt));
     }
 
     public void RemovePayment(Guid paymentId)
@@ -204,8 +201,6 @@ public sealed class Order : Entity
                 else
                 {
                     existing.Update(p.Method, p.Amount);
-                    AddDomainEvent(new OrderPaymentUpdatedEvent(Id, existing.Id, EstablishmentId,
-                        existing.PaymentMethod, existing.Amount, existing.UpdatedAt));
                 }
 
                 existingById.Remove(p.Id.Value);
@@ -227,7 +222,6 @@ public sealed class Order : Entity
                     "Não é possível remover pagamento já confirmado. Realize estorno antes de remover.");
 
             payment.Cancel();
-            AddDomainEvent(new OrderPaymentCancelledEvent(Id, payment.Id, EstablishmentId, DateTime.UtcNow));
         }
 
         UpdatedAt = DateTime.UtcNow;
