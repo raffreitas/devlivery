@@ -1,29 +1,26 @@
+using Devlivery.Common.Events;
 using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
-using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
-
-using Mediator;
 
 namespace Devlivery.Features.CashRegister.Events;
 
 public sealed class OrderDeletedEventHandler(
     ILogger<OrderDeletedEventHandler> logger,
     ICashSessionRepository cashSessionRepository,
-    IUnitOfWork unitOfWork,
     ICurrentUserAccessor currentUserAccessor,
     ITenantAccessor tenantAccessor
-) : INotificationHandler<OrderDeletedEvent>
+) : IDomainEventHandler<OrderDeletedEvent>
 {
-    public async ValueTask Handle(OrderDeletedEvent notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(OrderDeletedEvent domainEvent, CancellationToken cancellationToken)
     {
         var actor = await currentUserAccessor.ResolveAsync(cancellationToken);
         logger.LogInformation(
             "Processing OrderDeletedEvent for Order {OrderId} (Total: {Total}, EstablishmentId: {EstablishmentId})",
-            notification.OrderId,
-            notification.Total,
+            domainEvent.OrderId,
+            domainEvent.Total,
             tenantAccessor.Tenant.Id);
 
         var activeSession = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
@@ -32,20 +29,20 @@ public sealed class OrderDeletedEventHandler(
             logger.LogWarning(
                 "No active cash session found for establishment {EstablishmentId}. No reversal recorded for order {OrderId}.",
                 tenantAccessor.Tenant.Id,
-                notification.OrderId);
+                domainEvent.OrderId);
             return;
         }
 
         // Try to find payments correlated to the deleted order
         var matches = activeSession.Movements
             .Where(p => p.EntryType == CashSessionEntryType.Payment && p.OrderPaymentId is not null &&
-                        (p.RelatedOrderId == notification.OrderId || p.OrderPaymentId == notification.OrderId))
+                        (p.RelatedOrderId == domainEvent.OrderId || p.OrderPaymentId == domainEvent.OrderId))
             .ToList();
 
         if (matches.Count == 0)
         {
             logger.LogInformation("No matching payments found in active session for order {OrderId}.",
-                notification.OrderId);
+                domainEvent.OrderId);
             return;
         }
 
@@ -60,13 +57,12 @@ public sealed class OrderDeletedEventHandler(
                 paymentMethod: payment.PaymentMethod!.Value,
                 reason: "Pedido Excluído",
                 createdBy: actor.Id,
-                relatedOrderId: notification.OrderId);
+                relatedOrderId: domainEvent.OrderId);
         }
 
         await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Reversal entries recorded for order {OrderId} in session {SessionId}",
-            notification.OrderId, activeSession.Id);
+            domainEvent.OrderId, activeSession.Id);
     }
 }

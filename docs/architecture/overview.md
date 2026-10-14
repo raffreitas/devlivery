@@ -35,7 +35,7 @@ Handlers que registram autoria resolvem o usuário do token no banco, dentro do 
 
 ## Eventos e consistência
 
-Eventos de domínio são publicados pelo interceptor do EF Core durante `SaveChanges`. Os handlers de caixa decorrentes de pedidos executam dentro da requisição e recebem o contexto autenticado corrente. Se o processamento migrar para filas ou jobs, o autor e o tenant deverão ser transportados explicitamente no contrato do evento.
+Eventos de domínio são despachados pelo `UnitOfWork` antes da gravação, e as alterações dos handlers são persistidas no mesmo `SaveChanges` da operação que gerou os eventos. Os handlers de caixa decorrentes de pedidos executam dentro da requisição e recebem o contexto autenticado corrente. Se o processamento migrar para filas ou jobs, o autor e o tenant deverão ser transportados explicitamente no contrato do evento.
 
 O banco é a fronteira de persistência compartilhada desta aplicação. Não há broker, cache distribuído ou limitador distribuído neste momento.
 

@@ -1,45 +1,42 @@
+using Devlivery.Common.Events;
 using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Common.Enums;
-using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
-
-using Mediator;
 
 namespace Devlivery.Features.CashRegister.Events;
 
 public sealed class OrderChangeCalculatedEventHandler(
     ILogger<OrderChangeCalculatedEventHandler> logger,
     ICashSessionRepository cashSessionRepository,
-    IUnitOfWork unitOfWork,
     ICurrentUserAccessor currentUserAccessor,
     ITenantAccessor tenantAccessor,
     IOrderRepository orderRepository
-) : INotificationHandler<OrderChangeCalculatedEvent>
+) : IDomainEventHandler<OrderChangeCalculatedEvent>
 {
-    public async ValueTask Handle(OrderChangeCalculatedEvent notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(OrderChangeCalculatedEvent domainEvent, CancellationToken cancellationToken)
     {
         var actor = await currentUserAccessor.ResolveAsync(cancellationToken);
         logger.LogInformation(
             "Processing OrderChangeCalculatedEvent for Order {OrderId} (Change: {Change}, EstablishmentId: {EstablishmentId})",
-            notification.OrderId,
-            notification.Change,
+            domainEvent.OrderId,
+            domainEvent.Change,
             tenantAccessor.Tenant.Id);
 
-        if (notification.Change <= 0)
+        if (domainEvent.Change <= 0)
         {
-            logger.LogDebug("No change to record for Order {OrderId}", notification.OrderId);
+            logger.LogDebug("No change to record for Order {OrderId}", domainEvent.OrderId);
             return;
         }
 
         // Ensure the order exists and that there was a cash payment involved
-        var order = await orderRepository.GetByIdAsync(notification.OrderId, cancellationToken);
+        var order = await orderRepository.GetByIdAsync(domainEvent.OrderId, cancellationToken);
         if (order is null)
         {
-            logger.LogWarning("Order {OrderId} not found; cannot record change.", notification.OrderId);
+            logger.LogWarning("Order {OrderId} not found; cannot record change.", domainEvent.OrderId);
             return;
         }
 
@@ -47,7 +44,7 @@ public sealed class OrderChangeCalculatedEventHandler(
             p.PaymentMethod == PaymentMethod.Cash && p.PaymentStatus != PaymentStatus.Cancelled && p.Amount > 0);
         if (!hasCashPayment)
         {
-            logger.LogDebug("Order {OrderId} has no cash payment; skipping change recording.", notification.OrderId);
+            logger.LogDebug("Order {OrderId} has no cash payment; skipping change recording.", domainEvent.OrderId);
             return;
         }
 
@@ -57,27 +54,26 @@ public sealed class OrderChangeCalculatedEventHandler(
             logger.LogWarning(
                 "No active cash session found for establishment {EstablishmentId}. Change for Order {OrderId} will not be recorded.",
                 tenantAccessor.Tenant.Id,
-                notification.OrderId);
+                domainEvent.OrderId);
             return;
         }
 
         // Idempotency: do not create duplicate change entries for the same order
-        if (activeSession.HasChangeFor(notification.OrderId))
+        if (activeSession.HasChangeFor(domainEvent.OrderId))
         {
             logger.LogInformation("Change entry for Order {OrderId} already exists in session {SessionId}",
-                notification.OrderId, activeSession.Id);
+                domainEvent.OrderId, activeSession.Id);
             return;
         }
 
-        activeSession.AddChange(notification.OrderId, notification.Change, actor.Id, PaymentMethod.Cash);
+        activeSession.AddChange(domainEvent.OrderId, domainEvent.Change, actor.Id, PaymentMethod.Cash);
 
         await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation(
             "Change for Order {OrderId} recorded in cash session {SessionId}. Change: {Change}",
-            notification.OrderId,
+            domainEvent.OrderId,
             activeSession.Id,
-            notification.Change);
+            domainEvent.Change);
     }
 }

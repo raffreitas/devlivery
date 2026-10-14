@@ -1,7 +1,6 @@
 using Devlivery.Domain.Aggregates.Orders;
 using Devlivery.Domain.Aggregates.Orders.Entities;
 using Devlivery.Domain.Aggregates.Orders.Enums;
-using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Aggregates.Orders.ValueObjects;
 using Devlivery.Domain.Common.Enums;
 using Devlivery.Domain.SeedWork;
@@ -16,7 +15,7 @@ namespace Devlivery.Tests.Features.Orders.Domain;
 public sealed class ReconcilePaymentsTests(OrdersUnitTestFixture fixture)
 {
     [Fact]
-    public void ReconcilePayments_Should_Add_New_Payment_And_Raise_Event()
+    public void ReconcilePayments_Should_Add_New_Payment()
     {
         var establishmentId = Guid.NewGuid();
         var item = fixture.CreateOrderItem(establishmentId: establishmentId);
@@ -31,11 +30,10 @@ public sealed class ReconcilePaymentsTests(OrdersUnitTestFixture fixture)
         order.ReconcilePayments(updates);
 
         order.Payments.Count.ShouldBe(2);
-        order.DomainEvents.OfType<OrderPaymentAddedEvent>().Any().ShouldBeTrue();
     }
 
     [Fact]
-    public void ReconcilePayments_Should_Update_Pending_Payment_And_Raise_Event()
+    public void ReconcilePayments_Should_Update_Pending_Payment()
     {
         var establishmentId = Guid.NewGuid();
         var item = fixture.CreateOrderItem(establishmentId: establishmentId);
@@ -57,7 +55,6 @@ public sealed class ReconcilePaymentsTests(OrdersUnitTestFixture fixture)
         var payment = order.Payments.First(p => p.Id == existingPayment.Id);
         payment.PaymentMethod.ShouldBe(PaymentMethod.Pix);
         payment.Amount.ShouldBe(originalAmount + 5m);
-        order.DomainEvents.OfType<OrderPaymentUpdatedEvent>().Any().ShouldBeTrue();
     }
 
     [Fact]
@@ -81,7 +78,7 @@ public sealed class ReconcilePaymentsTests(OrdersUnitTestFixture fixture)
     }
 
     [Fact]
-    public void ReconcilePayments_Should_Cancel_Leftover_Pending_Payments_And_Raise_Event()
+    public void ReconcilePayments_Should_Cancel_Leftover_Pending_Payments()
     {
         var establishmentId = Guid.NewGuid();
         var item = fixture.CreateOrderItem(establishmentId: establishmentId);
@@ -98,8 +95,6 @@ public sealed class ReconcilePaymentsTests(OrdersUnitTestFixture fixture)
 
         order.ReconcilePayments(updates);
 
-        var cancelled = order.DomainEvents.OfType<OrderPaymentCancelledEvent>().Any();
-        cancelled.ShouldBeTrue();
         var remaining = order.Payments.First(p => p.Id == p2.Id);
         remaining.PaymentStatus.ShouldBe(PaymentStatus.Cancelled);
     }

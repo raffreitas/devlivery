@@ -1,22 +1,13 @@
-using Microsoft.EntityFrameworkCore.Storage;
-
 namespace Devlivery.Infrastructure.Persistence;
 
 /// <summary>
-/// Unit of Work interface for managing database transactions.
-/// Ensures Domain Events are dispatched via the DispatchDomainEventsInterceptor.
+/// Unit of Work for persisting the changes of a request.
 /// </summary>
 public interface IUnitOfWork
 {
     /// <summary>
-    /// Saves all changes to the database.
-    /// Domain Events are automatically dispatched by the DispatchDomainEventsInterceptor.
+    /// Dispatches pending domain events (including events raised by their handlers)
+    /// and then persists every tracked change in a single save.
     /// </summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Begins a new database transaction.
-    /// Use this for explicit transaction control when needed.
-    /// </summary>
-    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 }

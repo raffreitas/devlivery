@@ -1,4 +1,6 @@
+using Devlivery.Common.Events;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
+using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Features.CashRegister.Commands.CloseCashSession;
 using Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 using Devlivery.Features.CashRegister.Commands.CreateCashSession;
@@ -19,10 +21,10 @@ public static class CashRegisterFeature
         services.AddScoped<ICashSessionRepository, CashSessionRepository>();
 
         // Register Domain Event Handlers
-        services.AddScoped<OrderPaymentConfirmedEventHandler>();
-        services.AddScoped<OrderDeletedEventHandler>();
-        services.AddScoped<OrderStatusChangedEventHandler>();
-        services.AddScoped<OrderChangeCalculatedEventHandler>();
+        services.AddScoped<IDomainEventHandler<OrderPaymentConfirmedEvent>, OrderPaymentConfirmedEventHandler>();
+        services.AddScoped<IDomainEventHandler<OrderDeletedEvent>, OrderDeletedEventHandler>();
+        services.AddScoped<IDomainEventHandler<OrderStatusChangedEvent>, OrderStatusChangedEventHandler>();
+        services.AddScoped<IDomainEventHandler<OrderChangeCalculatedEvent>, OrderChangeCalculatedEventHandler>();
 
         return services;
     }
