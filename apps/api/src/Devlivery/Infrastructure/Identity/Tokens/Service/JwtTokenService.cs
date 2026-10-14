@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Devlivery.Infrastructure.Identity.Tokens.Service;
 
-internal sealed class JwtTokenService(IOptions<JwtTokenSettings> options) : ITokenService
+internal sealed class JwtTokenService(IOptions<JwtTokenSettings> options, TimeProvider timeProvider) : ITokenService
 {
     private readonly JwtTokenSettings _settings = options.Value;
 
@@ -29,7 +29,7 @@ internal sealed class JwtTokenService(IOptions<JwtTokenSettings> options) : ITok
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(_settings.ExpirationInMinutes),
+            Expires = timeProvider.GetUtcNow().UtcDateTime.AddMinutes(_settings.ExpirationInMinutes),
             Issuer = _settings.Issuer,
             Audience = _settings.Audience,
             SigningCredentials = credentials

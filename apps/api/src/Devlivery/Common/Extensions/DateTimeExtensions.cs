@@ -1,11 +1,11 @@
 ﻿using System.Linq.Expressions;
 
+using Devlivery.Common.Time;
+
 namespace Devlivery.Common.Extensions;
 
 public static class DateTimeExtensions
 {
-    private static readonly TimeZoneInfo BrazilTimeZone = TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
-
     /// <summary>
     /// Converts a local Brazil date (BRT/BRST) to UTC start of day (00:00:00 local time → UTC).
     /// Use this for date range filtering when dates come from Brazilian timezone.
@@ -13,7 +13,7 @@ public static class DateTimeExtensions
     public static DateTime ToBrazilStartOfDayUtc(this DateTime date)
     {
         var localStart = DateTime.SpecifyKind(date.Date, DateTimeKind.Unspecified);
-        return TimeZoneInfo.ConvertTimeToUtc(localStart, BrazilTimeZone);
+        return TimeZoneInfo.ConvertTimeToUtc(localStart, BrazilTime.TimeZone);
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ public static class DateTimeExtensions
     public static DateTime ToBrazilEndOfDayExclusiveUtc(this DateTime date)
     {
         var localEnd = DateTime.SpecifyKind(date.Date.AddDays(1), DateTimeKind.Unspecified);
-        return TimeZoneInfo.ConvertTimeToUtc(localEnd, BrazilTimeZone);
+        return TimeZoneInfo.ConvertTimeToUtc(localEnd, BrazilTime.TimeZone);
     }
 
     /// <summary>

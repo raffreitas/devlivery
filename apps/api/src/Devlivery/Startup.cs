@@ -14,10 +14,10 @@ using Devlivery.Infrastructure.Identity;
 using Devlivery.Infrastructure.Observability;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
-using Devlivery.Infrastructure.Time;
-using Devlivery.Infrastructure.Time.Abstractions;
 
 using FluentValidation;
+
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Devlivery;
 
@@ -40,7 +40,7 @@ public static class Startup
         services.AddHealthChecksConfiguration();
         services.AddHttpContextAccessor();
 
-        services.AddSingleton<IDateTimeProvider, BrazilDateTimeProvider>();
+        services.TryAddSingleton(TimeProvider.System);
 
         // OpenAPI/Swagger
         services.AddOpenApiConfiguration();
