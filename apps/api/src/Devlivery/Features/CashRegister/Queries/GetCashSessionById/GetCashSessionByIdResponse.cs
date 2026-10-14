@@ -57,7 +57,6 @@ public sealed record GetCashSessionByIdResponse(
                 m.Reason))
             .ToArray();
 
-        // Calcular total de pedidos líquidos (payments - refunds)
         var totalPayments = cashSession.Movements.Count(m => m.EntryType == CashSessionEntryType.Payment);
         var totalRefunds = cashSession.Movements.Count(m => m.EntryType == CashSessionEntryType.Refund);
         var totalOrders = totalPayments - totalRefunds;

@@ -22,8 +22,6 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
             .Include(o => o.Payments)
             .AsQueryable();
 
-        // Date filtering: Convert local Brazil time (BRT/BRST) to UTC before querying
-        // Database stores all dates in UTC, but filters are expected in local time (America/Sao_Paulo)
         ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
 
         if (query.PaymentMethod is not null)

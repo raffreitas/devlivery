@@ -32,7 +32,6 @@ public sealed class OrderChangeCalculatedEventHandler(
             return;
         }
 
-        // Ensure the order exists and that there was a cash payment involved
         var order = await orderRepository.GetByIdAsync(domainEvent.OrderId, cancellationToken);
         if (order is null)
         {

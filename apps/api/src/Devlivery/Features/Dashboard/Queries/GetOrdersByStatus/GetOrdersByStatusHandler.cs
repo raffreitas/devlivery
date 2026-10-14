@@ -20,7 +20,6 @@ public sealed class GetOrdersByStatusHandler(ApplicationDbContext dbContext)
             .AsNoTracking()
             .AsQueryable();
 
-        // Apply date filter
         ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
 
         var orders = await ordersQuery.ToListAsync(cancellationToken);

@@ -51,7 +51,6 @@ public sealed class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.Property(e => e.UpdatedAt)
             .IsRequired();
 
-        // Relationships
         builder.HasOne<Category>()
             .WithMany()
             .HasForeignKey(e => e.CategoryId)
@@ -62,7 +61,6 @@ public sealed class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
             .HasForeignKey(e => e.EstablishmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Indexes para performance
         builder.HasIndex(x => x.EstablishmentId);
         builder.HasIndex(e => e.DueDate);
         builder.HasIndex(e => e.Status);

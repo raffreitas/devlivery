@@ -33,7 +33,6 @@ public sealed class CashSessionMovementConfiguration : IEntityTypeConfiguration<
             .HasForeignKey(x => x.EstablishmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Indexes
         builder.HasIndex(x => x.EstablishmentId);
         builder.HasIndex(x => x.CashSessionId);
         builder.HasIndex(x => x.CreatedAt);

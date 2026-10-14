@@ -21,15 +21,12 @@ public sealed class GetSalesOverTimeHandler(ApplicationDbContext dbContext)
             .AsNoTracking()
             .AsQueryable();
 
-        // Apply date filter
         ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
 
-        // Filter out canceled orders
         ordersQuery = ordersQuery.Where(o => o.Status != OrderStatus.Canceled);
 
         var orders = await ordersQuery.ToListAsync(cancellationToken);
 
-        // Group by date (using local Brazil timezone)
         var salesByDate = orders
             .GroupBy(o => o.CreatedAt.ToBrazilTime().Date)
             .Select(g => new
@@ -40,7 +37,6 @@ public sealed class GetSalesOverTimeHandler(ApplicationDbContext dbContext)
             .OrderBy(x => x.Date)
             .ToList();
 
-        // Format dates as ISO date string (yyyy-MM-dd)
         var data = salesByDate
             .Select(x => new SalesTimeSeriesItem(
                 x.Date.ToString("yyyy-MM-dd"),

@@ -2,17 +2,6 @@ using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.Orders.Entities;
 
-/// <summary>
-/// Child Entity of Order aggregate.
-/// OrderItem HAS identity within the Order context, but cannot exist independently.
-/// It is NOT a Value Object because it needs to be tracked and updated individually.
-/// 
-/// DDD Pattern: Child Entity
-/// - Has its own Id for tracking within the aggregate
-/// - Only accessible through Order (aggregate root)
-/// - No repository of its own
-/// - Lifecycle controlled by Order
-/// </summary>
 public sealed class OrderItem : Entity
 {
     public Guid ProductId { get; private set; }
@@ -22,7 +11,6 @@ public sealed class OrderItem : Entity
     public string? Notes { get; private set; }
     public decimal TotalPrice => UnitPrice * Quantity;
 
-    // EF Core constructor
     private OrderItem() { }
 
     public OrderItem(Guid productId, Guid establishmentId, int quantity, decimal unitPrice, string? notes)

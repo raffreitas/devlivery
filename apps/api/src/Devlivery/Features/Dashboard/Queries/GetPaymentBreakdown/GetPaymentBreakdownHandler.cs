@@ -22,10 +22,8 @@ public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
             .AsNoTracking()
             .AsQueryable();
 
-        // Apply date filter
         ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
 
-        // Filter out canceled orders
         ordersQuery = ordersQuery.Where(o => o.Status != OrderStatus.Canceled);
 
         var orders = await ordersQuery.ToListAsync(cancellationToken);
@@ -38,7 +36,6 @@ public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
                 g => g.Key,
                 g => g.Sum(o => o.Amount));
 
-        // Ensure all payment methods are present with 0 value
         var allMethods = Enum.GetValues<PaymentMethod>();
         var completeBreakdown = allMethods.ToDictionary(
             method => method,

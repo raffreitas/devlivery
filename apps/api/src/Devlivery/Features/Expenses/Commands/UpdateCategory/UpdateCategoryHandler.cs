@@ -22,7 +22,6 @@ public sealed class UpdateCategoryHandler(
             return Result.Fail(new NotFoundError("Categoria não encontrada."));
         }
 
-        // Verifica se o nome já existe (se estiver sendo alterado)
         if (command.Name != null && command.Name != category.Name)
         {
             var existingCategory = await categoryRepository

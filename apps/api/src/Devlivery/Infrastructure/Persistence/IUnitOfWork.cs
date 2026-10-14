@@ -1,8 +1,5 @@
 namespace Devlivery.Infrastructure.Persistence;
 
-/// <summary>
-/// Unit of Work for persisting the changes of a request.
-/// </summary>
 public interface IUnitOfWork
 {
     /// <summary>

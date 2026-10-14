@@ -9,9 +9,6 @@ public interface IDomainEventDispatcher
     Task DispatchAsync(IDomainEvent domainEvent, CancellationToken cancellationToken = default);
 }
 
-/// <summary>
-/// Dispatches domain events to every registered <see cref="IDomainEventHandler{TEvent}"/>, sequentially.
-/// </summary>
 public sealed class DomainEventDispatcher(IServiceProvider serviceProvider) : IDomainEventDispatcher
 {
     private static readonly ConcurrentDictionary<Type, EventDispatcher> Dispatchers = new();
