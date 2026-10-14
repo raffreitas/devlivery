@@ -1,10 +1,9 @@
 using Devlivery.Common.Extensions;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +12,7 @@ namespace Devlivery.Features.Dashboard.Queries.GetDashboardStats;
 public sealed class GetDashboardStatsHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetDashboardStatsQuery, Result<GetDashboardStatsResponse>>
 {
-    public async ValueTask<Result<GetDashboardStatsResponse>> Handle(
+    public async Task<Result<GetDashboardStatsResponse>> HandleAsync(
         GetDashboardStatsQuery query,
         CancellationToken cancellationToken)
     {

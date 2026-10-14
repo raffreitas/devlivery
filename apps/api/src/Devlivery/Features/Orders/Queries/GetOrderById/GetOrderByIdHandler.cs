@@ -1,9 +1,8 @@
 using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +11,7 @@ namespace Devlivery.Features.Orders.Queries.GetOrderById;
 public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetOrderByIdQuery, Result<GetOrderByIdResponse>>
 {
-    public async ValueTask<Result<GetOrderByIdResponse>> Handle(
+    public async Task<Result<GetOrderByIdResponse>> HandleAsync(
         GetOrderByIdQuery query,
         CancellationToken cancellationToken)
     {

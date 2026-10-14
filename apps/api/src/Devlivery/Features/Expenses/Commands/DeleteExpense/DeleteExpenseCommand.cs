@@ -1,12 +1,8 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.DeleteExpense;
 
-public sealed record DeleteExpenseCommand(Guid ExpenseId) : ICommand<Result>;
+public sealed record DeleteExpenseCommand(Guid ExpenseId);
 
 public sealed class DeleteExpenseCommandValidator : AbstractValidator<DeleteExpenseCommand>
 {

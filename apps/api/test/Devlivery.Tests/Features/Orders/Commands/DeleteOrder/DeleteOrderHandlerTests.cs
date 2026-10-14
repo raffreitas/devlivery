@@ -24,7 +24,7 @@ public sealed class DeleteOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var command = new DeleteOrderCommand(Guid.NewGuid());
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is NotFoundError);
@@ -43,7 +43,7 @@ public sealed class DeleteOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var command = new DeleteOrderCommand(order.Id);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
         await repository.Received(1).RemoveAsync(order, Arg.Any<CancellationToken>());

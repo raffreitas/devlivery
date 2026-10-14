@@ -73,7 +73,7 @@ public sealed class GetAllExpensesHandlerTests : IAsyncLifetime
         var handler = CreateHandler(tenantId, today);
 
         // Act
-        var result = await handler.Handle(new GetAllExpensesQuery(), CancellationToken.None);
+        var result = await handler.HandleAsync(new GetAllExpensesQuery(), CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -142,7 +142,7 @@ public sealed class GetAllExpensesHandlerTests : IAsyncLifetime
         var handler = CreateHandler(tenantId, today);
 
         // Act
-        var result = await handler.Handle(new GetAllExpensesQuery(), CancellationToken.None);
+        var result = await handler.HandleAsync(new GetAllExpensesQuery(), CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -201,7 +201,7 @@ public sealed class GetAllExpensesHandlerTests : IAsyncLifetime
         var handler = CreateHandler(tenantId, today);
 
         // Act
-        var result = await handler.Handle(new GetAllExpensesQuery(), CancellationToken.None);
+        var result = await handler.HandleAsync(new GetAllExpensesQuery(), CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -264,7 +264,7 @@ public sealed class GetAllExpensesHandlerTests : IAsyncLifetime
         var handler = CreateHandler(tenantId, today);
 
         // Act
-        var result = await handler.Handle(new GetAllExpensesQuery(), CancellationToken.None);
+        var result = await handler.HandleAsync(new GetAllExpensesQuery(), CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

@@ -1,11 +1,10 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Products;
 using Devlivery.Domain.Aggregates.Products.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
 
 using FluentResults;
-
-using Mediator;
 
 namespace Devlivery.Features.Products.Commands.CreateProduct;
 
@@ -14,7 +13,7 @@ public sealed class CreateProductHandler(
     IUnitOfWork unitOfWork,
     ITenantAccessor tenantAccessor) : ICommandHandler<CreateProductCommand, Result<CreateProductResponse>>
 {
-    public async ValueTask<Result<CreateProductResponse>> Handle(
+    public async Task<Result<CreateProductResponse>> HandleAsync(
         CreateProductCommand command,
         CancellationToken cancellationToken)
     {

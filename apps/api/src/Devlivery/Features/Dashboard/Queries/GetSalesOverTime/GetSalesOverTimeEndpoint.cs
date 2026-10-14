@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetSalesOverTime;
 
@@ -14,11 +15,14 @@ public static class GetSalesOverTimeEndpoint
             .Produces<ApiResource<GetSalesOverTimeResponse>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<IResult> Handle(DateTime? startDate, DateTime? endDate, ISender sender,
+    private static async Task<IResult> Handle(
+        DateTime? startDate,
+        DateTime? endDate,
+        IQueryHandler<GetSalesOverTimeQuery, Result<GetSalesOverTimeResponse>> handler,
         CancellationToken ct)
     {
         var query = new GetSalesOverTimeQuery(startDate, endDate);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
 
         return result.ToOk();
     }

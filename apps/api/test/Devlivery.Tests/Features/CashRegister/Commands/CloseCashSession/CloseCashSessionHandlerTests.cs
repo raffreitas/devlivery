@@ -37,7 +37,7 @@ public sealed class CloseCashSessionHandlerTests : IClassFixture<CashRegisterUni
         var command = new CloseCashSessionCommand(cashSession.Id, 120.50m, "Fechamento");
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -56,7 +56,7 @@ public sealed class CloseCashSessionHandlerTests : IClassFixture<CashRegisterUni
         var command = new CloseCashSessionCommand(cashSession.Id, 80m, null);
 
         // Act
-        await _handler.Handle(command, CancellationToken.None);
+        await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         await _cashSessionRepository.Received(1).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
@@ -73,7 +73,7 @@ public sealed class CloseCashSessionHandlerTests : IClassFixture<CashRegisterUni
         var command = new CloseCashSessionCommand(Guid.NewGuid(), 50m, null);
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -94,7 +94,7 @@ public sealed class CloseCashSessionHandlerTests : IClassFixture<CashRegisterUni
         var command = new CloseCashSessionCommand(cashSession.Id, 50m, null);
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();

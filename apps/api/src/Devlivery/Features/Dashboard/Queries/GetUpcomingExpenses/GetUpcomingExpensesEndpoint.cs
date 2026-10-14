@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetUpcomingExpenses;
 
@@ -14,10 +15,13 @@ public static class GetUpcomingExpensesEndpoint
             .Produces<ApiResource<GetUpcomingExpensesResponse>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<IResult> Handle(int days, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        int days,
+        IQueryHandler<GetUpcomingExpensesQuery, Result<GetUpcomingExpensesResponse>> handler,
+        CancellationToken ct)
     {
         var query = new GetUpcomingExpensesQuery(days);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
 
         return result.ToOk();
     }

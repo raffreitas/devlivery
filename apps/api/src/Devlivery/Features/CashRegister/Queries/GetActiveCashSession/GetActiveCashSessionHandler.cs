@@ -1,10 +1,9 @@
 using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +12,7 @@ namespace Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
 public sealed class GetActiveCashSessionHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetActiveCashSessionQuery, Result<GetActiveCashSessionResponse>>
 {
-    public async ValueTask<Result<GetActiveCashSessionResponse>> Handle(GetActiveCashSessionQuery query,
+    public async Task<Result<GetActiveCashSessionResponse>> HandleAsync(GetActiveCashSessionQuery query,
         CancellationToken cancellationToken)
     {
         var cashSession = await dbContext.CashSessions

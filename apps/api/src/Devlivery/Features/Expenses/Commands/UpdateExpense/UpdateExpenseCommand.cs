@@ -1,8 +1,4 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.UpdateExpense;
 
@@ -13,7 +9,7 @@ public sealed record UpdateExpenseCommand(
     DateOnly? DueDate,
     string? Supplier,
     string? Description,
-    DateOnly? PaymentDate = null) : ICommand<Result>;
+    DateOnly? PaymentDate = null);
 
 public sealed class UpdateExpenseCommandValidator : AbstractValidator<UpdateExpenseCommand>
 {

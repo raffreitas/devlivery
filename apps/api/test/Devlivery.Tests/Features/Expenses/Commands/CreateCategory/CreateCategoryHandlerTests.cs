@@ -28,7 +28,7 @@ public sealed class CreateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         var command = new CreateCategoryCommand("Nome");
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -52,7 +52,7 @@ public sealed class CreateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         var command = new CreateCategoryCommand("Nome", Guid.NewGuid());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -77,7 +77,7 @@ public sealed class CreateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         var command = new CreateCategoryCommand("Nome");
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

@@ -1,9 +1,8 @@
 using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +11,7 @@ namespace Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 public sealed class GetCashSessionByIdHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetCashSessionByIdQuery, Result<GetCashSessionByIdResponse>>
 {
-    public async ValueTask<Result<GetCashSessionByIdResponse>> Handle(GetCashSessionByIdQuery query,
+    public async Task<Result<GetCashSessionByIdResponse>> HandleAsync(GetCashSessionByIdQuery query,
         CancellationToken cancellationToken)
     {
         var cashSession = await dbContext.CashSessions

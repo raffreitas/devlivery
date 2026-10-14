@@ -1,9 +1,8 @@
 using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +11,7 @@ namespace Devlivery.Features.Expenses.Queries.GetExpenseById;
 public sealed class GetExpenseByIdHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetExpenseByIdQuery, Result<GetExpenseByIdResponse>>
 {
-    public async ValueTask<Result<GetExpenseByIdResponse>> Handle(GetExpenseByIdQuery query,
+    public async Task<Result<GetExpenseByIdResponse>> HandleAsync(GetExpenseByIdQuery query,
         CancellationToken cancellationToken)
     {
         var expense = await dbContext.Expenses

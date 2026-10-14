@@ -1,10 +1,9 @@
 using Devlivery.Common.Extensions;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +12,7 @@ namespace Devlivery.Features.Orders.Queries.GetAllOrders;
 public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetAllOrdersQuery, Result<List<GetAllOrdersResponse>>>
 {
-    public async ValueTask<Result<List<GetAllOrdersResponse>>> Handle(
+    public async Task<Result<List<GetAllOrdersResponse>>> HandleAsync(
         GetAllOrdersQuery query,
         CancellationToken cancellationToken)
     {

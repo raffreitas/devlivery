@@ -1,10 +1,6 @@
 ﻿using Devlivery.Domain.Common.Enums;
 
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.CreateOrder;
 
@@ -16,7 +12,7 @@ public sealed record CreateOrderCommand(
     OrderPaymentDto[] Payments,
     decimal DeliveryFee = 0,
     string? DeliveryReference = null,
-    string? Notes = null) : ICommand<Result<CreateOrderResponse>>;
+    string? Notes = null);
 
 public sealed record OrderItemDto(Guid ProductId, int Quantity, string? Notes);
 public sealed record OrderPaymentDto(PaymentMethod Method, decimal Amount);

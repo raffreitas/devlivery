@@ -1,8 +1,4 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.CreateExpense;
 
@@ -12,7 +8,7 @@ public sealed record CreateExpenseCommand(
     DateOnly DueDate,
     string? Supplier,
     string? Description,
-    DateOnly? PaymentDate) : ICommand<Result<CreateExpenseResponse>>;
+    DateOnly? PaymentDate);
 
 public sealed class CreateExpenseCommandValidator : AbstractValidator<CreateExpenseCommand>
 {

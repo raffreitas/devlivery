@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetExpensesOverTime;
 
@@ -17,11 +18,11 @@ public static class GetExpensesOverTimeEndpoint
     private static async Task<IResult> Handle(
         DateOnly? startDate,
         DateOnly? endDate,
-        ISender sender,
+        IQueryHandler<GetExpensesOverTimeQuery, Result<GetExpensesOverTimeResponse>> handler,
         CancellationToken ct)
     {
         var query = new GetExpensesOverTimeQuery(startDate, endDate);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
 
         return result.ToOk();
     }

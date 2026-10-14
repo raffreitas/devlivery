@@ -20,7 +20,7 @@ flowchart LR
 
 A composição ocorre em `Startup.cs`. As features ficam em `src/Devlivery/Features` e agrupam endpoint, comando ou consulta, validação e handler. O domínio em `Domain` permanece independente de HTTP e JWT. `Infrastructure` implementa persistência, autenticação, tenancy, observabilidade e representação HTTP.
 
-O projeto usa Minimal APIs e o mediator gerado em compilação. EF Core atende escrita e consultas que precisam do tracking; Dapper está disponível para consultas diretas. Há dois contextos no mesmo PostgreSQL:
+O projeto usa Minimal APIs. Cada endpoint recebe por injeção a interface do seu handler (`ICommandHandler<TCommand, TResponse>` ou `IQueryHandler<TQuery, TResponse>`, em `Common/Handlers`); handlers de commands, queries e eventos de domínio são registrados por varredura do assembly com Scrutor. EF Core atende escrita e consultas que precisam do tracking; Dapper está disponível para consultas diretas. Há dois contextos no mesmo PostgreSQL:
 
 - `ApplicationDbContext`: dados de negócio e migrações da aplicação;
 - `ApplicationIdentityDbContext`: tabelas do ASP.NET Core Identity no schema `identity`.

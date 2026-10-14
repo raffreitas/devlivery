@@ -37,7 +37,7 @@ public sealed class CreateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -69,7 +69,7 @@ public sealed class CreateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -106,7 +106,7 @@ public sealed class CreateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -151,7 +151,7 @@ public sealed class CreateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -191,7 +191,7 @@ public sealed class CreateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -227,7 +227,7 @@ public sealed class CreateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

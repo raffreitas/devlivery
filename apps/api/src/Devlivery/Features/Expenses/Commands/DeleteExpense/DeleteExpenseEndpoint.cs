@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Expenses.Commands.DeleteExpense;
 
@@ -16,11 +17,11 @@ public static class DeleteExpenseEndpoint
 
     private static async Task<IResult> Handle(
         Guid expenseId,
-        ISender sender,
+        ICommandHandler<DeleteExpenseCommand, Result> handler,
         CancellationToken ct)
     {
         var command = new DeleteExpenseCommand(expenseId);
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
         return result.ToNoContent();
     }
 }

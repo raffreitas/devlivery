@@ -1,15 +1,11 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.UpdateCategory;
 
 public sealed record UpdateCategoryCommand(
     Guid CategoryId,
     string? Name,
-    bool? IsActive) : ICommand<Result>;
+    bool? IsActive);
 
 public sealed class UpdateCategoryCommandValidator : AbstractValidator<UpdateCategoryCommand>
 {

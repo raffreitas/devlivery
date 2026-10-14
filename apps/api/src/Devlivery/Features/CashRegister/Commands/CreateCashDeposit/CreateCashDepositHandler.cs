@@ -1,3 +1,4 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Common.Errors;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
@@ -6,8 +7,6 @@ using Devlivery.Infrastructure.Persistence;
 
 using FluentResults;
 
-using Mediator;
-
 namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
 public sealed class CreateCashDepositHandler(
@@ -15,7 +14,7 @@ public sealed class CreateCashDepositHandler(
     ICurrentUserAccessor currentUserAccessor,
     IUnitOfWork unitOfWork) : ICommandHandler<CreateCashDepositCommand, Result<CreateCashDepositResponse>>
 {
-    public async ValueTask<Result<CreateCashDepositResponse>> Handle(
+    public async Task<Result<CreateCashDepositResponse>> HandleAsync(
         CreateCashDepositCommand command,
         CancellationToken cancellationToken)
     {

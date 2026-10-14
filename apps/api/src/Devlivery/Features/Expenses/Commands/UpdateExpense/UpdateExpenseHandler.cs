@@ -1,10 +1,9 @@
 using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Expenses.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 
 using FluentResults;
-
-using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.UpdateExpense;
 
@@ -13,7 +12,7 @@ public sealed class UpdateExpenseHandler(
     ICategoryRepository categoryRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<UpdateExpenseCommand, Result>
 {
-    public async ValueTask<Result> Handle(
+    public async Task<Result> HandleAsync(
         UpdateExpenseCommand command,
         CancellationToken cancellationToken)
     {

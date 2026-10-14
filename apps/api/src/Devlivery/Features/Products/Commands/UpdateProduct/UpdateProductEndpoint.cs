@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Products.Commands.UpdateProduct;
 
@@ -22,7 +23,10 @@ public static class UpdateProductEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<IResult> Handle(Guid id, UpdateProductRequest request, ISender sender,
+    private static async Task<IResult> Handle(
+        Guid id,
+        UpdateProductRequest request,
+        ICommandHandler<UpdateProductCommand, Result> handler,
         CancellationToken ct)
     {
         var command = new UpdateProductCommand(
@@ -33,7 +37,7 @@ public static class UpdateProductEndpoint
             request.Category,
             request.Available);
 
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
 
         return result.ToNoContent();
     }

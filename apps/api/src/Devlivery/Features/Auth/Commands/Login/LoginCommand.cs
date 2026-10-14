@@ -2,11 +2,9 @@
 
 using FluentValidation;
 
-using Mediator;
-
 namespace Devlivery.Features.Auth.Commands.Login;
 
-public sealed record LoginCommand(string Email, string Password) : ICommand<Result<LoginResponse>>;
+public sealed record LoginCommand(string Email, string Password);
 
 public sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
 {

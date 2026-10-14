@@ -1,10 +1,6 @@
 ﻿using Devlivery.Domain.Common.Enums;
 
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
@@ -17,7 +13,7 @@ public sealed record UpdateOrderCommand(
     OrderPaymentDto[] Payments,
     decimal DeliveryFee = 0,
     string? DeliveryReference = null,
-    string? Notes = null) : ICommand<Result>;
+    string? Notes = null);
 
 public sealed record OrderItemDto(Guid ProductId, int Quantity, string? Notes);
 

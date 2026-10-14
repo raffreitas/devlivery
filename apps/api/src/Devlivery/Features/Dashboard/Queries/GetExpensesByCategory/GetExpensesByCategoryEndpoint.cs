@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetExpensesByCategory;
 
@@ -14,11 +15,14 @@ public static class GetExpensesByCategoryEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<IResult> Handle(DateOnly? startDate, DateOnly? endDate, ISender sender,
+    private static async Task<IResult> Handle(
+        DateOnly? startDate,
+        DateOnly? endDate,
+        IQueryHandler<GetExpensesByCategoryQuery, Result<GetExpensesByCategoryResponse>> handler,
         CancellationToken ct)
     {
         var query = new GetExpensesByCategoryQuery(startDate, endDate);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
 
         return result.ToOk();
     }

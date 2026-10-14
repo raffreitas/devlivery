@@ -1,3 +1,4 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Common.Errors;
 using Devlivery.Domain.Aggregates.CashRegister;
@@ -7,8 +8,6 @@ using Devlivery.Infrastructure.Tenancy;
 
 using FluentResults;
 
-using Mediator;
-
 namespace Devlivery.Features.CashRegister.Commands.CreateCashSession;
 
 public sealed class CreateCashSessionHandler(
@@ -17,7 +16,7 @@ public sealed class CreateCashSessionHandler(
     IUnitOfWork unitOfWork,
     ITenantAccessor tenantAccessor) : ICommandHandler<CreateCashSessionCommand, Result<CreateCashSessionResponse>>
 {
-    public async ValueTask<Result<CreateCashSessionResponse>> Handle(
+    public async Task<Result<CreateCashSessionResponse>> HandleAsync(
         CreateCashSessionCommand command,
         CancellationToken cancellationToken)
     {

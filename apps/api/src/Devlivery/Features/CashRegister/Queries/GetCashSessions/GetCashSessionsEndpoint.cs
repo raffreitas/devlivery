@@ -1,8 +1,9 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessions;
 
@@ -15,11 +16,15 @@ public static class GetCashSessionsEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<IResult> Handle(DateTime? start, DateTime? end, CashSessionStatus? status, ISender sender,
+    private static async Task<IResult> Handle(
+        DateTime? start,
+        DateTime? end,
+        CashSessionStatus? status,
+        IQueryHandler<GetCashSessionsQuery, Result<GetCashSessionsResponse[]>> handler,
         CancellationToken ct)
     {
         var query = new GetCashSessionsQuery(start, end, status);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
         return result.ToOk();
     }
 }

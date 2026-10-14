@@ -1,8 +1,9 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Common.Enums;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Orders.Queries.GetAllOrders;
 
@@ -17,12 +18,15 @@ public static class GetAllOrdersEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<IResult> Handle(DateTime? start, DateTime? end, PaymentMethod? paymentMethod,
-        ISender sender,
+    private static async Task<IResult> Handle(
+        DateTime? start,
+        DateTime? end,
+        PaymentMethod? paymentMethod,
+        IQueryHandler<GetAllOrdersQuery, Result<List<GetAllOrdersResponse>>> handler,
         CancellationToken ct)
     {
         var query = new GetAllOrdersQuery(start, end, paymentMethod);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
         return result.ToOk();
     }
 }

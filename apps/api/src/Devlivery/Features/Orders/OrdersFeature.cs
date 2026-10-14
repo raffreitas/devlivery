@@ -16,8 +16,6 @@ public static class OrdersFeature
         // Register Repository
         services.AddScoped<IOrderRepository, OrderRepository>();
 
-        // Commands and Queries handlers are automatically discovered by Mediator
-        // No manual registration needed when using ICommandHandler/IQueryHandler
         return services;
     }
 

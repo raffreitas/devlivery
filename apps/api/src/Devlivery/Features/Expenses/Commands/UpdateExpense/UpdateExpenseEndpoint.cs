@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Expenses.Commands.UpdateExpense;
 
@@ -15,7 +16,10 @@ public static class UpdateExpenseEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<IResult> Handle(Guid expenseId, UpdateExpenseRequest request, ISender sender,
+    private static async Task<IResult> Handle(
+        Guid expenseId,
+        UpdateExpenseRequest request,
+        ICommandHandler<UpdateExpenseCommand, Result> handler,
         CancellationToken ct)
     {
         var command = new UpdateExpenseCommand(
@@ -28,7 +32,7 @@ public static class UpdateExpenseEndpoint
             request.PaymentDate
         );
 
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
 
         return result.ToNoContent();
     }

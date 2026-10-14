@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Expenses.Queries.GetAllExpenseCategories;
 
@@ -15,11 +16,11 @@ public static class GetAllExpenseCategoriesEndpoint
     }
 
     private static async Task<IResult> Handle(
-        ISender sender,
+        IQueryHandler<GetAllExpenseCategoriesQuery, Result<List<GetAllExpenseCategoriesResponse>>> handler,
         CancellationToken ct)
     {
         var query = new GetAllExpenseCategoriesQuery();
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
         return result.ToOk();
     }
 }

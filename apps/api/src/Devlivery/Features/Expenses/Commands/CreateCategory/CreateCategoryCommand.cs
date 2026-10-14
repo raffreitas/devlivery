@@ -1,14 +1,10 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.CreateCategory;
 
 public sealed record CreateCategoryCommand(
     string Name,
-    Guid? ParentCategoryId = null) : ICommand<Result<CreateCategoryResponse>>;
+    Guid? ParentCategoryId = null);
 
 public sealed class CreateCategoryCommandValidator : AbstractValidator<CreateCategoryCommand>
 {

@@ -1,9 +1,8 @@
 using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +11,7 @@ namespace Devlivery.Features.Products.Queries.GetProductById;
 public sealed class GetProductByIdHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetProductByIdQuery, Result<GetProductByIdResponse>>
 {
-    public async ValueTask<Result<GetProductByIdResponse>> Handle(
+    public async Task<Result<GetProductByIdResponse>> HandleAsync(
         GetProductByIdQuery query,
         CancellationToken cancellationToken)
     {

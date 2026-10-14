@@ -1,10 +1,5 @@
 using Devlivery.Domain.Common.Enums;
 
-using FluentResults;
-
-using Mediator;
-
 namespace Devlivery.Features.Orders.Queries.GetAllOrders;
 
-public sealed record GetAllOrdersQuery(DateTime? StartDate, DateTime? EndDate, PaymentMethod? PaymentMethod)
-    : IQuery<Result<List<GetAllOrdersResponse>>>;
+public sealed record GetAllOrdersQuery(DateTime? StartDate, DateTime? EndDate, PaymentMethod? PaymentMethod);

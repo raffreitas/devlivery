@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionById;
 
@@ -14,10 +15,13 @@ public static class GetCashSessionByIdEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<IResult> Handle(Guid id, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        Guid id,
+        IQueryHandler<GetCashSessionByIdQuery, Result<GetCashSessionByIdResponse>> handler,
+        CancellationToken ct)
     {
         var query = new GetCashSessionByIdQuery(id);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
         return result.ToOk();
     }
 }
