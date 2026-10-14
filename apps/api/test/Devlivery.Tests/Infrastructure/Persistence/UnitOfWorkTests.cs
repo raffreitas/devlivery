@@ -39,7 +39,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
     private Guid TenantId => _establishment.Id;
 
     [Fact]
-    public async Task SaveChangesAsync_Should_Persist_Order_And_Cash_Movements_In_Single_Save()
+    public async Task CommitAsync_Should_Persist_Order_And_Cash_Movements_In_Single_Save()
     {
         // Arrange
         await using var provider = BuildServiceProvider(services => services.AddCashRegisterEventHandlers());
@@ -53,7 +53,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
             order!.UpdateStatus(OrderStatus.Delivered);
 
             _saveCounter.Reset();
-            await scope.ServiceProvider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
+            await scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync();
         }
 
         // Assert
@@ -76,7 +76,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
     }
 
     [Fact]
-    public async Task SaveChangesAsync_Should_Persist_Nothing_When_Handler_Throws()
+    public async Task CommitAsync_Should_Persist_Nothing_When_Handler_Throws()
     {
         // Arrange
         await using var provider = BuildServiceProvider(services =>
@@ -95,7 +95,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
 
             _saveCounter.Reset();
             await Should.ThrowAsync<InvalidOperationException>(() =>
-                scope.ServiceProvider.GetRequiredService<IUnitOfWork>().SaveChangesAsync());
+                scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync());
         }
 
         // Assert
@@ -109,7 +109,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
     }
 
     [Fact]
-    public async Task SaveChangesAsync_Should_Dispatch_Events_Raised_By_Handlers_And_Clear_Them()
+    public async Task CommitAsync_Should_Dispatch_Events_Raised_By_Handlers_And_Clear_Them()
     {
         // Arrange
         var recorder = new StatusChangeRecorder();
@@ -127,7 +127,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
             order = (await scope.ServiceProvider.GetRequiredService<IOrderRepository>().GetByIdAsync(orderId))!;
             order.UpdateStatus(OrderStatus.Preparing);
 
-            await scope.ServiceProvider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
+            await scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync();
         }
 
         // Assert
@@ -143,7 +143,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
     }
 
     [Fact]
-    public async Task SaveChangesAsync_Should_Throw_When_Handlers_Keep_Raising_Events()
+    public async Task CommitAsync_Should_Throw_When_Handlers_Keep_Raising_Events()
     {
         // Arrange
         await using var provider = BuildServiceProvider(services =>
@@ -158,7 +158,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(() =>
-            scope.ServiceProvider.GetRequiredService<IUnitOfWork>().SaveChangesAsync());
+            scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync());
         _saveCounter.Count.ShouldBe(0);
     }
 

@@ -13,7 +13,7 @@ public sealed class UnitOfWork(ApplicationDbContext dbContext, IDomainEventDispa
     // Guards against handlers that keep raising events for each other.
     private const int MaxDispatchRounds = 10;
 
-    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
         await DispatchDomainEventsAsync(cancellationToken);
         return await dbContext.SaveChangesAsync(cancellationToken);

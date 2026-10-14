@@ -64,7 +64,7 @@ public sealed class CreateOrderHandler(
         );
 
         await orderRepository.AddAsync(order, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return new CreateOrderResponse(order.Id);
     }

@@ -39,7 +39,7 @@ public sealed class CreateCashSessionHandler(
             notes: command.Notes);
 
         await cashSessionRepository.AddAsync(cashSession, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         var response = new CreateCashSessionResponse(
             cashSession.Id,

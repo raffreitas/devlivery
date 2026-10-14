@@ -84,6 +84,6 @@ public sealed class CreateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         result.Value.ShouldNotBeNull();
         result.Value!.CategoryId.ShouldNotBe(Guid.Empty);
         await categoryRepository.Received().AddAsync(Arg.Any<Category>(), Arg.Any<CancellationToken>());
-        await unitOfWork.Received().SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.Received().CommitAsync(Arg.Any<CancellationToken>());
     }
 }

@@ -20,7 +20,7 @@ public sealed class UpdateOrderStatusHandler(
 
         order.UpdateStatus(command.Status);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
         return Result.Ok();
     }
 }

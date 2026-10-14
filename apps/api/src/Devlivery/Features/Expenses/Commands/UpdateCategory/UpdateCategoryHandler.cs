@@ -40,7 +40,7 @@ public sealed class UpdateCategoryHandler(
             isActive: command.IsActive
         );
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Ok();
     }

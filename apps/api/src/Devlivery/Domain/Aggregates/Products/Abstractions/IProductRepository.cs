@@ -1,7 +1,7 @@
 namespace Devlivery.Domain.Aggregates.Products.Abstractions;
 
 /// <summary>
-/// Products returned by <see cref="GetByIdAsync"/> are tracked: changes are persisted by <c>IUnitOfWork.SaveChangesAsync</c>.
+/// Products returned by <see cref="GetByIdAsync"/> are tracked: changes are persisted by <c>IUnitOfWork.CommitAsync</c>.
 /// </summary>
 public interface IProductRepository
 {

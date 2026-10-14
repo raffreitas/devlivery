@@ -96,7 +96,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
         var result = await handler.HandleAsync(command, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
     [Fact]
     public async Task Handle_Should_Use_Product_Price_For_OrderItem()

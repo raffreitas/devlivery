@@ -1,7 +1,7 @@
 namespace Devlivery.Domain.Aggregates.Orders.Abstractions;
 
 /// <summary>
-/// Orders returned by this repository are tracked: changes are persisted by <c>IUnitOfWork.SaveChangesAsync</c>.
+/// Orders returned by this repository are tracked: changes are persisted by <c>IUnitOfWork.CommitAsync</c>.
 /// </summary>
 public interface IOrderRepository
 {

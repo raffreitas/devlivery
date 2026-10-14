@@ -225,7 +225,7 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
     }
 
     [Fact]
-    public async Task Handle_Should_Call_SaveChangesAsync_On_UnitOfWork()
+    public async Task Handle_Should_Call_CommitAsync_On_UnitOfWork()
     {
         // Arrange
         var product = new Product("Produto", "Descrição", 10.00m, "Categoria", true, Guid.NewGuid());
@@ -252,7 +252,7 @@ public sealed class CreateOrderHandlerTests(OrdersUnitTestFixture fixture)
         await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

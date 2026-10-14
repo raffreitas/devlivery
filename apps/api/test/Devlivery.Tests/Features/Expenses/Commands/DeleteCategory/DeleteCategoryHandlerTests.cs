@@ -96,7 +96,7 @@ public sealed class DeleteCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         category.IsActive.ShouldBeFalse();
         subcategory1.IsActive.ShouldBeFalse();
         subcategory2.IsActive.ShouldBeFalse();
-        await unitOfWork.Received().SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.Received().CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public sealed class DeleteCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         result.IsSuccess.ShouldBeTrue();
         subcategory.IsActive.ShouldBeFalse();
         parentCategory.IsActive.ShouldBeTrue(); // Parent should not be deactivated
-        await unitOfWork.Received().SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.Received().CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -156,6 +156,6 @@ public sealed class DeleteCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         // Assert
         result.IsSuccess.ShouldBeTrue();
         category.IsActive.ShouldBeFalse();
-        await unitOfWork.Received().SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.Received().CommitAsync(Arg.Any<CancellationToken>());
     }
 }

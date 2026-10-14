@@ -1,7 +1,7 @@
 namespace Devlivery.Domain.Aggregates.Expenses.Abstractions;
 
 /// <summary>
-/// Categories returned by this repository are tracked: changes are persisted by <c>IUnitOfWork.SaveChangesAsync</c>.
+/// Categories returned by this repository are tracked: changes are persisted by <c>IUnitOfWork.CommitAsync</c>.
 /// </summary>
 public interface ICategoryRepository
 {

@@ -9,5 +9,5 @@ public interface IUnitOfWork
     /// Dispatches pending domain events (including events raised by their handlers)
     /// and then persists every tracked change in a single save.
     /// </summary>
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task<int> CommitAsync(CancellationToken cancellationToken = default);
 }
