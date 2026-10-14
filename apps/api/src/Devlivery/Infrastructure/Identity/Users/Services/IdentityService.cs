@@ -1,5 +1,5 @@
 using Devlivery.Common.Errors;
-using Devlivery.Features.Users.Domain;
+using Devlivery.Domain.Aggregates.Users;
 using Devlivery.Infrastructure.Identity.Abstractions;
 using Devlivery.Infrastructure.Identity.Users.Models;
 

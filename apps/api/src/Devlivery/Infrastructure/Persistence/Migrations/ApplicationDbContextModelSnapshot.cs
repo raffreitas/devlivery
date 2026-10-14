@@ -585,7 +585,7 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                     b.ToTable("products", (string)null);
                 });
 
-            modelBuilder.Entity("Devlivery.Features.Users.Domain.User", b =>
+            modelBuilder.Entity("Devlivery.Domain.Aggregates.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -742,7 +742,7 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .HasConstraintName("fk_products_establishments_establishment_id");
                 });
 
-            modelBuilder.Entity("Devlivery.Features.Users.Domain.User", b =>
+            modelBuilder.Entity("Devlivery.Domain.Aggregates.Users.User", b =>
                 {
                     b.HasOne("Devlivery.Features.Establishments.Domain.Establishment", null)
                         .WithMany()

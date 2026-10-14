@@ -5,7 +5,7 @@ using Devlivery.Domain.Aggregates.Expenses;
 using Devlivery.Domain.Aggregates.Orders;
 using Devlivery.Domain.Aggregates.Orders.Entities;
 using Devlivery.Domain.Aggregates.Products;
-using Devlivery.Features.Users.Domain;
+using Devlivery.Domain.Aggregates.Users;
 using Devlivery.Infrastructure.Persistence.Configurations;
 using Devlivery.Infrastructure.Persistence.Extensions;
 using Devlivery.Infrastructure.Tenancy;

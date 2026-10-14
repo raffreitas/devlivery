@@ -1,8 +1,8 @@
 ﻿using Devlivery.Domain.SeedWork;
 
-namespace Devlivery.Features.Users.Domain;
+namespace Devlivery.Domain.Aggregates.Users;
 
-public class User : Entity
+public sealed class User : Entity
 {
     public string Name { get; private set; }
     public string Email { get; private set; }

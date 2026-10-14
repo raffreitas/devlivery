@@ -1,6 +1,7 @@
-﻿using Bogus;
+﻿using Devlivery.Domain.Aggregates.Users;
 
-using Devlivery.Features.Users.Domain;
+using Bogus;
+
 
 namespace Devlivery.Tests.Common.Builders;
 
