@@ -152,7 +152,6 @@ public sealed class CashSessionBuilder
             notes: _notes
         );
 
-        // Apply movements
         foreach (var movement in _movements)
         {
             switch (movement.EntryType)
@@ -182,7 +181,6 @@ public sealed class CashSessionBuilder
             }
         }
 
-        // Close if requested
         if (_shouldClose)
         {
             cashSession.Close(_closingAmount ?? cashSession.ExpectedCashAmount, null);

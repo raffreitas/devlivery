@@ -4,10 +4,6 @@ using Devlivery.Infrastructure.Persistence.Context;
 
 namespace Devlivery.Infrastructure.Persistence;
 
-/// <summary>
-/// Dispatches domain events before saving, so that changes made by event handlers
-/// are persisted atomically together with the changes that raised the events.
-/// </summary>
 public sealed class UnitOfWork(ApplicationDbContext dbContext, IDomainEventDispatcher dispatcher) : IUnitOfWork
 {
     // Guards against handlers that keep raising events for each other.

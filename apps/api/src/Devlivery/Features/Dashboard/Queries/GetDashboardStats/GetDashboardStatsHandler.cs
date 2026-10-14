@@ -20,12 +20,10 @@ public sealed class GetDashboardStatsHandler(ApplicationDbContext dbContext)
             .AsNoTracking()
             .AsQueryable();
 
-        // Apply date filter
         ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
 
         var orders = await ordersQuery.ToListAsync(cancellationToken);
 
-        // Filter out canceled orders for revenue calculation
         var validOrders = orders.Where(o => o.Status != OrderStatus.Canceled).ToList();
 
         var totalOrders = validOrders.Count;

@@ -11,7 +11,6 @@ public static class QueryableExtensions
     /// Both days are inclusive: the start uses <c>&gt;=</c> its first instant and the end uses
     /// <c>&lt;</c> the first instant of the following day.
     /// </summary>
-    /// <example><c>query.WhereDateInRange(o => o.CreatedAt, startDate, endDate)</c></example>
     public static IQueryable<T> WhereDateInRange<T>(
         this IQueryable<T> query,
         Expression<Func<T, DateTime>> dateSelector,

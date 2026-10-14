@@ -1,8 +1,5 @@
 namespace Devlivery.Common.Endpoints;
 
-/// <summary>
-/// OpenAPI tags, one per feature.
-/// </summary>
 public static class Tags
 {
     public const string Auth = "Auth";

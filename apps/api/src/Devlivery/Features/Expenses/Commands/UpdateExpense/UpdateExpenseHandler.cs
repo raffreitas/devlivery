@@ -22,7 +22,6 @@ public sealed class UpdateExpenseHandler(
             return Result.Fail(new NotFoundError("Despesa não encontrada."));
         }
 
-        // Validate subcategory if changed
         if (command.CategoryId.HasValue)
         {
             var category = await categoryRepository.GetByIdAsync(command.CategoryId.Value, cancellationToken);

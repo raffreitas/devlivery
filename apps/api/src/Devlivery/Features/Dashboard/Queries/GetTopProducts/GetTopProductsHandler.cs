@@ -21,22 +21,18 @@ public sealed class GetTopProductsHandler(ApplicationDbContext dbContext)
             .Include(o => o.Items)
             .AsQueryable();
 
-        // Apply date filter
         ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
 
-        // Filter out canceled orders
         ordersQuery = ordersQuery.Where(o => o.Status != OrderStatus.Canceled);
 
         var orders = await ordersQuery.ToListAsync(cancellationToken);
 
-        // Get all product IDs from order items
         var productIds = orders
             .SelectMany(o => o.Items)
             .Select(i => i.ProductId)
             .Distinct()
             .ToHashSet();
 
-        // Load products
         var products = await dbContext.Products
             .AsNoTracking()
             .Where(p => productIds.Contains(p.Id))
@@ -44,7 +40,6 @@ public sealed class GetTopProductsHandler(ApplicationDbContext dbContext)
 
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
-        // Aggregate quantities by product
         var productSales = orders
             .SelectMany(o => o.Items)
             .GroupBy(i => i.ProductId)
@@ -56,7 +51,6 @@ public sealed class GetTopProductsHandler(ApplicationDbContext dbContext)
             .OrderByDescending(x => x.Quantity)
             .ToList();
 
-        // Map to response with product names
         var topProducts = productSales
             .Select(x => new TopProductItem(
                 productsDictionary[x.ProductId].Name,

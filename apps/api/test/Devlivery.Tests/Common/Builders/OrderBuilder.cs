@@ -112,12 +112,10 @@ public sealed class OrderBuilder
 
     public Order Build()
     {
-        // Se não houver items, criar um item padrão
         var items = _orderItems.Length == 0
             ? new[] { CreateDefaultOrderItem() }
             : _orderItems;
 
-        // Create value objects
         PhoneNumber? phone = null;
         if (!string.IsNullOrEmpty(_customerPhone))
         {
@@ -129,7 +127,6 @@ public sealed class OrderBuilder
 
         var totalItems = items.Sum(i => i.TotalPrice) + _deliveryFee;
 
-        // Se não houver pagamentos, criar um pagamento total padrão
         if (_payments.Count == 0)
         {
             _payments.Add(new OrderPayment(_establishmentId, _faker.PickRandom<PaymentMethod>(), totalItems));

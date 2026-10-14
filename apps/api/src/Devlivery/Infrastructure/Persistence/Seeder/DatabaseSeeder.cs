@@ -23,7 +23,6 @@ public static class DatabaseSeeder
 
         db.Establishments.Add(establishment);
 
-        // Seed User
         var user = new User(
             name: "Atendente",
             email: "admin@pizza.com",
@@ -43,7 +42,6 @@ public static class DatabaseSeeder
 
         db.Users.Add(user);
 
-        // Seed Products
         var products = new List<Product>
         {
             new(

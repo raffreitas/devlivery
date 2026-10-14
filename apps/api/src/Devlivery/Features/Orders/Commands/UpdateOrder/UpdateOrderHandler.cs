@@ -55,7 +55,6 @@ public sealed class UpdateOrderHandler(
             unitPrice: productsDictionary[item.ProductId].Price,
             notes: item.Notes)).ToList();
 
-        // Create Value Objects
         var customer = CustomerInfo.Create(command.CustomerName, command.CustomerPhone);
         var deliveryAddress = new DeliveryAddress(command.DeliveryAddress, command.DeliveryReference);
 

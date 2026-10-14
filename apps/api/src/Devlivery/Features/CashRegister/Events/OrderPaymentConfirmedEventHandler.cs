@@ -38,7 +38,6 @@ public sealed class OrderPaymentConfirmedEventHandler(
             return;
         }
 
-        // Add payment to the ledger (immutable, idempotent)
         activeSession.AddPayment(
             orderPaymentId: domainEvent.PaymentId,
             amount: domainEvent.Amount,

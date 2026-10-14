@@ -42,25 +42,20 @@ public static class Startup
 
         services.TryAddSingleton(TimeProvider.System);
 
-        // OpenAPI/Swagger
         services.AddOpenApiConfiguration();
 
-        // Shared Features
         services.AddIdentityFeature(configuration);
         services.AddDatabaseFeature(configuration);
         services.AddAuthorizationFeature();
         services.AddTenancyFeature();
 
-        // Features
         services.AddOrderFeature();
         services.AddProductFeature();
         services.AddCashRegisterFeature();
         services.AddExpenseFeature();
 
-        // CORS
         services.AddCorsConfiguration();
 
-        // Observability
         builder.AddObservabilityFeature();
     }
 
@@ -73,11 +68,9 @@ public static class Startup
         app.UseExceptionHandler();
         app.UseRouting();
 
-        // CORS
         app.UseCorsConfiguration();
         app.UseRateLimiter();
 
-        // Security
         if (!app.Environment.IsDevelopment())
         {
             app.UseHsts();
@@ -89,7 +82,6 @@ public static class Startup
         app.UseTenancyFeature();
         app.UseObservabilityFeature();
 
-        // Endpoints
         app.MapHealthCheckEndpoints();
         app.MapEndpoints();
     }

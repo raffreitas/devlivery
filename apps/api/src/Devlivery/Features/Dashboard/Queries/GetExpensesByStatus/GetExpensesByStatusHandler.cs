@@ -45,7 +45,6 @@ public sealed class GetExpensesByStatusHandler(
         await using var connection = await dbConnectionFactory.OpenConnectionAsync(cancellationToken);
         var expenses = await connection.QueryAsync<(string Status, DateOnly DueDate, decimal Amount)>(sql, parameters);
 
-        // Calculate display status and group
         var statusGroups = expenses
             .Select(e =>
             {

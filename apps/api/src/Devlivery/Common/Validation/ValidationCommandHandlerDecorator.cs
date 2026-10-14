@@ -7,10 +7,6 @@ using FluentValidation;
 
 namespace Devlivery.Common.Validation;
 
-/// <summary>
-/// Runs every <see cref="IValidator{T}"/> registered for the command before the decorated handler.
-/// An invalid command returns a <see cref="ValidationError"/> without reaching the handler.
-/// </summary>
 public sealed class ValidationCommandHandlerDecorator<TCommand, TResponse>(
     ICommandHandler<TCommand, TResponse> inner,
     IEnumerable<IValidator<TCommand>> validators)
