@@ -1,7 +1,7 @@
 namespace Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 
 /// <summary>
-/// Cash sessions returned by this repository are tracked: changes are persisted by <c>IUnitOfWork.SaveChangesAsync</c>.
+/// Cash sessions returned by this repository are tracked: changes are persisted by <c>IUnitOfWork.CommitAsync</c>.
 /// </summary>
 public interface ICashSessionRepository
 {

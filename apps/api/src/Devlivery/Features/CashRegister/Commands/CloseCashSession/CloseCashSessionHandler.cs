@@ -28,7 +28,7 @@ public sealed class CloseCashSessionHandler(ICashSessionRepository cashSessionRe
 
         cashSession.Close(command.ClosingAmount, command.Notes);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Ok();
     }

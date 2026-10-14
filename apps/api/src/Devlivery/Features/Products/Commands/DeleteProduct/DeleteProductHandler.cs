@@ -34,7 +34,7 @@ public sealed class DeleteProductHandler(
         }
 
         await productRepository.RemoveAsync(product, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Ok();
     }

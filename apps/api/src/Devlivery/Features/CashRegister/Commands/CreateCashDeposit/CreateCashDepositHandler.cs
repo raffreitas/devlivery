@@ -34,7 +34,7 @@ public sealed class CreateCashDepositHandler(
 
         var movement = cashSession.AddDeposit(command.Amount, actor.Id, command.Notes);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         var response = new CreateCashDepositResponse(
             movement.Id,

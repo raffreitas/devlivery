@@ -42,7 +42,7 @@ public sealed class DeleteCategoryHandler(
             }
         }
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Ok();
     }

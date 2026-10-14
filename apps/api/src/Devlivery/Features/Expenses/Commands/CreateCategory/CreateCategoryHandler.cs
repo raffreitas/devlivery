@@ -49,7 +49,7 @@ public sealed class CreateCategoryHandler(
             await categoryRepository.AddAsync(category, cancellationToken);
         }
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Ok(new CreateCategoryResponse(category.Id));
     }

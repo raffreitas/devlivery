@@ -62,7 +62,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
     }
 
     [Fact]
-    public async Task Handle_Should_Call_SaveChangesAsync_On_UnitOfWork()
+    public async Task Handle_Should_Call_CommitAsync_On_UnitOfWork()
     {
         // Arrange
         var tenantAccessor = fixture.CreateTenantAccessorMock();
@@ -80,7 +80,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

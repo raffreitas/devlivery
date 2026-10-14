@@ -34,7 +34,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
     private Guid TenantId => _establishment.Id;
 
     [Fact]
-    public async Task SaveChangesAsync_Should_Persist_Replaced_Order_Items_And_New_Payment()
+    public async Task CommitAsync_Should_Persist_Replaced_Order_Items_And_New_Payment()
     {
         // Arrange
         var pizza = new Product("Pizza", "Grande", 50m, "Pizzas", available: true, TenantId);
@@ -64,7 +64,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
                 new OrderPaymentUpdate(null, PaymentMethod.Pix, 8m)
             ]);
 
-            await CreateUnitOfWork(dbContext).SaveChangesAsync();
+            await CreateUnitOfWork(dbContext).CommitAsync();
         }
 
         // Assert
@@ -83,7 +83,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
     }
 
     [Fact]
-    public async Task SaveChangesAsync_Should_Persist_Subcategory_Added_To_Tracked_Category()
+    public async Task CommitAsync_Should_Persist_Subcategory_Added_To_Tracked_Category()
     {
         // Arrange
         var parent = new Category("Fornecedores", TenantId);
@@ -98,7 +98,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
             loaded.AddSubcategory(subcategory);
             subcategoryId = subcategory.Id;
 
-            await CreateUnitOfWork(dbContext).SaveChangesAsync();
+            await CreateUnitOfWork(dbContext).CommitAsync();
         }
 
         // Assert
@@ -108,7 +108,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
     }
 
     [Fact]
-    public async Task SaveChangesAsync_Should_Persist_Deposit_And_Closing_Of_Tracked_Cash_Session()
+    public async Task CommitAsync_Should_Persist_Deposit_And_Closing_Of_Tracked_Cash_Session()
     {
         // Arrange
         var session = new CashSession(TenantId, Guid.NewGuid(), "Operador", openingAmount: 100m, notes: null);
@@ -121,7 +121,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
             loaded.AddDeposit(50m, createdBy: Guid.NewGuid(), reason: "Reforço");
             loaded.Close(closingAmount: 150m, notes: null);
 
-            await CreateUnitOfWork(dbContext).SaveChangesAsync();
+            await CreateUnitOfWork(dbContext).CommitAsync();
         }
 
         // Assert
@@ -136,7 +136,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
     }
 
     [Fact]
-    public async Task SaveChangesAsync_Should_Persist_Changes_To_Tracked_Product_And_Expense()
+    public async Task CommitAsync_Should_Persist_Changes_To_Tracked_Product_And_Expense()
     {
         // Arrange
         var product = new Product("Pizza", "Grande", 50m, "Pizzas", available: true, TenantId);
@@ -154,7 +154,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
             var loadedExpense = (await new ExpenseRepository(dbContext).GetByIdAsync(expense.Id))!;
             loadedExpense.MarkAsPaid(new DateOnly(2026, 10, 9));
 
-            await CreateUnitOfWork(dbContext).SaveChangesAsync();
+            await CreateUnitOfWork(dbContext).CommitAsync();
         }
 
         // Assert

@@ -33,7 +33,7 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is NotFoundError);
-        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is ValidationError);
-        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -93,6 +93,6 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         existingCategory.Name.ShouldBe("same-name");
         existingCategory.IsActive.ShouldBeFalse();
 
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 }

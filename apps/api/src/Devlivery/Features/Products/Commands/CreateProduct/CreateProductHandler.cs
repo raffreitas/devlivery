@@ -27,7 +27,7 @@ public sealed class CreateProductHandler(
         );
 
         await productRepository.AddAsync(product, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         var response = new CreateProductResponse(product.Id);
 

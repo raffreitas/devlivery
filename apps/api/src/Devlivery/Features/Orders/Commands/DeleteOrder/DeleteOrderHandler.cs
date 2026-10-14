@@ -26,7 +26,7 @@ public sealed class DeleteOrderHandler(
         order.Delete();
 
         await orderRepository.RemoveAsync(order, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Ok();
     }

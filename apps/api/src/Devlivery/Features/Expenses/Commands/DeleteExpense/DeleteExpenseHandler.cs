@@ -22,7 +22,7 @@ public sealed class DeleteExpenseHandler(
         }
 
         await expenseRepository.RemoveAsync(expense, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Ok();
     }

@@ -1,7 +1,7 @@
 namespace Devlivery.Domain.Aggregates.Expenses.Abstractions;
 
 /// <summary>
-/// Expenses returned by this repository are tracked: changes are persisted by <c>IUnitOfWork.SaveChangesAsync</c>.
+/// Expenses returned by this repository are tracked: changes are persisted by <c>IUnitOfWork.CommitAsync</c>.
 /// </summary>
 public interface IExpenseRepository
 {

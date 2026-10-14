@@ -61,7 +61,7 @@ public sealed class CloseCashSessionHandlerTests : IClassFixture<CashRegisterUni
         // Assert
         cashSession.Status.ShouldBe(CashSessionStatus.Closed);
         cashSession.ClosingAmount.ShouldBe(80m);
-        await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

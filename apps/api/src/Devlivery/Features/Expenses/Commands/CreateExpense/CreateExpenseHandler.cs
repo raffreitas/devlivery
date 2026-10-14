@@ -36,7 +36,7 @@ public sealed class CreateExpenseHandler(
         );
 
         await expenseRepository.AddAsync(expense, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return Result.Ok(new CreateExpenseResponse(expense.Id));
     }

@@ -47,6 +47,6 @@ public sealed class DeleteOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         result.IsSuccess.ShouldBeTrue();
         await repository.Received(1).RemoveAsync(order, Arg.Any<CancellationToken>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 }
