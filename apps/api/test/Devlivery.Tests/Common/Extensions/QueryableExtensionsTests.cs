@@ -18,41 +18,57 @@ public sealed class QueryableExtensionsTests
         new("15 início", new DateTime(2026, 10, 15, 3, 0, 0, DateTimeKind.Utc))
     ];
 
+    private static readonly DateOnly Day = new(2026, 10, 14);
+
     [Fact]
-    public void WhereDateInRange_Should_Include_Whole_Brazilian_Days()
+    public void GivenSingleDayRange_WhenFiltering_ThenIncludesWholeBrazilianDay()
     {
         // Arrange
-        var day = new DateOnly(2026, 10, 14);
+        var rows = Rows.AsQueryable();
 
         // Act
-        var result = Rows.AsQueryable().WhereDateInRange(r => r.CreatedAtUtc, day, day);
+        var result = rows.WhereDateInRange(r => r.CreatedAtUtc, Day, Day);
 
         // Assert
         result.Select(r => r.Name).ShouldBe(["14 início", "14 fim"]);
     }
 
     [Fact]
-    public void WhereDateInRange_Should_Not_Filter_When_Dates_Are_Null()
+    public void GivenNoDates_WhenFiltering_ThenKeepsAllRows()
     {
+        // Arrange
+        var rows = Rows.AsQueryable();
+
         // Act
-        var result = Rows.AsQueryable().WhereDateInRange(r => r.CreatedAtUtc, null, null);
+        var result = rows.WhereDateInRange(r => r.CreatedAtUtc, null, null);
 
         // Assert
         result.Count().ShouldBe(Rows.Length);
     }
 
     [Fact]
-    public void WhereDateInRange_Should_Apply_Open_Ended_Ranges()
+    public void GivenOnlyStartDate_WhenFiltering_ThenIncludesEverythingFromStartOfThatDay()
     {
         // Arrange
-        var day = new DateOnly(2026, 10, 14);
+        var rows = Rows.AsQueryable();
 
         // Act
-        var fromDay = Rows.AsQueryable().WhereDateInRange(r => r.CreatedAtUtc, day, null);
-        var untilDay = Rows.AsQueryable().WhereDateInRange(r => r.CreatedAtUtc, null, day);
+        var result = rows.WhereDateInRange(r => r.CreatedAtUtc, Day, null);
 
         // Assert
-        fromDay.Select(r => r.Name).ShouldBe(["14 início", "14 fim", "15 início"]);
-        untilDay.Select(r => r.Name).ShouldBe(["13 tarde da noite", "14 início", "14 fim"]);
+        result.Select(r => r.Name).ShouldBe(["14 início", "14 fim", "15 início"]);
+    }
+
+    [Fact]
+    public void GivenOnlyEndDate_WhenFiltering_ThenIncludesEverythingUntilEndOfThatDay()
+    {
+        // Arrange
+        var rows = Rows.AsQueryable();
+
+        // Act
+        var result = rows.WhereDateInRange(r => r.CreatedAtUtc, null, Day);
+
+        // Assert
+        result.Select(r => r.Name).ShouldBe(["13 tarde da noite", "14 início", "14 fim"]);
     }
 }

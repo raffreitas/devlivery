@@ -2,92 +2,47 @@ using Devlivery.Features.CashRegister.Commands.CloseCashSession;
 
 using FluentValidation.TestHelper;
 
+using Shouldly;
+
 namespace Devlivery.Tests.Features.CashRegister.Commands.CloseCashSession;
 
 [Trait("Category", "Unit Tests")]
 public sealed class CloseCashSessionValidatorTests
 {
+    private static readonly CloseCashSessionCommand ValidCommand = new(Guid.NewGuid(), 0m, null);
+
     private readonly CloseCashSessionValidator _validator = new();
 
+    public static TheoryData<CloseCashSessionCommand, string, string> InvalidCommands => new()
+    {
+        { ValidCommand with { Id = Guid.Empty }, "Id", "O campo 'Caixa' é obrigatório." },
+        { ValidCommand with { ClosingAmount = -0.01m }, "ClosingAmount", "O campo 'Valor de fechamento' deve ser maior ou igual a 0." }
+    };
+
     [Fact]
-    public void Should_Have_Error_When_Id_Is_Empty()
+    public void GivenValidCommand_WhenValidating_ThenHasNoErrors()
     {
         // Arrange
-        var command = new CloseCashSessionCommand(
-            Guid.Empty,
-            100m,
-            null);
+        var command = ValidCommand;
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Id)
-            .WithErrorMessage("O campo 'Caixa' é obrigatório.");
+        result.IsValid.ShouldBeTrue();
     }
 
-    [Fact]
-    public void Should_Have_Error_When_ClosingAmount_Is_Negative()
+    [Theory]
+    [MemberData(nameof(InvalidCommands))]
+    public void GivenInvalidField_WhenValidating_ThenReturnsPortugueseErrorForField(
+        CloseCashSessionCommand command, string propertyName, string expectedMessage)
     {
-        // Arrange
-        var command = new CloseCashSessionCommand(
-            Guid.NewGuid(),
-            -10m,
-            null);
+        // Arrange: command comes from InvalidCommands
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.ClosingAmount)
-            .WithErrorMessage("O campo 'Valor de fechamento' deve ser maior ou igual a 0.");
-    }
-
-    [Fact]
-    public void Should_Not_Have_Error_When_Command_Is_Valid()
-    {
-        // Arrange
-        var command = new CloseCashSessionCommand(
-            Guid.NewGuid(),
-            250m,
-            "Fechamento normal");
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldNotHaveAnyValidationErrors();
-    }
-
-    [Fact]
-    public void Should_Not_Have_Error_When_ClosingAmount_Is_Zero()
-    {
-        // Arrange
-        var command = new CloseCashSessionCommand(
-            Guid.NewGuid(),
-            0m,
-            null);
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.ClosingAmount);
-    }
-
-    [Fact]
-    public void Should_Not_Have_Error_When_Notes_Is_Null()
-    {
-        // Arrange
-        var command = new CloseCashSessionCommand(
-            Guid.NewGuid(),
-            100m,
-            null);
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldNotHaveAnyValidationErrors();
+        result.ShouldHaveValidationErrorFor(propertyName).WithErrorMessage(expectedMessage);
     }
 }

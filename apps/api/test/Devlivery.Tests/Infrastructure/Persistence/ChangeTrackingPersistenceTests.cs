@@ -34,7 +34,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
     private Guid TenantId => _establishment.Id;
 
     [Fact]
-    public async Task CommitAsync_Should_Persist_Replaced_Order_Items_And_New_Payment()
+    public async Task GivenTrackedOrderWithReplacedItemsAndNewPayment_WhenCommitting_ThenPersistsChildChanges()
     {
         // Arrange
         var pizza = new Product("Pizza", "Grande", 50m, "Pizzas", available: true, TenantId);
@@ -83,7 +83,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
     }
 
     [Fact]
-    public async Task CommitAsync_Should_Persist_Subcategory_Added_To_Tracked_Category()
+    public async Task GivenTrackedCategoryWithNewSubcategory_WhenCommitting_ThenPersistsSubcategory()
     {
         // Arrange
         var parent = new Category("Fornecedores", TenantId);
@@ -108,7 +108,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
     }
 
     [Fact]
-    public async Task CommitAsync_Should_Persist_Deposit_And_Closing_Of_Tracked_Cash_Session()
+    public async Task GivenTrackedCashSessionWithDepositAndClosing_WhenCommitting_ThenPersistsBoth()
     {
         // Arrange
         var session = new CashSession(TenantId, Guid.NewGuid(), "Operador", openingAmount: 100m, notes: null);
@@ -136,7 +136,7 @@ public sealed class ChangeTrackingPersistenceTests(PostgresDatabaseFixture datab
     }
 
     [Fact]
-    public async Task CommitAsync_Should_Persist_Changes_To_Tracked_Product_And_Expense()
+    public async Task GivenTrackedProductAndExpenseChanges_WhenCommitting_ThenPersistsThem()
     {
         // Arrange
         var product = new Product("Pizza", "Grande", 50m, "Pizzas", available: true, TenantId);

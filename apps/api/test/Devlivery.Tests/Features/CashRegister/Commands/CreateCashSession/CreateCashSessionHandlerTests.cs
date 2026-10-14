@@ -1,5 +1,11 @@
+using Devlivery.Common.Errors;
 using Devlivery.Domain.Aggregates.CashRegister;
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
+using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Features.CashRegister.Commands.CreateCashSession;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Tests.Common.Builders;
+using Devlivery.Tests.Common.Mocks;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -9,153 +15,62 @@ using Shouldly;
 namespace Devlivery.Tests.Features.CashRegister.Commands.CreateCashSession;
 
 [Trait("Category", "Unit Tests")]
-public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fixture) : IClassFixture<CashRegisterUnitTestFixture>
+public sealed class CreateCashSessionHandlerTests
 {
+    private readonly Guid _tenantId = Guid.NewGuid();
+    private readonly Guid _operatorId = Guid.NewGuid();
+    private readonly ICashSessionRepository _cashSessionRepository = Substitute.For<ICashSessionRepository>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly CreateCashSessionHandler _handler;
+
+    public CreateCashSessionHandlerTests()
+    {
+        _handler = new CreateCashSessionHandler(
+            _cashSessionRepository,
+            TestMocks.CurrentUserAccessor(_operatorId, "Maria Souza"),
+            _unitOfWork,
+            TestMocks.TenantAccessor(_tenantId));
+    }
+
     [Fact]
-    public async Task Handle_Should_Create_CashSession_When_No_Active_Session_Exists()
+    public async Task GivenNoOpenSession_WhenOpening_ThenPersistsSessionForCurrentOperatorAndTenant()
     {
         // Arrange
-        var tenantId = Guid.NewGuid();
-        var tenantAccessor = fixture.CreateTenantAccessorMock(tenantId);
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .ReturnsNull();
-
-        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
-
-        var command = new CreateCashSessionCommand(OpeningAmount: 100.00m, Notes: null);
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).ReturnsNull();
+        CashSession? addedSession = null;
+        await _cashSessionRepository.AddAsync(Arg.Do<CashSession>(s => addedSession = s),
+            Arg.Any<CancellationToken>());
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(new CreateCashSessionCommand(100m, "Turno da noite"),
+            CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldNotBeNull();
-        result.Value.OpeningAmount.ShouldBe(100.00m);
-        result.Value.AttendantName.ShouldBe("João Silva");
-        result.Value.Status.ShouldBe("Open");
+        addedSession.ShouldNotBeNull();
+        addedSession.EstablishmentId.ShouldBe(_tenantId);
+        addedSession.AttendantId.ShouldBe(_operatorId);
+        addedSession.AttendantName.ShouldBe("Maria Souza");
+        addedSession.OpeningAmount.ShouldBe(100m);
+        addedSession.Notes.ShouldBe("Turno da noite");
+        result.Value.ShouldBe(new CreateCashSessionResponse(addedSession.Id, "Maria Souza", 100m,
+            addedSession.StartAt, nameof(CashSessionStatus.Open)));
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Handle_Should_Call_AddAsync_On_Repository()
+    public async Task GivenOpenSession_WhenOpeningAnother_ThenReturnsValidationErrorWithoutPersisting()
     {
         // Arrange
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .ReturnsNull();
-
-        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
-
-        var command = new CreateCashSessionCommand(OpeningAmount: 50.00m, Notes: "Abertura");
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
+            .Returns(new CashSessionBuilder().Build());
 
         // Act
-        await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(new CreateCashSessionCommand(100m, null), CancellationToken.None);
 
         // Assert
-        await cashSessionRepository.Received(1)
-            .AddAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Handle_Should_Call_CommitAsync_On_UnitOfWork()
-    {
-        // Arrange
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .ReturnsNull();
-
-        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
-
-        var command = new CreateCashSessionCommand(OpeningAmount: 200.00m, Notes: null);
-
-        // Act
-        await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Handle_Should_Return_ValidationError_When_Active_Session_Exists()
-    {
-        // Arrange
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        var activeSession = fixture.CreateCashSession();
-        cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(activeSession);
-
-        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
-
-        var command = new CreateCashSessionCommand(OpeningAmount: 150.00m, Notes: null);
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldNotBeEmpty();
-    }
-
-    [Fact]
-    public async Task Handle_Should_Not_Call_AddAsync_When_Active_Session_Exists()
-    {
-        // Arrange
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        var activeSession = fixture.CreateCashSession();
-        cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(activeSession);
-
-        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
-
-        var command = new CreateCashSessionCommand(OpeningAmount: 100.00m, Notes: null);
-
-        // Act
-        await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        await cashSessionRepository.DidNotReceive()
-            .AddAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Handle_Should_Use_TenantId_From_TenantAccessor()
-    {
-        // Arrange
-        var expectedTenantId = Guid.NewGuid();
-        var tenantAccessor = fixture.CreateTenantAccessorMock(expectedTenantId);
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        CashSession? capturedSession = null;
-        cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .ReturnsNull();
-
-        await cashSessionRepository.AddAsync(Arg.Do<CashSession>(s => capturedSession = s),
-            Arg.Any<CancellationToken>());
-
-        var handler = new CreateCashSessionHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork, tenantAccessor);
-
-        var command = new CreateCashSessionCommand(OpeningAmount: 100.00m, Notes: null);
-
-        // Act
-        await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        capturedSession.ShouldNotBeNull();
-        capturedSession.EstablishmentId.ShouldBe(expectedTenantId);
+        result.HasError<ValidationError>().ShouldBeTrue();
+        await _cashSessionRepository.DidNotReceive().AddAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
     }
 }

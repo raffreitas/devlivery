@@ -79,7 +79,8 @@ jobs:
             /o:"${{ env.SONAR_ORGANIZATION }}" \
             /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
-            /d:sonar.exclusions="**/Migrations/**"
+            /d:sonar.exclusions="**/Migrations/**" \
+            /d:sonar.coverage.exclusions="**/Devlivery.BackupJob/**,**/Program.cs,**/Infrastructure/Observability/**,**/Infrastructure/Persistence/Seeder/**,**/Infrastructure/Persistence/Factory/ApplicationDbContextFactory.cs"
 
       - name: Build
         run: |

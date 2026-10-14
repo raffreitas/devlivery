@@ -2,133 +2,53 @@ using Devlivery.Features.Auth.Commands.Login;
 
 using FluentValidation.TestHelper;
 
+using Shouldly;
+
 namespace Devlivery.Tests.Features.Auth.Commands.Login;
 
-[Collection("Auth Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class LoginValidatorTests(AuthUnitTestFixture fixture) : IClassFixture<AuthUnitTestFixture>
+public sealed class LoginValidatorTests
 {
+    private static readonly LoginCommand ValidCommand = new("maria@pizzaria.com", "123456");
+
     private readonly LoginCommandValidator _validator = new();
 
+    public static TheoryData<LoginCommand, string, string> InvalidCommands => new()
+    {
+        { ValidCommand with { Email = "" }, "Email", "O campo 'E-mail' é obrigatório." },
+        { ValidCommand with { Email = "   " }, "Email", "O campo 'E-mail' é obrigatório." },
+        { ValidCommand with { Email = null! }, "Email", "O campo 'E-mail' é obrigatório." },
+        { ValidCommand with { Email = "maria.pizzaria.com" }, "Email", "O campo 'E-mail' deve ser um e-mail válido." },
+        { ValidCommand with { Password = "" }, "Password", "O campo 'Senha' é obrigatório." },
+        { ValidCommand with { Password = "   " }, "Password", "O campo 'Senha' é obrigatório." },
+        { ValidCommand with { Password = null! }, "Password", "O campo 'Senha' é obrigatório." },
+        { ValidCommand with { Password = "12345" }, "Password", "O campo 'Senha' deve ter no mínimo 6 caracteres." }
+    };
+
     [Fact]
-    public void Should_Not_Have_Error_When_Command_Is_Valid()
+    public void GivenEmailAndSixCharacterPassword_WhenValidating_ThenHasNoErrors()
     {
         // Arrange
-        var command = new LoginCommand(
-            Email: fixture.Faker.Internet.Email(),
-            Password: fixture.Faker.Internet.Password(8)
-        );
+        var command = ValidCommand;
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldNotHaveAnyValidationErrors();
-    }
-
-    [Fact]
-    public void Should_Have_Error_When_Email_Is_Empty()
-    {
-        // Arrange
-        var command = new LoginCommand(
-            Email: string.Empty,
-            Password: fixture.Faker.Internet.Password()
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Email)
-            .WithErrorMessage("O campo 'E-mail' é obrigatório.");
-    }
-
-    [Fact]
-    public void Should_Have_Error_When_Email_Is_Invalid()
-    {
-        // Arrange
-        var command = new LoginCommand(
-            Email: "invalid-email",
-            Password: fixture.Faker.Internet.Password()
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Email)
-            .WithErrorMessage("O campo 'E-mail' deve ser um e-mail válido.");
-    }
-
-    [Fact]
-    public void Should_Have_Error_When_Password_Is_Empty()
-    {
-        // Arrange
-        var command = new LoginCommand(
-            Email: fixture.Faker.Internet.Email(),
-            Password: string.Empty
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("O campo 'Senha' é obrigatório.");
-    }
-
-    [Fact]
-    public void Should_Have_Error_When_Password_Is_Too_Short()
-    {
-        // Arrange
-        var command = new LoginCommand(
-            Email: fixture.Faker.Internet.Email(),
-            Password: "12345" // Less than 6 characters
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("O campo 'Senha' deve ter no mínimo 6 caracteres.");
+        result.IsValid.ShouldBeTrue();
     }
 
     [Theory]
-    [InlineData("")]
-    [InlineData(" ")]
-    [InlineData(null)]
-    public void Should_Have_Error_When_Email_Is_Null_Or_Whitespace(string? email)
+    [MemberData(nameof(InvalidCommands))]
+    public void GivenInvalidField_WhenValidating_ThenReturnsPortugueseErrorForField(
+        LoginCommand command, string propertyName, string expectedMessage)
     {
-        // Arrange
-        var command = new LoginCommand(
-            Email: email!,
-            Password: fixture.Faker.Internet.Password()
-        );
+        // Arrange: command comes from InvalidCommands
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Email);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(" ")]
-    [InlineData(null)]
-    public void Should_Have_Error_When_Password_Is_Null_Or_Whitespace(string? password)
-    {
-        // Arrange
-        var command = new LoginCommand(
-            Email: fixture.Faker.Internet.Email(),
-            Password: password!
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Password);
+        result.ShouldHaveValidationErrorFor(propertyName).WithErrorMessage(expectedMessage);
     }
 }

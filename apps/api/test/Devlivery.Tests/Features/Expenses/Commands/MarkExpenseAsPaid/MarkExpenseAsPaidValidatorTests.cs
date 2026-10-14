@@ -2,59 +2,47 @@ using Devlivery.Features.Expenses.Commands.MarkExpenseAsPaid;
 
 using FluentValidation.TestHelper;
 
+using Shouldly;
+
 namespace Devlivery.Tests.Features.Expenses.Commands.MarkExpenseAsPaid;
 
-[Collection("Expenses Unit Tests")]
 [Trait("Category", "Unit Tests")]
 public sealed class MarkExpenseAsPaidValidatorTests
 {
+    private static readonly MarkExpenseAsPaidCommand ValidCommand = new(Guid.NewGuid(), new DateOnly(2026, 5, 8));
+
     private readonly MarkExpenseAsPaidCommandValidator _validator = new();
 
+    public static TheoryData<MarkExpenseAsPaidCommand, string, string> InvalidCommands => new()
+    {
+        { ValidCommand with { ExpenseId = Guid.Empty }, "ExpenseId", "O campo 'Despesa' é obrigatório." },
+        { ValidCommand with { PaymentDate = default }, "PaymentDate", "O campo 'Data de pagamento' é obrigatório." }
+    };
+
     [Fact]
-    public void Validate_Should_Pass_When_Command_Is_Valid()
+    public void GivenValidCommand_WhenValidating_ThenHasNoErrors()
     {
         // Arrange
-        var command = new MarkExpenseAsPaidCommand(
-            ExpenseId: Guid.NewGuid(),
-            PaymentDate: DateOnly.FromDateTime(DateTime.UtcNow)
-        );
+        var command = ValidCommand;
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldNotHaveAnyValidationErrors();
+        result.IsValid.ShouldBeTrue();
     }
 
-    [Fact]
-    public void Validate_Should_Fail_When_ExpenseId_Is_Empty()
+    [Theory]
+    [MemberData(nameof(InvalidCommands))]
+    public void GivenInvalidField_WhenValidating_ThenReturnsPortugueseErrorForField(
+        MarkExpenseAsPaidCommand command, string propertyName, string expectedMessage)
     {
-        // Arrange
-        var command = new MarkExpenseAsPaidCommand(
-            ExpenseId: Guid.Empty,
-            PaymentDate: DateOnly.FromDateTime(DateTime.UtcNow)
-        );
+        // Arrange: command comes from InvalidCommands
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.ExpenseId);
-    }
-
-    [Fact]
-    public void Validate_Should_Fail_When_PaymentDate_Is_Default()
-    {
-        // Arrange
-        var command = new MarkExpenseAsPaidCommand(
-            ExpenseId: Guid.NewGuid(),
-            PaymentDate: default
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.PaymentDate);
+        result.ShouldHaveValidationErrorFor(propertyName).WithErrorMessage(expectedMessage);
     }
 }

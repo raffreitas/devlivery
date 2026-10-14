@@ -39,7 +39,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
     private Guid TenantId => _establishment.Id;
 
     [Fact]
-    public async Task CommitAsync_Should_Persist_Order_And_Cash_Movements_In_Single_Save()
+    public async Task GivenDeliveredOrderPaidInCash_WhenCommitting_ThenPersistsOrderAndCashMovementsInSingleSave()
     {
         // Arrange
         await using var provider = BuildServiceProvider(services => services.AddCashRegisterEventHandlers());
@@ -76,7 +76,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
     }
 
     [Fact]
-    public async Task CommitAsync_Should_Persist_Nothing_When_Handler_Throws()
+    public async Task GivenFailingEventHandler_WhenCommitting_ThenPersistsNothing()
     {
         // Arrange
         await using var provider = BuildServiceProvider(services =>
@@ -87,6 +87,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
         var (orderId, sessionId) = await SeedOrderAndOpenCashSessionAsync(provider, paidInCash: 50m, orderTotal: 50m);
 
         // Act
+        Exception? exception;
         await using (var scope = provider.CreateAsyncScope())
         {
             var order = await scope.ServiceProvider.GetRequiredService<IOrderRepository>()
@@ -94,11 +95,12 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
             order!.UpdateStatus(OrderStatus.Delivered);
 
             _saveCounter.Reset();
-            await Should.ThrowAsync<InvalidOperationException>(() =>
+            exception = await Record.ExceptionAsync(() =>
                 scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync());
         }
 
         // Assert
+        exception.ShouldBeOfType<InvalidOperationException>();
         _saveCounter.Count.ShouldBe(0);
 
         await using var assertScope = provider.CreateAsyncScope();
@@ -109,7 +111,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
     }
 
     [Fact]
-    public async Task CommitAsync_Should_Dispatch_Events_Raised_By_Handlers_And_Clear_Them()
+    public async Task GivenHandlerRaisingNewEvent_WhenCommitting_ThenDispatchesItAndClearsEvents()
     {
         // Arrange
         var recorder = new StatusChangeRecorder();
@@ -143,7 +145,7 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
     }
 
     [Fact]
-    public async Task CommitAsync_Should_Throw_When_Handlers_Keep_Raising_Events()
+    public async Task GivenHandlersRaisingEventsEndlessly_WhenCommitting_ThenThrowsWithoutSaving()
     {
         // Arrange
         await using var provider = BuildServiceProvider(services =>
@@ -156,9 +158,12 @@ public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
 
         _saveCounter.Reset();
 
-        // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(() =>
+        // Act
+        var exception = await Record.ExceptionAsync(() =>
             scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync());
+
+        // Assert
+        exception.ShouldBeOfType<InvalidOperationException>();
         _saveCounter.Count.ShouldBe(0);
     }
 

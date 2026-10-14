@@ -6,23 +6,21 @@ using Devlivery.Domain.Common.Enums;
 
 namespace Devlivery.Tests.Common.Builders;
 
-public class OrderPaymentBuilder
+public sealed class OrderPaymentBuilder
 {
     private readonly Faker _faker = new("pt_BR");
 
     private Guid _establishmentId;
     private PaymentMethod _paymentMethod;
     private decimal _amount;
-    private PaymentStatus _paymentStatus;
-    private DateTime? _confirmedAt;
+    private PaymentStatus _status;
 
     public OrderPaymentBuilder()
     {
         _establishmentId = Guid.NewGuid();
         _paymentMethod = _faker.PickRandom<PaymentMethod>();
         _amount = _faker.Random.Decimal(10m, 500m);
-        _paymentStatus = PaymentStatus.Pending;
-        _confirmedAt = null;
+        _status = PaymentStatus.Pending;
     }
 
     public OrderPaymentBuilder WithEstablishmentId(Guid establishmentId)
@@ -43,34 +41,15 @@ public class OrderPaymentBuilder
         return this;
     }
 
-    public OrderPaymentBuilder WithStatus(PaymentStatus status)
-    {
-        _paymentStatus = status;
-        if (status == PaymentStatus.Confirmed)
-        {
-            _confirmedAt = DateTime.UtcNow;
-        }
-        return this;
-    }
-
     public OrderPaymentBuilder AsConfirmed()
     {
-        _paymentStatus = PaymentStatus.Confirmed;
-        _confirmedAt = DateTime.UtcNow;
+        _status = PaymentStatus.Confirmed;
         return this;
     }
 
     public OrderPaymentBuilder AsCancelled()
     {
-        _paymentStatus = PaymentStatus.Cancelled;
-        _confirmedAt = null;
-        return this;
-    }
-
-    public OrderPaymentBuilder AsPending()
-    {
-        _paymentStatus = PaymentStatus.Pending;
-        _confirmedAt = null;
+        _status = PaymentStatus.Cancelled;
         return this;
     }
 
@@ -78,15 +57,10 @@ public class OrderPaymentBuilder
     {
         var payment = new OrderPayment(_establishmentId, _paymentMethod, _amount);
 
-        // Use reflection to set internal state for testing purposes
-        if (_paymentStatus == PaymentStatus.Confirmed && _confirmedAt.HasValue)
-        {
+        if (_status == PaymentStatus.Confirmed)
             payment.Confirm();
-        }
-        else if (_paymentStatus == PaymentStatus.Cancelled)
-        {
+        else if (_status == PaymentStatus.Cancelled)
             payment.Cancel();
-        }
 
         return payment;
     }

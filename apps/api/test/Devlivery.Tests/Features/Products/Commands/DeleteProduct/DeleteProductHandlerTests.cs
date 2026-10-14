@@ -1,6 +1,10 @@
 using Devlivery.Common.Errors;
 using Devlivery.Domain.Aggregates.Orders.Abstractions;
+using Devlivery.Domain.Aggregates.Products;
+using Devlivery.Domain.Aggregates.Products.Abstractions;
 using Devlivery.Features.Products.Commands.DeleteProduct;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Tests.Common.Builders;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -9,135 +13,64 @@ using Shouldly;
 
 namespace Devlivery.Tests.Features.Products.Commands.DeleteProduct;
 
-[Collection("Products Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class DeleteProductHandlerTests(ProductsUnitTestFixture fixture)
+public sealed class DeleteProductHandlerTests
 {
-    [Fact]
-    public async Task Handle_Should_Return_NotFoundError_When_Product_Does_Not_Exist()
+    private readonly IProductRepository _productRepository = Substitute.For<IProductRepository>();
+    private readonly IOrderRepository _orderRepository = Substitute.For<IOrderRepository>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly DeleteProductHandler _handler;
+
+    public DeleteProductHandlerTests()
     {
-        // Arrange
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var orderRepository = Substitute.For<IOrderRepository>();
-
-        productRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .ReturnsNull();
-
-        var handler = new DeleteProductHandler(productRepository, unitOfWork, orderRepository);
-
-        var command = new DeleteProductCommand(Id: Guid.NewGuid());
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is NotFoundError);
+        _handler = new DeleteProductHandler(_productRepository, _unitOfWork, _orderRepository);
     }
 
     [Fact]
-    public async Task Handle_Should_Return_ValidationError_When_Product_Is_In_Use()
+    public async Task GivenNonexistentProduct_WhenDeleting_ThenReturnsNotFoundError()
     {
         // Arrange
-        var product = fixture.CreateProduct();
-
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var orderRepository = Substitute.For<IOrderRepository>();
-
-        productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(product);
-        orderRepository.ExistsItemWithProductIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(true);
-
-        var handler = new DeleteProductHandler(productRepository, unitOfWork, orderRepository);
-
-        var command = new DeleteProductCommand(Id: product.Id);
+        _productRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).ReturnsNull();
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(new DeleteProductCommand(Guid.NewGuid()), CancellationToken.None);
 
         // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is ValidationError);
+        result.HasError<NotFoundError>().ShouldBeTrue();
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Handle_Should_Remove_Product_When_Not_In_Use()
+    public async Task GivenProductUsedInOrders_WhenDeleting_ThenReturnsValidationErrorAndKeepsProduct()
     {
         // Arrange
-        var product = fixture.CreateProduct();
-
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var orderRepository = Substitute.For<IOrderRepository>();
-
-        productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(product);
-        orderRepository.ExistsItemWithProductIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(false);
-
-        var handler = new DeleteProductHandler(productRepository, unitOfWork, orderRepository);
-
-        var command = new DeleteProductCommand(Id: product.Id);
+        var product = new ProductBuilder().Build();
+        _productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>()).Returns(product);
+        _orderRepository.ExistsItemWithProductIdAsync(product.Id, Arg.Any<CancellationToken>()).Returns(true);
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(new DeleteProductCommand(product.Id), CancellationToken.None);
+
+        // Assert
+        result.HasError<ValidationError>().ShouldBeTrue();
+        await _productRepository.DidNotReceive().RemoveAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>());
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GivenProductNotUsedInOrders_WhenDeleting_ThenRemovesProductAndCommits()
+    {
+        // Arrange
+        var product = new ProductBuilder().Build();
+        _productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>()).Returns(product);
+        _orderRepository.ExistsItemWithProductIdAsync(product.Id, Arg.Any<CancellationToken>()).Returns(false);
+
+        // Act
+        var result = await _handler.HandleAsync(new DeleteProductCommand(product.Id), CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-    }
-
-    [Fact]
-    public async Task Handle_Should_Call_Remove_On_Repository()
-    {
-        // Arrange
-        var product = fixture.CreateProduct();
-
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var orderRepository = Substitute.For<IOrderRepository>();
-
-        productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(product);
-        orderRepository.ExistsItemWithProductIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(false);
-
-        var handler = new DeleteProductHandler(productRepository, unitOfWork, orderRepository);
-
-        var command = new DeleteProductCommand(Id: product.Id);
-
-        // Act
-        await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        await productRepository.Received(1).RemoveAsync(product, Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Handle_Should_Call_CommitAsync_On_UnitOfWork()
-    {
-        // Arrange
-        var product = fixture.CreateProduct();
-
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var orderRepository = Substitute.For<IOrderRepository>();
-
-        productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(product);
-        orderRepository.ExistsItemWithProductIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(false);
-
-        var handler = new DeleteProductHandler(productRepository, unitOfWork, orderRepository);
-
-        var command = new DeleteProductCommand(Id: product.Id);
-
-        // Act
-        await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
+        await _productRepository.Received(1).RemoveAsync(product, Arg.Any<CancellationToken>());
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 }

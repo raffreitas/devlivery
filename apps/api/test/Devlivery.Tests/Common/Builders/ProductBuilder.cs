@@ -6,51 +6,52 @@ namespace Devlivery.Tests.Common.Builders;
 
 public sealed class ProductBuilder
 {
-    private readonly Faker _faker = new();
+    private readonly Faker _faker = new("pt_BR");
 
-    private string _productName;
-    private string _productDescription;
-    private decimal _productPrice;
-    private string _productCategory;
-    private bool _productAvailable;
+    private string _name;
+    private string _description;
+    private decimal _price;
+    private string _category;
+    private bool _available;
     private Guid _establishmentId;
 
     public ProductBuilder()
     {
-        _productName = _faker.Commerce.ProductName();
-        _productDescription = _faker.Commerce.ProductDescription();
-        _productPrice = _faker.Random.Decimal(1.0m, 999.99m);
-        _productCategory = _faker.Commerce.Categories(1)[0];
-        _productAvailable = true;
+        _name = _faker.Commerce.ProductName();
+        _description = _faker.Commerce.ProductDescription();
+        _price = _faker.Random.Decimal(1.0m, 999.99m);
+        _category = _faker.Commerce.Categories(1)[0];
+        _available = true;
+        _establishmentId = Guid.NewGuid();
     }
 
     public ProductBuilder WithName(string name)
     {
-        _productName = name;
+        _name = name;
         return this;
     }
 
     public ProductBuilder WithDescription(string description)
     {
-        _productDescription = description;
+        _description = description;
         return this;
     }
 
     public ProductBuilder WithPrice(decimal price)
     {
-        _productPrice = price;
+        _price = price;
         return this;
     }
 
     public ProductBuilder WithCategory(string category)
     {
-        _productCategory = category;
+        _category = category;
         return this;
     }
 
-    public ProductBuilder WithAvailability(bool available)
+    public ProductBuilder AsUnavailable()
     {
-        _productAvailable = available;
+        _available = false;
         return this;
     }
 
@@ -62,15 +63,12 @@ public sealed class ProductBuilder
 
     public Product Build()
     {
-        if (_establishmentId == Guid.Empty)
-            throw new InvalidOperationException("No establishment id has been added");
-
         return new Product(
-            name: _productName,
-            description: _productDescription,
-            price: _productPrice,
-            category: _productCategory,
-            available: _productAvailable,
+            name: _name,
+            description: _description,
+            price: _price,
+            category: _category,
+            available: _available,
             establishmentId: _establishmentId);
     }
 }

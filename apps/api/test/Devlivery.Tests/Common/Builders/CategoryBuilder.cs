@@ -6,21 +6,23 @@ namespace Devlivery.Tests.Common.Builders;
 
 public sealed class CategoryBuilder
 {
-    private readonly Faker _faker = new();
+    private readonly Faker _faker = new("pt_BR");
 
-    private string _categoryName;
+    private string _name;
     private Guid _establishmentId;
     private bool _isActive;
+    private Category? _parent;
 
     public CategoryBuilder()
     {
-        _categoryName = _faker.Commerce.Categories(1)[0];
+        _name = _faker.Commerce.Categories(1)[0];
+        _establishmentId = Guid.NewGuid();
         _isActive = true;
     }
 
     public CategoryBuilder WithName(string name)
     {
-        _categoryName = name;
+        _name = name;
         return this;
     }
 
@@ -30,23 +32,26 @@ public sealed class CategoryBuilder
         return this;
     }
 
-    public CategoryBuilder WithIsActive(bool isActive)
+    public CategoryBuilder WithParent(Category parent)
     {
-        _isActive = isActive;
+        _parent = parent;
+        return this;
+    }
+
+    public CategoryBuilder AsInactive()
+    {
+        _isActive = false;
         return this;
     }
 
     public Category Build()
     {
-        if (_establishmentId == Guid.Empty)
-            throw new InvalidOperationException("No establishment id has been added");
+        var category = new Category(_name, _establishmentId);
 
-        var category = new Category(_categoryName, _establishmentId);
+        _parent?.AddSubcategory(category);
 
         if (!_isActive)
-        {
             category.Deactivate();
-        }
 
         return category;
     }

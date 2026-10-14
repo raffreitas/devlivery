@@ -4,376 +4,286 @@ using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Aggregates.Orders.ValueObjects;
 using Devlivery.Domain.Common.Enums;
-using Devlivery.Domain.Common.ValueObjects;
 using Devlivery.Domain.SeedWork;
+using Devlivery.Tests.Common.Builders;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.Orders.Domain;
 
-[Collection("Orders Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class OrderTests(OrdersUnitTestFixture fixture)
+public sealed class OrderTests
 {
+    private static readonly CustomerInfo Customer = CustomerInfo.Create("João Silva", "11987654321");
+    private static readonly DeliveryAddress Address = new("Rua das Flores, 123", "Portão azul");
+
     [Fact]
-    public void Constructor_Should_Create_Order_With_Correct_Properties()
+    public void GivenItemsAndDeliveryFee_WhenCreatingOrder_ThenStartsPendingWithTotalOfItemsPlusFee()
     {
         // Arrange
-        const string customerName = "João Silva";
-        var customerPhone = new PhoneNumber("11987654321");
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
-        const PaymentMethod paymentMethod = PaymentMethod.Pix;
-        const decimal deliveryFee = 10.00m;
         var establishmentId = Guid.NewGuid();
-        const string notes = "Sem cebola";
-        var customer = CustomerInfo.Create(customerName, customerPhone);
-        var item = fixture.CreateOrderItem(establishmentId: establishmentId);
+        var items = new List<OrderItem>
+        {
+            new OrderItemBuilder().WithQuantity(2).WithUnitPrice(50m).Build(),
+            new OrderItemBuilder().WithQuantity(1).WithUnitPrice(30m).Build()
+        };
+        var payments = new List<OrderPayment> { new(establishmentId, PaymentMethod.Pix, 140m) };
 
         // Act
-        var totalAmount = item.TotalPrice + deliveryFee;
-        var payments = new List<OrderPayment> { new(establishmentId, paymentMethod, totalAmount) };
-
-        // Act
-        var order = new Order(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            deliveryFee: deliveryFee,
-            establishmentId: establishmentId,
-            items: [item],
-            payments: payments,
-            notes: notes
-        );
+        var order = new Order(Customer, Address, 10m, establishmentId, items, payments, "Sem cebola");
 
         // Assert
-        order.Customer.Name.ShouldBe(customerName);
-        order.Customer.Phone.ShouldNotBeNull();
-        order.Customer.Phone.Number.ShouldBe("11987654321");
-        order.DeliveryAddress.FullAddress.ShouldBe("Rua Teste, 123");
-        order.Status.ShouldBe(OrderStatus.Pending); // Status sempre começa como Pending
-        order.DeliveryFee.ShouldBe(deliveryFee);
+        order.Status.ShouldBe(OrderStatus.Pending);
+        order.Total.ShouldBe(140m);
+        order.Change.ShouldBe(0m);
+        order.Customer.ShouldBe(Customer);
+        order.DeliveryAddress.ShouldBe(Address);
         order.EstablishmentId.ShouldBe(establishmentId);
-        order.Notes.ShouldBe(notes);
-        order.CreatedAt.ShouldNotBe(default);
-        order.UpdatedAt.ShouldNotBe(default);
-        order.Items.Count.ShouldBe(1);
+        order.Notes.ShouldBe("Sem cebola");
+        order.Items.Count.ShouldBe(2);
+        order.Payments.ShouldHaveSingleItem().PaymentStatus.ShouldBe(PaymentStatus.Pending);
     }
 
     [Fact]
-    public void Constructor_Should_Calculate_Total_With_Items_And_DeliveryFee()
+    public void GivenNoItems_WhenCreatingOrder_ThenThrowsDomainException()
     {
         // Arrange
-        var customer = CustomerInfo.Create("João Silva", new PhoneNumber("11987654321"));
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
-        var establishmentId = Guid.NewGuid();
-        var item1 = fixture.CreateOrderItem(establishmentId: establishmentId, quantity: 2, unitPrice: 50.00m);
-        var item2 = fixture.CreateOrderItem(establishmentId: establishmentId, quantity: 1, unitPrice: 30.00m);
+        var payments = new List<OrderPayment> { new OrderPaymentBuilder().Build() };
 
         // Act
-        var totalAmount = item1.TotalPrice + item2.TotalPrice + 10.00m;
-        var payments = new List<OrderPayment> { new(establishmentId, PaymentMethod.Cash, totalAmount) };
-
-        // Act
-        var order = new Order(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            deliveryFee: 10.00m,
-            establishmentId: establishmentId,
-            items: [item1, item2],
-            payments: payments
-        );
+        var exception = Record.Exception(() => new Order(Customer, Address, 0m, Guid.NewGuid(), [], payments));
 
         // Assert
-        order.Total.ShouldBe(140.00m); // (2 * 50.00) + (1 * 30.00) + 10.00
+        exception.ShouldBeOfType<DomainException>().Message.ShouldBe("Pedido deve ter pelo menos um item");
     }
 
     [Fact]
-    public void Constructor_Should_Throw_When_No_Items_Provided()
+    public void GivenNoPayments_WhenCreatingOrder_ThenThrowsDomainException()
     {
         // Arrange
-        var customer = CustomerInfo.Create("João Silva");
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
+        var items = new List<OrderItem> { new OrderItemBuilder().Build() };
 
-        // Act & Assert
-        // Act & Assert
-        Should.Throw<DomainException>(() => new Order(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            deliveryFee: 10.00m,
-            establishmentId: Guid.NewGuid(),
-            items: [],
-            payments: [new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 10.00m)]
-        ));
+        // Act
+        var exception = Record.Exception(() => new Order(Customer, Address, 0m, Guid.NewGuid(), items, []));
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>()
+            .Message.ShouldBe("Pedido deve ter pelo menos uma forma de pagamento");
     }
 
     [Fact]
-    public void Constructor_Should_Throw_When_DeliveryFee_Is_Negative()
+    public void GivenNegativeDeliveryFee_WhenCreatingOrder_ThenThrowsDomainException()
     {
         // Arrange
-        var customer = CustomerInfo.Create("João Silva");
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
-        var establishmentId = Guid.NewGuid();
-        var item = fixture.CreateOrderItem(establishmentId: establishmentId);
+        var items = new List<OrderItem> { new OrderItemBuilder().Build() };
+        var payments = new List<OrderPayment> { new OrderPaymentBuilder().Build() };
 
-        // Act & Assert
-        // Act & Assert
-        Should.Throw<DomainException>(() => new Order(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            deliveryFee: -5.00m,
-            establishmentId: establishmentId,
-            items: [item],
-            payments: [new OrderPayment(establishmentId, PaymentMethod.Cash, item.TotalPrice - 5.00m)]
-        ));
+        // Act
+        var exception = Record.Exception(() => new Order(Customer, Address, -5m, Guid.NewGuid(), items, payments));
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>().Message.ShouldBe("Taxa de entrega não pode ser negativa");
     }
 
     [Fact]
-    public void UpdateStatus_Should_Change_Status()
+    public void GivenPendingOrder_WhenChangingStatus_ThenRaisesStatusChangedEvent()
     {
         // Arrange
-        var order = fixture.CreateOrder();
+        var order = new OrderBuilder().Build();
+        var beforeUpdate = DateTime.UtcNow;
 
         // Act
         order.UpdateStatus(OrderStatus.Preparing);
 
         // Assert
         order.Status.ShouldBe(OrderStatus.Preparing);
+        order.UpdatedAt.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
+        var statusChanged = order.DomainEvents.OfType<OrderStatusChangedEvent>().ShouldHaveSingleItem();
+        statusChanged.OrderId.ShouldBe(order.Id);
+        statusChanged.OldStatus.ShouldBe(OrderStatus.Pending);
+        statusChanged.NewStatus.ShouldBe(OrderStatus.Preparing);
     }
 
-    [Fact]
-    public async Task UpdateStatus_Should_Update_UpdatedAt_Timestamp()
+    [Theory]
+    [InlineData(OrderStatus.Canceled, OrderStatus.Preparing)]
+    [InlineData(OrderStatus.Canceled, OrderStatus.Delivered)]
+    [InlineData(OrderStatus.Delivered, OrderStatus.Preparing)]
+    [InlineData(OrderStatus.Delivered, OrderStatus.Canceled)]
+    public void GivenFinalizedOrder_WhenChangingStatus_ThenThrowsDomainException(
+        OrderStatus finalStatus, OrderStatus newStatus)
     {
         // Arrange
-        var order = fixture.CreateOrder();
-        var originalUpdatedAt = order.UpdatedAt;
-        await Task.Delay(10);
+        var order = new OrderBuilder().WithStatus(finalStatus).Build();
 
         // Act
-        order.UpdateStatus(OrderStatus.Ready);
+        var exception = Record.Exception(() => order.UpdateStatus(newStatus));
 
         // Assert
-        order.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
+        exception.ShouldBeOfType<DomainException>();
+        order.Status.ShouldBe(finalStatus);
     }
 
     [Fact]
-    public void UpdateStatus_Should_Raise_OrderStatusChangedEvent()
+    public void GivenPaymentAboveTotal_WhenDelivering_ThenConfirmsPaymentAndCalculatesChange()
     {
         // Arrange
-        var order = fixture.CreateOrder();
+        var payment = new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash).WithAmount(100m).Build();
+        var order = CreateOrderWithTotal(70m, payment);
 
         // Act
         order.UpdateStatus(OrderStatus.Delivered);
 
         // Assert
-        var statusChangedEvent = order.DomainEvents.OfType<OrderStatusChangedEvent>().FirstOrDefault();
-        statusChangedEvent.ShouldNotBeNull();
-        statusChangedEvent.OldStatus.ShouldBe(OrderStatus.Pending);
-        statusChangedEvent.NewStatus.ShouldBe(OrderStatus.Delivered);
+        order.Status.ShouldBe(OrderStatus.Delivered);
+        order.Change.ShouldBe(30m);
+        payment.PaymentStatus.ShouldBe(PaymentStatus.Confirmed);
+        payment.ConfirmedAt.ShouldNotBeNull();
+
+        var paymentConfirmed = order.DomainEvents.OfType<OrderPaymentConfirmedEvent>().ShouldHaveSingleItem();
+        paymentConfirmed.PaymentId.ShouldBe(payment.Id);
+        paymentConfirmed.PaymentMethod.ShouldBe(PaymentMethod.Cash);
+        paymentConfirmed.Amount.ShouldBe(100m);
+        paymentConfirmed.OrderTotal.ShouldBe(70m);
+        order.DomainEvents.OfType<OrderChangeCalculatedEvent>().ShouldHaveSingleItem().Change.ShouldBe(30m);
     }
 
     [Fact]
-    public void UpdateStatus_Should_Throw_When_Order_Is_Canceled()
+    public void GivenPaymentsBelowTotal_WhenDelivering_ThenThrowsAndKeepsOrderOpen()
     {
         // Arrange
-        var order = fixture.CreateOrder(status: OrderStatus.Canceled);
-
-        // Act & Assert
-        Should.Throw<DomainException>(() => order.UpdateStatus(OrderStatus.Preparing));
-    }
-
-    [Fact]
-    public void UpdateStatus_Should_Throw_When_Order_Is_Delivered()
-    {
-        // Arrange
-        var order = fixture.CreateOrder(status: OrderStatus.Delivered);
-
-        // Act & Assert
-        Should.Throw<DomainException>(() => order.UpdateStatus(OrderStatus.Preparing));
-    }
-
-    [Fact]
-    public void UpdateDetails_Should_Update_Customer_Information()
-    {
-        // Arrange
-        var order = fixture.CreateOrder(
-            customerName: "Nome Original",
-            customerPhone: "11111111111",
-            deliveryAddress: "Endereço Original",
-            paymentMethod: PaymentMethod.Cash,
-            deliveryFee: 5.00m,
-            notes: "Notas Originais"
-        );
-
-        var newCustomer = CustomerInfo.Create("Nome Atualizado", new PhoneNumber("22222222222"));
-        var newDeliveryAddress = new DeliveryAddress("Endereço Atualizado");
+        var payment = new OrderPaymentBuilder().WithAmount(20m).Build();
+        var order = CreateOrderWithTotal(50m, payment);
 
         // Act
-        order.UpdateDetails(
-            customer: newCustomer,
-            deliveryAddress: newDeliveryAddress,
-            deliveryFee: 10.00m,
-            notes: "Notas Atualizadas"
-        );
+        var exception = Record.Exception(() => order.UpdateStatus(OrderStatus.Delivered));
 
         // Assert
-        order.Customer.Name.ShouldBe("Nome Atualizado");
-        order.Customer.Phone.ShouldNotBeNull();
-        order.Customer.Phone.Number.ShouldBe("22222222222");
-        order.DeliveryAddress.FullAddress.ShouldBe("Endereço Atualizado");
-        order.Payments.First().PaymentMethod.ShouldBe(PaymentMethod.Cash); // Não muda
-        order.DeliveryFee.ShouldBe(10.00m);
-        order.Notes.ShouldBe("Notas Atualizadas");
+        exception.ShouldBeOfType<DomainException>();
+        order.Status.ShouldBe(OrderStatus.Pending);
+        payment.PaymentStatus.ShouldBe(PaymentStatus.Pending);
     }
 
     [Fact]
-    public void UpdateDetails_Should_Recalculate_Total_When_DeliveryFee_Changes()
+    public void GivenCancelledPaymentNeededToCoverTotal_WhenDelivering_ThenThrowsDomainException()
     {
         // Arrange
-        var establishmentId = Guid.NewGuid();
-        var item = fixture.CreateOrderItem(quantity: 2, unitPrice: 50.00m, establishmentId: establishmentId);
-        var customer = CustomerInfo.Create("João Silva");
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
-
-        var totalAmount = item.TotalPrice + 5.00m;
-        var payments = new List<OrderPayment> { new(establishmentId, PaymentMethod.Cash, totalAmount) };
-
-        var order = new Order(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            deliveryFee: 5.00m,
-            establishmentId: establishmentId,
-            items: [item],
-            payments: payments
-        );
-
-        // Total inicial: (2 * 50.00) + 5.00 = 105.00
-        order.Total.ShouldBe(105.00m);
+        var pending = new OrderPaymentBuilder().WithAmount(50m).Build();
+        var cancelled = new OrderPaymentBuilder().WithAmount(50m).AsCancelled().Build();
+        var order = CreateOrderWithTotal(100m, pending, cancelled);
 
         // Act
-        order.UpdateDetails(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            deliveryFee: 15.00m
-        );
+        var exception = Record.Exception(() => order.UpdateStatus(OrderStatus.Delivered));
 
         // Assert
-        order.Total.ShouldBe(115.00m); // (2 * 50.00) + 15.00
+        exception.ShouldBeOfType<DomainException>();
     }
 
     [Fact]
-    public void UpdateDetails_Should_Replace_Items_When_Provided()
+    public void GivenMixedPaymentStatuses_WhenDelivering_ThenConfirmsOnlyPendingPayments()
     {
         // Arrange
-        var establishmentId = Guid.NewGuid();
-        var originalItem = fixture.CreateOrderItem(establishmentId: establishmentId);
-        var customer = CustomerInfo.Create("João Silva");
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
-
-        var totalAmount = originalItem.TotalPrice + 5.00m;
-        var payments = new List<OrderPayment> { new(establishmentId, PaymentMethod.Cash, totalAmount) };
-
-        var order = new Order(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            deliveryFee: 5.00m,
-            establishmentId: establishmentId,
-            items: [originalItem],
-            payments: payments
-        );
-
-        var newItem1 = fixture.CreateOrderItem(quantity: 2, unitPrice: 25.00m, establishmentId: establishmentId);
-        var newItem2 = fixture.CreateOrderItem(quantity: 1, unitPrice: 40.00m, establishmentId: establishmentId);
+        var alreadyConfirmed = new OrderPaymentBuilder().WithAmount(40m).AsConfirmed().Build();
+        var pendingCash = new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash).WithAmount(30m).Build();
+        var pendingPix = new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Pix).WithAmount(30m).Build();
+        var cancelled = new OrderPaymentBuilder().WithAmount(25m).AsCancelled().Build();
+        var order = CreateOrderWithTotal(100m, alreadyConfirmed, pendingCash, pendingPix, cancelled);
 
         // Act
-        order.UpdateDetails(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            deliveryFee: 10.00m,
-            items: [newItem1, newItem2]
-        );
+        order.UpdateStatus(OrderStatus.Delivered);
 
         // Assert
-        order.Items.Count.ShouldBe(2);
+        order.DomainEvents.OfType<OrderPaymentConfirmedEvent>().Select(e => e.PaymentId)
+            .ShouldBe([pendingCash.Id, pendingPix.Id], ignoreOrder: true);
+        pendingCash.PaymentStatus.ShouldBe(PaymentStatus.Confirmed);
+        pendingPix.PaymentStatus.ShouldBe(PaymentStatus.Confirmed);
+        cancelled.PaymentStatus.ShouldBe(PaymentStatus.Cancelled);
+        order.Change.ShouldBe(0m);
+    }
+
+    [Fact]
+    public void GivenDeliveredOrder_WhenDeliveringAgain_ThenDoesNotConfirmPaymentsAgain()
+    {
+        // Arrange
+        var payment = new OrderPaymentBuilder().WithAmount(50m).Build();
+        var order = CreateOrderWithTotal(50m, payment);
+        order.UpdateStatus(OrderStatus.Delivered);
+
+        // Act
+        var exception = Record.Exception(() => order.UpdateStatus(OrderStatus.Delivered));
+
+        // Assert
+        exception.ShouldBeNull();
+        order.DomainEvents.OfType<OrderPaymentConfirmedEvent>().ShouldHaveSingleItem();
+        payment.PaymentStatus.ShouldBe(PaymentStatus.Confirmed);
+    }
+
+    [Fact]
+    public void GivenOrder_WhenUpdatingDetailsWithNewItems_ThenReplacesItemsAndRecalculatesTotal()
+    {
+        // Arrange
+        var originalItem = new OrderItemBuilder().Build();
+        var order = new OrderBuilder().WithItems(originalItem).WithDeliveryFee(5m).Build();
+        var newCustomer = CustomerInfo.Create("Maria Souza", "21912345678");
+        var newAddress = new DeliveryAddress("Av. Brasil, 500");
+        var newItems = new List<OrderItem>
+        {
+            new OrderItemBuilder().WithQuantity(2).WithUnitPrice(25m).Build(),
+            new OrderItemBuilder().WithQuantity(1).WithUnitPrice(40m).Build()
+        };
+        var beforeUpdate = DateTime.UtcNow;
+
+        // Act
+        order.UpdateDetails(newCustomer, newAddress, 10m, "Troco para 200", newItems);
+
+        // Assert
+        order.Customer.ShouldBe(newCustomer);
+        order.DeliveryAddress.ShouldBe(newAddress);
+        order.DeliveryFee.ShouldBe(10m);
+        order.Notes.ShouldBe("Troco para 200");
+        order.Items.ShouldBe(newItems, ignoreOrder: true);
         order.Items.ShouldNotContain(originalItem);
-        order.Total.ShouldBe(100.00m); // (2 * 25.00) + (1 * 40.00) + 10.00
+        order.Total.ShouldBe(100m);
+        order.UpdatedAt.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
     }
 
     [Fact]
-    public async Task UpdateDetails_Should_Update_UpdatedAt_Timestamp()
+    public void GivenOrder_WhenUpdatingDetailsWithoutItems_ThenKeepsItemsAndRecalculatesTotalWithNewFee()
     {
         // Arrange
-        var order = fixture.CreateOrder();
-        var originalUpdatedAt = order.UpdatedAt;
-        await Task.Delay(10);
-
-        var newCustomer = CustomerInfo.Create("Novo Nome");
-        var newDeliveryAddress = new DeliveryAddress("Novo Endereço");
+        var item = new OrderItemBuilder().WithQuantity(2).WithUnitPrice(50m).Build();
+        var order = new OrderBuilder().WithItems(item).WithDeliveryFee(5m).Build();
 
         // Act
-        order.UpdateDetails(
-            customer: newCustomer,
-            deliveryAddress: newDeliveryAddress,
-            deliveryFee: 12.00m
-        );
+        order.UpdateDetails(Customer, Address, 15m);
 
         // Assert
-        order.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
+        order.Items.ShouldHaveSingleItem().ShouldBe(item);
+        order.Total.ShouldBe(115m);
     }
 
     [Fact]
-    public void UpdatePaymentMethod_Should_Change_PaymentMethod()
+    public void GivenOrder_WhenDeleting_ThenRaisesOrderDeletedEvent()
     {
         // Arrange
-        var order = fixture.CreateOrder(paymentMethod: PaymentMethod.Cash);
-
-        // Act
-        order.AddPayment(new OrderPayment(order.EstablishmentId, PaymentMethod.Pix, order.Total));
-
-        // Assert
-        order.Payments.Any(p => p.PaymentMethod == PaymentMethod.Pix).ShouldBeTrue();
-    }
-
-    [Fact]
-    public void Delete_Should_Raise_OrderDeletedEvent()
-    {
-        // Arrange
-        var order = fixture.CreateOrder();
+        var order = new OrderBuilder().WithStatus(OrderStatus.Preparing).Build();
 
         // Act
         order.Delete();
 
         // Assert
-        var deletedEvent = order.DomainEvents.OfType<OrderDeletedEvent>().FirstOrDefault();
-        deletedEvent.ShouldNotBeNull();
-        deletedEvent.OrderId.ShouldBe(order.Id);
-        deletedEvent.EstablishmentId.ShouldBe(order.EstablishmentId);
+        var deleted = order.DomainEvents.OfType<OrderDeletedEvent>().ShouldHaveSingleItem();
+        deleted.OrderId.ShouldBe(order.Id);
+        deleted.EstablishmentId.ShouldBe(order.EstablishmentId);
+        deleted.Total.ShouldBe(order.Total);
+        deleted.Status.ShouldBe(OrderStatus.Preparing);
     }
 
-    [Fact]
-    public void Total_Should_Be_Sum_Of_Items_Plus_DeliveryFee()
+    private static Order CreateOrderWithTotal(decimal total, params OrderPayment[] payments)
     {
-        // Arrange
-        var establishmentId = Guid.NewGuid();
-        var item1 = fixture.CreateOrderItem(quantity: 2, unitPrice: 30.00m, establishmentId: establishmentId); // 60.00
-        var item2 = fixture.CreateOrderItem(quantity: 3, unitPrice: 15.00m, establishmentId: establishmentId); // 45.00
-        var item3 = fixture.CreateOrderItem(quantity: 1, unitPrice: 25.00m, establishmentId: establishmentId); // 25.00
-        var customer = CustomerInfo.Create("João Silva");
-        var deliveryAddress = new DeliveryAddress("Rua Teste, 123");
-
-        // Act
-        var totalAmount = item1.TotalPrice + item2.TotalPrice + item3.TotalPrice + 7.50m;
-        var payments = new List<OrderPayment> { new(establishmentId, PaymentMethod.Cash, totalAmount) };
-
-        // Act
-        var order = new Order(
-            customer: customer,
-            deliveryAddress: deliveryAddress,
-            deliveryFee: 7.50m,
-            establishmentId: establishmentId,
-            items: [item1, item2, item3],
-            payments: payments
-        );
-
-        // Assert
-        order.Total.ShouldBe(137.50m); // 60.00 + 45.00 + 25.00 + 7.50
+        return new OrderBuilder()
+            .WithItems(new OrderItemBuilder().WithQuantity(1).WithUnitPrice(total).Build())
+            .WithDeliveryFee(0m)
+            .WithCustomPayments(payments)
+            .Build();
     }
 }

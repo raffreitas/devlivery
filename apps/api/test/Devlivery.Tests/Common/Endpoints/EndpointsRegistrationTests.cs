@@ -58,7 +58,7 @@ public sealed class EndpointsRegistrationTests
     ];
 
     [Fact]
-    public async Task MapEndpoints_Should_Map_Every_Endpoint_With_Its_Route_And_Tag()
+    public async Task GivenRegisteredEndpoints_WhenMapping_ThenExposesExpectedRoutesAndTags()
     {
         // Arrange
         var builder = WebApplication.CreateBuilder();
@@ -85,7 +85,7 @@ public sealed class EndpointsRegistrationTests
     }
 
     [Fact]
-    public void AddEndpoints_Should_Register_Every_Endpoint_Class()
+    public void GivenApiAssembly_WhenAddingEndpoints_ThenRegistersEveryEndpointClass()
     {
         // Arrange
         var services = new ServiceCollection();

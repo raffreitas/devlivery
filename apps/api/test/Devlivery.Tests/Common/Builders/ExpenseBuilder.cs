@@ -1,13 +1,12 @@
 using Bogus;
 
 using Devlivery.Domain.Aggregates.Expenses;
-using Devlivery.Domain.Aggregates.Expenses.Enums;
 
 namespace Devlivery.Tests.Common.Builders;
 
 public sealed class ExpenseBuilder
 {
-    private readonly Faker _faker = new();
+    private readonly Faker _faker = new("pt_BR");
 
     private Guid _categoryId;
     private Guid _establishmentId;
@@ -16,10 +15,12 @@ public sealed class ExpenseBuilder
     private string? _supplier;
     private string? _description;
     private DateOnly? _paymentDate;
-    private ExpenseStatus? _status;
+    private bool _isCancelled;
 
     public ExpenseBuilder()
     {
+        _categoryId = Guid.NewGuid();
+        _establishmentId = Guid.NewGuid();
         _amount = _faker.Random.Decimal(10, 1000);
         _dueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
         _supplier = _faker.Company.CompanyName();
@@ -62,26 +63,20 @@ public sealed class ExpenseBuilder
         return this;
     }
 
-    public ExpenseBuilder WithPaymentDate(DateOnly? paymentDate)
+    public ExpenseBuilder AsPaid(DateOnly? paymentDate = null)
     {
-        _paymentDate = paymentDate;
+        _paymentDate = paymentDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
         return this;
     }
 
-    public ExpenseBuilder WithStatus(ExpenseStatus status)
+    public ExpenseBuilder AsCancelled()
     {
-        _status = status;
+        _isCancelled = true;
         return this;
     }
 
     public Expense Build()
     {
-        if (_establishmentId == Guid.Empty)
-            throw new InvalidOperationException("No establishment id has been added");
-
-        if (_categoryId == Guid.Empty)
-            _categoryId = Guid.NewGuid();
-
         var expense = new Expense(
             establishmentId: _establishmentId,
             categoryId: _categoryId,
@@ -92,11 +87,8 @@ public sealed class ExpenseBuilder
             paymentDate: _paymentDate
         );
 
-        // Ajustar status se necessário (após criação)
-        if (_status == ExpenseStatus.Cancelled && expense.Status != ExpenseStatus.Cancelled)
-        {
+        if (_isCancelled)
             expense.Cancel();
-        }
 
         return expense;
     }

@@ -1,5 +1,10 @@
+using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Tests.Common.Builders;
+using Devlivery.Tests.Common.Mocks;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -9,124 +14,73 @@ using Shouldly;
 namespace Devlivery.Tests.Features.CashRegister.Commands.CreateCashDeposit;
 
 [Trait("Category", "Unit Tests")]
-public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fixture) : IClassFixture<CashRegisterUnitTestFixture>
+public sealed class CreateCashDepositHandlerTests
 {
+    private readonly Guid _operatorId = Guid.NewGuid();
+    private readonly ICashSessionRepository _cashSessionRepository = Substitute.For<ICashSessionRepository>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly CreateCashDepositHandler _handler;
+
+    public CreateCashDepositHandlerTests()
+    {
+        _handler = new CreateCashDepositHandler(
+            _cashSessionRepository,
+            TestMocks.CurrentUserAccessor(_operatorId, "Maria Souza"),
+            _unitOfWork);
+    }
+
     [Fact]
-    public async Task Handle_Should_Create_Deposit_When_Session_Is_Open()
+    public async Task GivenNonexistentSession_WhenDepositing_ThenReturnsNotFoundError()
     {
         // Arrange
-        var tenantId = Guid.NewGuid();
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        var cashSession = fixture.CreateCashSession(establishmentId: tenantId);
-        cashSessionRepository.GetByIdAsync(cashSession.Id, Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var handler = new CreateCashDepositHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork);
-
-        var command = new CreateCashDepositCommand(CashSessionId: cashSession.Id, Amount: 50.00m, Notes: "Aporte");
+        _cashSessionRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).ReturnsNull();
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(new CreateCashDepositCommand(Guid.NewGuid(), 50m, null),
+            CancellationToken.None);
+
+        // Assert
+        result.HasError<NotFoundError>().ShouldBeTrue();
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GivenClosedSession_WhenDepositing_ThenReturnsValidationErrorWithoutRecording()
+    {
+        // Arrange
+        var session = new CashSessionBuilder().AsClosed().Build();
+        _cashSessionRepository.GetByIdAsync(session.Id, Arg.Any<CancellationToken>()).Returns(session);
+
+        // Act
+        var result = await _handler.HandleAsync(new CreateCashDepositCommand(session.Id, 50m, null),
+            CancellationToken.None);
+
+        // Assert
+        result.HasError<ValidationError>().ShouldBeTrue();
+        session.Movements.ShouldBeEmpty();
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GivenOpenSession_WhenDepositing_ThenRecordsDepositAttributedToCurrentOperator()
+    {
+        // Arrange
+        var session = new CashSessionBuilder().WithOpeningAmount(100m).Build();
+        _cashSessionRepository.GetByIdAsync(session.Id, Arg.Any<CancellationToken>()).Returns(session);
+
+        // Act
+        var result = await _handler.HandleAsync(new CreateCashDepositCommand(session.Id, 50m, "Reforço de troco"),
+            CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Amount.ShouldBe(50.00m);
-        result.Value.AttendantName.ShouldBe("João Silva");
-    }
-
-    [Fact]
-    public async Task Handle_Should_Add_Deposit_To_CashSession()
-    {
-        // Arrange
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        var cashSession = fixture.CreateCashSession();
-        cashSessionRepository.GetByIdAsync(cashSession.Id, Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var handler = new CreateCashDepositHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork);
-
-        var command = new CreateCashDepositCommand(CashSessionId: cashSession.Id, Amount: 100.00m, Notes: null);
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        cashSession.Movements.ShouldContain(m =>
-            m.EntryType == CashSessionEntryType.Deposit &&
-            m.Amount == 100.00m);
-    }
-
-    [Fact]
-    public async Task Handle_Should_Call_CommitAsync_On_UnitOfWork()
-    {
-        // Arrange
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        var cashSession = fixture.CreateCashSession();
-        cashSessionRepository.GetByIdAsync(cashSession.Id, Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var handler = new CreateCashDepositHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork);
-
-        var command = new CreateCashDepositCommand(CashSessionId: cashSession.Id, Amount: 200.00m, Notes: null);
-
-        // Act
-        await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Handle_Should_Return_NotFoundError_When_Session_Does_Not_Exist()
-    {
-        // Arrange
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        cashSessionRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .ReturnsNull();
-
-        var handler = new CreateCashDepositHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork);
-
-        var command = new CreateCashDepositCommand(CashSessionId: Guid.NewGuid(), Amount: 100.00m, Notes: null);
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors[0].Message.ShouldContain("não encontrado");
-    }
-
-    [Fact]
-    public async Task Handle_Should_Return_ValidationError_When_Session_Is_Closed()
-    {
-        // Arrange
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        var cashSession = fixture.CreateCashSession();
-        cashSession.Close(100.00m, null);
-
-        cashSessionRepository.GetByIdAsync(cashSession.Id, Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var handler = new CreateCashDepositHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork);
-
-        var command = new CreateCashDepositCommand(CashSessionId: cashSession.Id, Amount: 50.00m, Notes: null);
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldNotBeEmpty();
+        var deposit = session.Movements.ShouldHaveSingleItem();
+        deposit.EntryType.ShouldBe(CashSessionEntryType.Deposit);
+        deposit.Amount.ShouldBe(50m);
+        deposit.Reason.ShouldBe("Reforço de troco");
+        deposit.CreatedBy.ShouldBe(_operatorId);
+        session.ExpectedCashAmount.ShouldBe(150m);
+        result.Value.ShouldBe(new CreateCashDepositResponse(deposit.Id, 50m, "Maria Souza", deposit.CreatedAt));
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 }

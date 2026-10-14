@@ -1,205 +1,81 @@
 using Devlivery.Common.Errors;
-using Devlivery.Domain.Aggregates.Products;
+using Devlivery.Domain.Aggregates.Products.Abstractions;
 using Devlivery.Features.Products.Commands.UpdateProduct;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Tests.Common.Builders;
 
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.Products.Commands.UpdateProduct;
 
-[Collection("Products Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class UpdateProductHandlerTests(ProductsUnitTestFixture fixture)
+public sealed class UpdateProductHandlerTests
 {
-    [Fact]
-    public async Task Handle_Should_Return_NotFoundError_When_Product_Does_Not_Exist()
+    private readonly IProductRepository _productRepository = Substitute.For<IProductRepository>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly UpdateProductHandler _handler;
+
+    public UpdateProductHandlerTests()
     {
-        // Arrange
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        productRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns((Product?)null);
-
-        var handler = new UpdateProductHandler(productRepository, unitOfWork);
-
-        var command = new UpdateProductCommand(
-            Id: Guid.NewGuid(),
-            Name: "Produto Atualizado",
-            Description: "Descrição atualizada",
-            Price: 199.99m,
-            Category: "Nova Categoria",
-            Available: true
-        );
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is NotFoundError);
+        _handler = new UpdateProductHandler(_productRepository, _unitOfWork);
     }
 
     [Fact]
-    public async Task Handle_Should_Update_Product_Properties()
+    public async Task GivenNonexistentProduct_WhenUpdating_ThenReturnsNotFoundErrorWithoutCommitting()
     {
         // Arrange
-        var product = fixture.CreateProduct(
-            name: "Produto Original",
-            description: "Descrição Original",
-            price: 99.99m,
-            category: "Categoria Original",
-            available: false
-        );
-
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(product);
-
-        var handler = new UpdateProductHandler(productRepository, unitOfWork);
-
-        var command = new UpdateProductCommand(
-            Id: product.Id,
-            Name: "Produto Atualizado",
-            Description: "Descrição Atualizada",
-            Price: 199.99m,
-            Category: "Nova Categoria",
-            Available: true
-        );
+        _productRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).ReturnsNull();
+        var command = new UpdateProductCommand(Guid.NewGuid(), "Pizza", "Descrição", 10m, "Pizzas", true);
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.HasError<NotFoundError>().ShouldBeTrue();
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GivenExistingProduct_WhenUpdating_ThenAppliesChangesAndCommits()
+    {
+        // Arrange
+        var product = new ProductBuilder().Build();
+        _productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>()).Returns(product);
+        var command = new UpdateProductCommand(product.Id, "Pizza Portuguesa", "Presunto, ovo e cebola", 54.90m,
+            "Pizzas Especiais", Available: true);
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        product.Name.ShouldBe("Produto Atualizado");
-        product.Description.ShouldBe("Descrição Atualizada");
-        product.Price.ShouldBe(199.99m);
-        product.Category.ShouldBe("Nova Categoria");
+        product.Name.ShouldBe("Pizza Portuguesa");
+        product.Description.ShouldBe("Presunto, ovo e cebola");
+        product.Price.ShouldBe(54.90m);
+        product.Category.ShouldBe("Pizzas Especiais");
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 
-    [Fact]
-    public async Task Handle_Should_Set_Product_As_Available_When_Available_Is_True()
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public async Task GivenProductAvailability_WhenUpdatingWithDifferentAvailability_ThenProductFollowsCommand(
+        bool currentlyAvailable, bool requestedAvailability)
     {
         // Arrange
-        var product = fixture.CreateProduct(available: false);
-
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(product);
-
-        var handler = new UpdateProductHandler(productRepository, unitOfWork);
-
-        var command = new UpdateProductCommand(
-            Id: product.Id,
-            Name: product.Name,
-            Description: product.Description,
-            Price: product.Price,
-            Category: product.Category,
-            Available: true
-        );
+        var builder = new ProductBuilder();
+        var product = (currentlyAvailable ? builder : builder.AsUnavailable()).Build();
+        _productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>()).Returns(product);
+        var command = new UpdateProductCommand(product.Id, product.Name, product.Description, product.Price,
+            product.Category, requestedAvailability);
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
-        product.Available.ShouldBeTrue();
-    }
-
-    [Fact]
-    public async Task Handle_Should_Set_Product_As_Unavailable_When_Available_Is_False()
-    {
-        // Arrange
-        var product = fixture.CreateProduct(available: true);
-
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(product);
-
-        var handler = new UpdateProductHandler(productRepository, unitOfWork);
-
-        var command = new UpdateProductCommand(
-            Id: product.Id,
-            Name: product.Name,
-            Description: product.Description,
-            Price: product.Price,
-            Category: product.Category,
-            Available: false
-        );
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        product.Available.ShouldBeFalse();
-    }
-
-    [Fact]
-    public async Task Handle_Should_Call_CommitAsync_On_UnitOfWork()
-    {
-        // Arrange
-        var product = fixture.CreateProduct();
-
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(product);
-
-        var handler = new UpdateProductHandler(productRepository, unitOfWork);
-
-        var command = new UpdateProductCommand(
-            Id: product.Id,
-            Name: "Produto Atualizado",
-            Description: "Descrição Atualizada",
-            Price: 199.99m,
-            Category: "Nova Categoria",
-            Available: true
-        );
-
-        // Act
-        await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Handle_Should_Return_Success_When_Product_Is_Updated()
-    {
-        // Arrange
-        var product = fixture.CreateProduct();
-
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(product);
-
-        var handler = new UpdateProductHandler(productRepository, unitOfWork);
-
-        var command = new UpdateProductCommand(
-            Id: product.Id,
-            Name: "Produto Atualizado",
-            Description: "Descrição Atualizada",
-            Price: 199.99m,
-            Category: "Nova Categoria",
-            Available: true
-        );
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
+        product.Available.ShouldBe(requestedAvailability);
     }
 }

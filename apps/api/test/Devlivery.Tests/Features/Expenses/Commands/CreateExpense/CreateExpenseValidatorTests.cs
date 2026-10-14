@@ -2,151 +2,50 @@ using Devlivery.Features.Expenses.Commands.CreateExpense;
 
 using FluentValidation.TestHelper;
 
+using Shouldly;
+
 namespace Devlivery.Tests.Features.Expenses.Commands.CreateExpense;
 
-[Collection("Expenses Unit Tests")]
 [Trait("Category", "Unit Tests")]
 public sealed class CreateExpenseValidatorTests
 {
+    private static readonly CreateExpenseCommand ValidCommand =
+        new(Guid.NewGuid(), 0.01m, new DateOnly(2026, 5, 10), Supplier: null, Description: null, PaymentDate: null);
+
     private readonly CreateExpenseCommandValidator _validator = new();
 
+    public static TheoryData<CreateExpenseCommand, string, string> InvalidCommands => new()
+    {
+        { ValidCommand with { CategoryId = Guid.Empty }, "CategoryId", "O campo 'Categoria' é obrigatório." },
+        { ValidCommand with { Amount = 0m }, "Amount", "O campo 'Valor' deve ser maior que 0." },
+        { ValidCommand with { Amount = -10m }, "Amount", "O campo 'Valor' deve ser maior que 0." },
+        { ValidCommand with { DueDate = default }, "DueDate", "O campo 'Data de vencimento' é obrigatório." }
+    };
+
     [Fact]
-    public void Validate_Should_Pass_When_Command_Is_Valid()
+    public void GivenCommandWithOnlyRequiredFields_WhenValidating_ThenHasNoErrors()
     {
         // Arrange
-        var command = new CreateExpenseCommand(
-            CategoryId: Guid.NewGuid(),
-            Amount: 100.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: "Fornecedor Teste",
-            Description: "Descrição Teste",
-            PaymentDate: null
-        );
+        var command = ValidCommand;
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldNotHaveAnyValidationErrors();
+        result.IsValid.ShouldBeTrue();
     }
 
-    [Fact]
-    public void Validate_Should_Fail_When_CategoryId_Is_Empty()
+    [Theory]
+    [MemberData(nameof(InvalidCommands))]
+    public void GivenInvalidField_WhenValidating_ThenReturnsPortugueseErrorForField(
+        CreateExpenseCommand command, string propertyName, string expectedMessage)
     {
-        // Arrange
-        var command = new CreateExpenseCommand(
-            CategoryId: Guid.Empty,
-            Amount: 100.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: null,
-            Description: null,
-            PaymentDate: null
-        );
+        // Arrange: command comes from InvalidCommands
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.CategoryId);
-    }
-
-    [Fact]
-    public void Validate_Should_Fail_When_Amount_Is_Zero()
-    {
-        // Arrange
-        var command = new CreateExpenseCommand(
-            CategoryId: Guid.NewGuid(),
-            Amount: 0,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: null,
-            Description: null,
-            PaymentDate: null
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount);
-    }
-
-    [Fact]
-    public void Validate_Should_Fail_When_Amount_Is_Negative()
-    {
-        // Arrange
-        var command = new CreateExpenseCommand(
-            CategoryId: Guid.NewGuid(),
-            Amount: -10.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: null,
-            Description: null,
-            PaymentDate: null
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount);
-    }
-
-    [Fact]
-    public void Validate_Should_Pass_When_Supplier_Is_Null()
-    {
-        // Arrange
-        var command = new CreateExpenseCommand(
-            CategoryId: Guid.NewGuid(),
-            Amount: 100.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: null,
-            Description: null,
-            PaymentDate: null
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.Supplier);
-    }
-
-    [Fact]
-    public void Validate_Should_Pass_When_Description_Is_Null()
-    {
-        // Arrange
-        var command = new CreateExpenseCommand(
-            CategoryId: Guid.NewGuid(),
-            Amount: 100.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: null,
-            Description: null,
-            PaymentDate: null
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.Description);
-    }
-
-    [Fact]
-    public void Validate_Should_Pass_When_PaymentDate_Is_Null()
-    {
-        // Arrange
-        var command = new CreateExpenseCommand(
-            CategoryId: Guid.NewGuid(),
-            Amount: 100.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: null,
-            Description: null,
-            PaymentDate: null
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.PaymentDate);
+        result.ShouldHaveValidationErrorFor(propertyName).WithErrorMessage(expectedMessage);
     }
 }

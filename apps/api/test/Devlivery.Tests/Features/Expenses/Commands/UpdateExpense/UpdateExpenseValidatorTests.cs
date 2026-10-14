@@ -2,123 +2,49 @@ using Devlivery.Features.Expenses.Commands.UpdateExpense;
 
 using FluentValidation.TestHelper;
 
+using Shouldly;
+
 namespace Devlivery.Tests.Features.Expenses.Commands.UpdateExpense;
 
-[Collection("Expenses Unit Tests")]
 [Trait("Category", "Unit Tests")]
 public sealed class UpdateExpenseValidatorTests
 {
+    private static readonly UpdateExpenseCommand ValidCommand =
+        new(Guid.NewGuid(), CategoryId: null, Amount: null, DueDate: null, Supplier: null, Description: null);
+
     private readonly UpdateExpenseCommandValidator _validator = new();
 
-    [Fact]
-    public void Validate_Should_Fail_When_PaymentDate_Is_Default()
+    public static TheoryData<UpdateExpenseCommand, string, string> InvalidCommands => new()
     {
-        var command = new UpdateExpenseCommand(Guid.NewGuid(), null, null, null, null, null,
-            DateOnly.MinValue);
-
-        var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(x => x.PaymentDate);
-    }
+        { ValidCommand with { ExpenseId = Guid.Empty }, "ExpenseId", "O campo 'Despesa' é obrigatório." },
+        { ValidCommand with { Amount = 0m }, "Amount", "O campo 'Valor' deve ser maior que 0." },
+        { ValidCommand with { PaymentDate = DateOnly.MinValue }, "PaymentDate", "O campo 'Data de pagamento' deve ser uma data válida." }
+    };
 
     [Fact]
-    public void Validate_Should_Pass_When_Command_Is_Valid()
+    public void GivenCommandWithOnlyExpenseId_WhenValidating_ThenHasNoErrors()
     {
         // Arrange
-        var command = new UpdateExpenseCommand(
-            ExpenseId: Guid.NewGuid(),
-            CategoryId: Guid.NewGuid(),
-            Amount: 200.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)),
-            Supplier: "Fornecedor Atualizado",
-            Description: "Descrição Atualizada",
-            PaymentDate: new DateOnly(2026, 9, 2)
-        );
+        var command = ValidCommand;
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldNotHaveAnyValidationErrors();
+        result.IsValid.ShouldBeTrue();
     }
 
-    [Fact]
-    public void Validate_Should_Fail_When_ExpenseId_Is_Empty()
+    [Theory]
+    [MemberData(nameof(InvalidCommands))]
+    public void GivenInvalidField_WhenValidating_ThenReturnsPortugueseErrorForField(
+        UpdateExpenseCommand command, string propertyName, string expectedMessage)
     {
-        // Arrange
-        var command = new UpdateExpenseCommand(
-            ExpenseId: Guid.Empty,
-            CategoryId: null,
-            Amount: null,
-            DueDate: null,
-            Supplier: null,
-            Description: null
-        );
+        // Arrange: command comes from InvalidCommands
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.ExpenseId);
-    }
-
-    [Fact]
-    public void Validate_Should_Fail_When_Amount_Is_Zero()
-    {
-        // Arrange
-        var command = new UpdateExpenseCommand(
-            ExpenseId: Guid.NewGuid(),
-            CategoryId: null,
-            Amount: 0,
-            DueDate: null,
-            Supplier: null,
-            Description: null
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount);
-    }
-
-    [Fact]
-    public void Validate_Should_Fail_When_Amount_Is_Negative()
-    {
-        // Arrange
-        var command = new UpdateExpenseCommand(
-            ExpenseId: Guid.NewGuid(),
-            CategoryId: null,
-            Amount: -10.00m,
-            DueDate: null,
-            Supplier: null,
-            Description: null
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount);
-    }
-
-    [Fact]
-    public void Validate_Should_Pass_When_All_Optional_Fields_Are_Null()
-    {
-        // Arrange
-        var command = new UpdateExpenseCommand(
-            ExpenseId: Guid.NewGuid(),
-            CategoryId: null,
-            Amount: null,
-            DueDate: null,
-            Supplier: null,
-            Description: null
-        );
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldNotHaveAnyValidationErrors();
+        result.ShouldHaveValidationErrorFor(propertyName).WithErrorMessage(expectedMessage);
     }
 }
