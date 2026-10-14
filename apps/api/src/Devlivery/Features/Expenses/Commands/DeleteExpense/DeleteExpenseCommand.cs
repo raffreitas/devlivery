@@ -8,7 +8,6 @@ public sealed class DeleteExpenseCommandValidator : AbstractValidator<DeleteExpe
 {
     public DeleteExpenseCommandValidator()
     {
-        RuleFor(x => x.ExpenseId)
-            .NotEmpty().WithMessage("ExpenseId é obrigatório.");
+        RuleFor(x => x.ExpenseId).NotEmpty().WithName("Despesa");
     }
 }

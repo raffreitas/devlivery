@@ -12,10 +12,7 @@ public sealed class CloseCashSessionValidator : AbstractValidator<CloseCashSessi
 {
     public CloseCashSessionValidator()
     {
-        RuleFor(x => x.Id)
-            .NotEmpty().WithMessage("O id do caixa é obrigatório.");
-
-        RuleFor(x => x.ClosingAmount)
-            .GreaterThanOrEqualTo(0).WithMessage("O valor de fechamento deve ser maior ou igual a zero.");
+        RuleFor(x => x.Id).NotEmpty().WithName("Caixa");
+        RuleFor(x => x.ClosingAmount).GreaterThanOrEqualTo(0).WithName("Valor de fechamento");
     }
 }

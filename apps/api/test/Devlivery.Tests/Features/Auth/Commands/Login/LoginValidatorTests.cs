@@ -40,7 +40,7 @@ public sealed class LoginValidatorTests(AuthUnitTestFixture fixture) : IClassFix
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Email)
-            .WithErrorMessage("O campo 'Email' é obrigatório.");
+            .WithErrorMessage("O campo 'E-mail' é obrigatório.");
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public sealed class LoginValidatorTests(AuthUnitTestFixture fixture) : IClassFix
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Email)
-            .WithErrorMessage("O campo 'Email' deve ser um e-mail válido.");
+            .WithErrorMessage("O campo 'E-mail' deve ser um e-mail válido.");
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public sealed class LoginValidatorTests(AuthUnitTestFixture fixture) : IClassFix
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("O campo 'Password' é obrigatório.");
+            .WithErrorMessage("O campo 'Senha' é obrigatório.");
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public sealed class LoginValidatorTests(AuthUnitTestFixture fixture) : IClassFix
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("O campo 'Password' deve ter no mínimo 6 caracteres.");
+            .WithErrorMessage("O campo 'Senha' deve ter no mínimo 6 caracteres.");
     }
 
     [Theory]

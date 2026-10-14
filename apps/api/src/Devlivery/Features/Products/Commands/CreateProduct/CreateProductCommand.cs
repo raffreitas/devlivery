@@ -13,19 +13,9 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
 {
     public CreateProductCommandValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .MaximumLength(200).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
-
-        RuleFor(x => x.Description)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .MaximumLength(1000).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
-
-        RuleFor(x => x.Price)
-            .GreaterThan(0).WithMessage("O campo '{PropertyName}' deve ser maior que {ComparisonValue}.");
-
-        RuleFor(x => x.Category)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .MaximumLength(100).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(200).WithName("Nome");
+        RuleFor(x => x.Description).NotEmpty().MaximumLength(1000).WithName("Descrição");
+        RuleFor(x => x.Price).GreaterThan(0).WithName("Preço");
+        RuleFor(x => x.Category).NotEmpty().MaximumLength(100).WithName("Categoria");
     }
 }

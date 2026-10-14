@@ -8,7 +8,6 @@ public sealed class DeleteCategoryCommandValidator : AbstractValidator<DeleteCat
 {
     public DeleteCategoryCommandValidator()
     {
-        RuleFor(x => x.CategoryId)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
+        RuleFor(x => x.CategoryId).NotEmpty().WithName("Categoria");
     }
 }

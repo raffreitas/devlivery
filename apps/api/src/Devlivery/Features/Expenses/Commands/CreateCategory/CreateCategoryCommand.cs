@@ -10,8 +10,6 @@ public sealed class CreateCategoryCommandValidator : AbstractValidator<CreateCat
 {
     public CreateCategoryCommandValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .MaximumLength(200).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(200).WithName("Nome");
     }
 }

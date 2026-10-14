@@ -55,7 +55,7 @@ public sealed class UpdateOrderValidatorTests(OrdersUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Id)
-            .WithErrorMessage("O campo 'Id' é obrigatório.");
+            .WithErrorMessage("O campo 'Pedido' é obrigatório.");
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public sealed class UpdateOrderValidatorTests(OrdersUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Items)
-            .WithErrorMessage("O campo 'Items' não pode estar vazio.");
+            .WithErrorMessage("O campo 'Itens' é obrigatório.");
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public sealed class UpdateOrderValidatorTests(OrdersUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.CustomerName)
-            .WithErrorMessage("O campo 'Customer Name' é obrigatório.");
+            .WithErrorMessage("O campo 'Nome do cliente' é obrigatório.");
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public sealed class UpdateOrderValidatorTests(OrdersUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.CustomerName)
-            .WithErrorMessage("O campo 'Customer Name' deve ter no máximo 200 caracteres.");
+            .WithErrorMessage("O campo 'Nome do cliente' deve ter no máximo 200 caracteres.");
     }
 
     [Fact]
@@ -143,7 +143,7 @@ public sealed class UpdateOrderValidatorTests(OrdersUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.DeliveryAddress)
-            .WithErrorMessage("O campo 'Delivery Address' é obrigatório.");
+            .WithErrorMessage("O campo 'Endereço de entrega' é obrigatório.");
     }
 
     [Fact]
@@ -166,6 +166,6 @@ public sealed class UpdateOrderValidatorTests(OrdersUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.DeliveryFee)
-            .WithErrorMessage("O campo 'Delivery Fee' deve ser maior ou igual a 0.");
+            .WithErrorMessage("O campo 'Taxa de entrega' deve ser maior ou igual a 0.");
     }
 }

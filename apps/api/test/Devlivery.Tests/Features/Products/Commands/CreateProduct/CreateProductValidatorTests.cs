@@ -50,7 +50,7 @@ public sealed class CreateProductValidatorTests(ProductsUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Name)
-            .WithErrorMessage("O campo 'Name' é obrigatório.");
+            .WithErrorMessage("O campo 'Nome' é obrigatório.");
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public sealed class CreateProductValidatorTests(ProductsUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Name)
-            .WithErrorMessage("O campo 'Name' deve ter no máximo 200 caracteres.");
+            .WithErrorMessage("O campo 'Nome' deve ter no máximo 200 caracteres.");
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public sealed class CreateProductValidatorTests(ProductsUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Description)
-            .WithErrorMessage("O campo 'Description' é obrigatório.");
+            .WithErrorMessage("O campo 'Descrição' é obrigatório.");
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public sealed class CreateProductValidatorTests(ProductsUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Description)
-            .WithErrorMessage("O campo 'Description' deve ter no máximo 1000 caracteres.");
+            .WithErrorMessage("O campo 'Descrição' deve ter no máximo 1000 caracteres.");
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public sealed class CreateProductValidatorTests(ProductsUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Price)
-            .WithErrorMessage("O campo 'Price' deve ser maior que 0.");
+            .WithErrorMessage("O campo 'Preço' deve ser maior que 0.");
     }
 
     [Fact]
@@ -155,7 +155,7 @@ public sealed class CreateProductValidatorTests(ProductsUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Price)
-            .WithErrorMessage("O campo 'Price' deve ser maior que 0.");
+            .WithErrorMessage("O campo 'Preço' deve ser maior que 0.");
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public sealed class CreateProductValidatorTests(ProductsUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Category)
-            .WithErrorMessage("O campo 'Category' é obrigatório.");
+            .WithErrorMessage("O campo 'Categoria' é obrigatório.");
     }
 
     [Fact]
@@ -197,6 +197,6 @@ public sealed class CreateProductValidatorTests(ProductsUnitTestFixture fixture)
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Category)
-            .WithErrorMessage("O campo 'Category' deve ter no máximo 100 caracteres.");
+            .WithErrorMessage("O campo 'Categoria' deve ter no máximo 100 caracteres.");
     }
 }

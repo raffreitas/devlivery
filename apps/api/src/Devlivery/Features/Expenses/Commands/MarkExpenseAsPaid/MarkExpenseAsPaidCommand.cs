@@ -10,10 +10,7 @@ public sealed class MarkExpenseAsPaidCommandValidator : AbstractValidator<MarkEx
 {
     public MarkExpenseAsPaidCommandValidator()
     {
-        RuleFor(x => x.ExpenseId)
-            .NotEmpty().WithMessage("ExpenseId é obrigatório.");
-
-        RuleFor(x => x.PaymentDate)
-            .NotEmpty().WithMessage("PaymentDate é obrigatório.");
+        RuleFor(x => x.ExpenseId).NotEmpty().WithName("Despesa");
+        RuleFor(x => x.PaymentDate).NotEmpty().WithName("Data de pagamento");
     }
 }

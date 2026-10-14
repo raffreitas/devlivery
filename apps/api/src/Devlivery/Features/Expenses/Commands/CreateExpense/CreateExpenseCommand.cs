@@ -14,13 +14,8 @@ public sealed class CreateExpenseCommandValidator : AbstractValidator<CreateExpe
 {
     public CreateExpenseCommandValidator()
     {
-        RuleFor(x => x.CategoryId)
-            .NotEmpty().WithMessage("O campo {PropertyName} é obrigatório.");
-
-        RuleFor(x => x.Amount)
-            .GreaterThan(0).WithMessage("O campo {PropertyName} deve ser maior que zero.");
-
-        RuleFor(x => x.DueDate)
-            .NotEmpty().WithMessage("O campo {PropertyName} é obrigatório.");
+        RuleFor(x => x.CategoryId).NotEmpty().WithName("Categoria");
+        RuleFor(x => x.Amount).GreaterThan(0).WithName("Valor");
+        RuleFor(x => x.DueDate).NotEmpty().WithName("Data de vencimento");
     }
 }

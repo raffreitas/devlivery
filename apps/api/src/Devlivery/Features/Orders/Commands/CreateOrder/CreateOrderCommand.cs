@@ -21,46 +21,25 @@ public sealed class CreateOrderCommandValidator : AbstractValidator<CreateOrderC
 {
     public CreateOrderCommandValidator()
     {
-        RuleFor(x => x.Items).NotEmpty().WithMessage("O campo '{PropertyName}' não pode estar vazio.");
-
+        RuleFor(x => x.Items).NotEmpty().WithName("Itens");
         RuleForEach(x => x.Items).ChildRules(item =>
         {
-            item.RuleFor(x => x.ProductId).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
-            item.RuleFor(x => x.Quantity).GreaterThan(0)
-                .WithMessage("O campo '{PropertyName}' deve ser maior que {ComparisonValue}.");
+            item.RuleFor(x => x.ProductId).NotEmpty().WithName("Produto");
+            item.RuleFor(x => x.Quantity).GreaterThan(0).WithName("Quantidade");
         });
 
-        RuleFor(x => x.CustomerName)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .MaximumLength(200).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
+        RuleFor(x => x.CustomerName).NotEmpty().MaximumLength(200).WithName("Nome do cliente");
+        RuleFor(x => x.CustomerPhone).MaximumLength(20).WithName("Telefone do cliente");
 
-        When(x => !string.IsNullOrWhiteSpace(x.CustomerPhone), () =>
-        {
-            RuleFor(x => x.CustomerPhone)
-                .MaximumLength(20).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
-        });
-
-        RuleFor(x => x.Payments)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' não pode estar vazio.");
-
+        RuleFor(x => x.Payments).NotEmpty().WithName("Pagamentos");
         RuleForEach(x => x.Payments).ChildRules(payment =>
         {
-            payment.RuleFor(p => p.Method).IsInEnum().WithMessage("O campo '{PropertyName}' deve ser um método de pagamento válido.");
-            payment.RuleFor(p => p.Amount).GreaterThan(0).WithMessage("O campo '{PropertyName}' deve ser maior que {ComparisonValue}.");
+            payment.RuleFor(p => p.Method).IsInEnum().WithName("Forma de pagamento");
+            payment.RuleFor(p => p.Amount).GreaterThan(0).WithName("Valor do pagamento");
         });
 
-        RuleFor(x => x.DeliveryAddress)
-            .NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .MaximumLength(500).WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
-
-        RuleFor(x => x.DeliveryFee)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("O campo '{PropertyName}' deve ser maior ou igual a {ComparisonValue}.");
-
-        When(x => !string.IsNullOrWhiteSpace(x.Notes), () =>
-        {
-            RuleFor(x => x.Notes).MaximumLength(500)
-                .WithMessage("O campo '{PropertyName}' deve ter no máximo {MaxLength} caracteres.");
-        });
+        RuleFor(x => x.DeliveryAddress).NotEmpty().MaximumLength(500).WithName("Endereço de entrega");
+        RuleFor(x => x.DeliveryFee).GreaterThanOrEqualTo(0).WithName("Taxa de entrega");
+        RuleFor(x => x.Notes).MaximumLength(500).WithName("Observações");
     }
 }

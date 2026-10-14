@@ -15,24 +15,13 @@ public sealed class UpdateExpenseCommandValidator : AbstractValidator<UpdateExpe
 {
     public UpdateExpenseCommandValidator()
     {
-        RuleFor(x => x.ExpenseId)
-            .NotEmpty().WithMessage("ExpenseId é obrigatório.");
+        RuleFor(x => x.ExpenseId).NotEmpty().WithName("Despesa");
 
-        When(x => x.PaymentDate.HasValue, () =>
-        {
-            RuleFor(x => x.PaymentDate!.Value)
-                .NotEmpty().WithMessage("PaymentDate deve ser uma data válida.");
-        });
+        RuleFor(x => x.Amount).GreaterThan(0).WithName("Valor");
 
-        When(x => x.Amount.HasValue, () =>
-        {
-            RuleFor(x => x.Amount!.Value)
-                .GreaterThan(0).WithMessage("Amount deve ser maior que zero.");
-        });
-
-        When(x => x.DueDate is not null, () =>
-        {
-            RuleFor(x => x.DueDate);
-        });
+        RuleFor(x => x.PaymentDate)
+            .NotEqual(DateOnly.MinValue)
+            .WithMessage("O campo '{PropertyName}' deve ser uma data válida.")
+            .WithName("Data de pagamento");
     }
 }

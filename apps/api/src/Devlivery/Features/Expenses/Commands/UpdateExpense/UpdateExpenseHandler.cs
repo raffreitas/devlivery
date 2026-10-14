@@ -19,7 +19,7 @@ public sealed class UpdateExpenseHandler(
         var expense = await expenseRepository.GetByIdAsync(command.ExpenseId, cancellationToken);
         if (expense is null)
         {
-            return Result.Fail(new NotFoundError("Expense not found."));
+            return Result.Fail(new NotFoundError("Despesa não encontrada."));
         }
 
         // Validate subcategory if changed
@@ -28,7 +28,7 @@ public sealed class UpdateExpenseHandler(
             var category = await categoryRepository.GetByIdAsync(command.CategoryId.Value, cancellationToken);
             if (category is null || !category.IsActive)
             {
-                return Result.Fail(new NotFoundError("subcategory not found or inactive."));
+                return Result.Fail(new NotFoundError("Subcategoria não encontrada ou inativa."));
             }
         }
 

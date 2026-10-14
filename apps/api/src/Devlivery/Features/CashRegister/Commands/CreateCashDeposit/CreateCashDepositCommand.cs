@@ -12,10 +12,7 @@ public sealed class CreateCashDepositValidator : AbstractValidator<CreateCashDep
 {
     public CreateCashDepositValidator()
     {
-        RuleFor(x => x.CashSessionId)
-            .NotEmpty().WithMessage("A sessão de caixa é obrigatória.");
-
-        RuleFor(x => x.Amount)
-            .GreaterThan(0).WithMessage("O valor do aporte deve ser maior que zero.");
+        RuleFor(x => x.CashSessionId).NotEmpty().WithName("Caixa");
+        RuleFor(x => x.Amount).GreaterThan(0).WithName("Valor do aporte");
     }
 }

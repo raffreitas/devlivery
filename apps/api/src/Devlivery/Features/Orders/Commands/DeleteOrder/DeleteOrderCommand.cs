@@ -8,6 +8,6 @@ public sealed class DeleteOrderCommandValidator : AbstractValidator<DeleteOrderC
 {
     public DeleteOrderCommandValidator()
     {
-        RuleFor(x => x.Id).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
+        RuleFor(x => x.Id).NotEmpty().WithName("Pedido");
     }
 }

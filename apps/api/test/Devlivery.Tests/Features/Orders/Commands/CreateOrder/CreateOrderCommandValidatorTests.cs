@@ -36,6 +36,34 @@ public sealed class CreateOrderCommandValidatorTests
     }
 
     [Fact]
+    public void Validator_Should_Use_Portuguese_Field_Names_And_Keep_Property_Paths()
+    {
+        // Arrange
+        var validator = new CreateOrderCommandValidator();
+        var command = new CreateOrderCommand(
+            Items: [new OrderItemDto(Guid.NewGuid(), 0, null)],
+            CustomerName: "Cliente Teste",
+            CustomerPhone: new string('9', 21),
+            DeliveryAddress: "Rua Teste, 123",
+            Payments: [new OrderPaymentDto((PaymentMethod)99, 10m)],
+            Notes: new string('a', 501));
+
+        // Act
+        var result = validator.Validate(command);
+
+        // Assert
+        result.Errors.ToDictionary(e => e.PropertyName, e => e.ErrorMessage).ShouldBe(
+            new Dictionary<string, string>
+            {
+                ["Items[0].Quantity"] = "O campo 'Quantidade' deve ser maior que 0.",
+                ["CustomerPhone"] = "O campo 'Telefone do cliente' deve ter no máximo 20 caracteres.",
+                ["Payments[0].Method"] = "O campo 'Forma de pagamento' possui um valor inválido.",
+                ["Notes"] = "O campo 'Observações' deve ter no máximo 500 caracteres."
+            },
+            ignoreOrder: true);
+    }
+
+    [Fact]
     public void Validator_Should_Pass_For_Valid_Command()
     {
         var validator = new CreateOrderCommandValidator();

@@ -20,7 +20,7 @@ public sealed class GetCashSessionByIdHandler(ApplicationDbContext dbContext)
             .FirstOrDefaultAsync(cs => cs.Id == query.Id, cancellationToken);
 
         return cashSession is null
-            ? Result.Fail<GetCashSessionByIdResponse>(new NotFoundError("Caixa n�o encontrado."))
+            ? Result.Fail<GetCashSessionByIdResponse>(new NotFoundError("Caixa não encontrado."))
             : Result.Ok(GetCashSessionByIdResponse.FromDomain(cashSession));
     }
 }

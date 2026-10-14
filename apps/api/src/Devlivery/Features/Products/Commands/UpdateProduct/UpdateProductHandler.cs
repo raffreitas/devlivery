@@ -16,7 +16,7 @@ public sealed class UpdateProductHandler(
         var product = await productRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (product is null)
-            return Result.Fail(new NotFoundError("Produto n�o encontrado."));
+            return Result.Fail(new NotFoundError("Produto não encontrado."));
 
         product.Update(
             name: command.Name,
