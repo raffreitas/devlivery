@@ -6,7 +6,7 @@ namespace Devlivery.Tests.Common.Builders;
 
 public sealed class EstablishmentBuilder
 {
-    private readonly Faker _faker = new();
+    private readonly Faker _faker = new("pt_BR");
 
     private string _tradeName;
     private bool _isActive;
@@ -23,9 +23,9 @@ public sealed class EstablishmentBuilder
         return this;
     }
 
-    public EstablishmentBuilder IsActive(bool isActive)
+    public EstablishmentBuilder AsInactive()
     {
-        _isActive = isActive;
+        _isActive = false;
         return this;
     }
 

@@ -14,7 +14,7 @@ using Shouldly;
 
 namespace Devlivery.Tests.Infrastructure.Http;
 
-[Trait("Category", "Unit Tests")]
+[Trait("Category", "Integration Tests")]
 public sealed class GlobalExceptionHandlerTests : IDisposable
 {
     private readonly WebApplicationFactory<Program> _factory = new WebApplicationFactory<Program>()
@@ -28,7 +28,7 @@ public sealed class GlobalExceptionHandlerTests : IDisposable
         });
 
     [Fact]
-    public async Task Should_Return_400_With_ProblemDetails_When_Request_Cannot_Be_Bound()
+    public async Task GivenMalformedJson_WhenPostingToApi_ThenReturns400ProblemDetails()
     {
         // Arrange
         using var client = _factory.CreateClient();

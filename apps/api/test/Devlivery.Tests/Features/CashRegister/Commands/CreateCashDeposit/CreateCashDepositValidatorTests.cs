@@ -2,80 +2,48 @@ using Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
 using FluentValidation.TestHelper;
 
+using Shouldly;
+
 namespace Devlivery.Tests.Features.CashRegister.Commands.CreateCashDeposit;
 
+[Trait("Category", "Unit Tests")]
 public sealed class CreateCashDepositValidatorTests
 {
+    private static readonly CreateCashDepositCommand ValidCommand = new(Guid.NewGuid(), 0.01m, null);
+
     private readonly CreateCashDepositValidator _validator = new();
 
+    public static TheoryData<CreateCashDepositCommand, string, string> InvalidCommands => new()
+    {
+        { ValidCommand with { CashSessionId = Guid.Empty }, "CashSessionId", "O campo 'Caixa' é obrigatório." },
+        { ValidCommand with { Amount = 0m }, "Amount", "O campo 'Valor do aporte' deve ser maior que 0." },
+        { ValidCommand with { Amount = -10m }, "Amount", "O campo 'Valor do aporte' deve ser maior que 0." }
+    };
+
     [Fact]
-    public void Should_Have_Error_When_CashSessionId_Is_Empty()
+    public void GivenValidCommand_WhenValidating_ThenHasNoErrors()
     {
         // Arrange
-        var command = new CreateCashDepositCommand(Guid.Empty, 50m, null);
+        var command = ValidCommand;
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.CashSessionId)
-            .WithErrorMessage("O campo 'Caixa' é obrigatório.");
+        result.IsValid.ShouldBeTrue();
     }
 
-
-
-
-    [Fact]
-    public void Should_Have_Error_When_Amount_Is_Zero()
+    [Theory]
+    [MemberData(nameof(InvalidCommands))]
+    public void GivenInvalidField_WhenValidating_ThenReturnsPortugueseErrorForField(
+        CreateCashDepositCommand command, string propertyName, string expectedMessage)
     {
-        // Arrange
-        var command = new CreateCashDepositCommand(Guid.NewGuid(), 0m, null);
+        // Arrange: command comes from InvalidCommands
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage("O campo 'Valor do aporte' deve ser maior que 0.");
-    }
-
-    [Fact]
-    public void Should_Have_Error_When_Amount_Is_Negative()
-    {
-        // Arrange
-        var command = new CreateCashDepositCommand(Guid.NewGuid(), -10m, null);
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage("O campo 'Valor do aporte' deve ser maior que 0.");
-    }
-
-    [Fact]
-    public void Should_Not_Have_Error_When_Command_Is_Valid()
-    {
-        // Arrange
-        var command = new CreateCashDepositCommand(Guid.NewGuid(), 50m, "Aporte inicial");
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldNotHaveAnyValidationErrors();
-    }
-
-    [Fact]
-    public void Should_Not_Have_Error_When_Notes_Is_Null()
-    {
-        // Arrange
-        var command = new CreateCashDepositCommand(Guid.NewGuid(), 50m, null);
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.ShouldNotHaveAnyValidationErrors();
+        result.ShouldHaveValidationErrorFor(propertyName).WithErrorMessage(expectedMessage);
     }
 }

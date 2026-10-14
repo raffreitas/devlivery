@@ -1,218 +1,100 @@
 using Devlivery.Domain.Aggregates.Products;
+using Devlivery.Tests.Common.Builders;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.Products.Domain;
 
-[Collection("Products Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class ProductTests(ProductsUnitTestFixture fixture)
+public sealed class ProductTests
 {
     [Fact]
-    public void Constructor_Should_Create_Product_With_Correct_Properties()
+    public void GivenValidData_WhenCreatingProduct_ThenInitializesProperties()
     {
         // Arrange
-        const string name = "Produto Teste";
-        const string description = "Descrição do produto";
-        const decimal price = 99.99m;
-        const string category = "Eletrônicos";
-        const bool available = true;
         var establishmentId = Guid.NewGuid();
 
         // Act
-        var product = new Product(name, description, price, category, available, establishmentId);
+        var product = new Product("Pizza Calabresa", "Molho, calabresa e cebola", 49.90m, "Pizzas", true,
+            establishmentId);
 
         // Assert
-        product.Name.ShouldBe(name);
-        product.Description.ShouldBe(description);
-        product.Price.ShouldBe(price);
-        product.Category.ShouldBe(category);
-        product.Available.ShouldBe(available);
+        product.Name.ShouldBe("Pizza Calabresa");
+        product.Description.ShouldBe("Molho, calabresa e cebola");
+        product.Price.ShouldBe(49.90m);
+        product.Category.ShouldBe("Pizzas");
+        product.Available.ShouldBeTrue();
         product.EstablishmentId.ShouldBe(establishmentId);
         product.CreatedAt.ShouldNotBe(default);
-        product.UpdatedAt.ShouldNotBe(default);
+        product.UpdatedAt.ShouldBe(product.CreatedAt, TimeSpan.FromSeconds(1));
     }
 
     [Fact]
-    public async Task Update_Should_Update_All_Properties()
+    public void GivenProduct_WhenUpdatingAllFields_ThenReplacesValuesAndRefreshesUpdatedAt()
     {
         // Arrange
-        var product = fixture.CreateProduct(
-            name: "Nome Original",
-            description: "Descrição Original",
-            price: 50.00m,
-            category: "Categoria Original"
-        );
-
-        var originalUpdatedAt = product.UpdatedAt;
-        await Task.Delay(10);
-
-        const string newName = "Nome Atualizado";
-        const string newDescription = "Descrição Atualizada";
-        const decimal newPrice = 100.00m;
-        const string newCategory = "Nova Categoria";
+        var product = new ProductBuilder().Build();
+        var beforeUpdate = DateTime.UtcNow;
 
         // Act
-        product.Update(newName, newDescription, newPrice, newCategory);
+        product.Update("Pizza Portuguesa", "Presunto, ovo e cebola", 54.90m, "Pizzas Especiais");
 
         // Assert
-        product.Name.ShouldBe(newName);
-        product.Description.ShouldBe(newDescription);
-        product.Price.ShouldBe(newPrice);
-        product.Category.ShouldBe(newCategory);
-        product.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
+        product.Name.ShouldBe("Pizza Portuguesa");
+        product.Description.ShouldBe("Presunto, ovo e cebola");
+        product.Price.ShouldBe(54.90m);
+        product.Category.ShouldBe("Pizzas Especiais");
+        product.UpdatedAt.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
     }
 
     [Fact]
-    public void Update_Should_Keep_Original_Name_When_Null()
+    public void GivenProduct_WhenUpdatingWithNullFields_ThenKeepsOriginalValues()
     {
         // Arrange
-        const string originalName = "Nome Original";
-        var product = fixture.CreateProduct(name: originalName);
+        var product = new ProductBuilder()
+            .WithName("Pizza Calabresa")
+            .WithDescription("Molho, calabresa e cebola")
+            .WithPrice(49.90m)
+            .WithCategory("Pizzas")
+            .Build();
 
         // Act
-        product.Update(name: null, description: "Nova Descrição");
+        product.Update();
 
         // Assert
-        product.Name.ShouldBe(originalName);
+        product.Name.ShouldBe("Pizza Calabresa");
+        product.Description.ShouldBe("Molho, calabresa e cebola");
+        product.Price.ShouldBe(49.90m);
+        product.Category.ShouldBe("Pizzas");
     }
 
     [Fact]
-    public void Update_Should_Keep_Original_Description_When_Null()
+    public void GivenUnavailableProduct_WhenSettingAsAvailable_ThenProductIsAvailable()
     {
         // Arrange
-        const string originalDescription = "Descrição Original";
-        var product = fixture.CreateProduct(description: originalDescription);
-
-        // Act
-        product.Update(name: "Novo Nome", description: null);
-
-        // Assert
-        product.Description.ShouldBe(originalDescription);
-    }
-
-    [Fact]
-    public void Update_Should_Keep_Original_Price_When_Null()
-    {
-        // Arrange
-        const decimal originalPrice = 99.99m;
-        var product = fixture.CreateProduct(price: originalPrice);
-
-        // Act
-        product.Update(name: "Novo Nome", price: null);
-
-        // Assert
-        product.Price.ShouldBe(originalPrice);
-    }
-
-    [Fact]
-    public void Update_Should_Keep_Original_Category_When_Null()
-    {
-        // Arrange
-        const string originalCategory = "Categoria Original";
-        var product = fixture.CreateProduct(category: originalCategory);
-
-        // Act
-        product.Update(name: "Novo Nome", category: null);
-
-        // Assert
-        product.Category.ShouldBe(originalCategory);
-    }
-
-    [Fact]
-    public async Task Update_Should_Update_UpdatedAt_Timestamp()
-    {
-        // Arrange
-        var product = fixture.CreateProduct();
-        var originalUpdatedAt = product.UpdatedAt;
-        await Task.Delay(10);
-
-        // Act
-        product.Update(name: "Novo Nome");
-
-        // Assert
-        product.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
-    }
-
-    [Fact]
-    public void SetAsAvailable_Should_Set_Available_To_True()
-    {
-        // Arrange
-        var product = fixture.CreateProduct(available: false);
+        var product = new ProductBuilder().AsUnavailable().Build();
+        var beforeUpdate = DateTime.UtcNow;
 
         // Act
         product.SetAsAvailable();
 
         // Assert
         product.Available.ShouldBeTrue();
+        product.UpdatedAt.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
     }
 
     [Fact]
-    public async Task SetAsAvailable_Should_Update_UpdatedAt_Timestamp()
+    public void GivenAvailableProduct_WhenSettingAsUnavailable_ThenProductIsUnavailable()
     {
         // Arrange
-        var product = fixture.CreateProduct(available: false);
-        var originalUpdatedAt = product.UpdatedAt;
-        await Task.Delay(10);
-
-        // Act
-        product.SetAsAvailable();
-
-        // Assert
-        product.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
-    }
-
-    [Fact]
-    public void SetAsUnavailable_Should_Set_Available_To_False()
-    {
-        // Arrange
-        var product = fixture.CreateProduct(available: true);
+        var product = new ProductBuilder().Build();
+        var beforeUpdate = DateTime.UtcNow;
 
         // Act
         product.SetAsUnavailable();
 
         // Assert
         product.Available.ShouldBeFalse();
-    }
-
-    [Fact]
-    public async Task SetAsUnavailable_Should_Update_UpdatedAt_Timestamp()
-    {
-        // Arrange
-        var product = fixture.CreateProduct(available: true);
-        var originalUpdatedAt = product.UpdatedAt;
-        await Task.Delay(10);
-
-        // Act
-        product.SetAsUnavailable();
-
-        // Assert
-        product.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
-    }
-
-    [Fact]
-    public void SetAsAvailable_Should_Work_When_Already_Available()
-    {
-        // Arrange
-        var product = fixture.CreateProduct(available: true);
-
-        // Act
-        product.SetAsAvailable();
-
-        // Assert
-        product.Available.ShouldBeTrue();
-    }
-
-    [Fact]
-    public void SetAsUnavailable_Should_Work_When_Already_Unavailable()
-    {
-        // Arrange
-        var product = fixture.CreateProduct(available: false);
-
-        // Act
-        product.SetAsUnavailable();
-
-        // Assert
-        product.Available.ShouldBeFalse();
+        product.UpdatedAt.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
     }
 }

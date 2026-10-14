@@ -1,12 +1,13 @@
-using Devlivery.Domain.Aggregates.CashRegister;
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Common.Enums;
 using Devlivery.Features.CashRegister.Events;
 using Devlivery.Tests.Common.Builders;
+using Devlivery.Tests.Common.Mocks;
 
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -16,234 +17,92 @@ using Shouldly;
 namespace Devlivery.Tests.Features.CashRegister.Events;
 
 [Trait("Category", "Unit Tests")]
-public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fixture) : IClassFixture<CashRegisterUnitTestFixture>
+public sealed class OrderDeletedEventHandlerTests
 {
+    private readonly Guid _operatorId = Guid.NewGuid();
+    private readonly Guid _orderId = Guid.NewGuid();
+    private readonly ICashSessionRepository _cashSessionRepository = Substitute.For<ICashSessionRepository>();
+    private readonly OrderDeletedEventHandler _handler;
+
+    public OrderDeletedEventHandlerTests()
+    {
+        _handler = new OrderDeletedEventHandler(
+            NullLogger<OrderDeletedEventHandler>.Instance,
+            _cashSessionRepository,
+            TestMocks.CurrentUserAccessor(_operatorId),
+            TestMocks.TenantAccessor());
+    }
+
     [Fact]
-    public async Task Handle_Should_Add_Reversal_For_Single_Payment()
+    public async Task GivenDeletedOrderWithPayments_WhenHandled_ThenReversesEachOrderPayment()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderDeletedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var orderId = Guid.NewGuid();
-        var paymentId = Guid.NewGuid();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
+        var cashPaymentId = Guid.NewGuid();
+        var cardPaymentId = Guid.NewGuid();
+        var session = new CashSessionBuilder()
             .WithOpeningAmount(100m)
-            .WithPayment(50m, PaymentMethod.Cash, orderId, paymentId)
+            .WithPayment(40m, PaymentMethod.Cash, _orderId, cashPaymentId)
+            .WithPayment(20m, PaymentMethod.CreditCard, _orderId, cardPaymentId)
+            .WithPayment(15m, PaymentMethod.Cash)
             .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderDeletedEvent(
-            OrderId: orderId,
-            EstablishmentId: tenantAccessor.Tenant.Id,
-            Total: 50m,
-            Status: OrderStatus.Delivered,
-            DeletedAt: DateTime.UtcNow
-        );
-
-        var actorAccessor = fixture.CreateCurrentUserAccessorMock();
-        var expectedActor = await actorAccessor.ResolveAsync();
-        expectedActor.Id.ShouldNotBe(cashSession.AttendantId);
-
-        var handler = new OrderDeletedEventHandler(logger, repository, actorAccessor, tenantAccessor);
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).Returns(session);
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
+        await _handler.HandleAsync(CreateEvent(), CancellationToken.None);
 
         // Assert
-        cashSession.Movements.Where(x => x.EntryType == CashSessionEntryType.Refund)
-            .ShouldAllBe(x => x.CreatedBy == expectedActor.Id);
-        var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
-        reversals.Count.ShouldBe(1);
-        reversals[0].Amount.ShouldBe(50m);
-        reversals[0].OrderPaymentId.ShouldBe(paymentId);
-        reversals[0].Reason.ShouldBe("Pedido Excluído");
-
-        cashSession.TotalRevenue.ShouldBe(0m); // Payment - Reversal = 0
-
+        var refunds = session.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
+        refunds.Select(r => r.OrderPaymentId).ShouldBe([cashPaymentId, cardPaymentId], ignoreOrder: true);
+        refunds.ShouldAllBe(r => r.RelatedOrderId == _orderId && r.Reason == "Pedido Excluído"
+                                                              && r.CreatedBy == _operatorId);
+        session.TotalRevenue.ShouldBe(15m);
+        session.ExpectedCashAmount.ShouldBe(115m);
     }
 
     [Fact]
-    public async Task Handle_Should_Add_Reversals_For_Multi_Payment_Order()
+    public async Task GivenAlreadyReversedOrder_WhenDeletedEventIsHandledAgain_ThenDoesNotDuplicateRefunds()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderDeletedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var orderId = Guid.NewGuid();
-        var payment1Id = Guid.NewGuid();
-        var payment2Id = Guid.NewGuid();
-        var payment3Id = Guid.NewGuid();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .WithPayment(30m, PaymentMethod.Cash, orderId, payment1Id)
-            .WithPayment(20m, PaymentMethod.CreditCard, orderId, payment2Id)
-            .WithPayment(10m, PaymentMethod.Pix, orderId, payment3Id)
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderDeletedEvent(
-            OrderId: orderId,
-            EstablishmentId: tenantAccessor.Tenant.Id,
-            Total: 60m,
-            Status: OrderStatus.Delivered,
-            DeletedAt: DateTime.UtcNow
-        );
-
-        var handler = new OrderDeletedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var session = new CashSessionBuilder().WithPayment(40m, PaymentMethod.Cash, _orderId).Build();
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).Returns(session);
+        await _handler.HandleAsync(CreateEvent(), CancellationToken.None);
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
+        await _handler.HandleAsync(CreateEvent(), CancellationToken.None);
 
         // Assert
-        var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
-        reversals.Count.ShouldBe(3);
-        reversals.Sum(r => r.Amount).ShouldBe(60m);
-
-        cashSession.TotalRevenue.ShouldBe(0m); // All payments reversed
-        cashSession.ExpectedCashAmount.ShouldBe(100m); // Back to opening amount
-
+        session.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ShouldHaveSingleItem();
     }
 
     [Fact]
-    public async Task Handle_Should_Be_Idempotent_For_Same_Order()
+    public async Task GivenOrderWithoutPaymentsInSession_WhenDeleted_ThenRecordsNothing()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderDeletedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var orderId = Guid.NewGuid();
-        var paymentId = Guid.NewGuid();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .WithPayment(50m, PaymentMethod.Cash, orderId, paymentId)
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderDeletedEvent(
-            OrderId: orderId,
-            EstablishmentId: tenantAccessor.Tenant.Id,
-            Total: 50m,
-            Status: OrderStatus.Delivered,
-            DeletedAt: DateTime.UtcNow
-        );
-
-        var handler = new OrderDeletedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var session = new CashSessionBuilder().WithPayment(40m, PaymentMethod.Cash).Build();
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).Returns(session);
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None); // First time
-        await handler.HandleAsync(@event, CancellationToken.None); // Duplicate
+        await _handler.HandleAsync(CreateEvent(), CancellationToken.None);
 
-        // Assert - only one reversal recorded
-        var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
-        reversals.Count.ShouldBe(1);
-
+        // Assert
+        session.Movements.ShouldHaveSingleItem().EntryType.ShouldBe(CashSessionEntryType.Payment);
     }
 
     [Fact]
-    public async Task Handle_Should_Not_Add_Reversal_When_No_Active_Session()
+    public async Task GivenNoActiveSession_WhenDeleted_ThenSkipsWithoutFailing()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderDeletedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .ReturnsNull();
-
-        var @event = new OrderDeletedEvent(
-            OrderId: Guid.NewGuid(),
-            EstablishmentId: tenantAccessor.Tenant.Id,
-            Total: 50m,
-            Status: OrderStatus.Delivered,
-            DeletedAt: DateTime.UtcNow
-        );
-
-        var handler = new OrderDeletedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).ReturnsNull();
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
+        var exception = await Record.ExceptionAsync(() => _handler.HandleAsync(CreateEvent(), CancellationToken.None));
 
         // Assert
+        exception.ShouldBeNull();
     }
 
-    [Fact]
-    public async Task Handle_Should_Not_Add_Reversal_When_No_Matching_Payments()
+    private OrderDeletedEvent CreateEvent()
     {
-        // Arrange
-        var logger = Substitute.For<ILogger<OrderDeletedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .WithPayment(50m, PaymentMethod.Cash, Guid.NewGuid(), Guid.NewGuid()) // Different order
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderDeletedEvent(
-            OrderId: Guid.NewGuid(), // Order not in session
-            EstablishmentId: tenantAccessor.Tenant.Id,
-            Total: 50m,
-            Status: OrderStatus.Delivered,
-            DeletedAt: DateTime.UtcNow
-        );
-
-        var handler = new OrderDeletedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
-
-        // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
-
-        // Assert
-        var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
-        reversals.Count.ShouldBe(0);
-
-    }
-
-    [Fact]
-    public async Task Handle_Should_Log_Warning_When_No_Active_Session()
-    {
-        // Arrange
-        var logger = Substitute.For<ILogger<OrderDeletedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns((CashSession?)null);
-
-        var @event = new OrderDeletedEvent(
-            Guid.NewGuid(), tenantAccessor.Tenant.Id, 50m, OrderStatus.Delivered, DateTime.UtcNow
-        );
-
-        var handler = new OrderDeletedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
-
-        // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
-
-        // Assert
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("No active cash session found")),
-            null,
-            Arg.Any<Func<object, Exception?, string>>()!);
+        return new OrderDeletedEvent(_orderId, Guid.NewGuid(), 60m, OrderStatus.Delivered, DateTime.UtcNow);
     }
 }

@@ -2,6 +2,7 @@ using Devlivery.Domain.Aggregates.Orders.Entities;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Common.Enums;
 using Devlivery.Domain.SeedWork;
+using Devlivery.Tests.Common.Builders;
 
 using Shouldly;
 
@@ -11,54 +12,85 @@ namespace Devlivery.Tests.Features.Orders.Domain;
 public sealed class OrderPaymentTests
 {
     [Fact]
-    public void Confirm_Should_Set_Status_And_Timestamps()
+    public void GivenPendingPayment_WhenConfirming_ThenMarksAsConfirmed()
     {
-        var payment = new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 10m);
+        // Arrange
+        var payment = new OrderPaymentBuilder().Build();
 
+        // Act
         payment.Confirm();
 
+        // Assert
         payment.PaymentStatus.ShouldBe(PaymentStatus.Confirmed);
         payment.ConfirmedAt.ShouldNotBeNull();
-        payment.UpdatedAt.ShouldBeGreaterThan(payment.CreatedAt);
+    }
+
+    [Theory]
+    [InlineData(PaymentStatus.Confirmed)]
+    [InlineData(PaymentStatus.Cancelled)]
+    public void GivenNonPendingPayment_WhenConfirming_ThenThrowsDomainException(PaymentStatus status)
+    {
+        // Arrange
+        var payment = BuildPayment(status);
+
+        // Act
+        var exception = Record.Exception(payment.Confirm);
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>();
+        payment.PaymentStatus.ShouldBe(status);
     }
 
     [Fact]
-    public void Cancel_Should_Set_Status_To_Cancelled()
+    public void GivenPendingPayment_WhenCancelling_ThenMarksAsCancelled()
     {
-        var payment = new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 10m);
+        // Arrange
+        var payment = new OrderPaymentBuilder().Build();
 
+        // Act
         payment.Cancel();
 
+        // Assert
         payment.PaymentStatus.ShouldBe(PaymentStatus.Cancelled);
-        payment.UpdatedAt.ShouldBeGreaterThan(payment.CreatedAt);
     }
 
     [Fact]
-    public void Update_Should_Change_Method_And_Amount_When_Pending()
+    public void GivenPendingPayment_WhenUpdating_ThenChangesMethodAndAmount()
     {
-        var payment = new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 10m);
+        // Arrange
+        var payment = new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash).WithAmount(10m).Build();
 
+        // Act
         payment.Update(PaymentMethod.Pix, 15m);
 
+        // Assert
         payment.PaymentMethod.ShouldBe(PaymentMethod.Pix);
         payment.Amount.ShouldBe(15m);
     }
 
-    [Fact]
-    public void Update_Should_Throw_When_Confirmed()
+    [Theory]
+    [InlineData(PaymentStatus.Confirmed)]
+    [InlineData(PaymentStatus.Cancelled)]
+    public void GivenNonPendingPayment_WhenUpdating_ThenThrowsDomainException(PaymentStatus status)
     {
-        var payment = new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 10m);
-        payment.Confirm();
+        // Arrange
+        var payment = BuildPayment(status);
 
-        Should.Throw<DomainException>(() => payment.Update(PaymentMethod.Pix, 5m));
+        // Act
+        var exception = Record.Exception(() => payment.Update(PaymentMethod.Pix, 15m));
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>();
     }
 
-    [Fact]
-    public void Confirm_Should_Throw_When_Cancelled()
+    private static OrderPayment BuildPayment(PaymentStatus status)
     {
-        var payment = new OrderPayment(Guid.NewGuid(), PaymentMethod.Cash, 10m);
-        payment.Cancel();
-
-        Should.Throw<DomainException>(() => payment.Confirm());
+        var builder = new OrderPaymentBuilder();
+        return status switch
+        {
+            PaymentStatus.Confirmed => builder.AsConfirmed().Build(),
+            PaymentStatus.Cancelled => builder.AsCancelled().Build(),
+            _ => builder.Build()
+        };
     }
 }

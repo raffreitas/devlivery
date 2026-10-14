@@ -1,282 +1,129 @@
-using Devlivery.Domain.Aggregates.CashRegister;
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Common.Enums;
 using Devlivery.Features.CashRegister.Events;
 using Devlivery.Tests.Common.Builders;
+using Devlivery.Tests.Common.Mocks;
 
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.CashRegister.Events;
 
 [Trait("Category", "Unit Tests")]
-public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixture fixture) : IClassFixture<CashRegisterUnitTestFixture>
+public sealed class OrderStatusChangedEventHandlerTests
 {
+    private readonly Guid _operatorId = Guid.NewGuid();
+    private readonly Guid _orderId = Guid.NewGuid();
+    private readonly ICashSessionRepository _cashSessionRepository = Substitute.For<ICashSessionRepository>();
+    private readonly OrderStatusChangedEventHandler _handler;
+
+    public OrderStatusChangedEventHandlerTests()
+    {
+        _handler = new OrderStatusChangedEventHandler(
+            NullLogger<OrderStatusChangedEventHandler>.Instance,
+            _cashSessionRepository,
+            TestMocks.CurrentUserAccessor(_operatorId),
+            TestMocks.TenantAccessor());
+    }
+
     [Fact]
-    public async Task Handle_Should_Add_Reversal_When_Status_Changes_To_Canceled()
+    public async Task GivenCanceledOrderWithPayments_WhenStatusChanged_ThenReversesEachOrderPayment()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderStatusChangedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var orderId = Guid.NewGuid();
-        var paymentId = Guid.NewGuid();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
+        var cashPaymentId = Guid.NewGuid();
+        var pixPaymentId = Guid.NewGuid();
+        var session = new CashSessionBuilder()
             .WithOpeningAmount(100m)
-            .WithPayment(50m, PaymentMethod.Cash, orderId, paymentId)
+            .WithPayment(40m, PaymentMethod.Cash, _orderId, cashPaymentId)
+            .WithPayment(20m, PaymentMethod.Pix, _orderId, pixPaymentId)
+            .WithPayment(15m, PaymentMethod.Cash)
             .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderStatusChangedEvent(
-            OrderId: orderId,
-            EstablishmentId: tenantAccessor.Tenant.Id,
-            OldStatus: OrderStatus.Delivered,
-            NewStatus: OrderStatus.Canceled,
-            TotalAmount: 50m,
-            ChangedAt: DateTime.UtcNow
-        );
-
-        var actorAccessor = fixture.CreateCurrentUserAccessorMock();
-        var expectedActor = await actorAccessor.ResolveAsync();
-        expectedActor.Id.ShouldNotBe(cashSession.AttendantId);
-
-        var handler = new OrderStatusChangedEventHandler(logger, repository, actorAccessor, tenantAccessor);
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).Returns(session);
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
+        await _handler.HandleAsync(CreateEvent(OrderStatus.Canceled), CancellationToken.None);
 
         // Assert
-        cashSession.Movements.Where(x => x.EntryType == CashSessionEntryType.Refund)
-            .ShouldAllBe(x => x.CreatedBy == expectedActor.Id);
-        var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
-        reversals.Count.ShouldBe(1);
-        reversals[0].Amount.ShouldBe(50m);
-        reversals[0].Reason.ShouldBe("Pedido Cancelado");
-
-        cashSession.TotalRevenue.ShouldBe(0m);
-
+        var refunds = session.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
+        refunds.Select(r => r.OrderPaymentId).ShouldBe([cashPaymentId, pixPaymentId], ignoreOrder: true);
+        refunds.ShouldAllBe(r => r.RelatedOrderId == _orderId && r.Reason == "Pedido Cancelado"
+                                                              && r.CreatedBy == _operatorId);
+        refunds.Single(r => r.OrderPaymentId == cashPaymentId).Amount.ShouldBe(40m);
+        refunds.Single(r => r.OrderPaymentId == pixPaymentId).PaymentMethod.ShouldBe(PaymentMethod.Pix);
+        session.TotalRevenue.ShouldBe(15m);
+        session.ExpectedCashAmount.ShouldBe(115m);
     }
 
     [Fact]
-    public async Task Handle_Should_Not_Process_When_Status_Is_Not_Canceled()
+    public async Task GivenAlreadyReversedOrder_WhenCanceledEventIsHandledAgain_ThenDoesNotDuplicateRefunds()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderStatusChangedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var orderId = Guid.NewGuid();
-        var paymentId = Guid.NewGuid();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .WithPayment(50m, PaymentMethod.Cash, orderId, paymentId)
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var handler = new OrderStatusChangedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
-
-        // Act - Test various non-canceled status transitions
-        await handler.HandleAsync(new OrderStatusChangedEvent(
-            orderId, tenantAccessor.Tenant.Id, OrderStatus.Pending, OrderStatus.Preparing, 50m, DateTime.UtcNow
-        ), CancellationToken.None);
-
-        await handler.HandleAsync(new OrderStatusChangedEvent(
-            orderId, tenantAccessor.Tenant.Id, OrderStatus.Preparing, OrderStatus.Ready, 50m, DateTime.UtcNow
-        ), CancellationToken.None);
-
-        await handler.HandleAsync(new OrderStatusChangedEvent(
-            orderId, tenantAccessor.Tenant.Id, OrderStatus.Ready, OrderStatus.Delivered, 50m, DateTime.UtcNow
-        ), CancellationToken.None);
-
-        // Assert - no reversals added
-        var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
-        reversals.Count.ShouldBe(0);
-
-    }
-
-    [Fact]
-    public async Task Handle_Should_Add_Reversals_For_Multi_Payment_Order_When_Canceled()
-    {
-        // Arrange
-        var logger = Substitute.For<ILogger<OrderStatusChangedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var orderId = Guid.NewGuid();
-        var payment1Id = Guid.NewGuid();
-        var payment2Id = Guid.NewGuid();
-        var payment3Id = Guid.NewGuid();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .WithPayment(30m, PaymentMethod.Cash, orderId, payment1Id)
-            .WithPayment(20m, PaymentMethod.CreditCard, orderId, payment2Id)
-            .WithPayment(10m, PaymentMethod.Pix, orderId, payment3Id)
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderStatusChangedEvent(
-            OrderId: orderId,
-            EstablishmentId: tenantAccessor.Tenant.Id,
-            OldStatus: OrderStatus.Delivered,
-            NewStatus: OrderStatus.Canceled,
-            TotalAmount: 60m,
-            ChangedAt: DateTime.UtcNow
-        );
-
-        var handler = new OrderStatusChangedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var session = new CashSessionBuilder().WithPayment(40m, PaymentMethod.Cash, _orderId).Build();
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).Returns(session);
+        await _handler.HandleAsync(CreateEvent(OrderStatus.Canceled), CancellationToken.None);
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
+        await _handler.HandleAsync(CreateEvent(OrderStatus.Canceled), CancellationToken.None);
 
         // Assert
-        var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
-        reversals.Count.ShouldBe(3);
-        reversals.Sum(r => r.Amount).ShouldBe(60m);
-        reversals.All(r => r.Reason == "Pedido Cancelado").ShouldBeTrue();
-
-        cashSession.TotalRevenue.ShouldBe(0m);
+        session.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ShouldHaveSingleItem();
     }
 
-    [Fact]
-    public async Task Handle_Should_Be_Idempotent_For_Same_Canceled_Order()
+    [Theory]
+    [InlineData(OrderStatus.Preparing)]
+    [InlineData(OrderStatus.Ready)]
+    [InlineData(OrderStatus.Delivered)]
+    public async Task GivenNonCanceledStatus_WhenStatusChanged_ThenDoesNotReversePayments(OrderStatus newStatus)
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderStatusChangedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var orderId = Guid.NewGuid();
-        var paymentId = Guid.NewGuid();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .WithPayment(50m, PaymentMethod.Cash, orderId, paymentId)
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderStatusChangedEvent(
-            orderId, tenantAccessor.Tenant.Id, OrderStatus.Delivered, OrderStatus.Canceled, 50m, DateTime.UtcNow
-        );
-
-        var handler = new OrderStatusChangedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var session = new CashSessionBuilder().WithPayment(40m, PaymentMethod.Cash, _orderId).Build();
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).Returns(session);
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None); // First time
-        await handler.HandleAsync(@event, CancellationToken.None); // Duplicate
-
-        // Assert - only one reversal recorded
-        var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
-        reversals.Count.ShouldBe(1);
-    }
-
-    [Fact]
-    public async Task Handle_Should_Not_Add_Reversal_When_No_Active_Session()
-    {
-        // Arrange
-        var logger = Substitute.For<ILogger<OrderStatusChangedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns((CashSession?)null);
-
-        var @event = new OrderStatusChangedEvent(
-            Guid.NewGuid(), tenantAccessor.Tenant.Id, OrderStatus.Delivered, OrderStatus.Canceled, 50m, DateTime.UtcNow
-        );
-
-        var handler = new OrderStatusChangedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
-
-        // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
+        await _handler.HandleAsync(CreateEvent(newStatus), CancellationToken.None);
 
         // Assert
+        session.Movements.ShouldNotContain(m => m.EntryType == CashSessionEntryType.Refund);
     }
 
     [Fact]
-    public async Task Handle_Should_Not_Add_Reversal_When_No_Matching_Payments()
+    public async Task GivenOrderWithoutPaymentsInSession_WhenCanceled_ThenRecordsNothing()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderStatusChangedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .WithPayment(50m, PaymentMethod.Cash, Guid.NewGuid(), Guid.NewGuid()) // Different order
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderStatusChangedEvent(
-            Guid.NewGuid(), tenantAccessor.Tenant.Id, OrderStatus.Delivered, OrderStatus.Canceled, 50m, DateTime.UtcNow
-        );
-
-        var handler = new OrderStatusChangedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var session = new CashSessionBuilder().WithPayment(40m, PaymentMethod.Cash).Build();
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).Returns(session);
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
+        await _handler.HandleAsync(CreateEvent(OrderStatus.Canceled), CancellationToken.None);
 
         // Assert
-        var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
-        reversals.Count.ShouldBe(0);
+        session.Movements.ShouldHaveSingleItem().EntryType.ShouldBe(CashSessionEntryType.Payment);
     }
 
     [Fact]
-    public async Task Handle_Should_Log_Information_When_Processing_Canceled_Status()
+    public async Task GivenNoActiveSession_WhenCanceled_ThenSkipsWithoutFailing()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderStatusChangedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var orderId = Guid.NewGuid();
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .WithPayment(50m, PaymentMethod.Cash, orderId, Guid.NewGuid())
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderStatusChangedEvent(
-            orderId, tenantAccessor.Tenant.Id, OrderStatus.Delivered, OrderStatus.Canceled, 50m, DateTime.UtcNow
-        );
-
-        var handler = new OrderStatusChangedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).ReturnsNull();
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
+        var exception = await Record.ExceptionAsync(() =>
+            _handler.HandleAsync(CreateEvent(OrderStatus.Canceled), CancellationToken.None));
 
         // Assert
-        logger.Received().Log(
-            LogLevel.Information,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("Canceled")),
-            null,
-            Arg.Any<Func<object, Exception?, string>>()!);
+        exception.ShouldBeNull();
+    }
+
+    private OrderStatusChangedEvent CreateEvent(OrderStatus newStatus)
+    {
+        return new OrderStatusChangedEvent(_orderId, Guid.NewGuid(), OrderStatus.Pending, newStatus, 60m,
+            DateTime.UtcNow);
     }
 }

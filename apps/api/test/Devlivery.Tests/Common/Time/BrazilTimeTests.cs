@@ -10,7 +10,7 @@ namespace Devlivery.Tests.Common.Time;
 public sealed class BrazilTimeTests
 {
     [Fact]
-    public void GetBrazilToday_Should_Return_Previous_Day_When_Utc_Has_Already_Turned()
+    public void GivenUtcAlreadyOnNextDay_WhenGettingBrazilToday_ThenReturnsPreviousDay()
     {
         // Arrange: 02:00 UTC on Oct 15 is still 23:00 on Oct 14 in São Paulo (UTC-3)
         var timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 10, 15, 2, 0, 0, TimeSpan.Zero));
@@ -23,7 +23,7 @@ public sealed class BrazilTimeTests
     }
 
     [Fact]
-    public void GetBrazilNow_Should_Convert_Utc_To_Sao_Paulo_Time()
+    public void GivenUtcInstant_WhenGettingBrazilNow_ThenReturnsSaoPauloTime()
     {
         // Arrange
         var timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 10, 15, 15, 30, 0, TimeSpan.Zero));
@@ -35,21 +35,37 @@ public sealed class BrazilTimeTests
         now.ShouldBe(new DateTime(2026, 10, 15, 12, 30, 0));
     }
 
+    // São Paulo is UTC-3, so a local day runs from 03:00 UTC to 03:00 UTC of the next day
     [Fact]
-    public void Brazilian_Day_Boundaries_Should_Be_Converted_To_Utc()
+    public void GivenBrazilianDay_WhenGettingStartOfDayUtc_ThenReturnsThreeAmUtcOfSameDay()
     {
         // Arrange
         var day = new DateOnly(2026, 10, 14);
 
-        // Act & Assert: São Paulo is UTC-3, so the local day runs from 03:00 UTC to 03:00 UTC of the next day
-        day.ToBrazilStartOfDayUtc().ShouldBe(new DateTime(2026, 10, 14, 3, 0, 0, DateTimeKind.Utc));
-        day.ToBrazilEndOfDayExclusiveUtc().ShouldBe(new DateTime(2026, 10, 15, 3, 0, 0, DateTimeKind.Utc));
+        // Act
+        var start = day.ToBrazilStartOfDayUtc();
+
+        // Assert
+        start.ShouldBe(new DateTime(2026, 10, 14, 3, 0, 0, DateTimeKind.Utc));
+    }
+
+    [Fact]
+    public void GivenBrazilianDay_WhenGettingExclusiveEndOfDayUtc_ThenReturnsThreeAmUtcOfNextDay()
+    {
+        // Arrange
+        var day = new DateOnly(2026, 10, 14);
+
+        // Act
+        var end = day.ToBrazilEndOfDayExclusiveUtc();
+
+        // Assert
+        end.ShouldBe(new DateTime(2026, 10, 15, 3, 0, 0, DateTimeKind.Utc));
     }
 
     [Theory]
     [InlineData(DateTimeKind.Utc)]
     [InlineData(DateTimeKind.Unspecified)]
-    public void ToBrazilTime_Should_Treat_Value_As_Utc(DateTimeKind kind)
+    public void GivenUtcOrUnspecifiedKind_WhenConvertingToBrazilTime_ThenTreatsValueAsUtc(DateTimeKind kind)
     {
         // Arrange
         var utc = new DateTime(2026, 10, 15, 1, 0, 0, kind);

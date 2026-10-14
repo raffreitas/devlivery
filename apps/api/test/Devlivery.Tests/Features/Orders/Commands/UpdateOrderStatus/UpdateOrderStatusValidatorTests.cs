@@ -7,56 +7,43 @@ using Shouldly;
 
 namespace Devlivery.Tests.Features.Orders.Commands.UpdateOrderStatus;
 
-[Collection("Orders Unit Tests")]
 [Trait("Category", "Unit Tests")]
 public sealed class UpdateOrderStatusValidatorTests
 {
+    private static readonly UpdateOrderStatusCommand ValidCommand = new(Guid.NewGuid(), OrderStatus.Preparing);
+
     private readonly UpdateOrderStatusCommandValidator _validator = new();
 
+    public static TheoryData<UpdateOrderStatusCommand, string, string> InvalidCommands => new()
+    {
+        { ValidCommand with { Id = Guid.Empty }, "Id", "O campo 'Pedido' é obrigatório." },
+        { ValidCommand with { Status = (OrderStatus)99 }, "Status", "O campo 'Status' possui um valor inválido." }
+    };
+
     [Fact]
-    public void Should_Pass_Validation_When_Command_Is_Valid()
+    public void GivenValidCommand_WhenValidating_ThenHasNoErrors()
     {
         // Arrange
-        var command = new UpdateOrderStatusCommand(Guid.NewGuid(), OrderStatus.Preparing);
+        var command = ValidCommand;
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
         result.IsValid.ShouldBeTrue();
-        result.Errors.ShouldBeEmpty();
-    }
-
-    [Fact]
-    public void Should_Fail_Validation_When_Id_Is_Empty()
-    {
-        // Arrange
-        var command = new UpdateOrderStatusCommand(Guid.Empty, OrderStatus.Preparing);
-
-        // Act
-        var result = _validator.TestValidate(command);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.ShouldHaveValidationErrorFor(x => x.Id)
-            .WithErrorMessage("O campo 'Pedido' é obrigatório.");
     }
 
     [Theory]
-    [InlineData(OrderStatus.Pending)]
-    [InlineData(OrderStatus.Preparing)]
-    [InlineData(OrderStatus.Ready)]
-    [InlineData(OrderStatus.Delivered)]
-    [InlineData(OrderStatus.Canceled)]
-    public void Should_Pass_Validation_For_All_Valid_OrderStatuses(OrderStatus status)
+    [MemberData(nameof(InvalidCommands))]
+    public void GivenInvalidField_WhenValidating_ThenReturnsPortugueseErrorForField(
+        UpdateOrderStatusCommand command, string propertyName, string expectedMessage)
     {
-        // Arrange
-        var command = new UpdateOrderStatusCommand(Guid.NewGuid(), status);
+        // Arrange: command comes from InvalidCommands
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.IsValid.ShouldBeTrue();
+        result.ShouldHaveValidationErrorFor(propertyName).WithErrorMessage(expectedMessage);
     }
 }

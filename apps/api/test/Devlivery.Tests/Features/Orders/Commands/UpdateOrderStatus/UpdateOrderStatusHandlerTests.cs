@@ -1,113 +1,75 @@
 using Devlivery.Common.Errors;
-using Devlivery.Domain.Aggregates.Orders;
+using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.SeedWork;
 using Devlivery.Features.Orders.Commands.UpdateOrderStatus;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Tests.Common.Builders;
 
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.Orders.Commands.UpdateOrderStatus;
 
-
-[Collection("Orders Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class UpdateOrderStatusHandlerTests(OrdersUnitTestFixture fixture)
+public sealed class UpdateOrderStatusHandlerTests
 {
-    [Fact]
-    public async Task Handle_Should_Return_NotFoundError_When_Order_Does_Not_Exist()
+    private readonly IOrderRepository _orderRepository = Substitute.For<IOrderRepository>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly UpdateOrderStatusHandler _handler;
+
+    public UpdateOrderStatusHandlerTests()
     {
-        // Arrange
-        var orderRepository = fixture.CreateOrderRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        orderRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns((Order?)null);
-
-        var handler = new UpdateOrderStatusHandler(orderRepository, unitOfWork);
-
-        var command = new UpdateOrderStatusCommand(Guid.NewGuid(), OrderStatus.Preparing);
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is NotFoundError);
+        _handler = new UpdateOrderStatusHandler(_orderRepository, _unitOfWork);
     }
 
     [Fact]
-    public async Task Handle_Should_Update_Order_Status()
+    public async Task GivenNonexistentOrder_WhenUpdatingStatus_ThenReturnsNotFoundError()
     {
         // Arrange
-        var order = fixture.CreateOrder(status: OrderStatus.Pending);
+        _orderRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).ReturnsNull();
+        var command = new UpdateOrderStatusCommand(Guid.NewGuid(), OrderStatus.Preparing);
 
-        var orderRepository = fixture.CreateOrderRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
 
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
+        // Assert
+        result.HasError<NotFoundError>().ShouldBeTrue();
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
+    }
 
-        var handler = new UpdateOrderStatusHandler(orderRepository, unitOfWork);
-
+    [Fact]
+    public async Task GivenPendingOrder_WhenUpdatingStatus_ThenAppliesStatusAndCommits()
+    {
+        // Arrange
+        var order = new OrderBuilder().Build();
+        _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
         var command = new UpdateOrderStatusCommand(order.Id, OrderStatus.Preparing);
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         order.Status.ShouldBe(OrderStatus.Preparing);
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Handle_Should_Call_CommitAsync_On_UnitOfWork()
+    public async Task GivenDeliveredOrder_WhenChangingStatus_ThenThrowsDomainExceptionWithoutCommitting()
     {
         // Arrange
-        var order = fixture.CreateOrder();
-
-        var orderRepository = fixture.CreateOrderRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
-
-        var handler = new UpdateOrderStatusHandler(orderRepository, unitOfWork);
-
-        var command = new UpdateOrderStatusCommand(order.Id, OrderStatus.Delivered);
+        var order = new OrderBuilder().WithStatus(OrderStatus.Delivered).Build();
+        _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
+        var command = new UpdateOrderStatusCommand(order.Id, OrderStatus.Preparing);
 
         // Act
-        await handler.HandleAsync(command, CancellationToken.None);
+        var exception = await Record.ExceptionAsync(() => _handler.HandleAsync(command, CancellationToken.None));
 
         // Assert
-        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Theory]
-    [InlineData(OrderStatus.Pending, OrderStatus.Preparing)]
-    [InlineData(OrderStatus.Preparing, OrderStatus.Ready)]
-    [InlineData(OrderStatus.Ready, OrderStatus.Delivered)]
-    [InlineData(OrderStatus.Pending, OrderStatus.Canceled)]
-    public async Task Handle_Should_Update_From_Any_Status_To_Another(OrderStatus oldStatus, OrderStatus newStatus)
-    {
-        // Arrange
-        var order = fixture.CreateOrder(status: oldStatus);
-
-        var orderRepository = fixture.CreateOrderRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
-
-        var handler = new UpdateOrderStatusHandler(orderRepository, unitOfWork);
-
-        var command = new UpdateOrderStatusCommand(order.Id, newStatus);
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        order.Status.ShouldBe(newStatus);
+        exception.ShouldBeOfType<DomainException>();
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
     }
 }

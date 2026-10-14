@@ -34,7 +34,7 @@ public sealed class HandlersRegistrationTests
     ];
 
     [Fact]
-    public void AddHandlers_Should_Register_Every_Handler_By_Its_Interface_As_Scoped()
+    public void GivenApiAssembly_WhenAddingHandlers_ThenRegistersEveryHandlerByInterfaceAsScoped()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -64,7 +64,7 @@ public sealed class HandlersRegistrationTests
     [InlineData(typeof(ICommandHandler<CreateOrderCommand, Result<CreateOrderResponse>>), typeof(CreateOrderHandler))]
     [InlineData(typeof(IQueryHandler<GetAllProductsQuery, Result<List<GetAllProductsResponse>>>), typeof(GetAllProductsHandler))]
     [InlineData(typeof(IDomainEventHandler<OrderPaymentConfirmedEvent>), typeof(OrderPaymentConfirmedEventHandler))]
-    public void AddHandlers_Should_Register_Known_Handlers(Type service, Type implementation)
+    public void GivenKnownHandler_WhenAddingHandlers_ThenResolvesItsInterfaceToIt(Type service, Type implementation)
     {
         // Arrange
         var services = new ServiceCollection();
@@ -77,7 +77,7 @@ public sealed class HandlersRegistrationTests
     }
 
     [Fact]
-    public async Task AddHandlers_Should_Validate_Commands_Before_Reaching_The_Handler()
+    public async Task GivenInvalidCommand_WhenHandlingThroughContainer_ThenValidationRejectsItBeforeTheHandler()
     {
         // Arrange
         var productRepository = Substitute.For<IProductRepository>();

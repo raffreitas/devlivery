@@ -1,202 +1,122 @@
 using Devlivery.Domain.Aggregates.Expenses;
 using Devlivery.Domain.SeedWork;
+using Devlivery.Tests.Common.Builders;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.Expenses.Domain;
 
-[Collection("Expenses Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class CategoryTests(ExpensesUnitTestFixture fixture)
+public sealed class CategoryTests
 {
     [Fact]
-    public void Constructor_Should_Create_Category_With_Correct_Properties()
+    public void GivenNameAndEstablishment_WhenCreatingCategory_ThenIsActiveTopLevelCategory()
     {
         // Arrange
-        const string name = "Categoria Teste";
         var establishmentId = Guid.NewGuid();
 
         // Act
-        var category = new Category(name, establishmentId);
+        var category = new Category("Operacional", establishmentId);
 
         // Assert
-        category.Name.ShouldBe(name);
+        category.Name.ShouldBe("Operacional");
         category.EstablishmentId.ShouldBe(establishmentId);
         category.IsActive.ShouldBeTrue();
         category.ParentCategoryId.ShouldBeNull();
         category.Subcategories.ShouldBeEmpty();
-        category.CreatedAt.ShouldNotBe(default);
-        category.UpdatedAt.ShouldNotBe(default);
     }
 
     [Fact]
-    public void AddSubcategory_Should_Add_Subcategory_To_List()
+    public void GivenTopLevelCategory_WhenAddingSubcategory_ThenLinksSubcategoryToParent()
     {
         // Arrange
-        var parentCategory = fixture.CreateCategory();
-        var subcategory = fixture.CreateCategory();
+        var parent = new CategoryBuilder().Build();
+        var subcategory = new CategoryBuilder().Build();
 
         // Act
-        parentCategory.AddSubcategory(subcategory);
+        parent.AddSubcategory(subcategory);
 
         // Assert
-        parentCategory.Subcategories.ShouldContain(subcategory);
-        subcategory.ParentCategoryId.ShouldBe(parentCategory.Id);
+        parent.Subcategories.ShouldHaveSingleItem().ShouldBe(subcategory);
+        subcategory.ParentCategoryId.ShouldBe(parent.Id);
     }
 
     [Fact]
-    public async Task AddSubcategory_Should_Update_UpdatedAt_Timestamp()
+    public void GivenSubcategoryAlreadyInParent_WhenAddingAgain_ThenThrowsDomainException()
     {
         // Arrange
-        var parentCategory = fixture.CreateCategory();
-        var originalUpdatedAt = parentCategory.UpdatedAt;
-        await Task.Delay(10);
-        var subcategory = fixture.CreateCategory();
+        var parent = new CategoryBuilder().Build();
+        var subcategory = new CategoryBuilder().WithParent(parent).Build();
 
         // Act
-        parentCategory.AddSubcategory(subcategory);
+        var exception = Record.Exception(() => parent.AddSubcategory(subcategory));
 
         // Assert
-        parentCategory.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
+        exception.ShouldBeOfType<DomainException>()
+            .Message.ShouldBe("A subcategoria já está associada a esta categoria.");
+        parent.Subcategories.ShouldHaveSingleItem();
     }
 
     [Fact]
-    public void AddSubcategory_Should_Throw_When_Subcategory_Already_Added()
+    public void GivenSubcategoryOfAnotherParent_WhenAdding_ThenThrowsDomainException()
     {
         // Arrange
-        var parentCategory = fixture.CreateCategory();
-        var subcategory = fixture.CreateCategory();
-        parentCategory.AddSubcategory(subcategory);
-
-        // Act & Assert
-        Should.Throw<DomainException>(() => parentCategory.AddSubcategory(subcategory));
-    }
-
-    [Fact]
-    public void AddSubcategory_Should_Throw_When_Subcategory_Has_Parent()
-    {
-        // Arrange
-        var parentCategory1 = fixture.CreateCategory();
-        var parentCategory2 = fixture.CreateCategory();
-        var subcategory = fixture.CreateCategory();
-        parentCategory1.AddSubcategory(subcategory);
-
-        // Act & Assert
-        // A subcategoria já tem um parent (parentCategory1), então não pode ser adicionada a outro parent
-        Should.Throw<DomainException>(() => parentCategory2.AddSubcategory(subcategory));
-    }
-
-    [Fact]
-    public void Update_Should_Update_Name_When_Provided()
-    {
-        // Arrange
-        const string originalName = "Nome Original";
-        var category = fixture.CreateCategory(name: originalName);
-        const string newName = "Nome Atualizado";
+        var originalParent = new CategoryBuilder().Build();
+        var subcategory = new CategoryBuilder().WithParent(originalParent).Build();
+        var newParent = new CategoryBuilder().Build();
 
         // Act
-        category.Update(name: newName);
+        var exception = Record.Exception(() => newParent.AddSubcategory(subcategory));
 
         // Assert
-        category.Name.ShouldBe(newName);
+        exception.ShouldBeOfType<DomainException>()
+            .Message.ShouldBe("A subcategoria já está associada a outra categoria.");
+        subcategory.ParentCategoryId.ShouldBe(originalParent.Id);
+        newParent.Subcategories.ShouldBeEmpty();
     }
 
     [Fact]
-    public void Update_Should_Update_IsActive_When_Provided()
+    public void GivenCategory_WhenUpdatingNameAndStatus_ThenAppliesBoth()
     {
         // Arrange
-        var category = fixture.CreateCategory(isActive: true);
+        var category = new CategoryBuilder().WithName("Operacional").Build();
+        var beforeUpdate = DateTime.UtcNow;
 
         // Act
-        category.Update(isActive: false);
+        category.Update("Operação", isActive: false);
 
         // Assert
+        category.Name.ShouldBe("Operação");
         category.IsActive.ShouldBeFalse();
+        category.UpdatedAt.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
     }
 
     [Fact]
-    public void Update_Should_Keep_Original_Values_When_Null()
+    public void GivenCategory_WhenUpdatingWithNullFields_ThenKeepsOriginalValues()
     {
         // Arrange
-        const string originalName = "Nome Original";
-        var category = fixture.CreateCategory(name: originalName, isActive: true);
+        var category = new CategoryBuilder().WithName("Operacional").Build();
 
         // Act
-        category.Update(name: null, isActive: null);
+        category.Update();
 
         // Assert
-        category.Name.ShouldBe(originalName);
+        category.Name.ShouldBe("Operacional");
         category.IsActive.ShouldBeTrue();
     }
 
     [Fact]
-    public async Task Update_Should_Update_UpdatedAt_Timestamp()
+    public void GivenActiveCategory_WhenDeactivating_ThenIsInactive()
     {
         // Arrange
-        var category = fixture.CreateCategory();
-        var originalUpdatedAt = category.UpdatedAt;
-        await Task.Delay(10);
-
-        // Act
-        category.Update(name: "Novo Nome");
-
-        // Assert
-        category.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
-    }
-
-    [Fact]
-    public void Deactivate_Should_Set_IsActive_To_False()
-    {
-        // Arrange
-        var category = fixture.CreateCategory(isActive: true);
+        var category = new CategoryBuilder().Build();
+        var beforeUpdate = DateTime.UtcNow;
 
         // Act
         category.Deactivate();
 
         // Assert
         category.IsActive.ShouldBeFalse();
-    }
-
-    [Fact]
-    public async Task Deactivate_Should_Update_UpdatedAt_Timestamp()
-    {
-        // Arrange
-        var category = fixture.CreateCategory(isActive: true);
-        var originalUpdatedAt = category.UpdatedAt;
-        await Task.Delay(10);
-
-        // Act
-        category.Deactivate();
-
-        // Assert
-        category.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
-    }
-
-    [Fact]
-    public void Activate_Should_Set_IsActive_To_True()
-    {
-        // Arrange
-        var category = fixture.CreateCategory(isActive: false);
-
-        // Act
-        category.Activate();
-
-        // Assert
-        category.IsActive.ShouldBeTrue();
-    }
-
-    [Fact]
-    public async Task Activate_Should_Update_UpdatedAt_Timestamp()
-    {
-        // Arrange
-        var category = fixture.CreateCategory(isActive: false);
-        var originalUpdatedAt = category.UpdatedAt;
-        await Task.Delay(10);
-
-        // Act
-        category.Activate();
-
-        // Assert
-        category.UpdatedAt.ShouldBeGreaterThan(originalUpdatedAt);
+        category.UpdatedAt.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
     }
 }

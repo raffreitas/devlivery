@@ -1,10 +1,15 @@
 using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.Users;
 using Devlivery.Features.Auth.Commands.Login;
 using Devlivery.Infrastructure.Identity.Abstractions;
+using Devlivery.Infrastructure.Persistence.Context;
+using Devlivery.Tests.Common.Builders;
+using Devlivery.Tests.Common.Mocks;
 
 using FluentResults;
 
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using NSubstitute;
 
@@ -13,119 +18,84 @@ using Shouldly;
 namespace Devlivery.Tests.Features.Auth.Commands.Login;
 
 [Trait("Category", "Unit Tests")]
-public sealed class LoginHandlerTests(AuthUnitTestFixture fixture) : IClassFixture<AuthUnitTestFixture>
+public sealed class LoginHandlerTests : IDisposable
 {
-    [Fact]
-    public async Task Handle_Should_Return_UnauthorizedError_When_User_Does_Not_Exist()
+    private const string Email = "maria@pizzaria.com";
+    private const string Password = "senha-segura";
+
+    private readonly ApplicationDbContext _dbContext;
+    private readonly IIdentityService _identityService = Substitute.For<IIdentityService>();
+    private readonly ITokenService _tokenService = Substitute.For<ITokenService>();
+    private readonly LoginHandler _handler;
+
+    public LoginHandlerTests()
     {
-        // Arrange
-        var logger = Substitute.For<ILogger<LoginHandler>>();
-        var dbContext = fixture.CreateDbContextMock();
-        var identityService = fixture.CreateIdentityServiceMock();
-        var tokenService = fixture.CreateTokenServiceMock();
-
-        var handler = new LoginHandler(logger, dbContext, identityService, tokenService);
-
-        var command = new LoginCommand(
-            Email: fixture.Faker.Internet.Email(),
-            Password: fixture.Faker.Internet.Password()
-        );
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is UnauthorizedError);
-        await identityService.DidNotReceiveWithAnyArgs().SignInAsync(default!, default!, default);
+        // Login runs before any tenant is known: the context's tenant never matches the user's establishment
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        _dbContext = new ApplicationDbContext(options, TestMocks.TenantAccessor());
+        _handler = new LoginHandler(NullLogger<LoginHandler>.Instance, _dbContext, _identityService, _tokenService);
     }
 
     [Fact]
-    public async Task Handle_Should_Return_UnauthorizedError_When_SignIn_Fails()
+    public async Task GivenUnknownEmail_WhenLoggingIn_ThenReturnsUnauthorizedWithoutCheckingPassword()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<LoginHandler>>();
-        var dbContext = fixture.CreateDbContextMock();
-        var identityService = fixture.CreateIdentityServiceMock();
-        var tokenService = fixture.CreateTokenServiceMock();
+        var command = new LoginCommand("desconhecido@pizzaria.com", Password);
 
-        var user = fixture.CreateUser(
-            email: "user@example.com"
-        );
-        dbContext.Users.Add(user);
-        await dbContext.SaveChangesAsync();
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
 
-        var command = new LoginCommand(
-            Email: "user@example.com",
-            Password: "wrongpassword"
-        );
+        // Assert
+        result.Errors.ShouldHaveSingleItem().ShouldBeOfType<UnauthorizedError>()
+            .Message.ShouldBe("Usuário ou senha inválidos.");
+        await _identityService.DidNotReceiveWithAnyArgs().SignInAsync(default!, default!, default);
+    }
 
-        // Mock SignIn to fail
-        identityService.SignInAsync(command.Email, command.Password, Arg.Any<CancellationToken>())
+    [Fact]
+    public async Task GivenWrongPassword_WhenLoggingIn_ThenReturnsSameUnauthorizedErrorWithoutIssuingToken()
+    {
+        // Arrange
+        await SeedUserAsync();
+        _identityService.SignInAsync(Email, "senha-errada", Arg.Any<CancellationToken>())
             .Returns(Result.Fail("Invalid credentials"));
 
-        var handler = new LoginHandler(logger, dbContext, identityService, tokenService);
-
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(new LoginCommand(Email, "senha-errada"), CancellationToken.None);
 
         // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is UnauthorizedError);
-        await tokenService.DidNotReceiveWithAnyArgs().GenerateTokenAsync(default!, default);
+        result.Errors.ShouldHaveSingleItem().ShouldBeOfType<UnauthorizedError>()
+            .Message.ShouldBe("Usuário ou senha inválidos.");
+        await _tokenService.DidNotReceiveWithAnyArgs().GenerateTokenAsync(default!, default);
     }
 
     [Fact]
-    public async Task Handle_Should_Return_LoginResponse_When_Credentials_Are_Valid()
+    public async Task GivenValidCredentials_WhenLoggingIn_ThenIssuesTokenForUserAndTheirEstablishment()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<LoginHandler>>();
-        var dbContext = fixture.CreateDbContextMock();
-        var identityService = fixture.CreateIdentityServiceMock();
-        var tokenService = fixture.CreateTokenServiceMock();
-
-        var user = fixture.CreateUser(
-            name: "Test User",
-            email: "user@example.com"
-        );
-        dbContext.Users.Add(user);
-        await dbContext.SaveChangesAsync();
-
-        var command = new LoginCommand(
-            Email: "user@example.com",
-            Password: "validpassword"
-        );
-
-        var expectedToken = "generated-jwt-token";
-
-        // Mock SignIn to succeed
-        identityService.SignInAsync(command.Email, command.Password, Arg.Any<CancellationToken>())
-            .Returns(Result.Ok());
-
-        // Mock token generation
-        tokenService.GenerateTokenAsync(
-            Arg.Is<TokenRequest>(r =>
-                r.SubjectId == user.Id.ToString() &&
-                r.TenantId == user.EstablishmentId.ToString()),
-            Arg.Any<CancellationToken>())
-            .Returns(expectedToken);
-
-        var handler = new LoginHandler(logger, dbContext, identityService, tokenService);
+        var user = await SeedUserAsync();
+        _identityService.SignInAsync(Email, Password, Arg.Any<CancellationToken>()).Returns(Result.Ok());
+        _tokenService.GenerateTokenAsync(
+                new TokenRequest(user.Id.ToString(), user.EstablishmentId.ToString()),
+                Arg.Any<CancellationToken>())
+            .Returns("jwt-token");
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(new LoginCommand(Email, Password), CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.UserId.ShouldBe(user.Id);
-        result.Value.UserName.ShouldBe(user.Name);
-        result.Value.Token.ShouldBe(expectedToken);
+        result.Value.ShouldBe(new LoginResponse(user.Id, "Maria Souza", "jwt-token"));
+    }
 
-        await identityService.Received(1).SignInAsync(command.Email, command.Password, Arg.Any<CancellationToken>());
-        await tokenService.Received(1).GenerateTokenAsync(
-            Arg.Is<TokenRequest>(r =>
-                r.SubjectId == user.Id.ToString() &&
-                r.TenantId == user.EstablishmentId.ToString()),
-            Arg.Any<CancellationToken>());
+    public void Dispose() => _dbContext.Dispose();
+
+    private async Task<User> SeedUserAsync()
+    {
+        var user = new UserBuilder().WithName("Maria Souza").WithEmail(Email).Build();
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
+        return user;
     }
 }

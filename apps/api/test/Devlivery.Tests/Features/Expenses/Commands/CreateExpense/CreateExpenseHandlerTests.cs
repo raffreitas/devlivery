@@ -1,236 +1,103 @@
 using Devlivery.Common.Errors;
 using Devlivery.Domain.Aggregates.Expenses;
+using Devlivery.Domain.Aggregates.Expenses.Abstractions;
 using Devlivery.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Features.Expenses.Commands.CreateExpense;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Tests.Common.Builders;
+using Devlivery.Tests.Common.Mocks;
 
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.Expenses.Commands.CreateExpense;
 
-[Collection("Expenses Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class CreateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
+public sealed class CreateExpenseHandlerTests
 {
-    [Fact]
-    public async Task Handle_Should_Return_NotFoundError_When_Category_Does_Not_Exist()
+    private static readonly DateOnly DueDate = new(2026, 5, 10);
+
+    private readonly Guid _tenantId = Guid.NewGuid();
+    private readonly IExpenseRepository _expenseRepository = Substitute.For<IExpenseRepository>();
+    private readonly ICategoryRepository _categoryRepository = Substitute.For<ICategoryRepository>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly CreateExpenseHandler _handler;
+
+    public CreateExpenseHandlerTests()
+    {
+        _handler = new CreateExpenseHandler(_expenseRepository, _categoryRepository, _unitOfWork,
+            TestMocks.TenantAccessor(_tenantId));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenMissingOrInactiveCategory_WhenCreating_ThenReturnsNotFoundErrorWithoutPersisting(
+        bool categoryExists)
     {
         // Arrange
-        var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        var expenseRepository = fixture.CreateExpenseRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        categoryRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns((Category?)null);
-
-        var handler = new CreateExpenseHandler(expenseRepository, categoryRepository, unitOfWork, tenantAccessor);
-
-        var command = new CreateExpenseCommand(
-            CategoryId: Guid.NewGuid(),
-            Amount: 100.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: "Fornecedor Teste",
-            Description: "Descrição Teste",
-            PaymentDate: null
-        );
+        var categoryId = Guid.NewGuid();
+        if (categoryExists)
+            _categoryRepository.GetByIdAsync(categoryId, Arg.Any<CancellationToken>())
+                .Returns(new CategoryBuilder().AsInactive().Build());
+        else
+            _categoryRepository.GetByIdAsync(categoryId, Arg.Any<CancellationToken>()).ReturnsNull();
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(new CreateExpenseCommand(categoryId, 150m, DueDate, null, null, null),
+            CancellationToken.None);
 
         // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is NotFoundError);
+        result.HasError<NotFoundError>().ShouldBeTrue();
+        await _expenseRepository.DidNotReceive().AddAsync(Arg.Any<Expense>(), Arg.Any<CancellationToken>());
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Handle_Should_Return_NotFoundError_When_Category_Is_Inactive()
+    public async Task GivenActiveCategory_WhenCreating_ThenPersistsPendingExpenseForCurrentTenant()
     {
         // Arrange
-        var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        var expenseRepository = fixture.CreateExpenseRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var inactiveCategory = fixture.CreateCategory(isActive: false);
-        categoryRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(inactiveCategory);
-
-        var handler = new CreateExpenseHandler(expenseRepository, categoryRepository, unitOfWork, tenantAccessor);
-
-        var command = new CreateExpenseCommand(
-            CategoryId: inactiveCategory.Id,
-            Amount: 100.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: null,
-            Description: null,
-            PaymentDate: null
-        );
+        var category = new CategoryBuilder().Build();
+        _categoryRepository.GetByIdAsync(category.Id, Arg.Any<CancellationToken>()).Returns(category);
+        Expense? addedExpense = null;
+        await _expenseRepository.AddAsync(Arg.Do<Expense>(e => addedExpense = e), Arg.Any<CancellationToken>());
+        var command = new CreateExpenseCommand(category.Id, 150m, DueDate, "Distribuidora Sul", "Farinha", null);
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is NotFoundError);
+        addedExpense.ShouldNotBeNull();
+        addedExpense.EstablishmentId.ShouldBe(_tenantId);
+        addedExpense.CategoryId.ShouldBe(category.Id);
+        addedExpense.Amount.ShouldBe(150m);
+        addedExpense.DueDate.ShouldBe(DueDate);
+        addedExpense.Supplier.ShouldBe("Distribuidora Sul");
+        addedExpense.Description.ShouldBe("Farinha");
+        addedExpense.Status.ShouldBe(ExpenseStatus.Pending);
+        result.Value.ExpenseId.ShouldBe(addedExpense.Id);
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Handle_Should_Create_Expense_With_Correct_Properties()
+    public async Task GivenPaymentDate_WhenCreating_ThenPersistsExpenseAlreadyPaid()
     {
         // Arrange
-        var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        var expenseRepository = fixture.CreateExpenseRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var category = fixture.CreateCategory(isActive: true);
-        categoryRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(category);
-
-        var handler = new CreateExpenseHandler(expenseRepository, categoryRepository, unitOfWork, tenantAccessor);
-
-        const decimal amount = 150.50m;
-        var dueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
-        const string supplier = "Fornecedor Teste";
-        const string description = "Descrição Teste";
-
-        var command = new CreateExpenseCommand(
-            CategoryId: category.Id,
-            Amount: amount,
-            DueDate: dueDate,
-            Supplier: supplier,
-            Description: description,
-            PaymentDate: null
-        );
+        var category = new CategoryBuilder().Build();
+        _categoryRepository.GetByIdAsync(category.Id, Arg.Any<CancellationToken>()).Returns(category);
+        Expense? addedExpense = null;
+        await _expenseRepository.AddAsync(Arg.Do<Expense>(e => addedExpense = e), Arg.Any<CancellationToken>());
+        var paymentDate = DueDate.AddDays(-2);
 
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        await _handler.HandleAsync(new CreateExpenseCommand(category.Id, 150m, DueDate, null, null, paymentDate),
+            CancellationToken.None);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
-
-        await expenseRepository.Received(1).AddAsync(
-            Arg.Is<Expense>(e =>
-                e.CategoryId == category.Id &&
-                e.Amount == amount &&
-                e.DueDate == dueDate &&
-                e.Supplier == supplier &&
-                e.Description == description &&
-                e.EstablishmentId == tenantAccessor.Tenant.Id &&
-                e.Status == ExpenseStatus.Pending),
-            Arg.Any<CancellationToken>()
-        );
-    }
-
-    [Fact]
-    public async Task Handle_Should_Create_Expense_As_Paid_When_PaymentDate_Is_Provided()
-    {
-        // Arrange
-        var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        var expenseRepository = fixture.CreateExpenseRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var category = fixture.CreateCategory(isActive: true);
-        categoryRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(category);
-
-        var handler = new CreateExpenseHandler(expenseRepository, categoryRepository, unitOfWork, tenantAccessor);
-
-        var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
-
-        var command = new CreateExpenseCommand(
-            CategoryId: category.Id,
-            Amount: 100.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: null,
-            Description: null,
-            PaymentDate: paymentDate
-        );
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-
-        await expenseRepository.Received(1).AddAsync(
-            Arg.Is<Expense>(e =>
-                e.Status == ExpenseStatus.Paid &&
-                e.PaymentDate == paymentDate),
-            Arg.Any<CancellationToken>()
-        );
-    }
-
-    [Fact]
-    public async Task Handle_Should_Use_TenantId_From_TenantAccessor()
-    {
-        // Arrange
-        var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        var expenseRepository = fixture.CreateExpenseRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var expectedTenantId = tenantAccessor.Tenant.Id;
-
-        var category = fixture.CreateCategory(isActive: true);
-        categoryRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(category);
-
-        var handler = new CreateExpenseHandler(expenseRepository, categoryRepository, unitOfWork, tenantAccessor);
-
-        var command = new CreateExpenseCommand(
-            CategoryId: category.Id,
-            Amount: 100.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: null,
-            Description: null,
-            PaymentDate: null
-        );
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-
-        await expenseRepository.Received(1).AddAsync(
-            Arg.Is<Expense>(e => e.EstablishmentId == expectedTenantId),
-            Arg.Any<CancellationToken>()
-        );
-    }
-
-    [Fact]
-    public async Task Handle_Should_Return_CreateExpenseResponse_With_ExpenseId()
-    {
-        // Arrange
-        var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        var expenseRepository = fixture.CreateExpenseRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var category = fixture.CreateCategory(isActive: true);
-        categoryRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(category);
-
-        var handler = new CreateExpenseHandler(expenseRepository, categoryRepository, unitOfWork, tenantAccessor);
-
-        var command = new CreateExpenseCommand(
-            CategoryId: category.Id,
-            Amount: 100.00m,
-            DueDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
-            Supplier: null,
-            Description: null,
-            PaymentDate: null
-        );
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ExpenseId.ShouldNotBe(Guid.Empty);
+        addedExpense.ShouldNotBeNull();
+        addedExpense.Status.ShouldBe(ExpenseStatus.Paid);
+        addedExpense.PaymentDate.ShouldBe(paymentDate);
     }
 }

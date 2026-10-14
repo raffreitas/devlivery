@@ -8,7 +8,7 @@ namespace Devlivery.Tests.Common.Builders;
 
 public sealed class CashSessionBuilder
 {
-    private readonly Faker _faker = new();
+    private readonly Faker _faker = new("pt_BR");
 
     private Guid _establishmentId;
     private Guid _attendantId;

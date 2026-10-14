@@ -1,16 +1,17 @@
-﻿using Bogus;
+using Bogus;
 
 using Devlivery.Domain.Aggregates.Orders;
 using Devlivery.Domain.Aggregates.Orders.Entities;
+using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.ValueObjects;
 using Devlivery.Domain.Common.Enums;
 using Devlivery.Domain.Common.ValueObjects;
 
 namespace Devlivery.Tests.Common.Builders;
 
-public class OrderBuilder
+public sealed class OrderBuilder
 {
-    private readonly Faker _faker = new();
+    private readonly Faker _faker = new("pt_BR");
 
     private string _customerName;
     private string? _customerPhone;
@@ -21,6 +22,7 @@ public class OrderBuilder
     private readonly List<OrderPayment> _payments = [];
     private Guid _establishmentId;
     private string? _notes;
+    private OrderStatus? _status;
 
     public OrderBuilder()
     {
@@ -102,11 +104,14 @@ public class OrderBuilder
         return this;
     }
 
+    public OrderBuilder WithStatus(OrderStatus status)
+    {
+        _status = status;
+        return this;
+    }
+
     public Order Build()
     {
-        if (_establishmentId == Guid.Empty)
-            throw new InvalidOperationException("No establishment id has been added");
-
         // Se não houver items, criar um item padrão
         var items = _orderItems.Length == 0
             ? new[] { CreateDefaultOrderItem() }
@@ -149,6 +154,9 @@ public class OrderBuilder
             payments: _payments,
             notes: _notes
         );
+
+        if (_status.HasValue)
+            order.UpdateStatus(_status.Value);
 
         return order;
     }

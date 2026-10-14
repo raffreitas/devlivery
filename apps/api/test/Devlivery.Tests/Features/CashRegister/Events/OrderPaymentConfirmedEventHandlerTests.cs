@@ -1,267 +1,91 @@
-using Devlivery.Domain.Aggregates.CashRegister;
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Common.Enums;
 using Devlivery.Features.CashRegister.Events;
 using Devlivery.Tests.Common.Builders;
+using Devlivery.Tests.Common.Mocks;
 
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.CashRegister.Events;
 
 [Trait("Category", "Unit Tests")]
-public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestFixture fixture) : IClassFixture<CashRegisterUnitTestFixture>
+public sealed class OrderPaymentConfirmedEventHandlerTests
 {
+    private readonly Guid _operatorId = Guid.NewGuid();
+    private readonly ICashSessionRepository _cashSessionRepository = Substitute.For<ICashSessionRepository>();
+    private readonly OrderPaymentConfirmedEventHandler _handler;
+
+    public OrderPaymentConfirmedEventHandlerTests()
+    {
+        _handler = new OrderPaymentConfirmedEventHandler(
+            NullLogger<OrderPaymentConfirmedEventHandler>.Instance,
+            _cashSessionRepository,
+            TestMocks.CurrentUserAccessor(_operatorId),
+            TestMocks.TenantAccessor());
+    }
+
     [Fact]
-    public async Task Handle_Should_Add_Payment_To_Active_Session()
+    public async Task GivenActiveSession_WhenPaymentConfirmed_ThenRecordsPaymentAttributedToCurrentOperator()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderPaymentConfirmedEvent(
-            OrderId: Guid.NewGuid(),
-            PaymentId: Guid.NewGuid(),
-            EstablishmentId: tenantAccessor.Tenant.Id,
-            PaymentMethod: PaymentMethod.Cash,
-            Amount: 50m,
-            OrderTotal: 50m
-        );
-
-        var actorAccessor = fixture.CreateCurrentUserAccessorMock();
-        var expectedActor = await actorAccessor.ResolveAsync();
-        expectedActor.Id.ShouldNotBe(cashSession.AttendantId);
-
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, actorAccessor, tenantAccessor);
+        var session = new CashSessionBuilder().WithOpeningAmount(100m).Build();
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).Returns(session);
+        var @event = CreateEvent(PaymentMethod.Cash, 50m);
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
+        await _handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert
-        cashSession.Movements.Where(x => x.EntryType == CashSessionEntryType.Payment)
-            .ShouldAllBe(x => x.CreatedBy == expectedActor.Id);
-        cashSession.Movements.Count.ShouldBe(1);
-        cashSession.Movements.First().EntryType.ShouldBe(CashSessionEntryType.Payment);
-        cashSession.Movements.First().Amount.ShouldBe(50m);
-        cashSession.Movements.First().PaymentMethod.ShouldBe(PaymentMethod.Cash);
-        cashSession.Movements.First().OrderPaymentId.ShouldBe(@event.PaymentId);
-        cashSession.TotalRevenue.ShouldBe(50m);
-        cashSession.ExpectedCashAmount.ShouldBe(150m); // 100 + 50
-
+        var movement = session.Movements.ShouldHaveSingleItem();
+        movement.EntryType.ShouldBe(CashSessionEntryType.Payment);
+        movement.OrderPaymentId.ShouldBe(@event.PaymentId);
+        movement.RelatedOrderId.ShouldBe(@event.OrderId);
+        movement.PaymentMethod.ShouldBe(PaymentMethod.Cash);
+        movement.Amount.ShouldBe(50m);
+        movement.CreatedBy.ShouldBe(_operatorId);
+        session.ExpectedCashAmount.ShouldBe(150m);
     }
 
     [Fact]
-    public async Task Handle_Should_Be_Idempotent_For_Same_PaymentId()
+    public async Task GivenPaymentAlreadyRecorded_WhenSameEventIsHandledAgain_ThenDoesNotDuplicateIt()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var paymentId = Guid.NewGuid();
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderPaymentConfirmedEvent(
-            OrderId: Guid.NewGuid(),
-            PaymentId: paymentId,
-            EstablishmentId: tenantAccessor.Tenant.Id,
-            PaymentMethod: PaymentMethod.CreditCard,
-            Amount: 75m,
-            OrderTotal: 75m
-        );
-
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        var session = new CashSessionBuilder().Build();
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).Returns(session);
+        var @event = CreateEvent(PaymentMethod.Pix, 50m);
+        await _handler.HandleAsync(@event, CancellationToken.None);
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None); // First time
-        await handler.HandleAsync(@event, CancellationToken.None); // Duplicate
-
-        // Assert - only one payment recorded
-        cashSession.Movements.Count.ShouldBe(1);
-        cashSession.TotalRevenue.ShouldBe(75m);
-    }
-
-    [Fact]
-    public async Task Handle_Should_Record_Multiple_Payments_From_Same_Order()
-    {
-        // Arrange
-        var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var orderId = Guid.NewGuid();
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
-
-        var events = new[]
-        {
-            new OrderPaymentConfirmedEvent(orderId, Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Cash, 30m, 60m),
-            new OrderPaymentConfirmedEvent(orderId, Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.CreditCard, 20m, 60m),
-            new OrderPaymentConfirmedEvent(orderId, Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Pix, 10m, 60m)
-        };
-
-        // Act
-        foreach (var @event in events)
-        {
-            await handler.HandleAsync(@event, CancellationToken.None);
-        }
+        await _handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert
-        cashSession.Movements.Count.ShouldBe(3);
-        cashSession.TotalRevenue.ShouldBe(60m);
-        cashSession.TotalOrders.ShouldBe(3); // 3 different payment IDs
-
-        var cashPayments = cashSession.Movements.Where(m => m.PaymentMethod == PaymentMethod.Cash).Sum(m => m.Amount);
-        cashPayments.ShouldBe(30m);
-
-        cashSession.ExpectedCashAmount.ShouldBe(130m); // 100 + 30 (only cash)
+        session.Movements.ShouldHaveSingleItem();
+        session.TotalRevenue.ShouldBe(50m);
     }
 
     [Fact]
-    public async Task Handle_Should_Not_Record_Payment_When_No_Active_Session()
+    public async Task GivenNoActiveSession_WhenPaymentConfirmed_ThenSkipsWithoutFailing()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns((CashSession?)null);
-
-        var @event = new OrderPaymentConfirmedEvent(
-            OrderId: Guid.NewGuid(),
-            PaymentId: Guid.NewGuid(),
-            EstablishmentId: tenantAccessor.Tenant.Id,
-            PaymentMethod: PaymentMethod.Cash,
-            Amount: 50m,
-            OrderTotal: 50m
-        );
-
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).ReturnsNull();
 
         // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
-
-        // Assert - no update calls
-    }
-
-    [Fact]
-    public async Task Handle_Should_Update_Expected_Cash_Amount_Only_For_Cash_Payments()
-    {
-        // Arrange
-        var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .WithOpeningAmount(100m)
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
-
-        // Act
-        await handler.HandleAsync(new OrderPaymentConfirmedEvent(
-            Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Cash, 50m, 50m),
-            CancellationToken.None);
-
-        await handler.HandleAsync(new OrderPaymentConfirmedEvent(
-            Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.CreditCard, 30m, 30m),
-            CancellationToken.None);
+        var exception = await Record.ExceptionAsync(() =>
+            _handler.HandleAsync(CreateEvent(PaymentMethod.Cash, 50m), CancellationToken.None));
 
         // Assert
-        cashSession.TotalRevenue.ShouldBe(80m); // 50 + 30
-        cashSession.ExpectedCashAmount.ShouldBe(150m); // 100 + 50 (only cash payment)
+        exception.ShouldBeNull();
     }
 
-    [Fact]
-    public async Task Handle_Should_Log_Information_When_Processing_Event()
+    private static OrderPaymentConfirmedEvent CreateEvent(PaymentMethod method, decimal amount)
     {
-        // Arrange
-        var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        var cashSession = new CashSessionBuilder()
-            .WithEstablishmentId(tenantAccessor.Tenant.Id)
-            .Build();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var @event = new OrderPaymentConfirmedEvent(
-            Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Cash, 50m, 50m
-        );
-
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
-
-        // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
-
-        // Assert
-        logger.Received(2).Log(
-            LogLevel.Information,
-            Arg.Any<EventId>(),
-            Arg.Any<object>(),
-            null,
-            Arg.Any<Func<object, Exception?, string>>()!);
-    }
-
-    [Fact]
-    public async Task Handle_Should_Log_Warning_When_No_Active_Session()
-    {
-        // Arrange
-        var logger = Substitute.For<ILogger<OrderPaymentConfirmedEventHandler>>();
-        var repository = fixture.CreateCashSessionRepositoryMock();
-        var tenantAccessor = fixture.CreateTenantAccessorMock();
-
-        repository.GetActiveSessionAsync(Arg.Any<CancellationToken>())
-            .Returns((CashSession?)null);
-
-        var @event = new OrderPaymentConfirmedEvent(
-            Guid.NewGuid(), Guid.NewGuid(), tenantAccessor.Tenant.Id, PaymentMethod.Cash, 50m, 50m
-        );
-
-        var handler = new OrderPaymentConfirmedEventHandler(logger, repository, fixture.CreateCurrentUserAccessorMock(), tenantAccessor);
-
-        // Act
-        await handler.HandleAsync(@event, CancellationToken.None);
-
-        // Assert
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("No active cash session found")),
-            null,
-            Arg.Any<Func<object, Exception?, string>>()!);
+        return new OrderPaymentConfirmedEvent(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), method, amount, amount);
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Devlivery.Common.Errors;
-using Devlivery.Domain.Aggregates.Expenses;
+using Devlivery.Domain.Aggregates.Expenses.Abstractions;
 using Devlivery.Features.Expenses.Commands.UpdateCategory;
+using Devlivery.Infrastructure.Persistence;
+using Devlivery.Tests.Common.Builders;
 
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -10,89 +12,85 @@ using Shouldly;
 namespace Devlivery.Tests.Features.Expenses.Commands.UpdateCategory;
 
 [Trait("Category", "Unit Tests")]
-[Collection("Expenses Unit Tests")]
-public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
+public sealed class UpdateCategoryHandlerTests
 {
-    [Fact]
-    public async Task Handle_Should_Return_NotFoundError_When_Category_Does_Not_Exist()
+    private readonly ICategoryRepository _categoryRepository = Substitute.For<ICategoryRepository>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly UpdateCategoryHandler _handler;
+
+    public UpdateCategoryHandlerTests()
     {
-        // Arrange
-        var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        var handler = new UpdateCategoryHandler(categoryRepository, unitOfWork);
-
-        var command = new UpdateCategoryCommand(Guid.NewGuid(), "new-name", true);
-
-        categoryRepository.GetByIdAsync(command.CategoryId, Arg.Any<CancellationToken>())
-            .ReturnsNull();
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is NotFoundError);
-        await unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
+        _handler = new UpdateCategoryHandler(_categoryRepository, _unitOfWork);
     }
 
     [Fact]
-    public async Task Handle_Should_Return_ValidationError_When_Name_Already_Exists()
+    public async Task GivenNonexistentCategory_WhenUpdating_ThenReturnsNotFoundError()
     {
         // Arrange
-        var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
+        _categoryRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).ReturnsNull();
 
-        var existingCategory = fixture.CreateCategory(name: "old-name");
+        // Act
+        var result = await _handler.HandleAsync(new UpdateCategoryCommand(Guid.NewGuid(), "Operação", null),
+            CancellationToken.None);
 
-        categoryRepository.GetByIdAsync(existingCategory.Id, Arg.Any<CancellationToken>())
-            .Returns(existingCategory);
+        // Assert
+        result.HasError<NotFoundError>().ShouldBeTrue();
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
+    }
 
-        // Simulate that a different category with the new name already exists
-        categoryRepository.ExistsWithNameAsync("new-name", existingCategory.ParentCategoryId, Arg.Any<CancellationToken>())
+    [Fact]
+    public async Task GivenNameUsedBySibling_WhenRenamingSubcategory_ThenReturnsValidationErrorKeepingName()
+    {
+        // Arrange
+        var parent = new CategoryBuilder().Build();
+        var subcategory = new CategoryBuilder().WithName("Insumos").WithParent(parent).Build();
+        _categoryRepository.GetByIdAsync(subcategory.Id, Arg.Any<CancellationToken>()).Returns(subcategory);
+        _categoryRepository.ExistsWithNameAsync("Embalagens", parent.Id, Arg.Any<CancellationToken>()).Returns(true);
+
+        // Act
+        var result = await _handler.HandleAsync(new UpdateCategoryCommand(subcategory.Id, "Embalagens", null),
+            CancellationToken.None);
+
+        // Assert
+        result.Errors.ShouldHaveSingleItem().ShouldBeOfType<ValidationError>()
+            .Message.ShouldBe("Já existe uma subcategoria com o nome 'Embalagens'.");
+        subcategory.Name.ShouldBe("Insumos");
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GivenUnchangedName_WhenUpdatingStatus_ThenSkipsNameUniquenessCheck()
+    {
+        // Arrange
+        var category = new CategoryBuilder().WithName("Operacional").Build();
+        _categoryRepository.GetByIdAsync(category.Id, Arg.Any<CancellationToken>()).Returns(category);
+        _categoryRepository.ExistsWithNameAsync("Operacional", Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
-        var handler = new UpdateCategoryHandler(categoryRepository, unitOfWork);
-
-        var command = new UpdateCategoryCommand(existingCategory.Id, "new-name", null);
-
         // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(e => e is ValidationError);
-        await unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Handle_Should_Update_Category_And_Save_When_Successful()
-    {
-        // Arrange
-        var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        var existingCategory = fixture.CreateCategory(name: "same-name");
-
-        categoryRepository.GetByIdAsync(existingCategory.Id, Arg.Any<CancellationToken>())
-            .Returns(existingCategory);
-
-        // If name is same as current, ExistsWithName should not cause a conflict (we'll return false)
-        categoryRepository.ExistsWithNameAsync(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
-        var handler = new UpdateCategoryHandler(categoryRepository, unitOfWork);
-
-        var command = new UpdateCategoryCommand(existingCategory.Id, "same-name", false);
-
-        // Act
-        var result = await handler.HandleAsync(command, CancellationToken.None);
+        var result = await _handler.HandleAsync(new UpdateCategoryCommand(category.Id, "Operacional", false),
+            CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        existingCategory.Name.ShouldBe("same-name");
-        existingCategory.IsActive.ShouldBeFalse();
+        category.IsActive.ShouldBeFalse();
+    }
 
-        await unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
+    [Fact]
+    public async Task GivenAvailableName_WhenUpdating_ThenRenamesCategoryAndCommits()
+    {
+        // Arrange
+        var category = new CategoryBuilder().WithName("Operacional").Build();
+        _categoryRepository.GetByIdAsync(category.Id, Arg.Any<CancellationToken>()).Returns(category);
+
+        // Act
+        var result = await _handler.HandleAsync(new UpdateCategoryCommand(category.Id, "Operação", null),
+            CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        category.Name.ShouldBe("Operação");
+        category.IsActive.ShouldBeTrue();
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 }

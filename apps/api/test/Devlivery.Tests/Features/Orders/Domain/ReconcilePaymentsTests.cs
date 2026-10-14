@@ -4,98 +4,140 @@ using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.ValueObjects;
 using Devlivery.Domain.Common.Enums;
 using Devlivery.Domain.SeedWork;
+using Devlivery.Tests.Common.Builders;
 
 using Shouldly;
 
 namespace Devlivery.Tests.Features.Orders.Domain;
 
-
-[Collection("Orders Unit Tests")]
 [Trait("Category", "Unit Tests")]
-public sealed class ReconcilePaymentsTests(OrdersUnitTestFixture fixture)
+public sealed class ReconcilePaymentsTests
 {
     [Fact]
-    public void ReconcilePayments_Should_Add_New_Payment()
+    public void GivenPaymentWithoutId_WhenReconciling_ThenAddsNewPendingPayment()
     {
-        var establishmentId = Guid.NewGuid();
-        var item = fixture.CreateOrderItem(establishmentId: establishmentId);
-        var customer = CustomerInfo.Create("Cliente Teste", null);
-        var address = new DeliveryAddress("Rua Teste, 123");
+        // Arrange
+        var existing = new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash).WithAmount(30m).Build();
+        var order = CreateOrder(existing);
 
-        var existingPayment = new OrderPayment(establishmentId, PaymentMethod.Cash, item.TotalPrice);
-        var order = new Order(customer, address, 0m, establishmentId, [item], [existingPayment]);
+        // Act
+        order.ReconcilePayments([
+            new OrderPaymentUpdate(existing.Id, PaymentMethod.Cash, 30m),
+            new OrderPaymentUpdate(null, PaymentMethod.Pix, 20m)
+        ]);
 
-        var updates = new[] { new OrderPaymentUpdate(existingPayment.Id, PaymentMethod.Cash, existingPayment.Amount), new OrderPaymentUpdate(null, PaymentMethod.Pix, 5m) };
-
-        order.ReconcilePayments(updates);
-
+        // Assert
         order.Payments.Count.ShouldBe(2);
+        var added = order.Payments.Single(p => p.Id != existing.Id);
+        added.PaymentMethod.ShouldBe(PaymentMethod.Pix);
+        added.Amount.ShouldBe(20m);
+        added.PaymentStatus.ShouldBe(PaymentStatus.Pending);
+        added.EstablishmentId.ShouldBe(order.EstablishmentId);
     }
 
     [Fact]
-    public void ReconcilePayments_Should_Update_Pending_Payment()
+    public void GivenChangedPendingPayment_WhenReconciling_ThenUpdatesMethodAndAmount()
     {
-        var establishmentId = Guid.NewGuid();
-        var item = fixture.CreateOrderItem(establishmentId: establishmentId);
-        var customer = CustomerInfo.Create("Cliente Teste", null);
-        var address = new DeliveryAddress("Rua Teste, 123");
+        // Arrange
+        var existing = new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash).WithAmount(30m).Build();
+        var order = CreateOrder(existing);
 
-        var existingPayment = new OrderPayment(establishmentId, PaymentMethod.Cash, item.TotalPrice);
-        var order = new Order(customer, address, 0m, establishmentId, [item], [existingPayment]);
+        // Act
+        order.ReconcilePayments([new OrderPaymentUpdate(existing.Id, PaymentMethod.Pix, 45m)]);
 
-        var originalAmount = existingPayment.Amount;
-
-        OrderPaymentUpdate[] updates =
-        [
-            new OrderPaymentUpdate(existingPayment.Id, PaymentMethod.Pix, originalAmount + 5m)
-        ];
-
-        order.ReconcilePayments(updates);
-
-        var payment = order.Payments.First(p => p.Id == existingPayment.Id);
-        payment.PaymentMethod.ShouldBe(PaymentMethod.Pix);
-        payment.Amount.ShouldBe(originalAmount + 5m);
+        // Assert
+        existing.PaymentMethod.ShouldBe(PaymentMethod.Pix);
+        existing.Amount.ShouldBe(45m);
+        existing.PaymentStatus.ShouldBe(PaymentStatus.Pending);
     }
 
     [Fact]
-    public void ReconcilePayments_Should_Throw_When_Trying_To_Update_Confirmed_Payment()
+    public void GivenPendingPaymentMissingFromUpdates_WhenReconciling_ThenCancelsIt()
     {
-        var establishmentId = Guid.NewGuid();
-        var item = fixture.CreateOrderItem(establishmentId: establishmentId);
-        var customer = CustomerInfo.Create("Cliente Teste", null);
-        var address = new DeliveryAddress("Rua Teste, 123");
+        // Arrange
+        var kept = new OrderPaymentBuilder().Build();
+        var removed = new OrderPaymentBuilder().Build();
+        var order = CreateOrder(kept, removed);
 
-        var existingPayment = new OrderPayment(establishmentId, PaymentMethod.Cash, item.TotalPrice);
-        var order = new Order(customer, address, 0m, establishmentId, [item], [existingPayment]);
+        // Act
+        order.ReconcilePayments([new OrderPaymentUpdate(kept.Id, kept.PaymentMethod, kept.Amount)]);
 
-        // Confirm existing payment
-        var paymentRef = order.Payments.First();
-        paymentRef.Confirm();
-
-        var updates = new[] { new OrderPaymentUpdate(existingPayment.Id, PaymentMethod.Pix, existingPayment.Amount + 5m) };
-
-        Should.Throw<DomainException>(() => order.ReconcilePayments(updates));
+        // Assert
+        removed.PaymentStatus.ShouldBe(PaymentStatus.Cancelled);
+        kept.PaymentStatus.ShouldBe(PaymentStatus.Pending);
     }
 
     [Fact]
-    public void ReconcilePayments_Should_Cancel_Leftover_Pending_Payments()
+    public void GivenUnchangedConfirmedPayment_WhenReconciling_ThenKeepsItConfirmed()
     {
-        var establishmentId = Guid.NewGuid();
-        var item = fixture.CreateOrderItem(establishmentId: establishmentId);
-        var customer = CustomerInfo.Create("Cliente Teste", null);
-        var address = new DeliveryAddress("Rua Teste, 123");
+        // Arrange
+        var confirmed = new OrderPaymentBuilder().AsConfirmed().Build();
+        var order = CreateOrder(confirmed);
 
-        var p1 = new OrderPayment(establishmentId, PaymentMethod.Cash, item.TotalPrice / 2);
-        var p2 = new OrderPayment(establishmentId, PaymentMethod.Pix, item.TotalPrice / 2);
+        // Act
+        var exception = Record.Exception(() => order.ReconcilePayments([
+            new OrderPaymentUpdate(confirmed.Id, confirmed.PaymentMethod, confirmed.Amount)
+        ]));
 
-        var order = new Order(customer, address, 0m, establishmentId, [item], [p1, p2]);
+        // Assert
+        exception.ShouldBeNull();
+        confirmed.PaymentStatus.ShouldBe(PaymentStatus.Confirmed);
+    }
 
-        // Only keep p1 via updates
-        var updates = new[] { new OrderPaymentUpdate(p1.Id, p1.PaymentMethod, p1.Amount) };
+    [Fact]
+    public void GivenChangedConfirmedPayment_WhenReconciling_ThenThrowsAskingForRefund()
+    {
+        // Arrange
+        var confirmed = new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash).WithAmount(30m)
+            .AsConfirmed().Build();
+        var order = CreateOrder(confirmed);
 
-        order.ReconcilePayments(updates);
+        // Act
+        var exception = Record.Exception(() => order.ReconcilePayments([
+            new OrderPaymentUpdate(confirmed.Id, PaymentMethod.Pix, 30m)
+        ]));
 
-        var remaining = order.Payments.First(p => p.Id == p2.Id);
-        remaining.PaymentStatus.ShouldBe(PaymentStatus.Cancelled);
+        // Assert
+        exception.ShouldBeOfType<DomainException>().Message.ShouldContain("estorno");
+        confirmed.PaymentMethod.ShouldBe(PaymentMethod.Cash);
+    }
+
+    [Fact]
+    public void GivenConfirmedPaymentMissingFromUpdates_WhenReconciling_ThenThrowsAskingForRefund()
+    {
+        // Arrange
+        var confirmed = new OrderPaymentBuilder().AsConfirmed().Build();
+        var order = CreateOrder(confirmed);
+
+        // Act
+        var exception = Record.Exception(() => order.ReconcilePayments([
+            new OrderPaymentUpdate(null, PaymentMethod.Pix, 10m)
+        ]));
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>().Message.ShouldContain("estorno");
+        confirmed.PaymentStatus.ShouldBe(PaymentStatus.Confirmed);
+    }
+
+    [Fact]
+    public void GivenDeliveredOrder_WhenReconcilingWithNewPayment_ThenThrowsDomainException()
+    {
+        // Arrange
+        var order = new OrderBuilder().WithStatus(OrderStatus.Delivered).Build();
+        var updates = order.Payments
+            .Select(p => new OrderPaymentUpdate(p.Id, p.PaymentMethod, p.Amount))
+            .Append(new OrderPaymentUpdate(null, PaymentMethod.Pix, 10m))
+            .ToList();
+
+        // Act
+        var exception = Record.Exception(() => order.ReconcilePayments(updates));
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>();
+    }
+
+    private static Order CreateOrder(params OrderPayment[] payments)
+    {
+        return new OrderBuilder().WithCustomPayments(payments).Build();
     }
 }

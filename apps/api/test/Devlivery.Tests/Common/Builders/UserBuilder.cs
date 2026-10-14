@@ -1,13 +1,12 @@
-﻿using Devlivery.Domain.Aggregates.Users;
+﻿using Bogus;
 
-using Bogus;
-
+using Devlivery.Domain.Aggregates.Users;
 
 namespace Devlivery.Tests.Common.Builders;
 
-public class UserBuilder
+public sealed class UserBuilder
 {
-    private readonly Faker _faker = new();
+    private readonly Faker _faker = new("pt_BR");
 
     private string _name;
     private string _email;
@@ -17,6 +16,7 @@ public class UserBuilder
     {
         _name = _faker.Name.FullName();
         _email = _faker.Internet.Email();
+        _establishmentId = Guid.NewGuid();
     }
 
     public UserBuilder WithName(string name)
@@ -39,8 +39,6 @@ public class UserBuilder
 
     public User Build()
     {
-        return _establishmentId == Guid.Empty
-            ? throw new InvalidOperationException("EstablishmentId must be set")
-            : new User(_name, _email, _establishmentId);
+        return new User(_name, _email, _establishmentId);
     }
 }

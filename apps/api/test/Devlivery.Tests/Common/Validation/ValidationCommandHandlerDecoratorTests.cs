@@ -27,7 +27,7 @@ public sealed class ValidationCommandHandlerDecoratorTests
     }
 
     [Fact]
-    public async Task HandleAsync_Should_Return_ValidationError_And_Skip_Inner_When_Invalid()
+    public async Task GivenInvalidCommand_WhenHandling_ThenReturnsValidationErrorWithoutCallingHandler()
     {
         // Arrange
         var inner = Substitute.For<ICommandHandler<TestCommand, Result>>();
@@ -44,7 +44,7 @@ public sealed class ValidationCommandHandlerDecoratorTests
     }
 
     [Fact]
-    public async Task HandleAsync_Should_Return_Typed_ValidationError_When_Invalid_And_Response_Has_Value()
+    public async Task GivenInvalidCommandWithTypedResult_WhenHandling_ThenReturnsTypedValidationError()
     {
         // Arrange
         var inner = Substitute.For<ICommandHandler<TestCommand, Result<Guid>>>();
@@ -62,7 +62,7 @@ public sealed class ValidationCommandHandlerDecoratorTests
     }
 
     [Fact]
-    public async Task HandleAsync_Should_Call_Inner_When_Valid()
+    public async Task GivenValidCommand_WhenHandling_ThenReturnsHandlerResult()
     {
         // Arrange
         var command = new TestCommand("Pizza", 2);
@@ -81,7 +81,7 @@ public sealed class ValidationCommandHandlerDecoratorTests
     }
 
     [Fact]
-    public async Task HandleAsync_Should_Call_Inner_When_No_Validators()
+    public async Task GivenNoValidators_WhenHandling_ThenCallsHandler()
     {
         // Arrange
         var command = new TestCommand("", 0);
