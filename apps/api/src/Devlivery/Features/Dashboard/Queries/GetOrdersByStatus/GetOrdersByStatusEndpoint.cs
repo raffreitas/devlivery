@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetOrdersByStatus;
 
@@ -17,11 +18,11 @@ public static class GetOrdersByStatusEndpoint
     private static async Task<IResult> Handle(
         DateTime? startDate,
         DateTime? endDate,
-        ISender sender,
+        IQueryHandler<GetOrdersByStatusQuery, Result<GetOrdersByStatusResponse>> handler,
         CancellationToken ct)
     {
         var query = new GetOrdersByStatusQuery(startDate, endDate);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
 
         return result.ToOk();
     }

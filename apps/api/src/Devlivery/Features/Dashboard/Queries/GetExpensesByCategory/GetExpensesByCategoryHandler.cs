@@ -2,12 +2,11 @@ using System.Data;
 
 using Dapper;
 
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Persistence.Abstractions;
 using Devlivery.Infrastructure.Tenancy;
 
 using FluentResults;
-
-using Mediator;
 
 namespace Devlivery.Features.Dashboard.Queries.GetExpensesByCategory;
 
@@ -16,7 +15,7 @@ public sealed class GetExpensesByCategoryHandler(
     ITenantAccessor tenantAccessor)
     : IQueryHandler<GetExpensesByCategoryQuery, Result<GetExpensesByCategoryResponse>>
 {
-    public async ValueTask<Result<GetExpensesByCategoryResponse>> Handle(
+    public async Task<Result<GetExpensesByCategoryResponse>> HandleAsync(
         GetExpensesByCategoryQuery query,
         CancellationToken cancellationToken)
     {

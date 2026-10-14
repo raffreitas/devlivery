@@ -1,10 +1,9 @@
 using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 
 using FluentResults;
-
-using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.DeleteOrder;
 
@@ -12,7 +11,7 @@ public sealed class DeleteOrderHandler(
     IOrderRepository orderRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<DeleteOrderCommand, Result>
 {
-    public async ValueTask<Result> Handle(
+    public async Task<Result> HandleAsync(
         DeleteOrderCommand command,
         CancellationToken cancellationToken)
     {

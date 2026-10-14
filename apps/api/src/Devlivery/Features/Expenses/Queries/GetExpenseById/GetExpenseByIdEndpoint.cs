@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Expenses.Queries.GetExpenseById;
 
@@ -14,10 +15,13 @@ public static class GetExpenseByIdEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<IResult> Handle(Guid expenseId, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        Guid expenseId,
+        IQueryHandler<GetExpenseByIdQuery, Result<GetExpenseByIdResponse>> handler,
+        CancellationToken ct)
     {
         var query = new GetExpenseByIdQuery(expenseId);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
         return result.ToOk();
     }
 }

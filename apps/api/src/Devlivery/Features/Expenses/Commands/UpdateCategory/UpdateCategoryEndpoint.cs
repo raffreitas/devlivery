@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Expenses.Commands.UpdateCategory;
 
@@ -15,7 +16,10 @@ public static class UpdateCategoryEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<IResult> Handle(Guid categoryId, UpdateCategoryRequest request, ISender sender,
+    private static async Task<IResult> Handle(
+        Guid categoryId,
+        UpdateCategoryRequest request,
+        ICommandHandler<UpdateCategoryCommand, Result> handler,
         CancellationToken ct)
     {
         var command = new UpdateCategoryCommand(
@@ -24,7 +28,7 @@ public static class UpdateCategoryEndpoint
             IsActive: request.IsActive
         );
 
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
 
         return result.ToNoContent();
     }

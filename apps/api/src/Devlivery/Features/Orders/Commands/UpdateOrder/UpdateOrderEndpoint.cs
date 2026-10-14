@@ -1,7 +1,8 @@
-﻿using Devlivery.Infrastructure.Http.Extensions;
+﻿using Devlivery.Common.Handlers;
+using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
@@ -26,7 +27,11 @@ public static class UpdateOrderEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<IResult> Handle(Guid id, UpdateOrderRequest request, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        Guid id,
+        UpdateOrderRequest request,
+        ICommandHandler<UpdateOrderCommand, Result> handler,
+        CancellationToken ct)
     {
         var command = new UpdateOrderCommand(
             id,
@@ -39,7 +44,7 @@ public static class UpdateOrderEndpoint
             request.DeliveryReference,
             request.Notes);
 
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
 
         return result.ToNoContent();
     }

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
+using Devlivery.Common.Handlers;
 using Devlivery.Features.Auth;
 using Devlivery.Features.CashRegister;
 using Devlivery.Features.Dashboard;
@@ -32,7 +33,7 @@ public static class Startup
 
         services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
 
-        services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
+        services.AddHandlers();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();

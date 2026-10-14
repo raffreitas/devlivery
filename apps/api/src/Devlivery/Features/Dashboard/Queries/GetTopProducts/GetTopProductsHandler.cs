@@ -1,10 +1,9 @@
 using Devlivery.Common.Extensions;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +12,7 @@ namespace Devlivery.Features.Dashboard.Queries.GetTopProducts;
 public sealed class GetTopProductsHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetTopProductsQuery, Result<GetTopProductsResponse>>
 {
-    public async ValueTask<Result<GetTopProductsResponse>> Handle(
+    public async Task<Result<GetTopProductsResponse>> HandleAsync(
         GetTopProductsQuery query,
         CancellationToken cancellationToken)
     {

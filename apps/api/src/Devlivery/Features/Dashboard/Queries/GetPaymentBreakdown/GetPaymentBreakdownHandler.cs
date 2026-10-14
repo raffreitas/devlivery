@@ -1,11 +1,10 @@
 using Devlivery.Common.Extensions;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Common.Enums;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +13,7 @@ namespace Devlivery.Features.Dashboard.Queries.GetPaymentBreakdown;
 public sealed class GetPaymentBreakdownHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetPaymentBreakdownQuery, Result<GetPaymentBreakdownResponse>>
 {
-    public async ValueTask<Result<GetPaymentBreakdownResponse>> Handle(
+    public async Task<Result<GetPaymentBreakdownResponse>> HandleAsync(
         GetPaymentBreakdownQuery query,
         CancellationToken cancellationToken)
     {

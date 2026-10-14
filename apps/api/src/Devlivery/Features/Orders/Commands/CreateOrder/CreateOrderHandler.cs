@@ -1,4 +1,5 @@
 ﻿using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Orders;
 using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Entities;
@@ -9,8 +10,6 @@ using Devlivery.Infrastructure.Tenancy;
 
 using FluentResults;
 
-using Mediator;
-
 namespace Devlivery.Features.Orders.Commands.CreateOrder;
 
 public sealed class CreateOrderHandler(
@@ -19,7 +18,7 @@ public sealed class CreateOrderHandler(
     IUnitOfWork unitOfWork,
     ITenantAccessor tenantAccessor) : ICommandHandler<CreateOrderCommand, Result<CreateOrderResponse>>
 {
-    public async ValueTask<Result<CreateOrderResponse>> Handle(
+    public async Task<Result<CreateOrderResponse>> HandleAsync(
         CreateOrderCommand command,
         CancellationToken cancellationToken)
     {

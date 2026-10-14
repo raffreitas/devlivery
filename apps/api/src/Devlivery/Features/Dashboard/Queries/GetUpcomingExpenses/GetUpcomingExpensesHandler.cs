@@ -2,6 +2,7 @@ using System.Data;
 
 using Dapper;
 
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Features.Expenses.Queries.GetAllExpenses;
 using Devlivery.Infrastructure.Persistence.Abstractions;
@@ -9,8 +10,6 @@ using Devlivery.Infrastructure.Tenancy;
 using Devlivery.Infrastructure.Time.Abstractions;
 
 using FluentResults;
-
-using Mediator;
 
 namespace Devlivery.Features.Dashboard.Queries.GetUpcomingExpenses;
 
@@ -20,7 +19,7 @@ public sealed class GetUpcomingExpensesHandler(
     IDateTimeProvider dateTimeProvider)
     : IQueryHandler<GetUpcomingExpensesQuery, Result<GetUpcomingExpensesResponse>>
 {
-    public async ValueTask<Result<GetUpcomingExpensesResponse>> Handle(
+    public async Task<Result<GetUpcomingExpensesResponse>> HandleAsync(
         GetUpcomingExpensesQuery query,
         CancellationToken cancellationToken)
     {

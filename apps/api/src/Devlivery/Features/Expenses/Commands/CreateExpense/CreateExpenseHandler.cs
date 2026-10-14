@@ -1,12 +1,11 @@
 using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Expenses;
 using Devlivery.Domain.Aggregates.Expenses.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
 
 using FluentResults;
-
-using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.CreateExpense;
 
@@ -16,7 +15,7 @@ public sealed class CreateExpenseHandler(
     IUnitOfWork unitOfWork,
     ITenantAccessor tenantAccessor) : ICommandHandler<CreateExpenseCommand, Result<CreateExpenseResponse>>
 {
-    public async ValueTask<Result<CreateExpenseResponse>> Handle(
+    public async Task<Result<CreateExpenseResponse>> HandleAsync(
         CreateExpenseCommand command,
         CancellationToken cancellationToken)
     {

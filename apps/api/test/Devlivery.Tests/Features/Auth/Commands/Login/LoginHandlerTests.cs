@@ -32,7 +32,7 @@ public sealed class LoginHandlerTests(AuthUnitTestFixture fixture) : IClassFixtu
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -67,7 +67,7 @@ public sealed class LoginHandlerTests(AuthUnitTestFixture fixture) : IClassFixtu
         var handler = new LoginHandler(logger, dbContext, identityService, tokenService);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -113,7 +113,7 @@ public sealed class LoginHandlerTests(AuthUnitTestFixture fixture) : IClassFixtu
         var handler = new LoginHandler(logger, dbContext, identityService, tokenService);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

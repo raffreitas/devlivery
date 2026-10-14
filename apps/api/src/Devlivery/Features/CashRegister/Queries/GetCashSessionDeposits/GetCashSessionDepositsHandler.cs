@@ -1,9 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +11,7 @@ namespace Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
 public sealed class GetCashSessionDepositsHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetCashSessionDepositsQuery, Result<GetCashSessionDepositsResponse[]>>
 {
-    public async ValueTask<Result<GetCashSessionDepositsResponse[]>> Handle(GetCashSessionDepositsQuery query,
+    public async Task<Result<GetCashSessionDepositsResponse[]>> HandleAsync(GetCashSessionDepositsQuery query,
         CancellationToken cancellationToken)
     {
         var deposits = await dbContext.CashSessionMovements

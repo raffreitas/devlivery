@@ -1,12 +1,8 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.DeleteOrder;
 
-public sealed record DeleteOrderCommand(Guid Id) : ICommand<Result>;
+public sealed record DeleteOrderCommand(Guid Id);
 
 public sealed class DeleteOrderCommandValidator : AbstractValidator<DeleteOrderCommand>
 {

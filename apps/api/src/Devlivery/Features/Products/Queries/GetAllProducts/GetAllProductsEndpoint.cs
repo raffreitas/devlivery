@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Products.Queries.GetAllProducts;
 
@@ -14,10 +15,12 @@ public static class GetAllProductsEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<IResult> Handle(ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        IQueryHandler<GetAllProductsQuery, Result<List<GetAllProductsResponse>>> handler,
+        CancellationToken ct)
     {
         var query = new GetAllProductsQuery();
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
         return result.ToOk();
     }
 }

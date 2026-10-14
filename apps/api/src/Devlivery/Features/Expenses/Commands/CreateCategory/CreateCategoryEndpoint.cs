@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Expenses.Commands.CreateCategory;
 
@@ -15,9 +16,12 @@ public static class CreateCategoryEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status422UnprocessableEntity);
     }
 
-    private static async Task<IResult> Handle(CreateCategoryCommand command, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        CreateCategoryCommand command,
+        ICommandHandler<CreateCategoryCommand, Result<CreateCategoryResponse>> handler,
+        CancellationToken ct)
     {
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
         return result.ToCreated(response => $"/api/expenses/categories/{response.CategoryId}");
     }
 }

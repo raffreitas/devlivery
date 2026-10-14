@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Expenses.Commands.DeleteCategory;
 
@@ -17,11 +18,11 @@ public static class DeleteCategoryEndpoint
 
     private static async Task<IResult> Handle(
         Guid categoryId,
-        ISender sender,
+        ICommandHandler<DeleteCategoryCommand, Result> handler,
         CancellationToken ct)
     {
         var command = new DeleteCategoryCommand(categoryId);
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
         return result.ToNoContent();
     }
 }

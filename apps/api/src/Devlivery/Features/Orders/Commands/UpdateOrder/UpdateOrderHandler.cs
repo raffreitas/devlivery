@@ -1,4 +1,5 @@
 ﻿using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Entities;
 using Devlivery.Domain.Aggregates.Orders.Enums;
@@ -8,8 +9,6 @@ using Devlivery.Infrastructure.Persistence;
 
 using FluentResults;
 
-using Mediator;
-
 namespace Devlivery.Features.Orders.Commands.UpdateOrder;
 
 public sealed class UpdateOrderHandler(
@@ -17,7 +16,7 @@ public sealed class UpdateOrderHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<UpdateOrderCommand, Result>
 {
-    public async ValueTask<Result> Handle(
+    public async Task<Result> HandleAsync(
         UpdateOrderCommand command,
         CancellationToken cancellationToken)
     {

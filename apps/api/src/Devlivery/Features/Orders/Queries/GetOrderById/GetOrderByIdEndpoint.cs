@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Orders.Queries.GetOrderById;
 
@@ -14,10 +15,13 @@ public static class GetOrderByIdEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<IResult> Handle(Guid id, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        Guid id,
+        IQueryHandler<GetOrderByIdQuery, Result<GetOrderByIdResponse>> handler,
+        CancellationToken ct)
     {
         var query = new GetOrderByIdQuery(id);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
         return result.ToOk();
     }
 }

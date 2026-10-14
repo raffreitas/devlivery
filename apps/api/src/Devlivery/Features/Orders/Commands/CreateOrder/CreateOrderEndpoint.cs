@@ -1,7 +1,8 @@
-﻿using Devlivery.Infrastructure.Http.Extensions;
+﻿using Devlivery.Common.Handlers;
+using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Orders.Commands.CreateOrder;
 
@@ -16,9 +17,12 @@ public static class CreateOrderEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<IResult> Handle(CreateOrderCommand command, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        CreateOrderCommand command,
+        ICommandHandler<CreateOrderCommand, Result<CreateOrderResponse>> handler,
+        CancellationToken ct)
     {
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
         return result.ToCreated();
     }
 }

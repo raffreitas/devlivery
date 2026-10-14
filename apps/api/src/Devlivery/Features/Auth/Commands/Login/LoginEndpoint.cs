@@ -1,7 +1,8 @@
-﻿using Devlivery.Infrastructure.Http.Extensions;
+﻿using Devlivery.Common.Handlers;
+using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Auth.Commands.Login;
 
@@ -18,9 +19,12 @@ public static class LoginEndpoint
             .AllowAnonymous();
     }
 
-    private static async Task<IResult> Handle(LoginCommand command, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        LoginCommand command,
+        ICommandHandler<LoginCommand, Result<LoginResponse>> handler,
+        CancellationToken ct)
     {
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
         return result.ToOk();
     }
 }

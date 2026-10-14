@@ -1,8 +1,4 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.CashRegister.Commands.CloseCashSession;
 
@@ -10,7 +6,7 @@ public sealed record CloseCashSessionCommand(
     Guid Id,
     decimal ClosingAmount,
     string? Notes
-) : ICommand<Result>;
+);
 
 public sealed class CloseCashSessionValidator : AbstractValidator<CloseCashSessionCommand>
 {

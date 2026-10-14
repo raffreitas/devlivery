@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -22,11 +23,11 @@ public static class GetAllExpensesEndpoint
         [FromQuery] ExpenseDisplayStatus? status,
         [FromQuery(Name = "start")] DateOnly? startDate,
         [FromQuery(Name = "end")] DateOnly? endDate,
-        ISender sender,
+        IQueryHandler<GetAllExpensesQuery, Result<List<GetAllExpensesResponse>>> handler,
         CancellationToken ct)
     {
         var query = new GetAllExpensesQuery(categoryId, status, startDate, endDate);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
         return result.ToOk();
     }
 }

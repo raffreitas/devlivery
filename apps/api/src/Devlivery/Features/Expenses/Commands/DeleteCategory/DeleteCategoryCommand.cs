@@ -1,12 +1,8 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.DeleteCategory;
 
-public sealed record DeleteCategoryCommand(Guid CategoryId) : ICommand<Result>;
+public sealed record DeleteCategoryCommand(Guid CategoryId);
 
 public sealed class DeleteCategoryCommandValidator : AbstractValidator<DeleteCategoryCommand>
 {

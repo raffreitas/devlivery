@@ -1,14 +1,10 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.MarkExpenseAsPaid;
 
 public sealed record MarkExpenseAsPaidCommand(
     Guid ExpenseId,
-    DateOnly PaymentDate) : ICommand<Result>;
+    DateOnly PaymentDate);
 
 public sealed class MarkExpenseAsPaidCommandValidator : AbstractValidator<MarkExpenseAsPaidCommand>
 {

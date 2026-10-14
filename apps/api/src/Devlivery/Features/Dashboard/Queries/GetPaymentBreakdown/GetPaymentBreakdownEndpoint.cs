@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetPaymentBreakdown;
 
@@ -14,11 +15,14 @@ public static class GetPaymentBreakdownEndpoint
             .Produces<ApiResource<GetPaymentBreakdownResponse>>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<IResult> Handle(DateTime? startDate, DateTime? endDate, ISender sender,
+    private static async Task<IResult> Handle(
+        DateTime? startDate,
+        DateTime? endDate,
+        IQueryHandler<GetPaymentBreakdownQuery, Result<GetPaymentBreakdownResponse>> handler,
         CancellationToken ct)
     {
         var query = new GetPaymentBreakdownQuery(startDate, endDate);
-        var result = await sender.Send(query, ct);
+        var result = await handler.HandleAsync(query, ct);
 
         return result.ToOk();
     }

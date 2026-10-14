@@ -34,7 +34,7 @@ public sealed class UpdateProductHandlerTests(ProductsUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -71,7 +71,7 @@ public sealed class UpdateProductHandlerTests(ProductsUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -105,7 +105,7 @@ public sealed class UpdateProductHandlerTests(ProductsUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -136,7 +136,7 @@ public sealed class UpdateProductHandlerTests(ProductsUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -167,7 +167,7 @@ public sealed class UpdateProductHandlerTests(ProductsUnitTestFixture fixture)
         );
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         productRepository.Received(1).Update(product);
@@ -197,7 +197,7 @@ public sealed class UpdateProductHandlerTests(ProductsUnitTestFixture fixture)
         );
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -227,7 +227,7 @@ public sealed class UpdateProductHandlerTests(ProductsUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

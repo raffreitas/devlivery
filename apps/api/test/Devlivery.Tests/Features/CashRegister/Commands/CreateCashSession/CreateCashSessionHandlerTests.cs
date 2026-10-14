@@ -28,7 +28,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         var command = new CreateCashSessionCommand(OpeningAmount: 100.00m, Notes: null);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -54,7 +54,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         var command = new CreateCashSessionCommand(OpeningAmount: 50.00m, Notes: "Abertura");
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         await cashSessionRepository.Received(1)
@@ -77,7 +77,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         var command = new CreateCashSessionCommand(OpeningAmount: 200.00m, Notes: null);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -100,7 +100,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         var command = new CreateCashSessionCommand(OpeningAmount: 150.00m, Notes: null);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -124,7 +124,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         var command = new CreateCashSessionCommand(OpeningAmount: 100.00m, Notes: null);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         await cashSessionRepository.DidNotReceive()
@@ -152,7 +152,7 @@ public sealed class CreateCashSessionHandlerTests(CashRegisterUnitTestFixture fi
         var command = new CreateCashSessionCommand(OpeningAmount: 100.00m, Notes: null);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         capturedSession.ShouldNotBeNull();

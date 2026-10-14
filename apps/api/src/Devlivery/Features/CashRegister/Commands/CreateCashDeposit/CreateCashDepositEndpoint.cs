@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
@@ -20,14 +21,17 @@ public static class CreateCashDepositEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status409Conflict);
     }
 
-    private static async Task<IResult> Handle(Guid cashSessionId, CreateCashDepositRequest request, ISender sender,
+    private static async Task<IResult> Handle(
+        Guid cashSessionId,
+        CreateCashDepositRequest request,
+        ICommandHandler<CreateCashDepositCommand, Result<CreateCashDepositResponse>> handler,
         CancellationToken ct)
     {
         var command = new CreateCashDepositCommand(
             cashSessionId,
             request.Amount,
             request.Notes);
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
         return result.ToCreated(response => $"/api/cash-register/sessions/{cashSessionId}/deposits/{response.Id}");
     }
 }

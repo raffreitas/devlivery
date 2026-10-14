@@ -1,10 +1,9 @@
 ﻿using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Identity.Abstractions;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +15,7 @@ public sealed class LoginHandler(
     IIdentityService identityService,
     ITokenService tokenService) : ICommandHandler<LoginCommand, Result<LoginResponse>>
 {
-    public async ValueTask<Result<LoginResponse>> Handle(LoginCommand command, CancellationToken cancellationToken)
+    public async Task<Result<LoginResponse>> HandleAsync(LoginCommand command, CancellationToken cancellationToken)
     {
         var user = await dbContext.Users
             .IgnoreQueryFilters()

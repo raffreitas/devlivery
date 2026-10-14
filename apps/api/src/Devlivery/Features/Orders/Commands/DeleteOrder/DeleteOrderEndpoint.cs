@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Orders.Commands.DeleteOrder;
 
@@ -15,11 +16,14 @@ public static class DeleteOrderEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<IResult> Handle(Guid id, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        Guid id,
+        ICommandHandler<DeleteOrderCommand, Result> handler,
+        CancellationToken ct)
     {
         var command = new DeleteOrderCommand(id);
 
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
 
         return result.ToNoContent();
     }

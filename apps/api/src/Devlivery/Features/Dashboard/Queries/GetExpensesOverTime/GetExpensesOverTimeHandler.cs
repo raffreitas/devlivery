@@ -2,13 +2,12 @@ using System.Data;
 
 using Dapper;
 
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Expenses.Enums;
 using Devlivery.Infrastructure.Persistence.Abstractions;
 using Devlivery.Infrastructure.Tenancy;
 
 using FluentResults;
-
-using Mediator;
 
 namespace Devlivery.Features.Dashboard.Queries.GetExpensesOverTime;
 
@@ -17,7 +16,7 @@ public sealed class GetExpensesOverTimeHandler(
     ITenantAccessor tenantAccessor)
     : IQueryHandler<GetExpensesOverTimeQuery, Result<GetExpensesOverTimeResponse>>
 {
-    public async ValueTask<Result<GetExpensesOverTimeResponse>> Handle(
+    public async Task<Result<GetExpensesOverTimeResponse>> HandleAsync(
         GetExpensesOverTimeQuery query,
         CancellationToken cancellationToken)
     {

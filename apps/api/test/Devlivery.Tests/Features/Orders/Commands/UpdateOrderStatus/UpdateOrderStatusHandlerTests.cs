@@ -29,7 +29,7 @@ public sealed class UpdateOrderStatusHandlerTests(OrdersUnitTestFixture fixture)
         var command = new UpdateOrderStatusCommand(Guid.NewGuid(), OrderStatus.Preparing);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -53,7 +53,7 @@ public sealed class UpdateOrderStatusHandlerTests(OrdersUnitTestFixture fixture)
         var command = new UpdateOrderStatusCommand(order.Id, OrderStatus.Preparing);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -77,7 +77,7 @@ public sealed class UpdateOrderStatusHandlerTests(OrdersUnitTestFixture fixture)
         var command = new UpdateOrderStatusCommand(order.Id, OrderStatus.Ready);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         // repository update is not required by handler implementation; persistence occurs via UoW
@@ -100,7 +100,7 @@ public sealed class UpdateOrderStatusHandlerTests(OrdersUnitTestFixture fixture)
         var command = new UpdateOrderStatusCommand(order.Id, OrderStatus.Delivered);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -127,7 +127,7 @@ public sealed class UpdateOrderStatusHandlerTests(OrdersUnitTestFixture fixture)
         var command = new UpdateOrderStatusCommand(order.Id, newStatus);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

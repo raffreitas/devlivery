@@ -1,10 +1,9 @@
 using Devlivery.Common.Extensions;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Infrastructure.Persistence.Context;
 
 using FluentResults;
-
-using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +14,7 @@ public sealed class GetSalesOverTimeHandler(ApplicationDbContext dbContext)
 {
     private static readonly TimeZoneInfo BrazilTimeZone = TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
 
-    public async ValueTask<Result<GetSalesOverTimeResponse>> Handle(
+    public async Task<Result<GetSalesOverTimeResponse>> HandleAsync(
         GetSalesOverTimeQuery query,
         CancellationToken cancellationToken)
     {

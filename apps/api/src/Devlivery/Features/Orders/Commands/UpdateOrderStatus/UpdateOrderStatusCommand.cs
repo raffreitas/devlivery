@@ -1,16 +1,10 @@
 using Devlivery.Domain.Aggregates.Orders.Enums;
 
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
-public sealed record UpdateOrderStatusCommand(Guid Id, OrderStatus Status) : ICommand<Result>
-{
-};
+public sealed record UpdateOrderStatusCommand(Guid Id, OrderStatus Status);
 
 public sealed class UpdateOrderStatusCommandValidator : AbstractValidator<UpdateOrderStatusCommand>
 {

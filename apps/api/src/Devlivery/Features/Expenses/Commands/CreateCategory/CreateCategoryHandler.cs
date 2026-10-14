@@ -1,12 +1,11 @@
 using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Expenses;
 using Devlivery.Domain.Aggregates.Expenses.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Infrastructure.Tenancy;
 
 using FluentResults;
-
-using Mediator;
 
 namespace Devlivery.Features.Expenses.Commands.CreateCategory;
 
@@ -16,7 +15,7 @@ public sealed class CreateCategoryHandler(
     ITenantAccessor tenantAccessor
 ) : ICommandHandler<CreateCategoryCommand, Result<CreateCategoryResponse>>
 {
-    public async ValueTask<Result<CreateCategoryResponse>> Handle(
+    public async Task<Result<CreateCategoryResponse>> HandleAsync(
         CreateCategoryCommand command,
         CancellationToken cancellationToken)
     {

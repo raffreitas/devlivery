@@ -28,7 +28,7 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
             .ReturnsNull();
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -58,7 +58,7 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         var command = new UpdateCategoryCommand(existingCategory.Id, "new-name", null);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -88,7 +88,7 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         var command = new UpdateCategoryCommand(existingCategory.Id, "same-name", false);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

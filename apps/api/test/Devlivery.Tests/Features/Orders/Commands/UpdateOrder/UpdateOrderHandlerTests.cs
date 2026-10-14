@@ -29,7 +29,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var command = new UpdateOrderCommand(Guid.NewGuid(), Array.Empty<OrderItemDto>(), "Cliente Teste", null, "Rua Teste, 123", Array.Empty<OrderPaymentDto>());
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is NotFoundError);
@@ -49,7 +49,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var command = new UpdateOrderCommand(order.Id, Array.Empty<OrderItemDto>(), "Cliente Teste", null, "Rua Teste, 123", Array.Empty<OrderPaymentDto>());
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is ValidationError);
@@ -70,7 +70,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(Guid.NewGuid(), 1, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, PaymentMethod.Cash, 10m) });
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is NotFoundError);
@@ -93,7 +93,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
 
         var command = new UpdateOrderCommand(order.Id, new[] { new OrderItemDto(product.Id, 2, null) }, "Cliente Teste", null, "Rua Teste, 123", new[] { new OrderPaymentDto(null, PaymentMethod.Cash, 20m) }, 0m);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
         await repository.Received(1).UpdateAsync(order, Arg.Any<CancellationToken>());
@@ -131,7 +131,7 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

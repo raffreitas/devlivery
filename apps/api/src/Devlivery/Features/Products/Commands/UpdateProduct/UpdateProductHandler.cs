@@ -1,10 +1,9 @@
 using Devlivery.Common.Errors;
+using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Products.Abstractions;
 using Devlivery.Infrastructure.Persistence;
 
 using FluentResults;
-
-using Mediator;
 
 namespace Devlivery.Features.Products.Commands.UpdateProduct;
 
@@ -12,7 +11,7 @@ public sealed class UpdateProductHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<UpdateProductCommand, Result>
 {
-    public async ValueTask<Result> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(UpdateProductCommand command, CancellationToken cancellationToken)
     {
         var product = await productRepository.GetByIdAsync(command.Id, cancellationToken);
 

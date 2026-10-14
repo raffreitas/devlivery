@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Expenses.Commands.CreateExpense;
 
@@ -14,9 +15,12 @@ public static class CreateExpenseEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
-    private static async Task<IResult> Handle(CreateExpenseCommand command, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        CreateExpenseCommand command,
+        ICommandHandler<CreateExpenseCommand, Result<CreateExpenseResponse>> handler,
+        CancellationToken ct)
     {
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
 
         return result.ToCreated(response => $"/api/expenses/{response.ExpenseId}");
     }

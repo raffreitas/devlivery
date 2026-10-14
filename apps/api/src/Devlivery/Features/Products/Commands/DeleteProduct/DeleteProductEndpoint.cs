@@ -1,7 +1,8 @@
+using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
 
-using Mediator;
+using FluentResults;
 
 namespace Devlivery.Features.Products.Commands.DeleteProduct;
 
@@ -16,10 +17,13 @@ public static class DeleteProductEndpoint
             .Produces<ApiProblemDetails>(StatusCodes.Status422UnprocessableEntity);
     }
 
-    private static async Task<IResult> Handle(Guid id, ISender sender, CancellationToken ct)
+    private static async Task<IResult> Handle(
+        Guid id,
+        ICommandHandler<DeleteProductCommand, Result> handler,
+        CancellationToken ct)
     {
         var command = new DeleteProductCommand(id);
-        var result = await sender.Send(command, ct);
+        var result = await handler.HandleAsync(command, ct);
         return result.ToNoContent();
     }
 }

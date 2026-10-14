@@ -28,7 +28,7 @@ public sealed class DeleteCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         var command = new DeleteCategoryCommand(Guid.NewGuid());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -56,7 +56,7 @@ public sealed class DeleteCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         var command = new DeleteCategoryCommand(category.Id);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -89,7 +89,7 @@ public sealed class DeleteCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         var command = new DeleteCategoryCommand(category.Id);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -123,7 +123,7 @@ public sealed class DeleteCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         var command = new DeleteCategoryCommand(subcategory.Id);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -153,7 +153,7 @@ public sealed class DeleteCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         var command = new DeleteCategoryCommand(category.Id);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

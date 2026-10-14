@@ -1,8 +1,4 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashDeposit;
 
@@ -10,7 +6,7 @@ public sealed record CreateCashDepositCommand(
     Guid CashSessionId,
     decimal Amount,
     string? Notes
-) : ICommand<Result<CreateCashDepositResponse>>;
+);
 
 public sealed class CreateCashDepositValidator : AbstractValidator<CreateCashDepositCommand>
 {

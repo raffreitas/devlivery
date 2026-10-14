@@ -1,8 +1,4 @@
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Devlivery.Features.Products.Commands.UpdateProduct;
 
@@ -12,7 +8,7 @@ public sealed record UpdateProductCommand(
     string Description,
     decimal Price,
     string Category,
-    bool Available) : ICommand<Result>;
+    bool Available);
 
 public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProductCommand>
 {

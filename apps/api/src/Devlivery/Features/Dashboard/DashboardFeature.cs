@@ -15,9 +15,6 @@ public static class DashboardFeature
 {
     public static IServiceCollection AddDashboardFeature(this IServiceCollection services)
     {
-        // Handlers are automatically discovered by Mediator
-        // No manual registration needed when using IQueryHandler/ICommandHandler
-
         return services;
     }
 
