@@ -163,7 +163,6 @@ public sealed class UpdateExpenseHandlerTests(ExpensesUnitTestFixture fixture)
         expense.Status.ShouldBe(isPaid ? ExpenseStatus.Paid : ExpenseStatus.Pending);
         expense.PaymentDate.ShouldBe(correctedPaymentDate);
 
-        await expenseRepository.Received(1).UpdateAsync(expense, Arg.Any<CancellationToken>());
         await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

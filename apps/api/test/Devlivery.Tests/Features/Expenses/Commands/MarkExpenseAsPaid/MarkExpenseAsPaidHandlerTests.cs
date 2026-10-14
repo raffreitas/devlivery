@@ -66,6 +66,5 @@ public sealed class MarkExpenseAsPaidHandlerTests(ExpensesUnitTestFixture fixtur
         expense.Status.ShouldBe(ExpenseStatus.Paid);
         expense.PaymentDate.ShouldBe(paymentDate);
 
-        await expenseRepository.Received(1).UpdateAsync(expense, Arg.Any<CancellationToken>());
     }
 }

@@ -1,34 +1,18 @@
 namespace Devlivery.Domain.Aggregates.Products.Abstractions;
 
 /// <summary>
-/// Repository interface for Product aggregate.
-/// Provides abstraction for product persistence operations.
+/// Products returned by <see cref="GetByIdAsync"/> are tracked: changes are persisted by <c>IUnitOfWork.SaveChangesAsync</c>.
 /// </summary>
 public interface IProductRepository
 {
-    /// <summary>
-    /// Gets a product by ID.
-    /// </summary>
     Task<Product?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>
-    /// Gets multiple products by their IDs.
-    /// Used when creating orders to validate and fetch products.
+    /// Read-only lookup (not tracked), used to validate and price order items.
     /// </summary>
     Task<List<Product>> GetByIdsAsync(List<Guid> ids, CancellationToken ct = default);
 
-    /// <summary>
-    /// Adds a new product to the database.
-    /// </summary>
     Task AddAsync(Product product, CancellationToken ct = default);
 
-    /// <summary>
-    /// Updates an existing product.
-    /// </summary>
-    void Update(Product product);
-
-    /// <summary>
-    /// Removes a product from the database.
-    /// </summary>
-    void Remove(Product product);
+    Task RemoveAsync(Product product, CancellationToken ct = default);
 }

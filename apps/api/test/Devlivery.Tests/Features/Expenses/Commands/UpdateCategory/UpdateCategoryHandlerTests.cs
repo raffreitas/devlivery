@@ -33,7 +33,6 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is NotFoundError);
-        await categoryRepository.DidNotReceive().UpdateAsync(Arg.Any<Category>(), Arg.Any<CancellationToken>());
         await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
@@ -50,7 +49,7 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
             .Returns(existingCategory);
 
         // Simulate that a different category with the new name already exists
-        categoryRepository.ExistsWithName("new-name", existingCategory.ParentCategoryId, Arg.Any<CancellationToken>())
+        categoryRepository.ExistsWithNameAsync("new-name", existingCategory.ParentCategoryId, Arg.Any<CancellationToken>())
             .Returns(true);
 
         var handler = new UpdateCategoryHandler(categoryRepository, unitOfWork);
@@ -63,7 +62,6 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is ValidationError);
-        await categoryRepository.DidNotReceive().UpdateAsync(Arg.Any<Category>(), Arg.Any<CancellationToken>());
         await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
@@ -80,7 +78,7 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
             .Returns(existingCategory);
 
         // If name is same as current, ExistsWithName should not cause a conflict (we'll return false)
-        categoryRepository.ExistsWithName(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+        categoryRepository.ExistsWithNameAsync(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         var handler = new UpdateCategoryHandler(categoryRepository, unitOfWork);
@@ -92,11 +90,9 @@ public sealed class UpdateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        existingCategory.Name.ShouldBe("same-name");
+        existingCategory.IsActive.ShouldBeFalse();
 
-        await categoryRepository.Received(1)
-            .UpdateAsync(
-                Arg.Is<Category>(c => c.Id == existingCategory.Id && c.Name == "same-name" && !c.IsActive),
-                Arg.Any<CancellationToken>());
         await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

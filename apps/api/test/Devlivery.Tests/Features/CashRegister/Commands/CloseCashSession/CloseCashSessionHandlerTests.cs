@@ -46,7 +46,7 @@ public sealed class CloseCashSessionHandlerTests : IClassFixture<CashRegisterUni
     }
 
     [Fact]
-    public async Task Handle_Should_Call_UpdateAsync_And_SaveChanges()
+    public async Task Handle_Should_Close_Session_And_SaveChanges()
     {
         // Arrange
         var cashSession = _fixture.CreateCashSession();
@@ -59,7 +59,8 @@ public sealed class CloseCashSessionHandlerTests : IClassFixture<CashRegisterUni
         await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        await _cashSessionRepository.Received(1).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
+        cashSession.Status.ShouldBe(CashSessionStatus.Closed);
+        cashSession.ClosingAmount.ShouldBe(80m);
         await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 

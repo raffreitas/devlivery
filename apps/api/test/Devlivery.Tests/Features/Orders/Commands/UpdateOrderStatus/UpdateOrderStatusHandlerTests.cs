@@ -61,29 +61,6 @@ public sealed class UpdateOrderStatusHandlerTests(OrdersUnitTestFixture fixture)
     }
 
     [Fact]
-    public async Task Handle_Should_Call_Update_On_Repository()
-    {
-        // Arrange
-        var order = fixture.CreateOrder();
-
-        var orderRepository = fixture.CreateOrderRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
-            .Returns(order);
-
-        var handler = new UpdateOrderStatusHandler(orderRepository, unitOfWork);
-
-        var command = new UpdateOrderStatusCommand(order.Id, OrderStatus.Ready);
-
-        // Act
-        await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        // repository update is not required by handler implementation; persistence occurs via UoW
-    }
-
-    [Fact]
     public async Task Handle_Should_Call_SaveChangesAsync_On_UnitOfWork()
     {
         // Arrange

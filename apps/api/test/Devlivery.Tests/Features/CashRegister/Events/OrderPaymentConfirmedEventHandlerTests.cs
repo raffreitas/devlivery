@@ -61,7 +61,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         cashSession.TotalRevenue.ShouldBe(50m);
         cashSession.ExpectedCashAmount.ShouldBe(150m); // 100 + 50
 
-        await repository.Received(1).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -99,7 +98,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         // Assert - only one payment recorded
         cashSession.Movements.Count.ShouldBe(1);
         cashSession.TotalRevenue.ShouldBe(75m);
-        await repository.Received(2).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -171,7 +169,6 @@ public sealed class OrderPaymentConfirmedEventHandlerTests(CashRegisterUnitTestF
         await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert - no update calls
-        await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

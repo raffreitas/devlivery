@@ -30,7 +30,6 @@ public sealed class UpdateProductHandler(
         else
             product.SetAsUnavailable();
 
-        productRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

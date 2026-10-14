@@ -42,7 +42,6 @@ public sealed class DeleteCategoryHandler(
             }
         }
 
-        await categoryRepository.UpdateAsync(category, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

@@ -144,36 +144,6 @@ public sealed class UpdateProductHandlerTests(ProductsUnitTestFixture fixture)
     }
 
     [Fact]
-    public async Task Handle_Should_Call_Update_On_Repository()
-    {
-        // Arrange
-        var product = fixture.CreateProduct();
-
-        var productRepository = fixture.CreateProductRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        productRepository.GetByIdAsync(product.Id, Arg.Any<CancellationToken>())
-            .Returns(product);
-
-        var handler = new UpdateProductHandler(productRepository, unitOfWork);
-
-        var command = new UpdateProductCommand(
-            Id: product.Id,
-            Name: "Produto Atualizado",
-            Description: "Descrição Atualizada",
-            Price: 199.99m,
-            Category: "Nova Categoria",
-            Available: true
-        );
-
-        // Act
-        await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        productRepository.Received(1).Update(product);
-    }
-
-    [Fact]
     public async Task Handle_Should_Call_SaveChangesAsync_On_UnitOfWork()
     {
         // Arrange

@@ -26,7 +26,7 @@ public sealed class UpdateCategoryHandler(
         if (command.Name != null && command.Name != category.Name)
         {
             var existingCategory = await categoryRepository
-                .ExistsWithName(command.Name, category.ParentCategoryId, cancellationToken);
+                .ExistsWithNameAsync(command.Name, category.ParentCategoryId, cancellationToken);
 
             if (existingCategory)
             {
@@ -40,7 +40,6 @@ public sealed class UpdateCategoryHandler(
             isActive: command.IsActive
         );
 
-        await categoryRepository.UpdateAsync(category, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

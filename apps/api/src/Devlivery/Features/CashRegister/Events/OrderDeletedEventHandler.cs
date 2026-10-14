@@ -60,8 +60,6 @@ public sealed class OrderDeletedEventHandler(
                 relatedOrderId: domainEvent.OrderId);
         }
 
-        await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
-
         logger.LogInformation("Reversal entries recorded for order {OrderId} in session {SessionId}",
             domainEvent.OrderId, activeSession.Id);
     }

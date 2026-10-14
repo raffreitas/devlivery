@@ -65,7 +65,6 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
 
         cashSession.TotalRevenue.ShouldBe(0m);
 
-        await repository.Received(1).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -107,7 +106,6 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
         var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
         reversals.Count.ShouldBe(0);
 
-        await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -213,7 +211,6 @@ public sealed class OrderStatusChangedEventHandlerTests(CashRegisterUnitTestFixt
         await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert
-        await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

@@ -62,29 +62,6 @@ public sealed class CreateCashDepositHandlerTests(CashRegisterUnitTestFixture fi
     }
 
     [Fact]
-    public async Task Handle_Should_Call_UpdateAsync_On_Repository()
-    {
-        // Arrange
-        var cashSessionRepository = fixture.CreateCashSessionRepositoryMock();
-        var unitOfWork = fixture.CreateUnitOfWorkMock();
-
-        var cashSession = fixture.CreateCashSession();
-        cashSessionRepository.GetByIdAsync(cashSession.Id, Arg.Any<CancellationToken>())
-            .Returns(cashSession);
-
-        var handler = new CreateCashDepositHandler(cashSessionRepository, fixture.CreateCurrentUserAccessorMock(), unitOfWork);
-
-        var command = new CreateCashDepositCommand(CashSessionId: cashSession.Id, Amount: 75.00m, Notes: "Depósito");
-
-        // Act
-        await handler.HandleAsync(command, CancellationToken.None);
-
-        // Assert
-        await cashSessionRepository.Received(1)
-            .UpdateAsync(cashSession, Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task Handle_Should_Call_SaveChangesAsync_On_UnitOfWork()
     {
         // Arrange

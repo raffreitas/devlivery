@@ -112,7 +112,7 @@ public sealed class DeleteProductHandlerTests(ProductsUnitTestFixture fixture)
         await handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        productRepository.Received(1).Remove(product);
+        await productRepository.Received(1).RemoveAsync(product, Arg.Any<CancellationToken>());
     }
 
     [Fact]

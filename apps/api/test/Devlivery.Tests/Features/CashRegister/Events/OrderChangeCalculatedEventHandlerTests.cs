@@ -62,7 +62,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         changes[0].Amount.ShouldBe(5m);
         changes[0].PaymentMethod.ShouldBe(PaymentMethod.Cash);
 
-        await repository.Received(1).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -82,7 +81,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert - nothing recorded
-        await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -105,7 +103,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert
-        await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -143,7 +140,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         // Assert - no change recorded
         var changes = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Change).ToList();
         changes.Count.ShouldBe(0);
-        await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -174,7 +170,6 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert - no update when no active session
-        await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -215,6 +210,5 @@ public sealed class OrderChangeCalculatedEventHandlerTests(CashRegisterUnitTestF
         // Assert - still only one change
         var changes = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Change).ToList();
         changes.Count.ShouldBe(1);
-        await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
     }
 }
