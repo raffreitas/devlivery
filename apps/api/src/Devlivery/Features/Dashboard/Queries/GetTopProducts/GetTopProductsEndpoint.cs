@@ -18,8 +18,8 @@ public sealed class GetTopProductsEndpoint : IEndpoint
     }
 
     private static async Task<IResult> Handle(
-        DateTime? startDate,
-        DateTime? endDate,
+        DateOnly? startDate,
+        DateOnly? endDate,
         IQueryHandler<GetTopProductsQuery, Result<GetTopProductsResponse>> handler,
         CancellationToken ct)
     {

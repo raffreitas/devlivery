@@ -18,8 +18,8 @@ public sealed class GetPaymentBreakdownEndpoint : IEndpoint
     }
 
     private static async Task<IResult> Handle(
-        DateTime? startDate,
-        DateTime? endDate,
+        DateOnly? startDate,
+        DateOnly? endDate,
         IQueryHandler<GetPaymentBreakdownQuery, Result<GetPaymentBreakdownResponse>> handler,
         CancellationToken ct)
     {

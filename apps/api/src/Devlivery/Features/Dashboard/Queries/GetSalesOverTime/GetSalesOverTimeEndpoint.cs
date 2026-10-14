@@ -18,8 +18,8 @@ public sealed class GetSalesOverTimeEndpoint : IEndpoint
     }
 
     private static async Task<IResult> Handle(
-        DateTime? startDate,
-        DateTime? endDate,
+        DateOnly? startDate,
+        DateOnly? endDate,
         IQueryHandler<GetSalesOverTimeQuery, Result<GetSalesOverTimeResponse>> handler,
         CancellationToken ct)
     {

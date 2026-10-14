@@ -27,6 +27,17 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
                         Detail = domainException.Message
                     }, cancellationToken: cancellationToken);
                 return true;
+            case BadHttpRequestException badRequest:
+                // Malformed input that could not be bound (e.g. an invalid date in the query string or invalid JSON).
+                httpContext.Response.StatusCode = badRequest.StatusCode;
+                await httpContext.Response.WriteAsJsonAsync(
+                    new ApiProblemDetails
+                    {
+                        Title = "Requisição inválida",
+                        Status = badRequest.StatusCode,
+                        Detail = "Os dados enviados na requisição estão em um formato inválido."
+                    }, cancellationToken: cancellationToken);
+                return true;
             case UnauthorizedAccessException:
             case UnauthorizedException:
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;

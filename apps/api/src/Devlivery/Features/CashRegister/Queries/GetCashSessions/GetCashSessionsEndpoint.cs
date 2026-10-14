@@ -19,8 +19,8 @@ public sealed class GetCashSessionsEndpoint : IEndpoint
     }
 
     private static async Task<IResult> Handle(
-        DateTime? start,
-        DateTime? end,
+        DateOnly? start,
+        DateOnly? end,
         CashSessionStatus? status,
         IQueryHandler<GetCashSessionsQuery, Result<GetCashSessionsResponse[]>> handler,
         CancellationToken ct)

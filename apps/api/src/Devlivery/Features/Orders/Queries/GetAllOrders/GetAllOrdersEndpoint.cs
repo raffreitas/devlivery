@@ -19,8 +19,8 @@ public sealed class GetAllOrdersEndpoint : IEndpoint
     }
 
     private static async Task<IResult> Handle(
-        DateTime? start,
-        DateTime? end,
+        DateOnly? start,
+        DateOnly? end,
         PaymentMethod? paymentMethod,
         IQueryHandler<GetAllOrdersQuery, Result<List<GetAllOrdersResponse>>> handler,
         CancellationToken ct)

@@ -91,8 +91,8 @@ export const dashboardService = {
   async getStats(startDate?: Date, endDate?: Date): Promise<DashboardStats> {
     let url = "/api/dashboard/stats";
     const params = new URLSearchParams();
-    if (startDate) params.set("startDate", startDate.toISOString());
-    if (endDate) params.set("endDate", endDate.toISOString());
+    if (startDate) params.set("startDate", formatDate(startDate));
+    if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
     const res = await api.get<ApiResponse<DashboardStatsDto>>(url);
@@ -105,8 +105,8 @@ export const dashboardService = {
   ): Promise<PaymentBreakdown> {
     let url = "/api/dashboard/payment-breakdown";
     const params = new URLSearchParams();
-    if (startDate) params.set("startDate", startDate.toISOString());
-    if (endDate) params.set("endDate", endDate.toISOString());
+    if (startDate) params.set("startDate", formatDate(startDate));
+    if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
     const res = await api.get<ApiResponse<PaymentBreakdownDto>>(url);
@@ -120,8 +120,8 @@ export const dashboardService = {
   ): Promise<OrdersByStatus> {
     let url = "/api/dashboard/orders-by-status";
     const params = new URLSearchParams();
-    if (startDate) params.set("startDate", startDate.toISOString());
-    if (endDate) params.set("endDate", endDate.toISOString());
+    if (startDate) params.set("startDate", formatDate(startDate));
+    if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
     const res = await api.get<ApiResponse<OrdersByStatusDto>>(url);
@@ -140,8 +140,8 @@ export const dashboardService = {
   ): Promise<ExpenseTimeSeries[]> {
     let url = "/api/dashboard/sales-over-time";
     const params = new URLSearchParams();
-    if (startDate) params.set("startDate", startDate.toISOString());
-    if (endDate) params.set("endDate", endDate.toISOString());
+    if (startDate) params.set("startDate", formatDate(startDate));
+    if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
     const res = await api.get<ApiResponse<SalesOverTimeDto>>(url);
@@ -154,8 +154,8 @@ export const dashboardService = {
   ): Promise<Array<{ name: string; quantity: number }>> {
     let url = "/api/dashboard/top-products";
     const params = new URLSearchParams();
-    if (startDate) params.set("startDate", startDate.toISOString());
-    if (endDate) params.set("endDate", endDate.toISOString());
+    if (startDate) params.set("startDate", formatDate(startDate));
+    if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
     const res = await api.get<ApiResponse<TopProductsDto>>(url);
