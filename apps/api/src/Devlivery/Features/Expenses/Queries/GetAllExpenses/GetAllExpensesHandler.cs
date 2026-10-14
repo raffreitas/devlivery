@@ -46,7 +46,7 @@ public sealed class GetAllExpensesHandler(
                       join public.expense_categories ec on ec.id = e.category_id
                       left join public.expense_categories ecp on ecp.id = ec.parent_category_id
              where e.establishment_id = @EstablishmentId
-             and (@CategoryId is null or ecp.id = @CategoryId)
+             and (@CategoryId is null or ec.id = @CategoryId or ecp.id = @CategoryId)
                and (
                    @StatusFilter is null 
                    or (@StatusFilter = '{nameof(ExpenseDisplayStatus.Overdue)}' 
@@ -55,7 +55,10 @@ public sealed class GetAllExpensesHandler(
                    or (@StatusFilter = '{nameof(ExpenseDisplayStatus.DueToday)}' 
                            and e.status = '{nameof(ExpenseDisplayStatus.Pending)}' 
                            and e.due_date = @Today)
-                   or (@StatusFilter not in ('{nameof(ExpenseDisplayStatus.Overdue)}', '{nameof(ExpenseDisplayStatus.DueToday)}') 
+                   or (@StatusFilter = '{nameof(ExpenseDisplayStatus.Pending)}'
+                           and e.status = '{nameof(ExpenseDisplayStatus.Pending)}'
+                           and e.due_date > @Today)
+                   or (@StatusFilter in ('{nameof(ExpenseDisplayStatus.Paid)}', '{nameof(ExpenseDisplayStatus.Cancelled)}')
                            and e.status = @StatusFilter)
                )
                and (@StartDate is null or e.due_date >= @StartDate)

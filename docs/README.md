@@ -8,6 +8,7 @@ Este diretório registra o produto, suas regras, as decisões técnicas e os pro
 | --- | --- |
 | [Visão do produto](product/overview.md) | Qual problema o Devlivery resolve, para quem e com quais capacidades atuais? |
 | [Modelo de domínio](product/domain-model.md) | Quais são os conceitos, estados, regras e integrações entre áreas? |
+| [Backlog de decisões](product/backlog.md) | Quais comportamentos atuais aguardam decisão de produto? |
 | [Arquitetura](architecture/overview.md) | Como o sistema é dividido e quais são seus limites técnicos? |
 | [ADRs](adrs/README.md) | Por que escolhas estruturais importantes foram adotadas? |
 

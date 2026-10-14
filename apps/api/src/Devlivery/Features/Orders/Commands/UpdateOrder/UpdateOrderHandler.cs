@@ -35,8 +35,10 @@ public sealed class UpdateOrderHandler(
         if (products.Count != productIds.Count)
             return Result.Fail(new NotFoundError("Um ou mais produtos não foram encontrados"));
 
-        // Verify all products are available
-        var unavailableProducts = products.Where(p => !p.Available).ToList();
+        // Only products being added must be available: items already in the order stay editable
+        // even if their product was paused after the order was placed.
+        var productIdsInOrder = order.Items.Select(i => i.ProductId).ToHashSet();
+        var unavailableProducts = products.Where(p => !p.Available && !productIdsInOrder.Contains(p.Id)).ToList();
         if (unavailableProducts.Count != 0)
         {
             var productNames = string.Join(", ", unavailableProducts.Select(p => p.Name));

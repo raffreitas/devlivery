@@ -38,7 +38,7 @@ O dashboard é uma capacidade de leitura sobre pedidos e despesas; ele não cons
 
 ## Produtos
 
-O **produto** representa um item vendável do catálogo e possui nome, descrição, preço, categoria e disponibilidade. A indisponibilidade retira o produto da operação sem apagar seu histórico. Ao entrar em um pedido, o item mantém quantidade e preço unitário próprios; o total do pedido não depende de recalcular o preço atual do catálogo.
+O **produto** representa um item vendável do catálogo e possui nome, descrição, preço, categoria e disponibilidade. A indisponibilidade retira o produto da operação sem apagar seu histórico: ele não pode ser adicionado a pedidos, mas pedidos em aberto que já o contêm continuam editáveis. Ao entrar em um pedido, o item mantém quantidade e preço unitário próprios; o total do pedido não depende de recalcular o preço atual do catálogo. Exceção atual: editar o pedido recalcula todos os itens pelo preço vigente do catálogo (ver [backlog](backlog.md)).
 
 ## Pedidos e pagamentos
 
@@ -91,7 +91,7 @@ O valor esperado em dinheiro é:
 valor de abertura + aportes + pagamentos em dinheiro - estornos em dinheiro - trocos
 ```
 
-O fechamento registra o valor contado e encerra a sessão. Uma sessão fechada não recebe pagamentos, trocos ou estornos. Consulte [segurança do login e do caixa](../operations/login-and-cash-security.md) para autoria e proteção de acesso.
+O fechamento registra o valor contado e encerra a sessão. Uma sessão fechada não recebe pagamentos, trocos, estornos ou aportes. Consulte [segurança do login e do caixa](../operations/login-and-cash-security.md) para autoria e proteção de acesso.
 
 ## Despesas
 
@@ -99,12 +99,14 @@ Uma **despesa** pertence a uma categoria, tem valor positivo, vencimento e, opci
 
 Estados e transições relevantes:
 
-- pendente pode ser marcada como paga ou cancelada;
-- paga mantém uma data de pagamento e pode voltar a pendente por estorno;
-- paga não pode ser cancelada diretamente;
+- pendente pode ser marcada como paga;
+- o domínio permite cancelar uma despesa pendente, mas a API ainda não expõe esse fluxo: a exclusão remove a despesa;
+- paga mantém uma data de pagamento e não pode ser cancelada; ainda não existe estorno que a devolva a pendente;
 - cancelada não pode ser paga nem editada;
 - a data de pagamento só pode ser corrigida enquanto a despesa está paga;
 - atraso e vencimento no dia são classificações calculadas para despesas pendentes.
+
+Na listagem, o filtro **Pendente** traz apenas despesas pendentes que ainda não venceram; **Vencida** e **Vence hoje** são filtros próprios. O filtro por categoria traz as despesas lançadas na própria categoria e em suas subcategorias.
 
 Categorias podem conter subcategorias. Uma subcategoria não pode ser associada simultaneamente a mais de uma categoria.
 

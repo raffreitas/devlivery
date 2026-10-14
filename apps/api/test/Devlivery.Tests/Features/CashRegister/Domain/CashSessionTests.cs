@@ -206,7 +206,8 @@ public sealed class CashSessionTests
     [InlineData("payment")]
     [InlineData("reversal")]
     [InlineData("change")]
-    public void GivenClosedSession_WhenAddingOrderMovement_ThenThrowsDomainException(string movement)
+    [InlineData("deposit")]
+    public void GivenClosedSession_WhenAddingMovement_ThenThrowsDomainException(string movement)
     {
         // Arrange
         var session = new CashSessionBuilder().AsClosed().Build();
