@@ -30,7 +30,7 @@ public sealed class DeleteProductHandler(
         if (productInUse)
         {
             return Result.Fail(
-                new ValidationError("Não é possível excluir um produto que já foi atribuido a um pedido."));
+                new ValidationError("Não é possível excluir um produto que já foi atribuído a um pedido."));
         }
 
         productRepository.Remove(product);

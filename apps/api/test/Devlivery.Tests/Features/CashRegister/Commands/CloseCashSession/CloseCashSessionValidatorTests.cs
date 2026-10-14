@@ -23,7 +23,7 @@ public sealed class CloseCashSessionValidatorTests
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Id)
-            .WithErrorMessage("O id do caixa é obrigatório.");
+            .WithErrorMessage("O campo 'Caixa' é obrigatório.");
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public sealed class CloseCashSessionValidatorTests
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.ClosingAmount)
-            .WithErrorMessage("O valor de fechamento deve ser maior ou igual a zero.");
+            .WithErrorMessage("O campo 'Valor de fechamento' deve ser maior ou igual a 0.");
     }
 
     [Fact]

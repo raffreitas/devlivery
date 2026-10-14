@@ -19,7 +19,7 @@ public sealed class CreateCashDepositValidatorTests
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.CashSessionId)
-            .WithErrorMessage("A sessão de caixa é obrigatória.");
+            .WithErrorMessage("O campo 'Caixa' é obrigatório.");
     }
 
 
@@ -36,7 +36,7 @@ public sealed class CreateCashDepositValidatorTests
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage("O valor do aporte deve ser maior que zero.");
+            .WithErrorMessage("O campo 'Valor do aporte' deve ser maior que 0.");
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public sealed class CreateCashDepositValidatorTests
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage("O valor do aporte deve ser maior que zero.");
+            .WithErrorMessage("O campo 'Valor do aporte' deve ser maior que 0.");
     }
 
     [Fact]

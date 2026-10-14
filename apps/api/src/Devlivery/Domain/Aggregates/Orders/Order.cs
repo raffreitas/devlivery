@@ -42,7 +42,7 @@ public sealed class Order : Entity
             throw new DomainException("Pedido deve ter pelo menos um item");
 
         if (payments == null || payments.Count == 0)
-            throw new DomainException("Pedido deve ter pelo menos uma forma pagamento");
+            throw new DomainException("Pedido deve ter pelo menos uma forma de pagamento");
 
         if (deliveryFee < 0)
             throw new DomainException("Taxa de entrega não pode ser negativa");

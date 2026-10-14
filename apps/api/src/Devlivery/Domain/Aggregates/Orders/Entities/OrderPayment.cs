@@ -29,7 +29,7 @@ public sealed class OrderPayment : Entity
         if (PaymentStatus == PaymentStatus.Confirmed)
             throw new DomainException("Pagamento já está confirmado.");
         if (PaymentStatus == PaymentStatus.Cancelled)
-            throw new DomainException("Não é possível confirmar um pagamento cancelado..");
+            throw new DomainException("Não é possível confirmar um pagamento cancelado.");
 
         PaymentStatus = PaymentStatus.Confirmed;
         ConfirmedAt = DateTime.UtcNow;

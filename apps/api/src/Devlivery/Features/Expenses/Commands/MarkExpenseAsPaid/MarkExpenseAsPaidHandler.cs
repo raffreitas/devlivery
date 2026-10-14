@@ -16,7 +16,7 @@ public sealed class MarkExpenseAsPaidHandler(
         var expense = await expenseRepository.GetByIdAsync(command.ExpenseId, cancellationToken);
         if (expense is null)
         {
-            return Result.Fail(new NotFoundError("Expense not found."));
+            return Result.Fail(new NotFoundError("Despesa não encontrada."));
         }
 
         expense.MarkAsPaid(command.PaymentDate);

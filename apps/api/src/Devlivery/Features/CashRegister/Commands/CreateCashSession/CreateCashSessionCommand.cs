@@ -11,7 +11,6 @@ public sealed class CreateCashSessionValidator : AbstractValidator<CreateCashSes
 {
     public CreateCashSessionValidator()
     {
-        RuleFor(x => x.OpeningAmount)
-            .GreaterThanOrEqualTo(0).WithMessage("O valor de abertura deve ser maior ou igual a zero.");
+        RuleFor(x => x.OpeningAmount).GreaterThanOrEqualTo(0).WithName("Valor de abertura");
     }
 }

@@ -39,7 +39,7 @@ public sealed class UpdateOrderStatusValidatorTests
         // Assert
         result.IsValid.ShouldBeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Id)
-            .WithErrorMessage("O campo 'Id' é obrigatório.");
+            .WithErrorMessage("O campo 'Pedido' é obrigatório.");
     }
 
     [Theory]

@@ -10,9 +10,7 @@ public sealed class UpdateOrderStatusCommandValidator : AbstractValidator<Update
 {
     public UpdateOrderStatusCommandValidator()
     {
-        RuleFor(x => x.Id).NotEmpty().WithMessage("O campo '{PropertyName}' é obrigatório.");
-        RuleFor(x => x.Status)
-            .NotNull().WithMessage("O campo '{PropertyName}' é obrigatório.")
-            .IsInEnum().WithMessage("Status inválido para o pedido.");
+        RuleFor(x => x.Id).NotEmpty().WithName("Pedido");
+        RuleFor(x => x.Status).IsInEnum().WithName("Status");
     }
 }

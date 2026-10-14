@@ -22,7 +22,7 @@ public sealed class CreateCashSessionValidatorTests
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.OpeningAmount)
-            .WithErrorMessage("O valor de abertura deve ser maior ou igual a zero.");
+            .WithErrorMessage("O campo 'Valor de abertura' deve ser maior ou igual a 0.");
     }
 
     [Fact]
