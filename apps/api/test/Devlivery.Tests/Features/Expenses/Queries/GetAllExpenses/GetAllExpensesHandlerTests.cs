@@ -101,6 +101,7 @@ public sealed class GetAllExpensesHandlerTests(PostgresDatabaseFixture database)
     [Theory]
     [InlineData(ExpenseDisplayStatus.Overdue, "Vencida")]
     [InlineData(ExpenseDisplayStatus.DueToday, "Vence hoje")]
+    [InlineData(ExpenseDisplayStatus.Pending, "Pendente")]
     [InlineData(ExpenseDisplayStatus.Paid, "Paga")]
     [InlineData(ExpenseDisplayStatus.Cancelled, "Cancelada")]
     public async Task GivenStatusFilter_WhenListing_ThenReturnsOnlyExpensesInThatDisplayStatus(
@@ -117,17 +118,20 @@ public sealed class GetAllExpensesHandlerTests(PostgresDatabaseFixture database)
     }
 
     [Fact]
-    public async Task GivenPendingStatusFilter_WhenListing_ThenReturnsEveryUnpaidExpenseIncludingOverdueAndDueToday()
+    public async Task GivenParentCategoryFilter_WhenListing_ThenIncludesExpensesFiledDirectlyUnderParent()
     {
         // Arrange
-        await SeedOneExpensePerDisplayStatusAsync();
+        await SeedExpenseAsync("Na subcategoria", new ExpenseBuilder());
+        await SeedExpenseAsync("Direto na categoria", new ExpenseBuilder(), categoryId: _parentCategory.Id);
 
         // Act
-        var result = await CreateHandler().HandleAsync(new GetAllExpensesQuery(Status: ExpenseDisplayStatus.Pending),
+        var result = await CreateHandler().HandleAsync(new GetAllExpensesQuery(CategoryId: _parentCategory.Id),
             CancellationToken.None);
 
         // Assert
-        result.Value.Select(e => e.Description).ShouldBe(["Vencida", "Vence hoje", "Pendente"]);
+        result.Value.Select(e => e.Description).ShouldBe(["Na subcategoria", "Direto na categoria"],
+            ignoreOrder: true);
+        result.Value.Single(e => e.Description == "Direto na categoria").Category.Subcategories.ShouldBeEmpty();
     }
 
     [Fact]

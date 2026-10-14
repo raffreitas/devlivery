@@ -36,7 +36,7 @@ public sealed class OrderDeletedEventHandler(
         // Try to find payments correlated to the deleted order
         var matches = activeSession.Movements
             .Where(p => p.EntryType == CashSessionEntryType.Payment && p.OrderPaymentId is not null &&
-                        (p.RelatedOrderId == domainEvent.OrderId || p.OrderPaymentId == domainEvent.OrderId))
+                        p.RelatedOrderId == domainEvent.OrderId)
             .ToList();
 
         if (matches.Count == 0)

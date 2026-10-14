@@ -13,7 +13,12 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
         Exception exception,
         CancellationToken cancellationToken)
     {
-        logger.LogError(exception, "Houve um erro não tratado ao processar a requisição.");
+        // Client errors (4xx) are expected outcomes, not server failures: keep them out of error-level alerts.
+        if (exception is DomainException or BadHttpRequestException or UnauthorizedAccessException
+            or UnauthorizedException)
+            logger.LogWarning(exception, "Requisição rejeitada: {Reason}", exception.Message);
+        else
+            logger.LogError(exception, "Houve um erro não tratado ao processar a requisição.");
 
         switch (exception)
         {

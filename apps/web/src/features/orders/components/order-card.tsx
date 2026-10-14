@@ -22,9 +22,11 @@ import { OrderPrint } from "./order-print";
 interface OrderCardProps {
   order: Order;
   onEdit: (order: Order) => void;
-  onUpdateStatus: (id: string, status: OrderStatus) => void;
-  onDelete: (id: string) => void;
+  onUpdateStatus: (id: string, status: OrderStatus) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }
+
+const CLOSED_ALERT = { open: false, type: "", action: () => {} };
 
 const NEXT_STATUS: Record<OrderStatus, OrderStatus | null> = {
   Pending: "Preparing",
@@ -51,10 +53,15 @@ export function OrderCard({
     onEdit(order);
   };
 
-  const handleNextStatus = () => {
+  // Failed mutations are already reported by the global MutationCache error toast,
+  // so the handlers below only need to avoid announcing success when the API rejects.
+  const handleNextStatus = async () => {
     const next = NEXT_STATUS[order.status];
-    if (next) {
-      onUpdateStatus(order.id, next);
+    if (!next) return;
+    try {
+      await onUpdateStatus(order.id, next);
+    } catch {
+      // Reported by the global MutationCache.
     }
   };
 
@@ -62,16 +69,24 @@ export function OrderCard({
     setAlert({ open: true, type, action });
   };
 
-  const handleCancel = () => {
-    onUpdateStatus(order.id, "Canceled");
-    setAlert({ open: false, type: "", action: () => {} });
-    toast.success("Pedido cancelado com sucesso");
+  const handleCancel = async () => {
+    setAlert(CLOSED_ALERT);
+    try {
+      await onUpdateStatus(order.id, "Canceled");
+      toast.success("Pedido cancelado com sucesso");
+    } catch {
+      // Reported by the global MutationCache.
+    }
   };
 
   const handleDelete = async () => {
-    onDelete(order.id);
-    setAlert({ open: false, type: "", action: () => {} });
-    toast.success("Pedido excluído com sucesso");
+    setAlert(CLOSED_ALERT);
+    try {
+      await onDelete(order.id);
+      toast.success("Pedido excluído com sucesso");
+    } catch {
+      // Reported by the global MutationCache.
+    }
   };
 
   return (
@@ -107,9 +122,7 @@ export function OrderCard({
 
       <AlertDialog
         open={alert.open}
-        onOpenChange={() =>
-          setAlert({ open: false, type: "", action: () => {} })
-        }
+        onOpenChange={() => setAlert(CLOSED_ALERT)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>

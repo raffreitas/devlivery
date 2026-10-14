@@ -41,18 +41,6 @@ public sealed class Expense : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public bool IsOverdue(DateOnly referenceDate)
-    {
-        if (Status == ExpenseStatus.Paid) return false;
-        return Status == ExpenseStatus.Pending && DueDate < referenceDate;
-    }
-
-    public bool IsDueToday(DateOnly referenceDate)
-    {
-        if (Status == ExpenseStatus.Paid) return false;
-        return Status == ExpenseStatus.Pending && DueDate == referenceDate;
-    }
-
     public void Update(
         Guid? categoryId = null,
         decimal? amount = null,
@@ -71,6 +59,9 @@ public sealed class Expense : Entity
 
         if (paymentDate == DateOnly.MinValue)
             throw new DomainException("A data de pagamento deve ser válida.");
+
+        if (amount <= 0)
+            throw new DomainException("O valor da despesa deve ser maior que zero.");
 
         PaymentDate = paymentDate ?? PaymentDate;
         Description = description ?? Description;
@@ -102,15 +93,6 @@ public sealed class Expense : Entity
             );
 
         Status = ExpenseStatus.Cancelled;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void UnmarkAsPaid()
-    {
-        if (Status != ExpenseStatus.Paid) return;
-
-        Status = ExpenseStatus.Pending;
-        PaymentDate = null;
         UpdatedAt = DateTime.UtcNow;
     }
 }

@@ -81,6 +81,32 @@ public sealed class UpdateOrderHandlerTests
     }
 
     [Fact]
+    public async Task GivenItemWhoseProductWasPausedAfterOrdering_WhenUpdating_ThenKeepsItemAndAppliesChanges()
+    {
+        // Arrange
+        var pausedProduct = new ProductBuilder().WithPrice(40m).AsUnavailable().Build();
+        var order = new OrderBuilder()
+            .WithItems(new OrderItemBuilder().WithProduct(pausedProduct).WithQuantity(1).Build())
+            .Build();
+        _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
+        _productRepository.GetByIdsAsync(Arg.Any<List<Guid>>(), Arg.Any<CancellationToken>())
+            .Returns([pausedProduct]);
+        var command = CreateCommand(order.Id, [new OrderItemDto(pausedProduct.Id, 1, null)], []) with
+        {
+            DeliveryAddress = "Av. Brasil, 500"
+        };
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        order.DeliveryAddress.FullAddress.ShouldBe("Av. Brasil, 500");
+        order.Items.ShouldHaveSingleItem().ProductId.ShouldBe(pausedProduct.Id);
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task GivenUnavailableProduct_WhenUpdating_ThenReturnsValidationErrorNamingTheProduct()
     {
         // Arrange

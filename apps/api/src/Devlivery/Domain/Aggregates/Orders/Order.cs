@@ -132,18 +132,6 @@ public sealed class Order : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void RemovePayment(Guid paymentId)
-    {
-        if (Status == OrderStatus.Delivered || Status == OrderStatus.Canceled)
-            throw new DomainException("Não é possível remover pagamentos de um pedido finalizado.");
-
-        var payment = _payments.FirstOrDefault(p => p.Id == paymentId);
-        if (payment == null) return;
-
-        _payments.Remove(payment);
-        UpdatedAt = DateTime.UtcNow;
-    }
-
     public void Delete()
     {
         AddDomainEvent(new OrderDeletedEvent(

@@ -39,35 +39,4 @@ public sealed class OrderItem : Entity
         UnitPrice = unitPrice;
         Notes = notes;
     }
-
-    /// <summary>
-    /// Updates the quantity of this item.
-    /// Business logic: quantity must be positive.
-    /// </summary>
-    public void UpdateQuantity(int newQuantity)
-    {
-        if (newQuantity <= 0)
-            throw new DomainException("Quantidade deve ser maior que zero");
-
-        Quantity = newQuantity;
-    }
-
-    /// <summary>
-    /// Updates the notes for this item.
-    /// </summary>
-    public void UpdateNotes(string? newNotes)
-    {
-        Notes = newNotes;
-    }
-
-    /// <summary>
-    /// Updates the unit price (e.g., when product price changes).
-    /// </summary>
-    internal void UpdateUnitPrice(decimal newUnitPrice)
-    {
-        if (newUnitPrice < 0)
-            throw new DomainException("Preço unitário não pode ser negativo");
-
-        UnitPrice = newUnitPrice;
-    }
 }

@@ -146,6 +146,22 @@ public sealed class ExpenseTests
         expense.PaymentDate.ShouldBe(PaymentDate);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-0.01)]
+    public void GivenNonPositiveAmount_WhenUpdatingExpense_ThenThrowsDomainException(decimal amount)
+    {
+        // Arrange
+        var expense = new ExpenseBuilder().WithAmount(150m).Build();
+
+        // Act
+        var exception = Record.Exception(() => expense.Update(amount: amount));
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>().Message.ShouldBe("O valor da despesa deve ser maior que zero.");
+        expense.Amount.ShouldBe(150m);
+    }
+
     [Fact]
     public void GivenCancelledExpense_WhenUpdating_ThenThrowsDomainException()
     {
