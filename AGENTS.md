@@ -32,7 +32,7 @@ Follow each application's `.editorconfig`. C# uses four spaces, PascalCase types
 
 ## Testing Guidelines
 
-Backend tests use xUnit, Shouldly, NSubstitute, and PostgreSQL Testcontainers; keep Docker running for container-backed tests. Mirror feature folders, name classes `*Tests`, and use descriptive names such as `Handle_Should_Create_Product_With_Correct_Properties` with Arrange/Act/Assert sections.
+Backend tests use xUnit, Shouldly, NSubstitute, and PostgreSQL Testcontainers; keep Docker running for container-backed tests. Mirror feature folders, name classes `*Tests`, and name tests `GivenContext_WhenAction_ThenOutcome` (e.g. `GivenClosedSession_WhenAddingPayment_ThenThrowsDomainException`) with separate Arrange/Act/Assert sections. Build test data with `Common/Builders`; HTTP contract tests live in `Features/<Feature>/Api` and use `ApiFactory`. See `docs/development/testing-strategy.md`.
 
 From the repository root, run:
 

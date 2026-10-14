@@ -16,6 +16,8 @@ public sealed class GetCashSessionsHandler(ApplicationDbContext dbContext)
     {
         var sessionsQuery = dbContext.CashSessions
             .AsNoTracking()
+            // Totals (revenue, expected cash, orders) are computed from the movements.
+            .Include(cs => cs.Movements)
             .AsQueryable();
 
         sessionsQuery = sessionsQuery
