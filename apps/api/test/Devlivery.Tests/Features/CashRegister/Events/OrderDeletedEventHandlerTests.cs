@@ -66,7 +66,6 @@ public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fi
 
         cashSession.TotalRevenue.ShouldBe(0m); // Payment - Reversal = 0
 
-        await repository.Received(1).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -114,7 +113,6 @@ public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fi
         cashSession.TotalRevenue.ShouldBe(0m); // All payments reversed
         cashSession.ExpectedCashAmount.ShouldBe(100m); // Back to opening amount
 
-        await repository.Received(1).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -155,7 +153,6 @@ public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fi
         var reversals = cashSession.Movements.Where(m => m.EntryType == CashSessionEntryType.Refund).ToList();
         reversals.Count.ShouldBe(1);
 
-        await repository.Received(2).UpdateAsync(cashSession, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -183,7 +180,6 @@ public sealed class OrderDeletedEventHandlerTests(CashRegisterUnitTestFixture fi
         await handler.HandleAsync(@event, CancellationToken.None);
 
         // Assert
-        await repository.DidNotReceive().UpdateAsync(Arg.Any<CashSession>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

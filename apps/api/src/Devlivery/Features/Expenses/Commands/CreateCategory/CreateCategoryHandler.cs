@@ -22,7 +22,7 @@ public sealed class CreateCategoryHandler(
         var establishmentId = tenantAccessor.Tenant.Id;
 
         var existingCategory = await categoryRepository
-            .ExistsWithName(command.Name, command.ParentCategoryId, cancellationToken);
+            .ExistsWithNameAsync(command.Name, command.ParentCategoryId, cancellationToken);
 
         if (existingCategory)
         {
@@ -42,7 +42,6 @@ public sealed class CreateCategoryHandler(
 
             category = new Category(command.Name, establishmentId);
             parentCategory.AddSubcategory(category);
-            await categoryRepository.UpdateAsync(parentCategory, cancellationToken);
         }
         else
         {

@@ -68,8 +68,6 @@ public sealed class OrderChangeCalculatedEventHandler(
 
         activeSession.AddChange(domainEvent.OrderId, domainEvent.Change, actor.Id, PaymentMethod.Cash);
 
-        await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
-
         logger.LogInformation(
             "Change for Order {OrderId} recorded in cash session {SessionId}. Change: {Change}",
             domainEvent.OrderId,

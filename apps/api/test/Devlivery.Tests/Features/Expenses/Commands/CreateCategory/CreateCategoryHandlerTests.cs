@@ -17,7 +17,7 @@ public sealed class CreateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
     {
         // Arrange
         var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        categoryRepository.ExistsWithName(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+        categoryRepository.ExistsWithNameAsync(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
         var unitOfWork = fixture.CreateUnitOfWorkMock();
@@ -40,7 +40,7 @@ public sealed class CreateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
     {
         // Arrange
         var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        categoryRepository.ExistsWithName(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+        categoryRepository.ExistsWithNameAsync(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
             .Returns(false);
         categoryRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((Category?)null);
 
@@ -64,7 +64,7 @@ public sealed class CreateCategoryHandlerTests(ExpensesUnitTestFixture fixture)
     {
         // Arrange
         var categoryRepository = fixture.CreateCategoryRepositoryMock();
-        categoryRepository.ExistsWithName(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+        categoryRepository.ExistsWithNameAsync(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         var unitOfWork = fixture.CreateUnitOfWorkMock();

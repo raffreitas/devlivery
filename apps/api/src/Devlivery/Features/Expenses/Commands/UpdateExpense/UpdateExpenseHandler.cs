@@ -41,7 +41,6 @@ public sealed class UpdateExpenseHandler(
             paymentDate: command.PaymentDate
         );
 
-        await expenseRepository.UpdateAsync(expense, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

@@ -26,13 +26,11 @@ using NSubstitute;
 
 using Shouldly;
 
-using Testcontainers.PostgreSql;
-
 namespace Devlivery.Tests.Infrastructure.Persistence;
 
 [Trait("Category", "Integration Tests")]
-public sealed class UnitOfWorkTests(UnitOfWorkTests.PostgresFixture database)
-    : IClassFixture<UnitOfWorkTests.PostgresFixture>
+public sealed class UnitOfWorkTests(PostgresDatabaseFixture database)
+    : IClassFixture<PostgresDatabaseFixture>
 {
     private readonly Establishment _establishment = new("Loja Teste", isActive: true);
     private readonly Guid _actorId = Guid.NewGuid();
@@ -212,29 +210,6 @@ public sealed class UnitOfWorkTests(UnitOfWorkTests.PostgresFixture database)
         await dbContext.SaveChangesAsync();
 
         return (order.Id, session.Id);
-    }
-
-    public sealed class PostgresFixture : IAsyncLifetime
-    {
-        private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:16-alpine")
-            .WithCleanUp(true)
-            .Build();
-
-        public string ConnectionString => _container.GetConnectionString();
-
-        public async Task InitializeAsync()
-        {
-            await _container.StartAsync();
-
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseNpgsql(ConnectionString)
-                .UseSnakeCaseNamingConvention()
-                .Options;
-            await using var dbContext = new ApplicationDbContext(options, new TenantAccessor());
-            await dbContext.Database.MigrateAsync();
-        }
-
-        public async Task DisposeAsync() => await _container.DisposeAsync();
     }
 
     private sealed class SaveChangesCounter : SaveChangesInterceptor

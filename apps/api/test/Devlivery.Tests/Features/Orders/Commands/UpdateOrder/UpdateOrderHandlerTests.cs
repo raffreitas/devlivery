@@ -96,7 +96,6 @@ public sealed class UpdateOrderHandlerTests(OrdersUnitTestFixture fixture)
         var result = await handler.HandleAsync(command, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        await repository.Received(1).UpdateAsync(order, Arg.Any<CancellationToken>());
         await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
     [Fact]

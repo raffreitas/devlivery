@@ -59,8 +59,6 @@ public sealed class OrderStatusChangedEventHandler(
                 relatedOrderId: domainEvent.OrderId);
         }
 
-        await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
-
         logger.LogInformation("Recorded reversals for canceled order {OrderId} in session {SessionId}.",
             domainEvent.OrderId, activeSession.Id);
     }

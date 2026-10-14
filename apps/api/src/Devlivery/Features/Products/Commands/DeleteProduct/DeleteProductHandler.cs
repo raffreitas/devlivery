@@ -33,7 +33,7 @@ public sealed class DeleteProductHandler(
                 new ValidationError("Não é possível excluir um produto que já foi atribuído a um pedido."));
         }
 
-        productRepository.Remove(product);
+        await productRepository.RemoveAsync(product, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

@@ -68,7 +68,6 @@ public sealed class UpdateOrderHandler(
         var updates = command.Payments?.Select(p => new OrderPaymentUpdate(p.Id, p.Method, p.Amount)) ?? Enumerable.Empty<OrderPaymentUpdate>();
         order.ReconcilePayments(updates);
 
-        await orderRepository.UpdateAsync(order, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

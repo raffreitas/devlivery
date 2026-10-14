@@ -21,7 +21,6 @@ public sealed class MarkExpenseAsPaidHandler(
 
         expense.MarkAsPaid(command.PaymentDate);
 
-        await expenseRepository.UpdateAsync(expense, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

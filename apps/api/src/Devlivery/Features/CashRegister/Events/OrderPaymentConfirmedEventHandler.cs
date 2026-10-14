@@ -47,8 +47,6 @@ public sealed class OrderPaymentConfirmedEventHandler(
             relatedOrderId: domainEvent.OrderId
         );
 
-        await cashSessionRepository.UpdateAsync(activeSession, cancellationToken);
-
         logger.LogInformation(
             "Payment {PaymentId} successfully recorded in cash session {SessionId} ledger. Amount: {Amount}, Method: {PaymentMethod}",
             domainEvent.PaymentId,
