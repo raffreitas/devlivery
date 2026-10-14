@@ -1,5 +1,5 @@
 ﻿using Devlivery.Domain.Aggregates.Establishments;
-using Devlivery.Features.Users.Domain;
+using Devlivery.Domain.Aggregates.Users;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
