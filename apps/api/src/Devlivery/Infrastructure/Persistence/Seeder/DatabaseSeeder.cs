@@ -1,6 +1,6 @@
 using Devlivery.Domain.Aggregates.Establishments;
 using Devlivery.Domain.Aggregates.Products;
-using Devlivery.Features.Users.Domain;
+using Devlivery.Domain.Aggregates.Users;
 using Devlivery.Infrastructure.Identity.Users.Models;
 using Devlivery.Infrastructure.Persistence.Context;
 

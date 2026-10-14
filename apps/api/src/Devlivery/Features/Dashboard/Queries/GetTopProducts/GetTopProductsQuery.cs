@@ -1,3 +1,3 @@
 namespace Devlivery.Features.Dashboard.Queries.GetTopProducts;
 
-public sealed record GetTopProductsQuery(DateTime? StartDate, DateTime? EndDate);
+public sealed record GetTopProductsQuery(DateOnly? StartDate, DateOnly? EndDate);

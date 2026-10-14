@@ -35,6 +35,17 @@ public sealed class BrazilTimeTests
         now.ShouldBe(new DateTime(2026, 10, 15, 12, 30, 0));
     }
 
+    [Fact]
+    public void Brazilian_Day_Boundaries_Should_Be_Converted_To_Utc()
+    {
+        // Arrange
+        var day = new DateOnly(2026, 10, 14);
+
+        // Act & Assert: São Paulo is UTC-3, so the local day runs from 03:00 UTC to 03:00 UTC of the next day
+        day.ToBrazilStartOfDayUtc().ShouldBe(new DateTime(2026, 10, 14, 3, 0, 0, DateTimeKind.Utc));
+        day.ToBrazilEndOfDayExclusiveUtc().ShouldBe(new DateTime(2026, 10, 15, 3, 0, 0, DateTimeKind.Utc));
+    }
+
     [Theory]
     [InlineData(DateTimeKind.Utc)]
     [InlineData(DateTimeKind.Unspecified)]

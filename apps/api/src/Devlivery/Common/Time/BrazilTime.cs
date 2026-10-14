@@ -16,4 +16,16 @@ public static class BrazilTime
 
     public static DateTime ToBrazilTime(this DateTime utcDateTime) =>
         TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc), TimeZone);
+
+    /// <summary>
+    /// UTC instant when the given Brazilian calendar day starts (00:00 in São Paulo).
+    /// </summary>
+    public static DateTime ToBrazilStartOfDayUtc(this DateOnly date) =>
+        TimeZoneInfo.ConvertTimeToUtc(date.ToDateTime(TimeOnly.MinValue), TimeZone);
+
+    /// <summary>
+    /// UTC instant when the given Brazilian calendar day ends, exclusive (00:00 of the next day in São Paulo).
+    /// </summary>
+    public static DateTime ToBrazilEndOfDayExclusiveUtc(this DateOnly date) =>
+        date.AddDays(1).ToBrazilStartOfDayUtc();
 }

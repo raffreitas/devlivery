@@ -18,8 +18,8 @@ public sealed class GetDashboardStatsEndpoint : IEndpoint
     }
 
     private static async Task<IResult> Handle(
-        DateTime? startDate,
-        DateTime? endDate,
+        DateOnly? startDate,
+        DateOnly? endDate,
         IQueryHandler<GetDashboardStatsQuery, Result<GetDashboardStatsResponse>> handler,
         CancellationToken ct)
     {
