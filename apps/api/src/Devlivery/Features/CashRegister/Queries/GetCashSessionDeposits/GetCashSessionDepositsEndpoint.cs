@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.CashRegister.Queries.GetCashSessionDeposits;
 
-public static class GetCashSessionDepositsEndpoint
+public sealed class GetCashSessionDepositsEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("sessions/{cashSessionId:guid}/deposits", Handle)
+        app.MapGet("cash-register/sessions/{cashSessionId:guid}/deposits", Handle)
+            .WithTags(Tags.CashRegister)
             .Produces<ApiResource<IEnumerable<GetCashSessionDepositsResponse>>>();
     }
 

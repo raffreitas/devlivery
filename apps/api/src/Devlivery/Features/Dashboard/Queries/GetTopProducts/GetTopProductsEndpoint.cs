@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetTopProducts;
 
-public static class GetTopProductsEndpoint
+public sealed class GetTopProductsEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/top-products", Handle)
+        app.MapGet("dashboard/top-products", Handle)
+            .WithTags(Tags.Dashboard)
             .Produces<ApiResource<GetTopProductsResponse>>()
             .Produces<ApiResource<GetTopProductsResponse>>(StatusCodes.Status400BadRequest);
     }

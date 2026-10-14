@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Dashboard.Queries.GetPaymentBreakdown;
 
-public static class GetPaymentBreakdownEndpoint
+public sealed class GetPaymentBreakdownEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/payment-breakdown", Handle)
+        app.MapGet("dashboard/payment-breakdown", Handle)
+            .WithTags(Tags.Dashboard)
             .Produces<ApiResource<GetPaymentBreakdownResponse>>()
             .Produces<ApiResource<GetPaymentBreakdownResponse>>(StatusCodes.Status400BadRequest);
     }

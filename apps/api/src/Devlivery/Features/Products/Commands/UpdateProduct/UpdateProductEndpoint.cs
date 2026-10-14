@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,7 +7,7 @@ using FluentResults;
 
 namespace Devlivery.Features.Products.Commands.UpdateProduct;
 
-public static class UpdateProductEndpoint
+public sealed class UpdateProductEndpoint : IEndpoint
 {
     internal sealed record UpdateProductRequest(
         string Name,
@@ -15,9 +16,10 @@ public static class UpdateProductEndpoint
         string Category,
         bool Available);
 
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("{id:guid}", Handle)
+        app.MapPut("products/{id:guid}", Handle)
+            .WithTags(Tags.Products)
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);

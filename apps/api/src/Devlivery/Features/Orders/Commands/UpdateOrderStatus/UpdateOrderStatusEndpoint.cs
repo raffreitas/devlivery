@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Infrastructure.Http.Extensions;
@@ -7,13 +8,14 @@ using FluentResults;
 
 namespace Devlivery.Features.Orders.Commands.UpdateOrderStatus;
 
-public static class UpdateOrderStatusEndpoint
+public sealed class UpdateOrderStatusEndpoint : IEndpoint
 {
     internal sealed record UpdateOrderStatusRequest(OrderStatus Status);
 
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPatch("{id:guid}/status", Handle)
+        app.MapPatch("orders/{id:guid}/status", Handle)
+            .WithTags(Tags.Orders)
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound)

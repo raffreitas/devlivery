@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Expenses.Commands.CreateCategory;
 
-public static class CreateCategoryEndpoint
+public sealed class CreateCategoryEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/categories", Handle)
+        app.MapPost("expenses/categories", Handle)
+            .WithTags(Tags.Expenses)
             .Produces<ApiResource<CreateCategoryResponse>>(StatusCodes.Status201Created)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status422UnprocessableEntity);

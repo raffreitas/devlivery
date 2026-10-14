@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Expenses.Queries.GetAllExpenseCategories;
 
-public static class GetAllExpenseCategoriesEndpoint
+public sealed class GetAllExpenseCategoriesEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/categories", Handle)
+        app.MapGet("expenses/categories", Handle)
+            .WithTags(Tags.Expenses)
             .Produces<ApiResource<List<GetAllExpenseCategoriesResponse>>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }

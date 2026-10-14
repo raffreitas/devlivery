@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Expenses.Commands.CreateExpense;
 
-public static class CreateExpenseEndpoint
+public sealed class CreateExpenseEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("", Handle)
+        app.MapPost("expenses", Handle)
+            .WithTags(Tags.Expenses)
             .Produces<ApiResource<CreateExpenseResponse>>(StatusCodes.Status201Created)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }

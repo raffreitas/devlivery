@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.CashRegister.Queries.GetActiveCashSession;
 
-public static class GetActiveCashSessionEndpoint
+public sealed class GetActiveCashSessionEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("sessions/active", Handle)
+        app.MapGet("cash-register/sessions/active", Handle)
+            .WithTags(Tags.CashRegister)
             .Produces<ApiResource<GetActiveCashSessionResponse>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }

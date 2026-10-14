@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Orders.Queries.GetOrderById;
 
-public static class GetOrderByIdEndpoint
+public sealed class GetOrderByIdEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("{id:guid}", Handle)
+        app.MapGet("orders/{id:guid}", Handle)
+            .WithTags(Tags.Orders)
             .Produces<ApiResource<GetOrderByIdResponse>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }

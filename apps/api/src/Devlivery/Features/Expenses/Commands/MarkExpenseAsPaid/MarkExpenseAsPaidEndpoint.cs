@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Expenses.Commands.MarkExpenseAsPaid;
 
-public static class MarkExpenseAsPaidEndpoint
+public sealed class MarkExpenseAsPaidEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPatch("{expenseId:guid}/mark-as-paid", Handle)
+        app.MapPatch("expenses/{expenseId:guid}/mark-as-paid", Handle)
+            .WithTags(Tags.Expenses)
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }

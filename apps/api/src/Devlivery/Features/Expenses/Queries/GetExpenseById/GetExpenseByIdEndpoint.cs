@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.Expenses.Queries.GetExpenseById;
 
-public static class GetExpenseByIdEndpoint
+public sealed class GetExpenseByIdEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("{expenseId:guid}", Handle)
+        app.MapGet("expenses/{expenseId:guid}", Handle)
+            .WithTags(Tags.Expenses)
             .Produces<ApiResource<GetExpenseByIdResponse>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound);
     }

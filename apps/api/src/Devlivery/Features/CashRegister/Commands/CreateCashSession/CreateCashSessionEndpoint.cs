@@ -1,3 +1,4 @@
+using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
 using Devlivery.Infrastructure.Http.Extensions;
 using Devlivery.Infrastructure.Http.Models;
@@ -6,11 +7,12 @@ using FluentResults;
 
 namespace Devlivery.Features.CashRegister.Commands.CreateCashSession;
 
-public static class CreateCashSessionEndpoint
+public sealed class CreateCashSessionEndpoint : IEndpoint
 {
-    public static void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("sessions", Handle)
+        app.MapPost("cash-register/sessions", Handle)
+            .WithTags(Tags.CashRegister)
             .Produces<ApiResource<CreateCashSessionResponse>>(StatusCodes.Status201Created)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status409Conflict);
