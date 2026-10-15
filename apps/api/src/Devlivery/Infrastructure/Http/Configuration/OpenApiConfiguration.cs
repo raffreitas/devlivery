@@ -1,5 +1,6 @@
 using Asp.Versioning;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
 
 using Scalar.AspNetCore;
@@ -13,7 +14,6 @@ public static class OpenApiConfiguration
         services.AddApiVersioning(options =>
         {
             options.ApiVersionReader = new UrlSegmentApiVersionReader();
-            options.AssumeDefaultVersionWhenUnspecified = false;
             options.ReportApiVersions = true;
         })
         .AddApiExplorer(options =>
@@ -25,6 +25,7 @@ public static class OpenApiConfiguration
         {
             options.Document.AddDocumentTransformer((document, _, _) =>
             {
+                document.Info.Title = "Devlivery API";
                 document.Components ??= new OpenApiComponents();
                 document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
 
@@ -35,22 +36,20 @@ public static class OpenApiConfiguration
                     Scheme = "bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Insira seu token JWT. Exemplo: Bearer {seu_token}"
+                    Description = "Obtenha o JWT no login e cole apenas o token, sem o prefixo Bearer."
                 };
 
-                document.Security?.Add(new OpenApiSecurityRequirement
+                return Task.CompletedTask;
+            });
+            options.Document.AddOperationTransformer((operation, context, _) =>
+            {
+                if (!context.Description.ActionDescriptor.EndpointMetadata.OfType<IAllowAnonymous>().Any())
                 {
+                    operation.Security = [new OpenApiSecurityRequirement
                     {
-                        new OpenApiSecuritySchemeReference("Bearer")
-                        {
-                            Reference = new JsonSchemaReference
-                            {
-                                Type = ReferenceType.SecurityScheme, Id = "Bearer"
-                            }
-                        },
-                        []
-                    }
-                });
+                        [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
+                    }];
+                }
 
                 return Task.CompletedTask;
             });
@@ -66,6 +65,9 @@ public static class OpenApiConfiguration
         app.MapOpenApi().WithDocumentPerVersion().AllowAnonymous();
         app.MapScalarApiReference(options =>
         {
+            options.WithTitle("Devlivery · Referência da API")
+                .AddPreferredSecuritySchemes("Bearer");
+
             foreach (var description in app.DescribeApiVersions())
             {
                 options.AddDocument(description.GroupName, description.GroupName,
