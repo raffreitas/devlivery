@@ -89,7 +89,7 @@ interface UpcomingExpensesDto {
 
 export const dashboardService = {
   async getStats(startDate?: Date, endDate?: Date): Promise<DashboardStats> {
-    let url = "/api/dashboard/stats";
+    let url = "/dashboard/stats";
     const params = new URLSearchParams();
     if (startDate) params.set("startDate", formatDate(startDate));
     if (endDate) params.set("endDate", formatDate(endDate));
@@ -103,7 +103,7 @@ export const dashboardService = {
     startDate?: Date,
     endDate?: Date,
   ): Promise<PaymentBreakdown> {
-    let url = "/api/dashboard/payment-breakdown";
+    let url = "/dashboard/payment-breakdown";
     const params = new URLSearchParams();
     if (startDate) params.set("startDate", formatDate(startDate));
     if (endDate) params.set("endDate", formatDate(endDate));
@@ -118,7 +118,7 @@ export const dashboardService = {
     startDate?: Date,
     endDate?: Date,
   ): Promise<OrdersByStatus> {
-    let url = "/api/dashboard/orders-by-status";
+    let url = "/dashboard/orders-by-status";
     const params = new URLSearchParams();
     if (startDate) params.set("startDate", formatDate(startDate));
     if (endDate) params.set("endDate", formatDate(endDate));
@@ -138,7 +138,7 @@ export const dashboardService = {
     startDate?: Date,
     endDate?: Date,
   ): Promise<ExpenseTimeSeries[]> {
-    let url = "/api/dashboard/sales-over-time";
+    let url = "/dashboard/sales-over-time";
     const params = new URLSearchParams();
     if (startDate) params.set("startDate", formatDate(startDate));
     if (endDate) params.set("endDate", formatDate(endDate));
@@ -152,7 +152,7 @@ export const dashboardService = {
     startDate?: Date,
     endDate?: Date,
   ): Promise<Array<{ name: string; quantity: number }>> {
-    let url = "/api/dashboard/top-products";
+    let url = "/dashboard/top-products";
     const params = new URLSearchParams();
     if (startDate) params.set("startDate", formatDate(startDate));
     if (endDate) params.set("endDate", formatDate(endDate));
@@ -166,7 +166,7 @@ export const dashboardService = {
     startDate?: Date,
     endDate?: Date,
   ): Promise<ExpensesByCategory[]> {
-    let url = "/api/dashboard/expenses-by-category";
+    let url = "/dashboard/expenses-by-category";
     const params = new URLSearchParams();
     if (startDate) params.set("startDate", formatDate(startDate));
     if (endDate) params.set("endDate", formatDate(endDate));
@@ -181,7 +181,7 @@ export const dashboardService = {
     startDate?: Date,
     endDate?: Date,
   ): Promise<ExpensesByStatus[]> {
-    let url = "/api/dashboard/expenses-by-status";
+    let url = "/dashboard/expenses-by-status";
     const params = new URLSearchParams();
     if (startDate) params.set("startDate", formatDate(startDate));
     if (endDate) params.set("endDate", formatDate(endDate));
@@ -196,7 +196,7 @@ export const dashboardService = {
     startDate?: Date,
     endDate?: Date,
   ): Promise<ExpenseTimeSeries[]> {
-    let url = "/api/dashboard/expenses-over-time";
+    let url = "/dashboard/expenses-over-time";
     const params = new URLSearchParams();
     if (startDate) params.set("startDate", formatDate(startDate));
     if (endDate) params.set("endDate", formatDate(endDate));
@@ -211,7 +211,7 @@ export const dashboardService = {
     startDate?: Date,
     endDate?: Date,
   ): Promise<ExpenseSummaryDto> {
-    let url = "/api/dashboard/expense-summary";
+    let url = "/dashboard/expense-summary";
     const params = new URLSearchParams();
     if (startDate) params.set("startDate", formatDate(startDate));
     if (endDate) params.set("endDate", formatDate(endDate));
@@ -223,7 +223,7 @@ export const dashboardService = {
   },
 
   async getUpcomingExpenses(days = 7): Promise<UpcomingExpenseDto[]> {
-    const url = `/api/dashboard/upcoming-expenses?days=${days}`;
+    const url = `/dashboard/upcoming-expenses?days=${days}`;
 
     const res = await api.get<ApiResponse<UpcomingExpensesDto>>(url);
 

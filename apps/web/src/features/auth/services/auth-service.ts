@@ -27,10 +27,10 @@ export const authService = {
   },
 
   login: async ({ email, password }: Credentials): Promise<AuthState> => {
-    const res = await api.post<ApiResponse<LoginResponseDto>>(
-      "/api/auth/login",
-      { email, password },
-    );
+    const res = await api.post<ApiResponse<LoginResponseDto>>("/auth/login", {
+      email,
+      password,
+    });
 
     const user: User = {
       id: res.data.userId,

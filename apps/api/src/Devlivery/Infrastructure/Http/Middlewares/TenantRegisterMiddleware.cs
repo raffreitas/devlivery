@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 using Devlivery.Infrastructure.Tenancy;
 
@@ -17,7 +17,7 @@ public class TenantRegisterMiddleware(
             "/openapi",
             "/health",
             "/alive",
-            "/api/auth/login"
+            "/api/v1/auth/login"
         ];
         if (publicEndpoints.Any(endpoint => context.Request.Path.StartsWithSegments(endpoint)))
         {

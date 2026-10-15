@@ -92,7 +92,7 @@ export const expenseService = {
     categoryId?: string;
     status?: string;
   }): Promise<Expense[]> => {
-    let url = "/api/expenses";
+    let url = "/expenses";
     if (
       params?.startDate ||
       params?.endDate ||
@@ -113,7 +113,7 @@ export const expenseService = {
 
   getById: async (id: string): Promise<Expense | null> => {
     const res = await api.get<ApiResponse<ExpenseDto | null>>(
-      `/api/expenses/${id}`,
+      `/expenses/${id}`,
     );
     return res.data ? mapExpense(res.data) : null;
   },
@@ -127,7 +127,7 @@ export const expenseService = {
       description: data.description || null,
       paymentDate: data.paymentDate || null,
     };
-    await api.post<void>("/api/expenses", payload);
+    await api.post<void>("/expenses", payload);
   },
 
   update: async (id: string, data: Partial<ExpenseFormData>): Promise<void> => {
@@ -140,23 +140,23 @@ export const expenseService = {
       supplier: data.supplier || null,
       description: data.description || null,
     };
-    await api.put<void>(`/api/expenses/${id}`, payload);
+    await api.put<void>(`/expenses/${id}`, payload);
   },
 
   markAsPaid: async (id: string, paymentDate: string): Promise<void> => {
-    await api.patch<void>(`/api/expenses/${id}/mark-as-paid`, {
+    await api.patch<void>(`/expenses/${id}/mark-as-paid`, {
       expenseId: id,
       paymentDate,
     });
   },
 
   delete: async (id: string): Promise<void> => {
-    await api.delete<void>(`/api/expenses/${id}`);
+    await api.delete<void>(`/expenses/${id}`);
   },
 
   getAllCategories: async (): Promise<Category[]> => {
     const res = await api.get<ApiResponse<CategoryDto[] | null>>(
-      "/api/expenses/categories",
+      "/expenses/categories",
     );
     const list = res.data ?? [];
     return list.map(mapCategory);
@@ -176,7 +176,7 @@ export const expenseService = {
       payload.parentCategoryId = data.parentCategoryId;
     }
     const res = await api.post<ApiResponse<{ categoryId: string }>>(
-      "/api/expenses/categories",
+      "/expenses/categories",
       payload,
     );
 
@@ -200,10 +200,10 @@ export const expenseService = {
     id: string,
     data: { name?: string; isActive?: boolean },
   ): Promise<void> => {
-    await api.put<void>(`/api/expenses/categories/${id}`, data);
+    await api.put<void>(`/expenses/categories/${id}`, data);
   },
 
   deleteCategory: async (id: string): Promise<void> => {
-    await api.delete<void>(`/api/expenses/categories/${id}`);
+    await api.delete<void>(`/expenses/categories/${id}`);
   },
 };

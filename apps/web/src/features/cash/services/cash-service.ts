@@ -94,14 +94,14 @@ function mapDepositDtoToDomain(dto: CashDepositDto): CashDeposit {
 export const cashService = {
   async getAll(): Promise<CashSession[]> {
     const response = await api.get<ApiResponse<CashSessionDto[]>>(
-      "/api/cash-register/sessions",
+      "/cash-register/sessions",
     );
     return response.data?.map(mapDtoToDomain) ?? [];
   },
 
   async getById(id: string): Promise<CashSession> {
     const response = await api.get<ApiResponse<CashSessionDto>>(
-      `/api/cash-register/sessions/${id}`,
+      `/cash-register/sessions/${id}`,
     );
     return mapDtoToDomain(response.data ?? ({} as CashSessionDto));
   },
@@ -109,7 +109,7 @@ export const cashService = {
   async getActive(): Promise<CashSession | null> {
     try {
       const response = await api.get<ApiResponse<CashSessionDto>>(
-        "/api/cash-register/sessions/active",
+        "/cash-register/sessions/active",
       );
       return mapDtoToDomain(response.data ?? ({} as CashSessionDto));
     } catch (error) {
@@ -130,7 +130,7 @@ export const cashService = {
     };
 
     const response = await api.post<ApiResponse<CashSessionDto>>(
-      "/api/cash-register/sessions",
+      "/cash-register/sessions",
       payload,
     );
 
@@ -144,7 +144,7 @@ export const cashService = {
     };
 
     await api.patch<ApiResponse<CashSessionDto>>(
-      `/api/cash-register/sessions/${id}/close`,
+      `/cash-register/sessions/${id}/close`,
       payload,
     );
   },
@@ -159,7 +159,7 @@ export const cashService = {
     };
 
     const response = await api.post<ApiResponse<CashDepositDto>>(
-      `/api/cash-register/sessions/${sessionId}/deposits`,
+      `/cash-register/sessions/${sessionId}/deposits`,
       payload,
     );
 
@@ -168,7 +168,7 @@ export const cashService = {
 
   async getDeposits(sessionId: string): Promise<CashDeposit[]> {
     const response = await api.get<ApiResponse<CashDepositDto[]>>(
-      `/api/cash-register/sessions/${sessionId}/deposits`,
+      `/cash-register/sessions/${sessionId}/deposits`,
     );
     return response.data?.map(mapDepositDtoToDomain) ?? [];
   },

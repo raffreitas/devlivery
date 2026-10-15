@@ -1,3 +1,5 @@
+using Asp.Versioning;
+
 namespace Devlivery.Common.Endpoints;
 
 public static class EndpointsRegistration
@@ -15,11 +17,18 @@ public static class EndpointsRegistration
 
     public static IEndpointRouteBuilder MapEndpoints(this WebApplication app)
     {
-        var api = app.MapGroup("/api");
-
-        foreach (var endpoint in app.Services.GetRequiredService<IEnumerable<IEndpoint>>())
+        var versions = app.Services.GetRequiredService<IEnumerable<IEndpoint>>()
+            .GroupBy(endpoint => endpoint.Version);
+        foreach (var version in versions)
         {
-            endpoint.MapEndpoint(api);
+            var api = app.NewVersionedApi()
+                .MapGroup("/api/v{version:apiVersion}")
+                .HasApiVersion(version.Key);
+
+            foreach (var endpoint in version)
+            {
+                endpoint.MapEndpoint(api);
+            }
         }
 
         return app;

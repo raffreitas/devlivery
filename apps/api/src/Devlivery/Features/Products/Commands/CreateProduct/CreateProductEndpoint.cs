@@ -23,6 +23,6 @@ public sealed class CreateProductEndpoint : IEndpoint
         CancellationToken ct)
     {
         var result = await handler.HandleAsync(command, ct);
-        return result.ToCreated(response => $"/api/products/{response.ProductId}");
+        return result.ToCreated(response => $"/api/v1/products/{response.ProductId}");
     }
 }

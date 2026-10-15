@@ -1,5 +1,8 @@
+using Asp.Versioning;
+
 using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;
+using Devlivery.Infrastructure.Http.Configuration;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Metadata;
@@ -16,45 +19,45 @@ public sealed class EndpointsRegistrationTests
     // Route table of the API: changing a route or tag here is a breaking change for the web app.
     private static readonly string[] ExpectedRoutes =
     [
-        "DELETE /api/expenses/categories/{categoryId:guid} [Expenses]",
-        "DELETE /api/expenses/{expenseId:guid} [Expenses]",
-        "DELETE /api/orders/{id:guid} [Orders]",
-        "DELETE /api/products/{id:guid} [Products]",
-        "GET /api/cash-register/sessions [CashRegister]",
-        "GET /api/cash-register/sessions/active [CashRegister]",
-        "GET /api/cash-register/sessions/{cashSessionId:guid}/deposits [CashRegister]",
-        "GET /api/cash-register/sessions/{id:guid} [CashRegister]",
-        "GET /api/dashboard/expense-summary [Dashboard]",
-        "GET /api/dashboard/expenses-by-category [Dashboard]",
-        "GET /api/dashboard/expenses-by-status [Dashboard]",
-        "GET /api/dashboard/expenses-over-time [Dashboard]",
-        "GET /api/dashboard/orders-by-status [Dashboard]",
-        "GET /api/dashboard/payment-breakdown [Dashboard]",
-        "GET /api/dashboard/sales-over-time [Dashboard]",
-        "GET /api/dashboard/stats [Dashboard]",
-        "GET /api/dashboard/top-products [Dashboard]",
-        "GET /api/dashboard/upcoming-expenses [Dashboard]",
-        "GET /api/expenses [Expenses]",
-        "GET /api/expenses/categories [Expenses]",
-        "GET /api/expenses/{expenseId:guid} [Expenses]",
-        "GET /api/orders [Orders]",
-        "GET /api/orders/{id:guid} [Orders]",
-        "GET /api/products [Products]",
-        "GET /api/products/{id:guid} [Products]",
-        "PATCH /api/cash-register/sessions/{id:guid}/close [CashRegister]",
-        "PATCH /api/expenses/{expenseId:guid}/mark-as-paid [Expenses]",
-        "PATCH /api/orders/{id:guid}/status [Orders]",
-        "POST /api/auth/login [Auth]",
-        "POST /api/cash-register/sessions [CashRegister]",
-        "POST /api/cash-register/sessions/{cashSessionId:guid}/deposits [CashRegister]",
-        "POST /api/expenses [Expenses]",
-        "POST /api/expenses/categories [Expenses]",
-        "POST /api/orders [Orders]",
-        "POST /api/products [Products]",
-        "PUT /api/expenses/categories/{categoryId:guid} [Expenses]",
-        "PUT /api/expenses/{expenseId:guid} [Expenses]",
-        "PUT /api/orders/{id:guid} [Orders]",
-        "PUT /api/products/{id:guid} [Products]",
+        "DELETE /api/v{version:apiVersion}/expenses/categories/{categoryId:guid} [Expenses]",
+        "DELETE /api/v{version:apiVersion}/expenses/{expenseId:guid} [Expenses]",
+        "DELETE /api/v{version:apiVersion}/orders/{id:guid} [Orders]",
+        "DELETE /api/v{version:apiVersion}/products/{id:guid} [Products]",
+        "GET /api/v{version:apiVersion}/cash-register/sessions [CashRegister]",
+        "GET /api/v{version:apiVersion}/cash-register/sessions/active [CashRegister]",
+        "GET /api/v{version:apiVersion}/cash-register/sessions/{cashSessionId:guid}/deposits [CashRegister]",
+        "GET /api/v{version:apiVersion}/cash-register/sessions/{id:guid} [CashRegister]",
+        "GET /api/v{version:apiVersion}/dashboard/expense-summary [Dashboard]",
+        "GET /api/v{version:apiVersion}/dashboard/expenses-by-category [Dashboard]",
+        "GET /api/v{version:apiVersion}/dashboard/expenses-by-status [Dashboard]",
+        "GET /api/v{version:apiVersion}/dashboard/expenses-over-time [Dashboard]",
+        "GET /api/v{version:apiVersion}/dashboard/orders-by-status [Dashboard]",
+        "GET /api/v{version:apiVersion}/dashboard/payment-breakdown [Dashboard]",
+        "GET /api/v{version:apiVersion}/dashboard/sales-over-time [Dashboard]",
+        "GET /api/v{version:apiVersion}/dashboard/stats [Dashboard]",
+        "GET /api/v{version:apiVersion}/dashboard/top-products [Dashboard]",
+        "GET /api/v{version:apiVersion}/dashboard/upcoming-expenses [Dashboard]",
+        "GET /api/v{version:apiVersion}/expenses [Expenses]",
+        "GET /api/v{version:apiVersion}/expenses/categories [Expenses]",
+        "GET /api/v{version:apiVersion}/expenses/{expenseId:guid} [Expenses]",
+        "GET /api/v{version:apiVersion}/orders [Orders]",
+        "GET /api/v{version:apiVersion}/orders/{id:guid} [Orders]",
+        "GET /api/v{version:apiVersion}/products [Products]",
+        "GET /api/v{version:apiVersion}/products/{id:guid} [Products]",
+        "PATCH /api/v{version:apiVersion}/cash-register/sessions/{id:guid}/close [CashRegister]",
+        "PATCH /api/v{version:apiVersion}/expenses/{expenseId:guid}/mark-as-paid [Expenses]",
+        "PATCH /api/v{version:apiVersion}/orders/{id:guid}/status [Orders]",
+        "POST /api/v{version:apiVersion}/auth/login [Auth]",
+        "POST /api/v{version:apiVersion}/cash-register/sessions [CashRegister]",
+        "POST /api/v{version:apiVersion}/cash-register/sessions/{cashSessionId:guid}/deposits [CashRegister]",
+        "POST /api/v{version:apiVersion}/expenses [Expenses]",
+        "POST /api/v{version:apiVersion}/expenses/categories [Expenses]",
+        "POST /api/v{version:apiVersion}/orders [Orders]",
+        "POST /api/v{version:apiVersion}/products [Products]",
+        "PUT /api/v{version:apiVersion}/expenses/categories/{categoryId:guid} [Expenses]",
+        "PUT /api/v{version:apiVersion}/expenses/{expenseId:guid} [Expenses]",
+        "PUT /api/v{version:apiVersion}/orders/{id:guid} [Orders]",
+        "PUT /api/v{version:apiVersion}/products/{id:guid} [Products]",
     ];
 
     [Fact]
@@ -62,6 +65,7 @@ public sealed class EndpointsRegistrationTests
     {
         // Arrange
         var builder = WebApplication.CreateBuilder();
+        builder.Services.AddOpenApiConfiguration();
         builder.Services.AddHandlers();
         builder.Services.AddEndpoints();
         builder.Services.AddRateLimiter(_ => { });
@@ -76,8 +80,11 @@ public sealed class EndpointsRegistrationTests
             .OfType<RouteEndpoint>()
             .Select(endpoint =>
             {
+                var version = endpoint.Metadata.GetRequiredMetadata<ApiVersionMetadata>();
                 var method = endpoint.Metadata.GetRequiredMetadata<HttpMethodMetadata>().HttpMethods.Single();
                 var tags = endpoint.Metadata.OfType<ITagsMetadata>().SelectMany(t => t.Tags);
+                version.Map(ApiVersionMapping.Explicit).SupportedApiVersions
+                    .ShouldBe([new ApiVersion(1, 0)]);
                 return $"{method} {endpoint.RoutePattern.RawText} [{string.Join(",", tags)}]";
             });
 

@@ -60,3 +60,6 @@ dotnet ef migrations add NomeDaMigracao --project src/Devlivery --context Applic
 ```
 
 Não coloque credenciais reais em `appsettings*.json`, `.env.example`, logs ou documentação.
+
+
+O cliente HTTP acrescenta `/api/v1` à origem definida em `VITE_API_URL`. Configure apenas a origem HTTPS da API, sem barra final e sem o prefixo de versão (exemplo: `https://localhost:7141`).

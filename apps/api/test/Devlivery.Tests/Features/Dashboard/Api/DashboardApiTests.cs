@@ -44,7 +44,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedOrderAsync(tenant, [(pizza, 10)], OrderStatus.Canceled);
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/stats");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/stats");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -66,7 +66,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedOrderAsync(tenant, [(pizza, 1)], OrderStatus.Canceled);
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/orders-by-status");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/orders-by-status");
 
         // Assert
         (await ApiTenant.ReadDataAsync<GetOrdersByStatusResponse>(response))
@@ -85,7 +85,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedOrderAsync(tenant, [(soda, 1)], OrderStatus.Pending, Payment(tenant, PaymentMethod.CreditCard, 40m));
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/payment-breakdown");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/payment-breakdown");
 
         // Assert
         var breakdown = await ApiTenant.ReadDataAsync<GetPaymentBreakdownResponse>(response);
@@ -112,7 +112,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedOrderAsync(tenant, [(pizza, 4)], OrderStatus.Delivered, createdAt: Utc(2026, 10, 15, 15, 0));
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/sales-over-time");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/sales-over-time");
 
         // Assert
         var sales = await ApiTenant.ReadDataAsync<GetSalesOverTimeResponse>(response);
@@ -133,7 +133,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedOrderAsync(tenant, [(pizza, 2)], OrderStatus.Delivered, createdAt: Utc(2026, 10, 14, 15, 0));
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/stats?startDate=2026-10-14&endDate=2026-10-14");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/stats?startDate=2026-10-14&endDate=2026-10-14");
 
         // Assert
         var stats = await ApiTenant.ReadDataAsync<GetDashboardStatsResponse>(response);
@@ -154,7 +154,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedOrderAsync(tenant, [(dessert, 10)], OrderStatus.Canceled);
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/top-products");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/top-products");
 
         // Assert
         var top = await ApiTenant.ReadDataAsync<GetTopProductsResponse>(response);
@@ -174,7 +174,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedExpenseAsync(tenant, category, 10m, e => e.WithDueDate(Today.AddDays(-1)).AsCancelled());
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/expense-summary");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/expense-summary");
 
         // Assert
         var summary = await ApiTenant.ReadDataAsync<GetExpenseSummaryResponse>(response);
@@ -196,7 +196,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedExpenseAsync(tenant, staff, 300m);
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/expenses-by-category");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/expenses-by-category");
 
         // Assert
         var byCategory = await ApiTenant.ReadDataAsync<GetExpensesByCategoryResponse>(response);
@@ -219,7 +219,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedExpenseAsync(tenant, category, 15m, e => e.WithDueDate(Today.AddDays(-2)));
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/expenses-by-status");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/expenses-by-status");
 
         // Assert
         var byStatus = await ApiTenant.ReadDataAsync<GetExpensesByStatusResponse>(response);
@@ -245,7 +245,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedExpenseAsync(tenant, category, 70m, e => e.WithDueDate(day));
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/expenses-over-time?startDate=2026-05-01&endDate=2026-05-31");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/expenses-over-time?startDate=2026-05-01&endDate=2026-05-31");
 
         // Assert
         var overTime = await ApiTenant.ReadDataAsync<GetExpensesOverTimeResponse>(response);
@@ -270,7 +270,7 @@ public sealed class DashboardApiTests(ApiFactory api)
         await SeedExpenseAsync(tenant, supplies, 60m, e => e.WithDueDate(Today.AddDays(2)).AsPaid(Today).WithDescription("Paga"));
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/dashboard/upcoming-expenses?days=7");
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/upcoming-expenses?days=7");
 
         // Assert
         var upcoming = await ApiTenant.ReadDataAsync<GetUpcomingExpensesResponse>(response);

@@ -61,7 +61,7 @@ function getAuthToken(): string | null {
 }
 
 const axiosInstance = axios.create({
-  baseURL: env.VITE_API_URL.replace(/\/$/, ""),
+  baseURL: `${env.VITE_API_URL.replace(/\/$/, "")}/api/v1`,
   headers: { "Content-Type": "application/json" },
 });
 

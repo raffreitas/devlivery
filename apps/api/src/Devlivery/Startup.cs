@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 using Devlivery.Common.Endpoints;
 using Devlivery.Common.Handlers;

@@ -37,7 +37,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
 
         // Act
         var response = await tenant.Client.GetAsync(
-            $"/api/expenses?categoryId={parent.Id}&status=Paid&start=2026-05-01&end=2026-05-31");
+            $"/api/v1/expenses?categoryId={parent.Id}&status=Paid&start=2026-05-01&end=2026-05-31");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -56,7 +56,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
         var expense = await SeedExpenseAsync(tenant, subcategory, "Farinha", e => e.WithAmount(150m));
 
         // Act
-        var response = await tenant.Client.GetAsync($"/api/expenses/{expense.Id}");
+        var response = await tenant.Client.GetAsync($"/api/v1/expenses/{expense.Id}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -73,7 +73,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
         var tenant = await api.CreateTenantAsync();
 
         // Act
-        var response = await tenant.Client.GetAsync($"/api/expenses/{Guid.NewGuid()}");
+        var response = await tenant.Client.GetAsync($"/api/v1/expenses/{Guid.NewGuid()}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -93,7 +93,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
         await tenant.SeedAsync(operational, supplies, cleaning, retired, administrative, inactiveParent);
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/expenses/categories");
+        var response = await tenant.Client.GetAsync("/api/v1/expenses/categories");
 
         // Assert
         var categories = await ApiTenant.ReadDataAsync<List<GetAllExpenseCategoriesResponse>>(response);
@@ -110,12 +110,12 @@ public sealed class ExpensesApiTests(ApiFactory api)
         var command = new CreateExpenseCommand(subcategory.Id, 150m, DueDate, "Distribuidora Sul", "Farinha", null);
 
         // Act
-        var response = await tenant.Client.PostAsJsonAsync("/api/expenses", command, ApiTenant.JsonOptions);
+        var response = await tenant.Client.PostAsJsonAsync("/api/v1/expenses", command, ApiTenant.JsonOptions);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
         var created = await ApiTenant.ReadDataAsync<CreateExpenseResponse>(response);
-        response.Headers.Location.ShouldBe(new Uri($"/api/expenses/{created.ExpenseId}", UriKind.Relative));
+        response.Headers.Location.ShouldBe(new Uri($"/api/v1/expenses/{created.ExpenseId}", UriKind.Relative));
         var persisted = await LoadExpenseAsync(tenant, created.ExpenseId);
         persisted.EstablishmentId.ShouldBe(tenant.EstablishmentId);
         persisted.Amount.ShouldBe(150m);
@@ -132,7 +132,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
         var request = new { CategoryId = (Guid?)null, Amount = 300m, DueDate = DueDate, Supplier = "Atacadão", Description = "Embalagens" };
 
         // Act
-        var response = await tenant.Client.PutAsJsonAsync($"/api/expenses/{expense.Id}", request, ApiTenant.JsonOptions);
+        var response = await tenant.Client.PutAsJsonAsync($"/api/v1/expenses/{expense.Id}", request, ApiTenant.JsonOptions);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
@@ -151,7 +151,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
         var expense = await SeedExpenseAsync(tenant, subcategory, "Farinha");
 
         // Act
-        var response = await tenant.Client.PatchAsJsonAsync($"/api/expenses/{expense.Id}/mark-as-paid",
+        var response = await tenant.Client.PatchAsJsonAsync($"/api/v1/expenses/{expense.Id}/mark-as-paid",
             new { PaymentDate = DueDate }, ApiTenant.JsonOptions);
 
         // Assert
@@ -170,7 +170,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
         var expense = await SeedExpenseAsync(tenant, subcategory, "Farinha", e => e.AsCancelled());
 
         // Act
-        var response = await tenant.Client.PatchAsJsonAsync($"/api/expenses/{expense.Id}/mark-as-paid",
+        var response = await tenant.Client.PatchAsJsonAsync($"/api/v1/expenses/{expense.Id}/mark-as-paid",
             new { PaymentDate = DueDate }, ApiTenant.JsonOptions);
 
         // Assert
@@ -187,7 +187,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
         var expense = await SeedExpenseAsync(tenant, subcategory, "Farinha");
 
         // Act
-        var response = await tenant.Client.DeleteAsync($"/api/expenses/{expense.Id}");
+        var response = await tenant.Client.DeleteAsync($"/api/v1/expenses/{expense.Id}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
@@ -203,12 +203,14 @@ public sealed class ExpensesApiTests(ApiFactory api)
         await tenant.SeedAsync(parent);
 
         // Act
-        var response = await tenant.Client.PostAsJsonAsync("/api/expenses/categories",
+        var response = await tenant.Client.PostAsJsonAsync("/api/v1/expenses/categories",
             new CreateCategoryCommand("Bebidas", parent.Id), ApiTenant.JsonOptions);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
         var created = await ApiTenant.ReadDataAsync<CreateCategoryResponse>(response);
+        response.Headers.Location.ShouldBe(new Uri(
+            $"/api/v1/expenses/categories/{created.CategoryId}", UriKind.Relative));
         var persisted = await tenant.WithDbContextAsync(db => db.ExpenseCategories.SingleAsync(c => c.Id == created.CategoryId));
         persisted.ParentCategoryId.ShouldBe(parent.Id);
         persisted.EstablishmentId.ShouldBe(tenant.EstablishmentId);
@@ -223,7 +225,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
         await tenant.SeedAsync(category);
 
         // Act
-        var response = await tenant.Client.PutAsJsonAsync($"/api/expenses/categories/{category.Id}",
+        var response = await tenant.Client.PutAsJsonAsync($"/api/v1/expenses/categories/{category.Id}",
             new { Name = "Operação", IsActive = (bool?)null }, ApiTenant.JsonOptions);
 
         // Assert
@@ -241,7 +243,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
         await SeedExpenseAsync(tenant, subcategory, "Farinha");
 
         // Act
-        var response = await tenant.Client.DeleteAsync($"/api/expenses/categories/{subcategory.Id}");
+        var response = await tenant.Client.DeleteAsync($"/api/v1/expenses/categories/{subcategory.Id}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
@@ -257,7 +259,7 @@ public sealed class ExpensesApiTests(ApiFactory api)
         var (parent, subcategory) = await SeedCategoriesAsync(tenant);
 
         // Act
-        var response = await tenant.Client.DeleteAsync($"/api/expenses/categories/{parent.Id}");
+        var response = await tenant.Client.DeleteAsync($"/api/v1/expenses/categories/{parent.Id}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);

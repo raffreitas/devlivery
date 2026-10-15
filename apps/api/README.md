@@ -25,7 +25,7 @@ apps/api/
 └── Devlivery.slnx
 ```
 
-Os endpoints são agrupados em `/api/auth`, `/api/products`, `/api/orders`, `/api/cash-register`, `/api/expenses` e `/api/dashboard`. Exceto login e health checks, a API exige um JWT válido.
+Os endpoints são agrupados em `/api/v1/auth`, `/api/v1/products`, `/api/v1/orders`, `/api/v1/cash-register`, `/api/v1/expenses` e `/api/v1/dashboard`. Exceto login e health checks, a API exige um JWT válido.
 
 ## Executar
 

@@ -38,6 +38,8 @@ Não ative o modo Railway sem executar a validação descrita no [guia de segura
 
 Variáveis `VITE_*` são incorporadas ao bundle e ficam visíveis no navegador. Nunca coloque segredos nelas.
 
+O cliente HTTP acrescenta `/api/v1` à origem definida em `VITE_API_URL`. Configure apenas a origem HTTPS da API, sem barra final e sem o prefixo de versão (exemplo: `https://localhost:7141`).
+
 ## Backup job
 
 | Variável | Padrão | Descrição |

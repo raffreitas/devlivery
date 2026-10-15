@@ -55,7 +55,7 @@ public sealed class GlobalExceptionHandlerTests : IDisposable
         using var malformedJson = new StringContent("{ \"email\": ", Encoding.UTF8, "application/json");
 
         // Act
-        var response = await client.PostAsync("/api/auth/login", malformedJson);
+        var response = await client.PostAsync("/api/v1/auth/login", malformedJson);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);

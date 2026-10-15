@@ -24,6 +24,6 @@ public sealed class CreateExpenseEndpoint : IEndpoint
     {
         var result = await handler.HandleAsync(command, ct);
 
-        return result.ToCreated(response => $"/api/expenses/{response.ExpenseId}");
+        return result.ToCreated(response => $"/api/v1/expenses/{response.ExpenseId}");
     }
 }
