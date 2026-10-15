@@ -4,7 +4,7 @@
 
 O ASP.NET Core Identity bloqueia a conta após cinco falhas consecutivas por cinco minutos. O estado é persistido no PostgreSQL e um login bem-sucedido zera o contador. Conta inexistente, senha incorreta e conta bloqueada retornam a mesma resposta 401 para não revelar usuários cadastrados.
 
-Além do bloqueio por conta, `POST /api/auth/login` possui uma janela fixa de 60 segundos com 30 requisições por IP e sem fila. Exceder o limite retorna 429 no formato de erro da API e inclui `Retry-After`. Os valores são configuráveis pelas opções `LoginProtection`.
+Além do bloqueio por conta, `POST /api/v1/auth/login` possui uma janela fixa de 60 segundos com 30 requisições por IP e sem fila. Exceder o limite retorna 429 no formato de erro da API e inclui `Retry-After`. Os valores são configuráveis pelas opções `LoginProtection`.
 
 O limite por IP reside na memória do processo e reinicia com a instância. Uma implantação com múltiplas instâncias exige limitação compartilhada. O bloqueio por conta continua persistente independentemente disso.
 

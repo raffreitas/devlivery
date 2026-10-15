@@ -1,10 +1,14 @@
+using Asp.Versioning;
+
 namespace Devlivery.Common.Endpoints;
 
 /// <summary>
-/// An HTTP endpoint discovered automatically from the assembly and mapped under the <c>/api</c> group.
-/// Each endpoint declares its full route (relative to <c>/api</c>) and its OpenAPI tag.
+/// An HTTP endpoint discovered automatically and mapped under its versioned API group.
+/// Routes are relative to <c>/api/v{version}</c>; existing endpoints default to v1.
 /// </summary>
 public interface IEndpoint
 {
+    ApiVersion Version => new(1, 0);
+
     void MapEndpoint(IEndpointRouteBuilder app);
 }

@@ -46,3 +46,6 @@ pnpm build
 O projeto não possui uma suíte de testes frontend configurada atualmente. O build executa a verificação TypeScript antes de gerar `dist/`.
 
 Para publicar, configure `VITE_API_URL` durante o build com a URL HTTPS pública da API e inclua a origem pública do frontend em `ALLOWED_ORIGINS` na API. Consulte o [guia de publicação](../../docs/operations/deployment.md).
+
+
+O cliente HTTP acrescenta `/api/v1` à origem definida em `VITE_API_URL`. Configure apenas a origem HTTPS da API, sem barra final e sem o prefixo de versão (exemplo: `https://localhost:7141`).

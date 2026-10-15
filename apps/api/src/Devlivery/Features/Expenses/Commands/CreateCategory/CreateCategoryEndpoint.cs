@@ -24,6 +24,6 @@ public sealed class CreateCategoryEndpoint : IEndpoint
         CancellationToken ct)
     {
         var result = await handler.HandleAsync(command, ct);
-        return result.ToCreated(response => $"/api/expenses/categories/{response.CategoryId}");
+        return result.ToCreated(response => $"/api/v1/expenses/categories/{response.CategoryId}");
     }
 }

@@ -30,13 +30,13 @@ public sealed class CashRegisterApiTests(ApiFactory api)
         var tenant = await api.CreateTenantAsync("Maria Souza");
 
         // Act
-        var response = await tenant.Client.PostAsJsonAsync("/api/cash-register/sessions",
+        var response = await tenant.Client.PostAsJsonAsync("/api/v1/cash-register/sessions",
             new CreateCashSessionCommand(100m, "Turno da noite"), ApiTenant.JsonOptions);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
         var created = await ApiTenant.ReadDataAsync<CreateCashSessionResponse>(response);
-        response.Headers.Location.ShouldBe(new Uri($"/api/cash-register/sessions/{created.Id}", UriKind.Relative));
+        response.Headers.Location.ShouldBe(new Uri($"/api/v1/cash-register/sessions/{created.Id}", UriKind.Relative));
         created.AttendantName.ShouldBe("Maria Souza");
         var persisted = await tenant.WithDbContextAsync(db => db.CashSessions.SingleAsync(s => s.Id == created.Id));
         persisted.AttendantId.ShouldBe(tenant.Operator.Id);
@@ -51,7 +51,7 @@ public sealed class CashRegisterApiTests(ApiFactory api)
         await tenant.SeedAsync(OpenSession(tenant));
 
         // Act
-        var response = await tenant.Client.PostAsJsonAsync("/api/cash-register/sessions",
+        var response = await tenant.Client.PostAsJsonAsync("/api/v1/cash-register/sessions",
             new CreateCashSessionCommand(100m, null), ApiTenant.JsonOptions);
 
         // Assert
@@ -67,14 +67,16 @@ public sealed class CashRegisterApiTests(ApiFactory api)
         await tenant.SeedAsync(session);
 
         // Act
-        var response = await tenant.Client.PostAsJsonAsync($"/api/cash-register/sessions/{session.Id}/deposits",
+        var response = await tenant.Client.PostAsJsonAsync($"/api/v1/cash-register/sessions/{session.Id}/deposits",
             new { Amount = 50m, Notes = "Reforço de troco" }, ApiTenant.JsonOptions);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
         var created = await ApiTenant.ReadDataAsync<CreateCashDepositResponse>(response);
+        response.Headers.Location.ShouldBe(new Uri(
+            $"/api/v1/cash-register/sessions/{session.Id}/deposits/{created.Id}", UriKind.Relative));
         var deposits = await ApiTenant.ReadDataAsync<GetCashSessionDepositsResponse[]>(
-            await tenant.Client.GetAsync($"/api/cash-register/sessions/{session.Id}/deposits"));
+            await tenant.Client.GetAsync($"/api/v1/cash-register/sessions/{session.Id}/deposits"));
         var deposit = deposits.ShouldHaveSingleItem();
         deposit.Id.ShouldBe(created.Id);
         deposit.Amount.ShouldBe(50m);
@@ -92,12 +94,12 @@ public sealed class CashRegisterApiTests(ApiFactory api)
         await tenant.SeedAsync(session);
 
         // Act
-        var response = await tenant.Client.PatchAsJsonAsync($"/api/cash-register/sessions/{session.Id}/close",
+        var response = await tenant.Client.PatchAsJsonAsync($"/api/v1/cash-register/sessions/{session.Id}/close",
             new { ClosingAmount = 180m, Notes = "Conferido" }, ApiTenant.JsonOptions);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
-        (await tenant.Client.GetAsync("/api/cash-register/sessions/active")).StatusCode
+        (await tenant.Client.GetAsync("/api/v1/cash-register/sessions/active")).StatusCode
             .ShouldBe(HttpStatusCode.NotFound);
         var persisted = await tenant.WithDbContextAsync(db => db.CashSessions.SingleAsync(s => s.Id == session.Id));
         persisted.Status.ShouldBe(CashSessionStatus.Closed);
@@ -113,7 +115,7 @@ public sealed class CashRegisterApiTests(ApiFactory api)
         await tenant.SeedAsync(session);
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/cash-register/sessions/active");
+        var response = await tenant.Client.GetAsync("/api/v1/cash-register/sessions/active");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -134,7 +136,7 @@ public sealed class CashRegisterApiTests(ApiFactory api)
         await tenant.SeedAsync(session);
 
         // Act
-        var response = await tenant.Client.GetAsync($"/api/cash-register/sessions/{session.Id}");
+        var response = await tenant.Client.GetAsync($"/api/v1/cash-register/sessions/{session.Id}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -157,7 +159,7 @@ public sealed class CashRegisterApiTests(ApiFactory api)
         await tenant.SeedAsync(open);
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/cash-register/sessions");
+        var response = await tenant.Client.GetAsync("/api/v1/cash-register/sessions");
 
         // Assert
         var sessions = await ApiTenant.ReadDataAsync<GetCashSessionsResponse[]>(response);
@@ -179,7 +181,7 @@ public sealed class CashRegisterApiTests(ApiFactory api)
         await tenant.SeedAsync(closed, open);
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/cash-register/sessions?status=Closed");
+        var response = await tenant.Client.GetAsync("/api/v1/cash-register/sessions?status=Closed");
 
         // Assert
         var sessions = await ApiTenant.ReadDataAsync<GetCashSessionsResponse[]>(response);

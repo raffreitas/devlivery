@@ -4,7 +4,7 @@ Comportamentos encontrados durante a revisão dos testes do backend (outubro de 
 
 ## 1. Edição de pedido recalcula o preço dos itens
 
-**Hoje:** `PUT /api/orders/{id}` (`UpdateOrderHandler`) recria todos os itens com o preço **atual** do catálogo. Se o preço de um produto mudou depois da criação do pedido, qualquer edição — mesmo só do endereço — altera o total.
+**Hoje:** `PUT /api/v1/orders/{id}` (`UpdateOrderHandler`) recria todos os itens com o preço **atual** do catálogo. Se o preço de um produto mudou depois da criação do pedido, qualquer edição — mesmo só do endereço — altera o total.
 
 **Conflito:** o [modelo de domínio](domain-model.md) diz que o item mantém o preço unitário próprio e que o total não depende do preço atual do catálogo.
 
@@ -43,7 +43,7 @@ Comportamentos encontrados durante a revisão dos testes do backend (outubro de 
 
 ## 4. Receita do Dashboard inclui pedidos ainda não entregues
 
-**Hoje:** `GET /api/dashboard/stats` e `GET /api/dashboard/sales-over-time` somam o total de todo pedido não cancelado — inclusive pendentes, em preparo e prontos, cujo pagamento ainda não foi confirmado. Já `GET /api/dashboard/payment-breakdown` considera apenas pagamentos **confirmados** (pedidos entregues), descontando o troco.
+**Hoje:** `GET /api/v1/dashboard/stats` e `GET /api/v1/dashboard/sales-over-time` somam o total de todo pedido não cancelado — inclusive pendentes, em preparo e prontos, cujo pagamento ainda não foi confirmado. Já `GET /api/v1/dashboard/payment-breakdown` considera apenas pagamentos **confirmados** (pedidos entregues), descontando o troco.
 
 **Efeito:** na mesma tela, o card "Receita Total" e o gráfico por forma de pagamento mostram valores diferentes; o **lucro líquido** (`receita - despesas pagas`) inclui dinheiro ainda não recebido.
 
@@ -57,7 +57,7 @@ Comportamentos encontrados durante a revisão dos testes do backend (outubro de 
 
 ## 5. Preço exibido nos pedidos vem do catálogo, não do item
 
-**Hoje:** `GET /api/orders` e `GET /api/orders/{id}` devolvem cada item com o `Product` atual (nome, **preço atual**), sem o `UnitPrice` gravado no item. Se o preço do catálogo mudou, a listagem mostra um valor diferente do que compõe o total do pedido. Relacionado ao item 1.
+**Hoje:** `GET /api/v1/orders` e `GET /api/v1/orders/{id}` devolvem cada item com o `Product` atual (nome, **preço atual**), sem o `UnitPrice` gravado no item. Se o preço do catálogo mudou, a listagem mostra um valor diferente do que compõe o total do pedido. Relacionado ao item 1.
 
 **Opção:** incluir `unitPrice` (e o subtotal) no `OrderItemDto` e usá-lo no front-end.
 
@@ -67,14 +67,14 @@ Comportamentos encontrados durante a revisão dos testes do backend (outubro de 
 
 Comportamentos sem impacto visível hoje, mas que confundem consumidores da API:
 
-- **Pagamentos cancelados:** `GET /api/orders` omite pagamentos cancelados; `GET /api/orders/{id}` os inclui.
+- **Pagamentos cancelados:** `GET /api/v1/orders` omite pagamentos cancelados; `GET /api/v1/orders/{id}` os inclui.
 - **Total de pedidos do caixa:** a listagem de sessões usa pagamentos distintos (inclui os estornados); a sessão ativa e o detalhe usam `pagamentos - estornos`.
-- **Resumo de despesas:** em `GET /api/dashboard/expense-summary`, `total` e `count` incluem despesas canceladas, então `total ≠ paid + pending + overdue`. O front-end não usa esses dois campos.
-- **`GET /api/expenses/{id}`:** devolve o status do domínio (`Pending`) em vez do status de exibição (`Overdue`/`DueToday`) e a categoria sem a hierarquia pai/subcategoria usada pela listagem. Não é chamado por nenhuma tela (`useExpense` não tem consumidores).
+- **Resumo de despesas:** em `GET /api/v1/dashboard/expense-summary`, `total` e `count` incluem despesas canceladas, então `total ≠ paid + pending + overdue`. O front-end não usa esses dois campos.
+- **`GET /api/v1/expenses/{id}`:** devolve o status do domínio (`Pending`) em vez do status de exibição (`Overdue`/`DueToday`) e a categoria sem a hierarquia pai/subcategoria usada pela listagem. Não é chamado por nenhuma tela (`useExpense` não tem consumidores).
 - **Nome dos filtros de data:** o Dashboard usa `startDate`/`endDate`; pedidos, caixa e despesas usam `start`/`end`.
 
 **Sugestão:** alinhar cada par ao contrato que o front-end já consome, removendo o que não é usado.
 
 ## Corrigido durante a revisão
 
-- `GET /api/cash-register/sessions` não carregava as movimentações e devolvia receita, caixa esperado e total de pedidos zerados. Corrigido com o `Include` das movimentações; a listagem ainda não é exibida pelo front-end.
+- `GET /api/v1/cash-register/sessions` não carregava as movimentações e devolvia receita, caixa esperado e total de pedidos zerados. Corrigido com o `Include` das movimentações; a listagem ainda não é exibida pelo front-end.

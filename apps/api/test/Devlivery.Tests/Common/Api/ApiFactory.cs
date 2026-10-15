@@ -58,7 +58,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         return tenant;
     }
 
-    /// <summary>Creates an operator that can sign in through <c>POST /api/auth/login</c>.</summary>
+    /// <summary>Creates an operator that can sign in through <c>POST /api/v1/auth/login</c>.</summary>
     public async Task<User> CreateLoginUserAsync(string email, string password)
     {
         var establishment = new EstablishmentBuilder().Build();

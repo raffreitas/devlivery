@@ -34,6 +34,6 @@ public sealed class CreateCashDepositEndpoint : IEndpoint
             request.Amount,
             request.Notes);
         var result = await handler.HandleAsync(command, ct);
-        return result.ToCreated(response => $"/api/cash-register/sessions/{cashSessionId}/deposits/{response.Id}");
+        return result.ToCreated(response => $"/api/v1/cash-register/sessions/{cashSessionId}/deposits/{response.Id}");
     }
 }

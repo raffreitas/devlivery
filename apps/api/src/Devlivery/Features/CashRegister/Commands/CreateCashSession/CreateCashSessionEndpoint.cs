@@ -24,6 +24,6 @@ public sealed class CreateCashSessionEndpoint : IEndpoint
         CancellationToken ct)
     {
         var result = await handler.HandleAsync(command, ct);
-        return result.ToCreated(response => $"/api/cash-register/sessions/{response.Id}");
+        return result.ToCreated(response => $"/api/v1/cash-register/sessions/{response.Id}");
     }
 }

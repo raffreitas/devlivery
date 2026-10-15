@@ -1,4 +1,6 @@
-﻿using Microsoft.OpenApi;
+using Asp.Versioning;
+
+using Microsoft.OpenApi;
 
 using Scalar.AspNetCore;
 
@@ -8,9 +10,20 @@ public static class OpenApiConfiguration
 {
     public static IServiceCollection AddOpenApiConfiguration(this IServiceCollection services)
     {
-        services.AddOpenApi(options =>
+        services.AddApiVersioning(options =>
         {
-            options.AddDocumentTransformer((document, _, _) =>
+            options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            options.AssumeDefaultVersionWhenUnspecified = false;
+            options.ReportApiVersions = true;
+        })
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'VVV";
+            options.SubstituteApiVersionInUrl = true;
+        })
+        .AddOpenApi(options =>
+        {
+            options.Document.AddDocumentTransformer((document, _, _) =>
             {
                 document.Components ??= new OpenApiComponents();
                 document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
@@ -50,8 +63,15 @@ public static class OpenApiConfiguration
     {
         if (!app.Environment.IsDevelopment()) return app;
 
-        app.MapOpenApi().AllowAnonymous();
-        app.MapScalarApiReference().AllowAnonymous();
+        app.MapOpenApi().WithDocumentPerVersion().AllowAnonymous();
+        app.MapScalarApiReference(options =>
+        {
+            foreach (var description in app.DescribeApiVersions())
+            {
+                options.AddDocument(description.GroupName, description.GroupName,
+                    isDefault: description.GroupName == "v1");
+            }
+        }).AllowAnonymous();
 
         return app;
     }

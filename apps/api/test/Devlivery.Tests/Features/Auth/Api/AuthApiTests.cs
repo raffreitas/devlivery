@@ -24,14 +24,14 @@ public sealed class AuthApiTests(ApiFactory api)
         using var client = api.CreateClient();
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginCommand(email, Password));
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginCommand(email, Password));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var login = await ApiTenant.ReadDataAsync<LoginResponse>(response);
         login.UserId.ShouldBe(user.Id);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.Token);
-        (await client.GetAsync("/api/products")).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await client.GetAsync("/api/v1/products")).StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public sealed class AuthApiTests(ApiFactory api)
         using var client = api.CreateClient();
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginCommand(email, "senha-errada"));
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginCommand(email, "senha-errada"));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
@@ -58,10 +58,10 @@ public sealed class AuthApiTests(ApiFactory api)
         await api.CreateLoginUserAsync(email, Password);
         using var client = api.CreateClient();
         for (var attempt = 0; attempt < 5; attempt++)
-            await client.PostAsJsonAsync("/api/auth/login", new LoginCommand(email, "senha-errada"));
+            await client.PostAsJsonAsync("/api/v1/auth/login", new LoginCommand(email, "senha-errada"));
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginCommand(email, Password));
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginCommand(email, Password));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);

@@ -45,7 +45,7 @@ Somente depois desse teste configure `LoginProtection__RailwayIngress=true`. Com
 
 ## Ordem de entrega
 
-Publique a API e aplique migrações antes do frontend. O backend aceita clientes antigos que ainda enviam campos de autoria, mas ignora esses campos. Em seguida, publique o frontend com `VITE_API_URL` apontando para a API pública.
+A migração para `/api/v1` exige publicar API e frontend na mesma janela coordenada. As rotas antigas `/api/...` deixam de existir, sem aliases ou redirecionamentos; clientes com bundle antigo precisam atualizar a página. Configure `VITE_API_URL` apenas com a origem pública HTTPS, sem `/api/v1`. Esta entrega não exige migrações de banco. Após publicar, valide login e uma consulta autenticada e acompanhe respostas 401 e 404. Em caso de regressão, reverta API e frontend juntos para a entrega anterior.
 
 ## Operação
 

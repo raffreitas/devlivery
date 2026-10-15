@@ -89,7 +89,7 @@ export const orderService = {
     endDate?: string;
     paymentMethod?: string;
   }): Promise<Order[]> => {
-    let url = "/api/orders";
+    let url = "/orders";
     if (params?.startDate || params?.endDate || params?.paymentMethod) {
       const qp = new URLSearchParams();
       if (params.startDate) qp.set("start", params.startDate);
@@ -103,9 +103,7 @@ export const orderService = {
   },
 
   getById: async (id: string): Promise<Order | null> => {
-    const res = await api.get<ApiResponse<OrderDto | null>>(
-      `/api/orders/${id}`,
-    );
+    const res = await api.get<ApiResponse<OrderDto | null>>(`/orders/${id}`);
     return res.data ? mapOrder(res.data) : null;
   },
 
@@ -140,7 +138,7 @@ export const orderService = {
         })),
       notes: data.notes ?? null,
     };
-    await api.post<void>("/api/orders", payload);
+    await api.post<void>("/orders", payload);
   },
 
   update: async (id: string, data: OrderFormData): Promise<void> => {
@@ -162,16 +160,16 @@ export const orderService = {
       })),
       notes: data.notes ?? null,
     };
-    await api.put<void>(`/api/orders/${id}`, payload);
+    await api.put<void>(`/orders/${id}`, payload);
   },
 
   updateStatus: async (id: string, status: OrderStatus): Promise<void> => {
-    await api.patch<void>(`/api/orders/${id}/status`, {
+    await api.patch<void>(`/orders/${id}/status`, {
       status,
     });
   },
 
   delete: async (id: string): Promise<void> => {
-    await api.delete<void>(`/api/orders/${id}`);
+    await api.delete<void>(`/orders/${id}`);
   },
 };

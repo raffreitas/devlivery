@@ -46,7 +46,7 @@ public sealed class OrdersApiTests(ApiFactory api)
         await SetCreatedAtAsync(tenant, newer, new DateTime(2026, 10, 14, 15, 0, 0, DateTimeKind.Utc));
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/orders");
+        var response = await tenant.Client.GetAsync("/api/v1/orders");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -71,7 +71,7 @@ public sealed class OrdersApiTests(ApiFactory api)
         await SetCreatedAtAsync(tenant, earlyOnFourteenth, new DateTime(2026, 10, 14, 3, 0, 0, DateTimeKind.Utc));
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/orders?start=2026-10-14&end=2026-10-14");
+        var response = await tenant.Client.GetAsync("/api/v1/orders?start=2026-10-14&end=2026-10-14");
 
         // Assert
         var orders = await ApiTenant.ReadDataAsync<List<GetAllOrdersResponse>>(response);
@@ -96,7 +96,7 @@ public sealed class OrdersApiTests(ApiFactory api)
         ]);
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/orders?paymentMethod=Pix");
+        var response = await tenant.Client.GetAsync("/api/v1/orders?paymentMethod=Pix");
 
         // Assert
         var orders = await ApiTenant.ReadDataAsync<List<GetAllOrdersResponse>>(response);
@@ -112,7 +112,7 @@ public sealed class OrdersApiTests(ApiFactory api)
         var order = await SeedOrderAsync(tenant, [(pizza, 2)], customer: "Maria Souza");
 
         // Act
-        var response = await tenant.Client.GetAsync($"/api/orders/{order.Id}");
+        var response = await tenant.Client.GetAsync($"/api/v1/orders/{order.Id}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -130,7 +130,7 @@ public sealed class OrdersApiTests(ApiFactory api)
         var tenant = await api.CreateTenantAsync();
 
         // Act
-        var response = await tenant.Client.GetAsync($"/api/orders/{Guid.NewGuid()}");
+        var response = await tenant.Client.GetAsync($"/api/v1/orders/{Guid.NewGuid()}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -151,7 +151,7 @@ public sealed class OrdersApiTests(ApiFactory api)
             DeliveryFee: 5m);
 
         // Act
-        var response = await tenant.Client.PostAsJsonAsync("/api/orders", command, ApiTenant.JsonOptions);
+        var response = await tenant.Client.PostAsJsonAsync("/api/v1/orders", command, ApiTenant.JsonOptions);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
@@ -182,7 +182,7 @@ public sealed class OrdersApiTests(ApiFactory api)
         };
 
         // Act
-        var response = await tenant.Client.PutAsJsonAsync($"/api/orders/{order.Id}", request, ApiTenant.JsonOptions);
+        var response = await tenant.Client.PutAsJsonAsync($"/api/v1/orders/{order.Id}", request, ApiTenant.JsonOptions);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
@@ -211,7 +211,7 @@ public sealed class OrdersApiTests(ApiFactory api)
         await tenant.SeedAsync(session);
 
         // Act
-        var response = await tenant.Client.PatchAsJsonAsync($"/api/orders/{order.Id}/status",
+        var response = await tenant.Client.PatchAsJsonAsync($"/api/v1/orders/{order.Id}/status",
             new { Status = OrderStatus.Delivered }, ApiTenant.JsonOptions);
 
         // Assert
@@ -234,7 +234,7 @@ public sealed class OrdersApiTests(ApiFactory api)
             status: OrderStatus.Delivered);
 
         // Act
-        var response = await tenant.Client.PatchAsJsonAsync($"/api/orders/{order.Id}/status",
+        var response = await tenant.Client.PatchAsJsonAsync($"/api/v1/orders/{order.Id}/status",
             new { Status = OrderStatus.Preparing }, ApiTenant.JsonOptions);
 
         // Assert
@@ -254,11 +254,11 @@ public sealed class OrdersApiTests(ApiFactory api)
         var session = new CashSessionBuilder().WithEstablishmentId(tenant.EstablishmentId)
             .WithAttendantId(tenant.Operator.Id).WithOpeningAmount(0m).Build();
         await tenant.SeedAsync(session);
-        await tenant.Client.PatchAsJsonAsync($"/api/orders/{order.Id}/status",
+        await tenant.Client.PatchAsJsonAsync($"/api/v1/orders/{order.Id}/status",
             new { Status = OrderStatus.Delivered }, ApiTenant.JsonOptions);
 
         // Act
-        var response = await tenant.Client.DeleteAsync($"/api/orders/{order.Id}");
+        var response = await tenant.Client.DeleteAsync($"/api/v1/orders/{order.Id}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);

@@ -28,7 +28,7 @@ public sealed class ProductsApiTests(ApiFactory api)
         await tenant.SeedAsync(newer);
 
         // Act
-        var response = await tenant.Client.GetAsync("/api/products");
+        var response = await tenant.Client.GetAsync("/api/v1/products");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -46,7 +46,7 @@ public sealed class ProductsApiTests(ApiFactory api)
         await tenant.SeedAsync(product);
 
         // Act
-        var response = await tenant.Client.GetAsync($"/api/products/{product.Id}");
+        var response = await tenant.Client.GetAsync($"/api/v1/products/{product.Id}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -62,7 +62,7 @@ public sealed class ProductsApiTests(ApiFactory api)
         var tenant = await api.CreateTenantAsync();
 
         // Act
-        var response = await tenant.Client.GetAsync($"/api/products/{Guid.NewGuid()}");
+        var response = await tenant.Client.GetAsync($"/api/v1/products/{Guid.NewGuid()}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -77,12 +77,12 @@ public sealed class ProductsApiTests(ApiFactory api)
         var command = new CreateProductCommand("Pizza Calabresa", "Molho, calabresa e cebola", 49.90m, "Pizzas", true);
 
         // Act
-        var response = await tenant.Client.PostAsJsonAsync("/api/products", command, ApiTenant.JsonOptions);
+        var response = await tenant.Client.PostAsJsonAsync("/api/v1/products", command, ApiTenant.JsonOptions);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
         var created = await ApiTenant.ReadDataAsync<CreateProductResponse>(response);
-        response.Headers.Location.ShouldBe(new Uri($"/api/products/{created.ProductId}", UriKind.Relative));
+        response.Headers.Location.ShouldBe(new Uri($"/api/v1/products/{created.ProductId}", UriKind.Relative));
         var persisted = await tenant.WithDbContextAsync(db => db.Products.SingleAsync(p => p.Id == created.ProductId));
         persisted.Name.ShouldBe("Pizza Calabresa");
         persisted.EstablishmentId.ShouldBe(tenant.EstablishmentId);
@@ -98,7 +98,7 @@ public sealed class ProductsApiTests(ApiFactory api)
         var request = new { Name = "Pizza Portuguesa", Description = "Presunto e ovo", Price = 54.90m, Category = "Pizzas", Available = false };
 
         // Act
-        var response = await tenant.Client.PutAsJsonAsync($"/api/products/{product.Id}", request, ApiTenant.JsonOptions);
+        var response = await tenant.Client.PutAsJsonAsync($"/api/v1/products/{product.Id}", request, ApiTenant.JsonOptions);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
@@ -120,7 +120,7 @@ public sealed class ProductsApiTests(ApiFactory api)
         await tenant.SeedAsync(product, order);
 
         // Act
-        var response = await tenant.Client.DeleteAsync($"/api/products/{product.Id}");
+        var response = await tenant.Client.DeleteAsync($"/api/v1/products/{product.Id}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
@@ -136,7 +136,7 @@ public sealed class ProductsApiTests(ApiFactory api)
         await tenant.SeedAsync(product);
 
         // Act
-        var response = await tenant.Client.DeleteAsync($"/api/products/{product.Id}");
+        var response = await tenant.Client.DeleteAsync($"/api/v1/products/{product.Id}");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
