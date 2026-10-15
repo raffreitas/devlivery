@@ -14,7 +14,7 @@ public sealed class GetTopProductsEndpoint : IEndpoint
         app.MapGet("dashboard/top-products", Handle)
             .WithTags(Tags.Dashboard)
             .Produces<ApiResource<GetTopProductsResponse>>()
-            .Produces<ApiResource<GetTopProductsResponse>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> Handle(

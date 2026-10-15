@@ -51,6 +51,12 @@ Endereços locais:
 - Prontidão: `/health`
 - Vivacidade: `/alive`
 
+## Documentação interativa
+
+Em desenvolvimento, abra `/scalar/` para consultar o guia de início rápido, selecionar o contrato e testar requisições. Autentique-se pelo login e cole `data.token` no campo Bearer; o login é público e as demais operações indicam a exigência de JWT. A referência inclui descrições das áreas, resumos das operações e orientações sobre respostas e erros.
+
+Ao adicionar ou alterar um endpoint, os metadados `.Produces(...)` alinhados ao comportamento real. A apresentação e o conteúdo geral ficam em `Infrastructure/Http/Configuration/ApiDocumentation.cs`.
+
 ## Testes
 
 A suíte cobre principalmente domínio, validators e handlers. Cenários de integração que exercitam consultas PostgreSQL usam Testcontainers e precisam do Docker em execução.

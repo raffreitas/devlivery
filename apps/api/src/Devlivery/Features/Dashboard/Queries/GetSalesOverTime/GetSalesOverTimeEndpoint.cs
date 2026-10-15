@@ -14,7 +14,7 @@ public sealed class GetSalesOverTimeEndpoint : IEndpoint
         app.MapGet("dashboard/sales-over-time", Handle)
             .WithTags(Tags.Dashboard)
             .Produces<ApiResource<GetSalesOverTimeResponse>>()
-            .Produces<ApiResource<GetSalesOverTimeResponse>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> Handle(

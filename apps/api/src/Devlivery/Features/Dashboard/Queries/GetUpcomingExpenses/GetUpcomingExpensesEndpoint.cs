@@ -14,7 +14,7 @@ public sealed class GetUpcomingExpensesEndpoint : IEndpoint
         app.MapGet("dashboard/upcoming-expenses", Handle)
             .WithTags(Tags.Dashboard)
             .Produces<ApiResource<GetUpcomingExpensesResponse>>()
-            .Produces<ApiResource<GetUpcomingExpensesResponse>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> Handle(

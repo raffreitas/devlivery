@@ -15,6 +15,7 @@ public sealed class CloseCashSessionEndpoint : IEndpoint
     {
         app.MapPatch("cash-register/sessions/{id:guid}/close", Handle)
             .WithTags(Tags.CashRegister)
+            .Produces(StatusCodes.Status204NoContent)
             .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ApiProblemDetails>(StatusCodes.Status422UnprocessableEntity);
