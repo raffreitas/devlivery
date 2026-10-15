@@ -1,10 +1,17 @@
 # Devlivery
 
-Devlivery é uma plataforma de gestão para operações de delivery. O monorepo reúne uma API .NET e uma aplicação web React para administrar pedidos, produtos, despesas, caixa e indicadores operacionais.
+[![API CI](https://github.com/raffreitas/devlivery/actions/workflows/api-ci.yaml/badge.svg?branch=main)](https://github.com/raffreitas/devlivery/actions/workflows/api-ci.yaml) [![API Sonar Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=devlivery-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=devlivery-api) [![API Coverage](https://sonarcloud.io/api/project_badges/measure?project=devlivery-api&metric=coverage)](https://sonarcloud.io/summary/new_code?id=devlivery-api)<br>
+[![Web App CI](https://github.com/raffreitas/devlivery/actions/workflows/web-app-ci.yaml/badge.svg?branch=main)](https://github.com/raffreitas/devlivery/actions/workflows/web-app-ci.yaml) [![Web Sonar Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=devlivery-web&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=devlivery-web)<br>
+[![License](https://img.shields.io/github/license/raffreitas/devlivery)](LICENSE)
 
-## Visão geral
+Gestão operacional para negócios de delivery. O Devlivery reúne uma API .NET e uma aplicação web React para centralizar pedidos, produtos, caixa, despesas e indicadores.
 
-A API segue arquitetura vertical slice e mantém as regras de negócio próximas de cada feature. O frontend também é organizado por feature e consome a API por contratos HTTP. PostgreSQL armazena os dados da aplicação e do ASP.NET Core Identity.
+## Arquitetura e tecnologias
+
+A API usa arquitetura vertical slice, com regras de negócio próximas de cada feature. O frontend React também é organizado por feature e consome a API por contratos HTTP. PostgreSQL armazena os dados da aplicação e do ASP.NET Core Identity, com isolamento por tenant derivado do token autenticado.
+
+- [API](apps/api/README.md): .NET 10, Minimal APIs, EF Core, Dapper, PostgreSQL e OpenTelemetry.
+- [Web](apps/web/README.md): React 19, TypeScript, Vite, TanStack Query e Tailwind CSS.
 
 ## Funcionalidades
 
@@ -30,10 +37,7 @@ apps/
         └── shared
 ```
 
-- [API](apps/api/README.md): .NET 10, Minimal APIs, EF Core, Dapper, PostgreSQL e OpenTelemetry.
-- [Web](apps/web/README.md): React 19, TypeScript, Vite, TanStack Query e Tailwind CSS.
-
-O tenant vem do token autenticado e é aplicado aos dados da aplicação. Eventos de domínio mantêm os efeitos de pedidos e caixa dentro da mesma requisição. Consulte a [visão de arquitetura](docs/architecture/overview.md) para os limites atuais.
+Eventos de domínio mantêm os efeitos de pedidos e caixa dentro da mesma requisição. Consulte a [visão de arquitetura](docs/architecture/overview.md) para os limites atuais.
 
 ## Executar localmente
 
