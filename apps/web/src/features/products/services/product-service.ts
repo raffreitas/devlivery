@@ -26,15 +26,22 @@ function mapProductDto(dto: ProductDto): Product {
 }
 
 export const productService = {
-  getAll: async (): Promise<Product[]> => {
-    const res = await api.get<ApiResponse<ProductDto[] | null>>("/products");
+  getAll: async (signal?: AbortSignal): Promise<Product[]> => {
+    const res = await api.get<ApiResponse<ProductDto[] | null>>(
+      "/products",
+      signal,
+    );
     const list = res.data ?? [];
     return list.map(mapProductDto);
   },
 
-  getById: async (id: string): Promise<Product | null> => {
+  getById: async (
+    id: string,
+    signal?: AbortSignal,
+  ): Promise<Product | null> => {
     const res = await api.get<ApiResponse<ProductDto | null>>(
       `/products/${id}`,
+      signal,
     );
     return res.data ? mapProductDto(res.data) : null;
   },

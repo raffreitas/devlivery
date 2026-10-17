@@ -20,6 +20,7 @@ import {
 } from "@/shared/components/ui/input-group";
 import { toast } from "@/shared/components/ui/toast";
 import { useAuth } from "@/shared/contexts/auth-context";
+import { ApiError } from "@/shared/services/api";
 import { type AuthFormData, authFormSchema } from "../types";
 
 export function LoginPage() {
@@ -52,7 +53,9 @@ export function LoginPage() {
         type: "error",
         title: limited
           ? "Muitas tentativas. Aguarde antes de tentar novamente."
-          : "Credenciais inválidas",
+          : error instanceof ApiError && error.status !== 401
+            ? error.message
+            : "Credenciais inv\u00e1lidas",
       });
     }
   };

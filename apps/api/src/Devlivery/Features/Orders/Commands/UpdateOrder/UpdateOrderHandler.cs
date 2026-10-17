@@ -48,11 +48,15 @@ public sealed class UpdateOrderHandler(
 
         var productsDictionary = products.ToDictionary(p => p.Id, p => p);
 
+        var recordedPrices = order.Items
+            .GroupBy(i => i.ProductId)
+            .ToDictionary(g => g.Key, g => g.First().UnitPrice);
+
         var newItems = command.Items.Select(item => new OrderItem(
             productId: item.ProductId,
             establishmentId: order.EstablishmentId,
             quantity: item.Quantity,
-            unitPrice: productsDictionary[item.ProductId].Price,
+            unitPrice: recordedPrices.GetValueOrDefault(item.ProductId, productsDictionary[item.ProductId].Price),
             notes: item.Notes)).ToList();
 
         var customer = CustomerInfo.Create(command.CustomerName, command.CustomerPhone);

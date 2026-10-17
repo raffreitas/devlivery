@@ -1,4 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  invalidateAfterMutation,
+  queryKeys,
+} from "@/shared/services/query-keys";
 import { formatDate } from "@/shared/utils/formatters";
 import { orderService } from "../services/order-service";
 import type {
@@ -16,50 +20,52 @@ export function useOrders(
   const queryClient = useQueryClient();
 
   const ordersQuery = useQuery({
-    queryKey: ["orders", { startDate, endDate, paymentMethod }],
-    queryFn: () =>
-      orderService.getAll({
-        startDate: startDate ? formatDate(startDate) : undefined,
-        endDate: endDate ? formatDate(endDate) : undefined,
-        paymentMethod,
-      }),
+    queryKey: [
+      ...queryKeys.orders,
+      { ...queryKeys.period(startDate, endDate), paymentMethod },
+    ],
+    queryFn: ({ signal }) =>
+      orderService.getAll(
+        {
+          startDate: startDate ? formatDate(startDate) : undefined,
+          endDate: endDate ? formatDate(endDate) : undefined,
+          paymentMethod,
+        },
+        signal,
+      ),
     staleTime: 30_000,
     placeholderData: (previousData) => previousData,
   });
 
   const createMutation = useMutation({
     mutationFn: orderService.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
+    meta: { skipGlobalErrorToast: true },
+    onSuccess: () => invalidateAfterMutation(queryClient, "orders"),
   });
 
   const updateMutation = useMutation({
+    meta: { skipGlobalErrorToast: true },
     mutationFn: ({ id, data }: { id: string; data: OrderFormData }) =>
       orderService.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
+    onSuccess: () => invalidateAfterMutation(queryClient, "orders"),
   });
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
       orderService.updateStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
+    onSuccess: () => invalidateAfterMutation(queryClient, "orders"),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => orderService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
+    onSuccess: () => invalidateAfterMutation(queryClient, "orders"),
   });
 
   return {
     orders: (ordersQuery.data ?? []) as Order[],
     loading: ordersQuery.isLoading,
+    error: ordersQuery.error,
+    hasData: ordersQuery.data !== undefined,
     isFetching: ordersQuery.isFetching,
     refetch: ordersQuery.refetch,
     createOrder: (data: OrderFormData) => createMutation.mutateAsync(data),

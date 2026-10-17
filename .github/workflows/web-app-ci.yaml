@@ -5,11 +5,17 @@ on:
     branches: [main]
     paths:
       - "apps/web/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
       - ".github/workflows/web-app-ci.yaml"
   pull_request:
     branches: [main]
     paths:
       - "apps/web/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
       - ".github/workflows/web-app-ci.yaml"
   workflow_dispatch:
 
@@ -68,6 +74,9 @@ jobs:
       - name: Lint
         run: pnpm --filter @devlivery/web run lint
 
+      - name: Test
+        run: pnpm --filter @devlivery/web run test
+
       - name: Check types
         run: pnpm --filter @devlivery/web exec tsc
 
@@ -84,5 +93,7 @@ jobs:
             -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
             -Dsonar.sources=src
-            -Dsonar.exclusions=src/shared/components/ui/**
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx
+            -Dsonar.exclusions=src/shared/components/ui/**,**/*.test.ts,**/*.test.tsx
             -Dsonar.coverage.exclusions=**/*

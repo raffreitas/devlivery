@@ -84,12 +84,15 @@ function mapExpense(dto: ExpenseDto): Expense {
 }
 
 export const expenseService = {
-  getAll: async (params?: {
-    startDate?: string;
-    endDate?: string;
-    categoryId?: string;
-    status?: string;
-  }): Promise<Expense[]> => {
+  getAll: async (
+    params?: {
+      startDate?: string;
+      endDate?: string;
+      categoryId?: string;
+      status?: string;
+    },
+    signal?: AbortSignal,
+  ): Promise<Expense[]> => {
     let url = "/expenses";
     if (
       params?.startDate ||
@@ -104,14 +107,18 @@ export const expenseService = {
       if (params.status) qp.set("status", params.status);
       url = `${url}?${qp.toString()}`;
     }
-    const res = await api.get<ApiResponse<ExpenseDto[] | null>>(url);
+    const res = await api.get<ApiResponse<ExpenseDto[] | null>>(url, signal);
     const list = res.data ?? [];
     return list.map(mapExpense);
   },
 
-  getById: async (id: string): Promise<Expense | null> => {
+  getById: async (
+    id: string,
+    signal?: AbortSignal,
+  ): Promise<Expense | null> => {
     const res = await api.get<ApiResponse<ExpenseDto | null>>(
       `/expenses/${id}`,
+      signal,
     );
     return res.data ? mapExpense(res.data) : null;
   },
@@ -152,9 +159,10 @@ export const expenseService = {
     await api.delete<void>(`/expenses/${id}`);
   },
 
-  getAllCategories: async (): Promise<Category[]> => {
+  getAllCategories: async (signal?: AbortSignal): Promise<Category[]> => {
     const res = await api.get<ApiResponse<CategoryDto[] | null>>(
       "/expenses/categories",
+      signal,
     );
     const list = res.data ?? [];
     return list.map(mapCategory);

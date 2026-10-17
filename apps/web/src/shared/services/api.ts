@@ -5,10 +5,10 @@ import { AUTH_STORAGE_KEY } from "@/features/auth/services/auth-service";
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export type ApiProblem = {
-  title: string;
-  detail: string;
-  status: number;
-  errors: Record<string, string>;
+  title?: string;
+  detail?: string;
+  status?: number;
+  errors?: Record<string, string> | null;
 };
 
 export type ApiResponse<T> = {
@@ -31,22 +31,44 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+export type ApiErrorKind = "http" | "network" | "timeout";
+
 export class ApiError extends Error {
-  status: number;
-  details?: unknown;
-  constructor(message: string, status: number, details?: unknown) {
+  status?: number;
+  details?: ApiProblem;
+  kind: ApiErrorKind;
+  constructor(
+    message: string,
+    status?: number,
+    details?: ApiProblem,
+    kind: ApiErrorKind = "http",
+  ) {
     super(message);
-    this.name = "ApiError";
     this.status = status;
     this.details = details;
+    this.kind = kind;
+    this.name = "ApiError";
   }
 }
 
 export class UnauthorizedError extends ApiError {
-  constructor(message = "Não autorizado", details?: unknown) {
+  constructor(message = "Não autorizado", details?: ApiProblem) {
     super(message, 401, details);
     this.name = "UnauthorizedError";
   }
+}
+
+export function shouldRetryQuery(failureCount: number, error: Error): boolean {
+  if (
+    axios.isCancel(error) ||
+    failureCount >= 2 ||
+    !(error instanceof ApiError)
+  )
+    return false;
+  return (
+    error.kind !== "http" ||
+    [408, 500, 502, 503, 504].includes(error.status ?? 0)
+  );
 }
 
 function getAuthToken(): string | null {
@@ -62,6 +84,7 @@ function getAuthToken(): string | null {
 
 const axiosInstance = axios.create({
   baseURL: `${env.VITE_API_URL.replace(/\/$/, "")}/api/v1`,
+  timeout: 30_000,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -71,6 +94,7 @@ async function request<T>(
     method?: HttpMethod;
     body?: unknown;
     headers?: Record<string, string>;
+    signal?: AbortSignal;
   } = {},
 ): Promise<T> {
   const url = path.startsWith("/") ? path : `/${path}`;
@@ -87,12 +111,15 @@ async function request<T>(
       method: options.method ?? "GET",
       data: options.body ?? undefined,
       headers,
+      signal: options.signal,
     });
 
     if (res.status === 204) return undefined as unknown as T;
 
     return res.data as T;
   } catch (err) {
+    if (axios.isCancel(err)) throw err;
+    if (!axios.isAxiosError(err)) throw err;
     const axiosErr = err as AxiosError;
 
     if (axiosErr.response) {
@@ -106,25 +133,29 @@ async function request<T>(
       if (status === 401) {
         throw new UnauthorizedError(
           message || "Sua sessão expirou. Por favor, faça login novamente.",
-          data,
+          data ?? undefined,
         );
       }
 
-      return Promise.reject({
-        message,
-        status,
-        data,
-      });
+      throw new ApiError(message, status, data ?? undefined);
     }
 
-    return Promise.reject({
-      message: axiosErr.message,
-    });
+    const timeout =
+      axiosErr.code === "ECONNABORTED" || axiosErr.code === "ETIMEDOUT";
+    throw new ApiError(
+      timeout
+        ? "A requisição demorou demais. Tente novamente."
+        : "Não foi possível conectar ao servidor. Verifique sua conexão.",
+      undefined,
+      undefined,
+      timeout ? "timeout" : "network",
+    );
   }
 }
 
 export const api = {
-  get: <T>(path: string) => request<T>(path, { method: "GET" }),
+  get: <T>(path: string, signal?: AbortSignal) =>
+    request<T>(path, { method: "GET", signal }),
   post: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: "POST", body }),
   put: <T>(path: string, body?: unknown) =>

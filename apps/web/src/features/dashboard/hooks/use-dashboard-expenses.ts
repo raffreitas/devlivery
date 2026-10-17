@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/shared/services/query-keys";
 import { dashboardService } from "../services/dashboard-service";
 
 export function useDashboardExpenses(
@@ -7,38 +8,22 @@ export function useDashboardExpenses(
   enabled = true,
 ) {
   const expensesByCategoryQuery = useQuery({
-    queryKey: ["dashboard", "expenses-by-category", { startDate, endDate }],
-    queryFn: () => dashboardService.getExpensesByCategory(startDate, endDate),
+    queryKey: [
+      ...queryKeys.dashboard,
+      "expenses-by-category",
+      queryKeys.period(startDate, endDate),
+    ],
+    queryFn: ({ signal }) =>
+      dashboardService.getExpensesByCategory(startDate, endDate, signal),
     enabled,
     staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
   });
 
-  const expensesByStatusQuery = useQuery({
-    queryKey: ["dashboard", "expenses-by-status", { startDate, endDate }],
-    queryFn: () => dashboardService.getExpensesByStatus(startDate, endDate),
-    enabled,
-    staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
-  });
-
-  const expensesOverTimeQuery = useQuery({
-    queryKey: ["dashboard", "expenses-over-time", { startDate, endDate }],
-    queryFn: () => dashboardService.getExpensesOverTime(startDate, endDate),
-    enabled,
-    staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
-  });
-
-  const isFetching =
-    expensesByCategoryQuery.isFetching ||
-    expensesByStatusQuery.isFetching ||
-    expensesOverTimeQuery.isFetching;
+  const isFetching = expensesByCategoryQuery.isFetching;
 
   return {
+    queries: { expensesByCategory: expensesByCategoryQuery },
     expensesByCategory: expensesByCategoryQuery.data ?? [],
-    expensesByStatus: expensesByStatusQuery.data ?? [],
-    expensesOverTime: expensesOverTimeQuery.data ?? [],
     isFetching,
   };
 }

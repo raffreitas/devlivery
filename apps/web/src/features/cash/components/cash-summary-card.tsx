@@ -24,6 +24,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { formatMoney } from "@/shared/utils/formatters";
+import { moneyDifference, sumMoney } from "@/shared/utils/money";
 import type { CashDeposit, CashSession } from "../types";
 
 interface CashSummaryCardProps {
@@ -41,9 +42,10 @@ export function CashSummaryCard({
 }: CashSummaryCardProps) {
   const isOpen = session.status === "Open";
   const expectedCashAmount = session.expectedCashAmount;
-  const difference = session.closingAmount
-    ? session.closingAmount - expectedCashAmount
-    : 0;
+  const difference = moneyDifference(
+    session.closingAmount ?? 0,
+    expectedCashAmount,
+  );
 
   const cashSalesAmount = session.paymentBreakdown.find(
     (payment) => payment.method === "Cash",
@@ -60,10 +62,7 @@ export function CashSummaryCard({
     return `${hours}h ${minutes}m`;
   };
 
-  const totalDeposits = deposits?.reduce(
-    (sum, deposit) => sum + deposit.amount,
-    0,
-  );
+  const totalDeposits = sumMoney(deposits.map((deposit) => deposit.amount));
 
   return (
     <Card className="p-4 sm:p-6 gap-1">

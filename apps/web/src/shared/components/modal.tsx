@@ -24,6 +24,7 @@ interface ModalProps {
   description?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  dismissible?: boolean;
 }
 
 /**
@@ -36,10 +37,11 @@ export function Modal({
   description,
   children,
   footer,
+  dismissible = true,
 }: ModalProps) {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const handleOpenChange = (open: boolean) => {
-    if (!open) onClose();
+    if (!open && dismissible) onClose();
   };
 
   if (isDesktop) {

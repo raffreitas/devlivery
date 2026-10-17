@@ -1,6 +1,7 @@
 import { TrashIcon, XIcon } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { formatMoney } from "@/shared/utils/formatters";
+import { itemTotal } from "@/shared/utils/money";
 
 interface OrderItemsTableItem {
   fieldId: string;
@@ -12,6 +13,7 @@ interface OrderItemsTableItem {
     category?: string;
     available?: boolean;
   };
+  unitPrice: number;
   quantity: number;
   notes?: string;
 }
@@ -67,9 +69,9 @@ export function OrderItemsTable({
               </div>
               <div className="flex justify-between text-xs text-secondary-foreground">
                 <span>Qtd: {item.quantity}</span>
-                <span>Unit: {formatMoney(item.product.price)}</span>
+                <span>Unit: {formatMoney(item.unitPrice)}</span>
                 <span className="font-medium text-foreground">
-                  {formatMoney(item.product.price * item.quantity)}
+                  {formatMoney(itemTotal(item.unitPrice, item.quantity))}
                 </span>
               </div>
             </div>
@@ -121,10 +123,10 @@ export function OrderItemsTable({
                     {item.quantity}
                   </td>
                   <td className="px-4 py-3 text-sm text-foreground text-right">
-                    {formatMoney(item.product.price)}
+                    {formatMoney(item.unitPrice)}
                   </td>
                   <td className="px-4 py-3 text-sm font-semibold text-foreground text-right">
-                    {formatMoney(item.product.price * item.quantity)}
+                    {formatMoney(itemTotal(item.unitPrice, item.quantity))}
                   </td>
                   <td className="px-4 py-3 text-sm text-center">
                     <Button

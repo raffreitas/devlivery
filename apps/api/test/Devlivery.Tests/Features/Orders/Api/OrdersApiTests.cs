@@ -269,6 +269,37 @@ public sealed class OrdersApiTests(ApiFactory api)
         refund.Reason.ShouldBe("Pedido Excluído");
     }
 
+    [Fact]
+    public async Task GivenCatalogPriceChanged_WhenListingAndGettingOrder_ThenReturnsRecordedUnitPrice()
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+        var product = await SeedProductAsync(tenant, "Pizza", 9.90m);
+        var order = await SeedOrderAsync(tenant, [(product, 3)], customer: "Cliente");
+        await tenant.WithDbContextAsync(async db =>
+        {
+            var storedProduct = await db.Products.SingleAsync(p => p.Id == product.Id);
+            storedProduct.Update(price: 20m);
+            await db.SaveChangesAsync();
+        });
+
+        // Act
+        var listResponse = await tenant.Client.GetAsync("/api/v1/orders");
+        var detailResponse = await tenant.Client.GetAsync($"/api/v1/orders/{order.Id}");
+
+        // Assert
+        listResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        detailResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var listed = (await ApiTenant.ReadDataAsync<List<GetAllOrdersResponse>>(listResponse)).ShouldHaveSingleItem();
+        var detail = await ApiTenant.ReadDataAsync<GetOrderByIdResponse>(detailResponse);
+        listed.Items.ShouldHaveSingleItem().UnitPrice.ShouldBe(9.90m);
+        detail.Items.ShouldHaveSingleItem().UnitPrice.ShouldBe(9.90m);
+        listed.Items[0].Product.Price.ShouldBe(20m);
+        detail.Items[0].Product.Price.ShouldBe(20m);
+        listed.Total.ShouldBe(29.70m);
+        detail.Total.ShouldBe(29.70m);
+    }
+
     private static async Task<Product> SeedProductAsync(ApiTenant tenant, string name, decimal price)
     {
         var product = new ProductBuilder().WithName(name).WithPrice(price)

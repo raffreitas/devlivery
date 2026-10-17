@@ -6,6 +6,7 @@ import {
   LoadingState,
 } from "@/shared/components/loading";
 import { Modal } from "@/shared/components/modal";
+import { QueryState } from "@/shared/components/query-state";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +36,9 @@ export function ProductsPage() {
   const {
     products,
     loading,
+    error,
+    hasData,
+    refetch,
     isFetching,
     createProduct,
     updateProduct,
@@ -53,11 +57,11 @@ export function ProductsPage() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
-  const handleCreateOrUpdate = (data: ProductFormData) => {
+  const handleCreateOrUpdate = async (data: ProductFormData) => {
     if (editingProduct) {
-      updateProduct(editingProduct.id, data);
+      await updateProduct(editingProduct.id, data);
     } else {
-      createProduct(data);
+      await createProduct(data);
     }
     setIsModalOpen(false);
     setEditingProduct(null);
@@ -128,35 +132,43 @@ export function ProductsPage() {
         onOpenFilters={() => setIsFiltersOpen(true)}
       />
 
-      <LoadingState
-        isLoading={loading && products.length === 0}
-        skeleton={<GridSkeleton items={10} columns={5} />}
+      <QueryState
+        isPending={loading}
+        error={error}
+        hasData={hasData}
+        refetch={refetch}
       >
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">
-              {products.length === 0
-                ? "Nenhum produto cadastrado. Comece criando um novo produto!"
-                : "Nenhum produto encontrado com os filtros aplicados."}
-            </p>
-          </div>
-        ) : (
-          <div
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 transition-opacity duration-200 ${
-              isFetching ? "opacity-60" : "opacity-100"
-            }`}
-          >
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onEdit={handleEdit}
-                onDelete={(productId) => setAlert({ open: true, productId })}
-              />
-            ))}
-          </div>
-        )}
-      </LoadingState>
+        {" "}
+        <LoadingState
+          isLoading={loading && products.length === 0}
+          skeleton={<GridSkeleton items={10} columns={5} />}
+        >
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground text-lg">
+                {products.length === 0
+                  ? "Nenhum produto cadastrado. Comece criando um novo produto!"
+                  : "Nenhum produto encontrado com os filtros aplicados."}
+              </p>
+            </div>
+          ) : (
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 transition-opacity duration-200 ${
+                isFetching ? "opacity-60" : "opacity-100"
+              }`}
+            >
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onEdit={handleEdit}
+                  onDelete={(productId) => setAlert({ open: true, productId })}
+                />
+              ))}
+            </div>
+          )}
+        </LoadingState>
+      </QueryState>
 
       <AlertDialog
         open={alert.open}
@@ -183,6 +195,7 @@ export function ProductsPage() {
       </AlertDialog>
 
       <Modal
+        dismissible={!(isCreating || isUpdating)}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={editingProduct ? "Editar Produto" : "Novo Produto"}

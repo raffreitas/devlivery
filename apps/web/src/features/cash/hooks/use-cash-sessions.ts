@@ -1,4 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  invalidateAfterMutation,
+  queryKeys,
+} from "@/shared/services/query-keys";
 import { cashService } from "../services/cash-service";
 import type {
   CloseCashSessionFormData,
@@ -6,49 +10,43 @@ import type {
   CreateCashSessionFormData,
 } from "../types";
 
-const CASH_SESSIONS_QUERY_KEY = ["cash-sessions"];
+const CASH_SESSIONS_QUERY_KEY = queryKeys.cash;
 
 export function useCashSessions() {
   const queryClient = useQueryClient();
 
   const currentSessionQuery = useQuery({
     queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
-    queryFn: () => cashService.getActive(),
+    queryFn: ({ signal }) => cashService.getActive(signal),
     staleTime: 0,
     gcTime: 5 * 60 * 1000,
-    placeholderData: (previousData) => previousData,
   });
 
   const sessionsQuery = useQuery({
     queryKey: CASH_SESSIONS_QUERY_KEY,
-    queryFn: () => cashService.getAll(),
+    queryFn: ({ signal }) => cashService.getAll(signal),
     staleTime: 60_000,
-    placeholderData: (previousData) => previousData,
     enabled: false,
   });
 
   const createMutation = useMutation({
     mutationFn: (dto: CreateCashSessionFormData) => cashService.create(dto),
-    onSuccess: (data) => {
+    meta: { skipGlobalErrorToast: true },
+    onSuccess: async (data) => {
       if (data) {
         queryClient.setQueryData([...CASH_SESSIONS_QUERY_KEY, "current"], data);
       }
-      queryClient.invalidateQueries({ queryKey: CASH_SESSIONS_QUERY_KEY });
-      queryClient.invalidateQueries({
-        queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
-      });
+      await invalidateAfterMutation(queryClient, "cash");
     },
   });
 
   const closeMutation = useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: CloseCashSessionFormData }) =>
       cashService.close(id, dto),
-    onSuccess: () => {
+    meta: { skipGlobalErrorToast: true },
+    onSuccess: async () => {
       queryClient.setQueryData([...CASH_SESSIONS_QUERY_KEY, "current"], null);
-      queryClient.invalidateQueries({ queryKey: CASH_SESSIONS_QUERY_KEY });
-      queryClient.invalidateQueries({
-        queryKey: [...CASH_SESSIONS_QUERY_KEY, "deposits"],
-      });
+      await invalidateAfterMutation(queryClient, "cash");
     },
   });
 
@@ -58,14 +56,13 @@ export function useCashSessions() {
       "deposits",
       currentSessionQuery.data?.id,
     ],
-    queryFn: () => {
+    queryFn: ({ signal }) => {
       if (!currentSessionQuery.data?.id) return Promise.resolve([]);
-      return cashService.getDeposits(currentSessionQuery.data.id);
+      return cashService.getDeposits(currentSessionQuery.data.id, signal);
     },
     enabled: !!currentSessionQuery.data?.id,
     staleTime: 0,
     gcTime: 5 * 60 * 1000,
-    placeholderData: (previousData) => previousData,
   });
 
   const depositMutation = useMutation({
@@ -76,19 +73,23 @@ export function useCashSessions() {
       sessionId: string;
       dto: CreateCashDepositFormData;
     }) => cashService.createDeposit(sessionId, dto),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: [...CASH_SESSIONS_QUERY_KEY, "deposits", variables.sessionId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
-      });
-    },
+    meta: { skipGlobalErrorToast: true },
+    onSuccess: () => invalidateAfterMutation(queryClient, "cash"),
   });
 
   return {
     sessions: sessionsQuery.data ?? [],
     currentSession: currentSessionQuery.data ?? null,
+    error: currentSessionQuery.error ?? depositsQuery.error,
+    hasData:
+      currentSessionQuery.data !== undefined &&
+      (!currentSessionQuery.data || depositsQuery.data !== undefined),
+    refetch: async () => {
+      await Promise.allSettled([
+        currentSessionQuery.refetch(),
+        depositsQuery.refetch(),
+      ]);
+    },
     deposits: depositsQuery.data ?? [],
     refetchSessions: sessionsQuery.refetch,
     isLoading:
