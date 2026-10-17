@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, Banknote, PlusIcon, TrendingUp } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { Banknote, PlusIcon, TrendingUp } from "lucide-react";
+import { useId } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   AlertDescription,
@@ -9,13 +9,12 @@ import {
 } from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/components/ui/field";
 import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { formatMoney } from "@/shared/utils/formatters";
@@ -44,6 +43,7 @@ export function CloseCashForm({
   isSubmitting,
   onCancel,
 }: CloseCashFormProps) {
+  const formId = useId();
   const form = useForm<CloseCashSessionFormData>({
     resolver: zodResolver(closeCashSessionFormSchema),
     defaultValues: {
@@ -53,19 +53,10 @@ export function CloseCashForm({
   });
 
   const handleSubmit = async (data: CloseCashSessionFormData) => {
-    try {
-      await onSubmit({
-        closingAmount: data.closingAmount,
-        notes: data.notes?.trim() || undefined,
-      });
-    } catch (err) {
-      toast.error(
-        err instanceof Error && err.message
-          ? err.message
-          : "Erro ao fechar caixa",
-      );
-      throw err;
-    }
+    await onSubmit({
+      closingAmount: data.closingAmount,
+      notes: data.notes?.trim() || undefined,
+    });
   };
 
   const closingAmount = form.watch("closingAmount");
@@ -73,8 +64,8 @@ export function CloseCashForm({
   const hasDifference = closingAmount > 0 && difference !== 0;
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <FieldGroup>
         {/* Breakdown do valor esperado */}
         <Alert>
           <Banknote className="w-5 h-5" />
@@ -118,21 +109,38 @@ export function CloseCashForm({
         </Alert>
 
         {/* Valor real contado */}
-        <FormField
+        <Controller
           control={form.control}
           name="closingAmount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor Real no Caixa</FormLabel>
-              <FormControl>
-                <InputMoney {...field} placeholder="0,00" />
-              </FormControl>
-              <p className="text-xs text-muted-foreground flex items-start gap-1">
-                <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" />
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`${formId}-close-cash-amount`}>
+                Valor Real no Caixa
+              </FieldLabel>
+              <InputMoney
+                {...field}
+                id={`${formId}-close-cash-amount`}
+                placeholder="0,00"
+                aria-invalid={fieldState.invalid}
+                aria-describedby={[
+                  `${formId}-close-cash-amount-description`,
+                  fieldState.invalid
+                    ? `${formId}-close-cash-amount-error`
+                    : undefined,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              />
+              <FieldDescription id={`${formId}-close-cash-amount-description`}>
                 Conte o dinheiro físico no caixa e informe o valor total
-              </p>
-              <FormMessage />
-            </FormItem>
+              </FieldDescription>
+              {fieldState.invalid && (
+                <FieldError
+                  id={`${formId}-close-cash-amount-error`}
+                  errors={[fieldState.error]}
+                />
+              )}
+            </Field>
           )}
         />
 
@@ -152,28 +160,39 @@ export function CloseCashForm({
           </Alert>
         )}
 
-        <FormField
+        <Controller
           control={form.control}
           name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Observações (opcional)</FormLabel>
-              <FormControl>
-                <Textarea
-                  id="notes"
-                  placeholder="Observações sobre o fechamento do caixa..."
-                  rows={3}
-                  disabled={isSubmitting}
-                  className="resize-none"
-                  {...field}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`${formId}-close-cash-notes`}>
+                Observações (opcional)
+              </FieldLabel>
+              <Textarea
+                {...field}
+                id={`${formId}-close-cash-notes`}
+                placeholder="Observações sobre o fechamento do caixa..."
+                rows={3}
+                disabled={isSubmitting}
+                className="resize-none"
+                aria-invalid={fieldState.invalid}
+                aria-describedby={
+                  fieldState.invalid
+                    ? `${formId}-close-cash-notes-error`
+                    : undefined
+                }
+              />
+              {fieldState.invalid && (
+                <FieldError
+                  id={`${formId}-close-cash-notes-error`}
+                  errors={[fieldState.error]}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+              )}
+            </Field>
           )}
         />
 
-        <div className="flex gap-2 pt-2">
+        <Field orientation="horizontal">
           <Button
             type="button"
             variant="outline"
@@ -191,8 +210,8 @@ export function CloseCashForm({
           >
             {isSubmitting ? "Fechando..." : "Fechar Caixa"}
           </Button>
-        </div>
-      </form>
-    </Form>
+        </Field>
+      </FieldGroup>
+    </form>
   );
 }

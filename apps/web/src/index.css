@@ -1,20 +1,16 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
-/* Bottom Sheet Animation */
-@keyframes slide-up {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+#root {
+  isolation: isolate;
 }
 
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+/* Toasts acima dos overlays (Dialog, Drawer), que também usam z-50 */
+[data-slot="toast-viewport"] {
+  z-index: 100;
 }
 
 /* Loading Progress Bar Animation */
@@ -30,15 +26,6 @@
 /* Safe Area Padding */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 1rem);
-}
-
-/* Bottom Sheet - garantir que fique colado no fundo */
-.bottom-sheet-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  transform: translateY(0);
 }
 
 @theme inline {

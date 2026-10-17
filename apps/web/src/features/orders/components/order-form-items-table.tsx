@@ -63,7 +63,7 @@ export function OrderItemsTable({
                   className="ml-2"
                   onClick={() => onRemoveItem(index)}
                 >
-                  <XIcon className="w-4 h-4 text-destructive" />
+                  <XIcon className="text-destructive" />
                 </Button>
               </div>
               <div className="flex justify-between text-xs text-secondary-foreground">
@@ -136,7 +136,7 @@ export function OrderItemsTable({
                       onClick={() => onRemoveItem(index)}
                       className="hover:bg-destructive/10"
                     >
-                      <TrashIcon className="w-4 h-4 text-destructive" />
+                      <TrashIcon className="text-destructive" />
                     </Button>
                   </td>
                 </tr>

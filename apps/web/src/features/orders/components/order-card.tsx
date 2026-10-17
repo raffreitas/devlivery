@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,6 +10,7 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Separator } from "@/shared/components/ui/separator";
+import { toast } from "@/shared/components/ui/toast";
 import { usePrintOrder } from "../hooks/use-print-order";
 import type { Order, OrderStatus } from "../types";
 import { OrderCardActions } from "./order-card-actions";
@@ -73,7 +73,7 @@ export function OrderCard({
     setAlert(CLOSED_ALERT);
     try {
       await onUpdateStatus(order.id, "Canceled");
-      toast.success("Pedido cancelado com sucesso");
+      toast.add({ type: "success", title: "Pedido cancelado com sucesso" });
     } catch {
       // Reported by the global MutationCache.
     }
@@ -83,7 +83,7 @@ export function OrderCard({
     setAlert(CLOSED_ALERT);
     try {
       await onDelete(order.id);
-      toast.success("Pedido excluído com sucesso");
+      toast.add({ type: "success", title: "Pedido excluído com sucesso" });
     } catch {
       // Reported by the global MutationCache.
     }

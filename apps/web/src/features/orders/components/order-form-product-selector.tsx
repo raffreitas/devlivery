@@ -1,8 +1,8 @@
 import { PlusIcon } from "lucide-react";
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 import type { Product } from "@/features/products/types";
+import { OptionCombobox } from "@/shared/components/option-combobox";
 import { Button } from "@/shared/components/ui/button";
-import { Combobox } from "@/shared/components/ui/combobox";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { formatMoney } from "@/shared/utils/formatters";
@@ -28,6 +28,7 @@ export function ProductSelector({
   onNotesChange,
   onAddItem,
 }: ProductSelectorProps) {
+  const selectorId = useId();
   const productOptions = useMemo(
     () =>
       products.map((product) => ({
@@ -41,20 +42,21 @@ export function ProductSelector({
     <div className="space-y-3 sm:space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-10 gap-3">
         <div className="sm:col-span-2 lg:col-span-5 space-y-2">
-          <Label htmlFor="product-select">Produto</Label>
-          <Combobox
+          <Label htmlFor={`${selectorId}-product-select`}>Produto</Label>
+          <OptionCombobox
+            id={`${selectorId}-product-select`}
             value={selectedProductId}
-            onChange={onProductChange}
+            onValueChange={onProductChange}
             options={productOptions}
             placeholder="Selecione ou pesquise"
-            className="w-full"
+            emptyText="Nenhum produto encontrado."
           />
         </div>
 
         <div className="sm:col-span-2 lg:col-span-2 space-y-2">
-          <Label htmlFor="quantity">Quantidade</Label>
+          <Label htmlFor={`${selectorId}-quantity`}>Quantidade</Label>
           <Input
-            id="quantity"
+            id={`${selectorId}-quantity`}
             type="number"
             min="1"
             value={quantity}
@@ -65,9 +67,9 @@ export function ProductSelector({
         </div>
 
         <div className="sm:col-span-2 lg:col-span-3 space-y-2">
-          <Label htmlFor="notes">Observações</Label>
+          <Label htmlFor={`${selectorId}-notes`}>Observações</Label>
           <Input
-            id="notes"
+            id={`${selectorId}-notes`}
             type="text"
             value={notes}
             onChange={(e) => onNotesChange(e.target.value)}

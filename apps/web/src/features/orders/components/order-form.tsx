@@ -3,27 +3,29 @@ import {
   Banknote,
   Check,
   CreditCard,
+  type LucideIcon,
   QrCode,
   Smartphone,
   Wallet,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useEffect, useId, useState } from "react";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useProducts } from "@/features/products/hooks/use-products";
 import { LoadingButton } from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { cn } from "@/shared/lib/utils";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/shared/components/ui/toggle-group";
 import {
   getPaymentOptionLabel,
   getPaymentOptions,
@@ -35,6 +37,13 @@ import {
 } from "../types";
 import { OrderItemsTable } from "./order-form-items-table";
 import { ProductSelector } from "./order-form-product-selector";
+
+const PAYMENT_ICONS: Partial<Record<PaymentMethod, LucideIcon>> = {
+  Cash: Banknote,
+  CreditCard: CreditCard,
+  DebitCard: Wallet,
+  Pix: QrCode,
+};
 
 interface OrderFormProps {
   initialData?: OrderFormData & { id?: string };
@@ -49,6 +58,7 @@ export function OrderForm({
   onCancel,
   isSubmitting: externalIsSubmitting,
 }: OrderFormProps) {
+  const formId = useId();
   const { products } = useProducts();
   const [selectedProductId, setSelectedProductId] = useState<
     string | undefined
@@ -130,20 +140,24 @@ export function OrderForm({
     onSubmit(data);
   };
 
-  const handleAddPaymentMethod = (
-    isSelected: boolean,
-    method: PaymentMethod,
-  ) => {
-    if (isSelected) {
-      if (paymentFields.length > 1) {
-        const index = paymentFields.findIndex((p) => p.method === method);
-        removePayment(index);
-      }
-    } else {
-      appendPayment({
-        method: method,
-        amount: Math.max(0, remainingAmount),
-      });
+  const handlePaymentMethodsChange = (values: string[]) => {
+    const methods = values as PaymentMethod[];
+    // Pelo menos uma forma de pagamento deve permanecer selecionada
+    if (methods.length === 0) return;
+
+    const removedIndex = paymentFields.findIndex(
+      (p) => !methods.includes(p.method),
+    );
+    if (removedIndex >= 0) {
+      removePayment(removedIndex);
+      return;
+    }
+
+    const added = methods.find(
+      (method) => !paymentFields.some((p) => p.method === method),
+    );
+    if (added) {
+      appendPayment({ method: added, amount: Math.max(0, remainingAmount) });
     }
   };
 
@@ -179,241 +193,290 @@ export function OrderForm({
   }, [total, paymentFields.length, form, payments]);
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handlePlaceOrder)}
-        className="flex flex-col sm:max-h-[calc(100vh-140px)]"
-      >
-        <div className="flex-1 overflow-y-auto px-2 space-y-4">
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold">Dados do Cliente</h3>
+    <form
+      onSubmit={form.handleSubmit(handlePlaceOrder)}
+      className="flex flex-col sm:max-h-[calc(100vh-140px)]"
+    >
+      <div className="flex-1 overflow-y-auto px-2 space-y-4">
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold">Dados do Cliente</h3>
 
-            <FormField
+          <FieldGroup className="gap-4">
+            <Controller
               control={form.control}
               name="customerName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome do Cliente</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nome do cliente" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={`${formId}-order-customer-name`}>
+                    Nome do Cliente
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id={`${formId}-order-customer-name`}
+                    placeholder="Nome do cliente"
+                    aria-invalid={fieldState.invalid}
+                    aria-describedby={
+                      fieldState.invalid
+                        ? `${formId}-order-customer-name-error`
+                        : undefined
+                    }
+                  />
+                  {fieldState.invalid && (
+                    <FieldError
+                      id={`${formId}-order-customer-name-error`}
+                      errors={[fieldState.error]}
+                    />
+                  )}
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="deliveryAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Endereço de Entrega</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Endereço completo" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={`${formId}-order-delivery-address`}>
+                    Endereço de Entrega
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id={`${formId}-order-delivery-address`}
+                    placeholder="Endereço completo"
+                    aria-invalid={fieldState.invalid}
+                    aria-describedby={
+                      fieldState.invalid
+                        ? `${formId}-order-delivery-address-error`
+                        : undefined
+                    }
+                  />
+                  {fieldState.invalid && (
+                    <FieldError
+                      id={`${formId}-order-delivery-address-error`}
+                      errors={[fieldState.error]}
+                    />
+                  )}
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações do Pedido</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Ex: Troco necessário, preferências do cliente, etc."
-                      className="resize-none"
-                      rows={2}
-                      {...field}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={`${formId}-order-notes`}>
+                    Observações do Pedido
+                  </FieldLabel>
+                  <Textarea
+                    {...field}
+                    id={`${formId}-order-notes`}
+                    placeholder="Ex: Troco necessário, preferências do cliente, etc."
+                    className="resize-none"
+                    rows={2}
+                    aria-invalid={fieldState.invalid}
+                    aria-describedby={
+                      fieldState.invalid
+                        ? `${formId}-order-notes-error`
+                        : undefined
+                    }
+                  />
+                  {fieldState.invalid && (
+                    <FieldError
+                      id={`${formId}-order-notes-error`}
+                      errors={[fieldState.error]}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                  )}
+                </Field>
+              )}
+            />
+          </FieldGroup>
+        </div>
+
+        <div className="space-y-3 sm:space-y-4">
+          <h3 className="text-base sm:text-lg font-semibold">
+            Itens do Pedido
+          </h3>
+
+          <ProductSelector
+            products={products.filter((p) => p.available)}
+            selectedProductId={selectedProductId}
+            quantity={quantity}
+            notes={notes}
+            onProductChange={setSelectedProductId}
+            onQuantityChange={setQuantity}
+            onNotesChange={setNotes}
+            onAddItem={handleAddItem}
+          />
+        </div>
+
+        <div className="space-y-4 pt-2">
+          <div className="flex items-center justify-between border-b pb-2">
+            <h3 className="text-base sm:text-lg font-semibold">
+              Fechamento e Pagamento
+            </h3>
+
+            <Controller
+              control={form.control}
+              name="deliveryFee"
+              render={({ field, fieldState }) => (
+                <Field
+                  orientation="horizontal"
+                  data-invalid={fieldState.invalid}
+                  className="w-auto gap-2"
+                >
+                  <FieldLabel
+                    htmlFor={`${formId}-order-delivery-fee`}
+                    className="truncate"
+                  >
+                    Taxa de entrega:
+                  </FieldLabel>
+                  <InputMoney
+                    {...field}
+                    id={`${formId}-order-delivery-fee`}
+                    className="h-8 w-24"
+                    aria-invalid={fieldState.invalid}
+                  />
+                </Field>
               )}
             />
           </div>
 
-          <div className="space-y-3 sm:space-y-4">
-            <h3 className="text-base sm:text-lg font-semibold">
-              Itens do Pedido
-            </h3>
+          <ToggleGroup
+            multiple
+            variant="outline"
+            size="sm"
+            value={paymentFields.map((p) => p.method)}
+            onValueChange={handlePaymentMethodsChange}
+            aria-label="Formas de pagamento"
+            className="flex-wrap"
+          >
+            {getPaymentOptions().map((option) => {
+              const Icon = PAYMENT_ICONS[option.value] ?? Smartphone;
 
-            <ProductSelector
-              products={products.filter((p) => p.available)}
-              selectedProductId={selectedProductId}
-              quantity={quantity}
-              notes={notes}
-              onProductChange={setSelectedProductId}
-              onQuantityChange={setQuantity}
-              onNotesChange={setNotes}
-              onAddItem={handleAddItem}
-            />
-          </div>
+              return (
+                <ToggleGroupItem key={option.value} value={option.value}>
+                  <Icon data-icon="inline-start" />
+                  {option.label}
+                </ToggleGroupItem>
+              );
+            })}
+          </ToggleGroup>
 
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center justify-between border-b pb-2">
-              <h3 className="text-base sm:text-lg font-semibold">
-                Fechamento e Pagamento
-              </h3>
-
-              <FormField
-                control={form.control}
-                name="deliveryFee"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-2 space-y-0">
-                    <FormLabel className="truncate py-0.5">
-                      Taxa de entrega:
-                    </FormLabel>
-                    <FormControl>
-                      <InputMoney {...field} className="h-8 w-24" />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-1.5">
-              {getPaymentOptions().map((option) => {
-                const isSelected = paymentFields.some(
-                  (p) => p.method === option.value,
-                );
-
-                const Icon =
-                  {
-                    Cash: Banknote,
-                    CreditCard: CreditCard,
-                    DebitCard: Wallet,
-                    Pix: QrCode,
-                  }[option.value] || Smartphone;
-
-                return (
-                  <Button
-                    key={option.value}
-                    type="button"
-                    variant={isSelected ? "default" : "outline"}
-                    size="sm"
-                    className={cn(
-                      "rounded-full px-3 h-7 gap-1.5 transition-all duration-200 border",
-                      isSelected
-                        ? "bg-primary border-primary hover:bg-primary/90"
-                        : "hover:border-primary/50 hover:bg-primary/5 text-muted-foreground",
-                    )}
-                    onClick={() =>
-                      handleAddPaymentMethod(isSelected, option.value)
-                    }
-                  >
-                    <Icon className="size-3.5" />
-                    <span className="text-xs">{option.label}</span>
-                    {isSelected && <Check className="size-3" />}
-                  </Button>
-                );
-              })}
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
-              {paymentFields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="group relative flex flex-1 flex-col p-2 rounded-lg border bg-muted/20 hover:border-primary/20 transition-colors shadow-none"
-                >
-                  <div className="flex items-center justify-between px-1 mb-0.5">
-                    <span className="text-[9px] font-bold tracking-tight text-muted-foreground uppercase">
-                      {getPaymentOptionLabel(field.method)}
-                    </span>
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name={`payments.${index}.amount`}
-                    render={({ field }) => (
-                      <FormItem className="space-y-0">
-                        <FormControl>
-                          <InputMoney {...field} />
-                        </FormControl>
-                        <FormMessage className="text-[10px]" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {total > 0 && (
-              <div className="flex flex-col gap-1.5 pt-1 border-t border-dashed mt-2">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-muted-foreground">
-                    Total Pedido: R$ {total.toFixed(2)}
+          <div className="flex flex-col sm:flex-row gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+            {paymentFields.map((field, index) => (
+              <div
+                key={field.id}
+                className="group relative flex flex-1 flex-col p-2 rounded-lg border bg-muted/20 hover:border-primary/20 transition-colors shadow-none"
+              >
+                <div className="flex items-center justify-between px-1 mb-0.5">
+                  <span className="text-[9px] font-bold tracking-tight text-muted-foreground uppercase">
+                    {getPaymentOptionLabel(field.method)}
                   </span>
-                  {remainingAmount > 0 ? (
-                    <span className="text-amber-600 font-bold flex items-center gap-1">
-                      <div className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
-                      Falta: R$ {remainingAmount.toFixed(2)}
-                    </span>
-                  ) : remainingAmount < 0 ? (
-                    <span className="text-blue-600 font-bold">
-                      Troco: R$ {Math.abs(remainingAmount).toFixed(2)}
-                    </span>
-                  ) : (
-                    <span className="text-green-600 font-bold flex items-center gap-1">
-                      <Check className="size-3" /> CONFERE
-                    </span>
-                  )}
                 </div>
+                <Controller
+                  control={form.control}
+                  name={`payments.${index}.amount`}
+                  render={({ field: amountField, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid} className="gap-1">
+                      <InputMoney
+                        {...amountField}
+                        id={`${formId}-payment-${field.id}-amount`}
+                        aria-label={`Valor em ${getPaymentOptionLabel(field.method)}`}
+                        aria-invalid={fieldState.invalid}
+                        aria-describedby={
+                          fieldState.invalid
+                            ? `${formId}-payment-${field.id}-amount-error`
+                            : undefined
+                        }
+                      />
+                      {fieldState.invalid && (
+                        <FieldError
+                          id={`${formId}-payment-${field.id}-amount-error`}
+                          errors={[fieldState.error]}
+                          className="text-[10px]"
+                        />
+                      )}
+                    </Field>
+                  )}
+                />
               </div>
-            )}
-
-            {form.formState.errors.payments?.root?.message && (
-              <p className="text-sm font-medium text-destructive mt-1">
-                {form.formState.errors.payments.root?.message}
-              </p>
-            )}
+            ))}
           </div>
 
-          <OrderItemsTable
-            items={fields.map((field) => ({
-              ...field,
-              fieldId: field.id,
-            }))}
-            subtotal={subtotal}
-            deliveryFee={deliveryFee}
-            total={total}
-            onRemoveItem={(index) => {
-              remove(index);
-            }}
-          />
-          {form.formState.errors.items && (
-            <p className="text-sm font-medium text-destructive">
-              {form.formState.errors.items.message}
+          {total > 0 && (
+            <div className="flex flex-col gap-1.5 pt-1 border-t border-dashed mt-2">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-muted-foreground">
+                  Total Pedido: R$ {total.toFixed(2)}
+                </span>
+                {remainingAmount > 0 ? (
+                  <span className="text-amber-600 font-bold flex items-center gap-1">
+                    <div className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    Falta: R$ {remainingAmount.toFixed(2)}
+                  </span>
+                ) : remainingAmount < 0 ? (
+                  <span className="text-blue-600 font-bold">
+                    Troco: R$ {Math.abs(remainingAmount).toFixed(2)}
+                  </span>
+                ) : (
+                  <span className="text-green-600 font-bold flex items-center gap-1">
+                    <Check className="size-3" /> CONFERE
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {form.formState.errors.payments?.root?.message && (
+            <p className="text-sm font-medium text-destructive mt-1">
+              {form.formState.errors.payments.root?.message}
             </p>
           )}
         </div>
 
-        <div className="flex gap-2 justify-center sm:justify-end pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            className="flex-1 sm:flex-initial"
-            disabled={
-              form.formState.isSubmitting || externalIsSubmitting === true
-            }
-          >
-            Cancelar
-          </Button>
-          <LoadingButton
-            type="submit"
-            className="flex-1 sm:flex-initial"
-            isLoading={
-              form.formState.isSubmitting || externalIsSubmitting === true
-            }
-            loadingText={initialData?.id ? "Atualizando..." : "Criando..."}
-          >
-            {initialData?.id ? "Atualizar" : "Criar"} Pedido
-          </LoadingButton>
-        </div>
-      </form>
-    </Form>
+        <OrderItemsTable
+          items={fields.map((field) => ({
+            ...field,
+            fieldId: field.id,
+          }))}
+          subtotal={subtotal}
+          deliveryFee={deliveryFee}
+          total={total}
+          onRemoveItem={(index) => {
+            remove(index);
+          }}
+        />
+        {form.formState.errors.items && (
+          <p className="text-sm font-medium text-destructive">
+            {form.formState.errors.items.message}
+          </p>
+        )}
+      </div>
+
+      <div className="flex gap-2 justify-center sm:justify-end pt-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          className="flex-1 sm:flex-initial"
+          disabled={
+            form.formState.isSubmitting || externalIsSubmitting === true
+          }
+        >
+          Cancelar
+        </Button>
+        <LoadingButton
+          type="submit"
+          className="flex-1 sm:flex-initial"
+          isLoading={
+            form.formState.isSubmitting || externalIsSubmitting === true
+          }
+          loadingText={initialData?.id ? "Atualizando..." : "Criando..."}
+        >
+          {initialData?.id ? "Atualizar" : "Criar"} Pedido
+        </LoadingButton>
+      </div>
+    </form>
   );
 }

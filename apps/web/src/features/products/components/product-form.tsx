@@ -1,17 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useId } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { LoadingButton } from "@/shared/components/loading";
+import { OptionCombobox } from "@/shared/components/option-combobox";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
-import { Combobox } from "@/shared/components/ui/combobox";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldTitle,
+} from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
@@ -32,6 +34,7 @@ export function ProductForm({
   categoryOptions,
   isSubmitting: externalIsSubmitting,
 }: ProductFormProps) {
+  const formId = useId();
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -44,103 +47,165 @@ export function ProductForm({
   });
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <FieldGroup>
+        <Controller
           control={form.control}
           name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do Produto</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder="Digite o nome do produto"
-                  required
-                  {...field}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`${formId}-product-name`}>
+                Nome do Produto
+              </FieldLabel>
+              <Input
+                {...field}
+                id={`${formId}-product-name`}
+                type="text"
+                placeholder="Digite o nome do produto"
+                required
+                aria-invalid={fieldState.invalid}
+                aria-describedby={
+                  fieldState.invalid
+                    ? `${formId}-product-name-error`
+                    : undefined
+                }
+              />
+              {fieldState.invalid && (
+                <FieldError
+                  id={`${formId}-product-name-error`}
+                  errors={[fieldState.error]}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+              )}
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Digite a descrição do produto"
-                  rows={3}
-                  required
-                  {...field}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`${formId}-product-description`}>
+                Descrição
+              </FieldLabel>
+              <Textarea
+                {...field}
+                id={`${formId}-product-description`}
+                placeholder="Digite a descrição do produto"
+                rows={3}
+                required
+                aria-invalid={fieldState.invalid}
+                aria-describedby={
+                  fieldState.invalid
+                    ? `${formId}-product-description-error`
+                    : undefined
+                }
+              />
+              {fieldState.invalid && (
+                <FieldError
+                  id={`${formId}-product-description-error`}
+                  errors={[fieldState.error]}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+              )}
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Preço (R$)</FormLabel>
-              <FormControl>
-                <InputMoney {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`${formId}-product-price`}>
+                Preço (R$)
+              </FieldLabel>
+              <InputMoney
+                {...field}
+                id={`${formId}-product-price`}
+                aria-invalid={fieldState.invalid}
+                aria-describedby={
+                  fieldState.invalid
+                    ? `${formId}-product-price-error`
+                    : undefined
+                }
+              />
+              {fieldState.invalid && (
+                <FieldError
+                  id={`${formId}-product-price-error`}
+                  errors={[fieldState.error]}
+                />
+              )}
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoria</FormLabel>
-              <FormControl>
-                <Combobox
-                  placeholder="Pesquisar ou criar uma categoria"
-                  options={categoryOptions ?? []}
-                  value={field.value}
-                  onChange={field.onChange}
-                  allowCustomValue
-                  className="max-w-full w-full"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`${formId}-product-category`}>
+                Categoria
+              </FieldLabel>
+              <OptionCombobox
+                id={`${formId}-product-category`}
+                name={field.name}
+                inputRef={field.ref}
+                placeholder="Pesquisar ou criar uma categoria"
+                options={categoryOptions ?? []}
+                value={field.value}
+                onValueChange={field.onChange}
+                onBlur={field.onBlur}
+                // Categoria de produto é texto livre: o rótulo é o próprio valor
+                onCreate={async (label) => ({ value: label, label })}
+                aria-invalid={fieldState.invalid}
+                aria-describedby={
+                  fieldState.invalid
+                    ? `${formId}-product-category-error`
+                    : undefined
+                }
+              />
+              {fieldState.invalid && (
+                <FieldError
+                  id={`${formId}-product-category-error`}
+                  errors={[fieldState.error]}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+              )}
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="available"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-              <FormControl>
+          render={({ field, fieldState }) => (
+            <FieldLabel htmlFor={`${formId}-product-available`}>
+              <Field orientation="horizontal" data-invalid={fieldState.invalid}>
                 <Checkbox
+                  id={`${formId}-product-available`}
+                  name={field.name}
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  aria-invalid={fieldState.invalid}
+                  aria-describedby={`${formId}-product-available-description`}
                 />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>Disponível</FormLabel>
-                <p className="text-sm text-muted-foreground">
-                  Este produto estará visível para registro de pedidos.
-                </p>
-              </div>
-            </FormItem>
+                <FieldContent>
+                  <FieldTitle>Disponível</FieldTitle>
+                  <FieldDescription
+                    id={`${formId}-product-available-description`}
+                  >
+                    Este produto estará visível para registro de pedidos.
+                  </FieldDescription>
+                </FieldContent>
+              </Field>
+            </FieldLabel>
           )}
         />
 
-        <div className="flex gap-2 justify-center sm:justify-end pt-2">
+        <Field
+          orientation="horizontal"
+          className="justify-center sm:justify-end"
+        >
           <Button
             type="button"
             variant="outline"
@@ -159,8 +224,8 @@ export function ProductForm({
           >
             {initialData?.id ? "Atualizar" : "Criar"} Produto
           </LoadingButton>
-        </div>
-      </form>
-    </Form>
+        </Field>
+      </FieldGroup>
+    </form>
   );
 }

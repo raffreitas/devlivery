@@ -1,5 +1,5 @@
 import type { DateRange } from "react-day-picker";
-import { DateRangePicker } from "@/shared/components/ui/date-range-picker";
+import { DateRangePicker } from "@/shared/components/date-range-picker";
 import { Label } from "@/shared/components/ui/label";
 
 interface DashboardFiltersContentProps {

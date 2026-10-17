@@ -31,11 +31,7 @@ export function Sidebar() {
           className="ml-auto shrink-0"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
-          {isCollapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
+          {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
         </Button>
       </div>
 

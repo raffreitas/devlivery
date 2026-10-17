@@ -233,7 +233,7 @@ export function CashSummaryCard({
         {/* Deposits list - if any */}
         {deposits && deposits.length > 0 && (
           <div className="border-t border-border">
-            <Accordion type="single" collapsible>
+            <Accordion>
               <AccordionItem value="deposits-list">
                 <AccordionTrigger>
                   <span className="flex items-center gap-2">
@@ -288,7 +288,7 @@ export function CashSummaryCard({
 
         {/* Sales summary - collapsed, secondary info */}
         <div className="border-t border-border">
-          <Accordion type="single" collapsible>
+          <Accordion>
             <AccordionItem value="sales-summary">
               <AccordionTrigger>
                 <span className="flex items-center gap-2">

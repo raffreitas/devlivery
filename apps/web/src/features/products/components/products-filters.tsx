@@ -34,8 +34,8 @@ export function ProductsFilters({
       {/* Mobile: Botão Filtros */}
       <div className="sm:hidden">
         <Button variant="secondary" onClick={onOpenFilters} className="w-full">
-          <Filter className="w-4 h-4" />
-          <span className="ml-2">Filtros</span>
+          <Filter data-icon="inline-start" />
+          <span>Filtros</span>
           {activeFiltersCount > 0 && (
             <span className="ml-2 px-1.5 py-0.5 bg-orange-500 text-white text-xs font-bold rounded-full min-w-5 text-center">
               {activeFiltersCount}
@@ -59,7 +59,12 @@ export function ProductsFilters({
           </div>
 
           <div className="w-full sm:w-50">
-            <Select onValueChange={onCategoryChange} value={filterCategory}>
+            <Select
+              onValueChange={(value) => {
+                if (value !== null) onCategoryChange(value as string);
+              }}
+              value={filterCategory}
+            >
               <SelectTrigger className="w-full">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Filter className="w-4 h-4" />
@@ -71,17 +76,11 @@ export function ProductsFilters({
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem
-                  value="all"
-                  onSelect={() => onCategoryChange("all")}
-                >
-                  Todas as categorias
-                </SelectItem>
+                <SelectItem value="all">Todas as categorias</SelectItem>
                 {categories.map((category) => (
                   <SelectItem
                     key={category}
                     value={category}
-                    onSelect={() => onCategoryChange(category)}
                     className="cursor-pointer"
                   >
                     {category}

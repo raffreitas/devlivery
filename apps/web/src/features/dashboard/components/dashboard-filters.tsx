@@ -23,7 +23,7 @@ export function DashboardFilters({
           onClick={onOpenFilters}
           className="w-full sm:w-auto"
         >
-          <Filter className="w-4 h-4" />
+          <Filter data-icon="inline-start" />
           Filtros
         </Button>
       </div>

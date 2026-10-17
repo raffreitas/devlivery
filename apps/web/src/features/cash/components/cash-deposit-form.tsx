@@ -1,15 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useId } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { LoadingButton } from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/components/ui/field";
 import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
 import {
@@ -26,6 +25,7 @@ export function CashDepositForm({
   onSubmit,
   isLoading = false,
 }: CashDepositFormProps) {
+  const formId = useId();
   const form = useForm<CreateCashDepositFormData>({
     resolver: zodResolver(createCashDepositFormSchema),
     defaultValues: {
@@ -40,53 +40,71 @@ export function CashDepositForm({
   };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleFormSubmit)}
-        className="space-y-4"
-      >
-        <FormField
+    <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+      <FieldGroup>
+        <Controller
           control={form.control}
           name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Valor do Aporte (R$) <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <InputMoney
-                  disabled={isLoading}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="0.00"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`${formId}-cash-deposit-amount`}>
+                Valor do Aporte (R$) <span className="text-destructive">*</span>
+              </FieldLabel>
+              <InputMoney
+                {...field}
+                id={`${formId}-cash-deposit-amount`}
+                disabled={isLoading}
+                placeholder="0.00"
+                aria-invalid={fieldState.invalid}
+                aria-describedby={
+                  fieldState.invalid
+                    ? `${formId}-cash-deposit-amount-error`
+                    : undefined
+                }
+              />
+              {fieldState.invalid && (
+                <FieldError
+                  id={`${formId}-cash-deposit-amount-error`}
+                  errors={[fieldState.error]}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+              )}
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Motivo ou Observações (Opcional)</FormLabel>
-              <FormControl>
-                <Textarea
-                  disabled={isLoading}
-                  placeholder="Motivo do aporte (ex: Troco, Falta de dinheiro...)"
-                  className="resize-none"
-                  rows={3}
-                  {...field}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`${formId}-cash-deposit-notes`}>
+                Motivo ou Observações (Opcional)
+              </FieldLabel>
+              <Textarea
+                {...field}
+                id={`${formId}-cash-deposit-notes`}
+                disabled={isLoading}
+                placeholder="Motivo do aporte (ex: Troco, Falta de dinheiro...)"
+                className="resize-none"
+                rows={3}
+                aria-invalid={fieldState.invalid}
+                aria-describedby={
+                  fieldState.invalid
+                    ? `${formId}-cash-deposit-notes-error`
+                    : undefined
+                }
+              />
+              {fieldState.invalid && (
+                <FieldError
+                  id={`${formId}-cash-deposit-notes-error`}
+                  errors={[fieldState.error]}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+              )}
+            </Field>
           )}
         />
 
-        <div className="flex gap-2 pt-2">
+        <Field orientation="horizontal">
           <Button
             type="button"
             variant="outline"
@@ -105,8 +123,8 @@ export function CashDepositForm({
           >
             Adicionar Aporte
           </LoadingButton>
-        </div>
-      </form>
-    </Form>
+        </Field>
+      </FieldGroup>
+    </form>
   );
 }
