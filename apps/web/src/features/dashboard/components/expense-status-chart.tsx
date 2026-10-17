@@ -17,7 +17,7 @@ import { ChartDataTable } from "./chart-data-table";
 import { ChartTooltipValue } from "./chart-tooltip-value";
 
 const statusConfig = {
-  Paid: { label: "Pago", color: "var(--chart-revenue)" },
+  Paid: { label: "Pago", color: "var(--success)" },
   Pending: { label: "Pendente", color: "var(--chart-info)" },
   Overdue: { label: "Vencido", color: "var(--chart-expense)" },
   DueToday: { label: "Vence Hoje", color: "var(--chart-warning)" },
