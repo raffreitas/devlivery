@@ -1,4 +1,5 @@
 import { formatMoney } from "@/shared/utils/formatters";
+import { fromCents, itemTotal, toCents } from "@/shared/utils/money";
 import { getPaymentOptionLabel } from "../constants/payment-methods";
 import type { Order } from "../types";
 
@@ -42,7 +43,7 @@ export function OrderPrint({ order }: OrderPrintProps) {
                 {item.quantity}x {item.product.name}
               </span>
               <span className="text-end whitespace-nowrap">
-                {formatMoney(item.product.price * item.quantity)}
+                {formatMoney(itemTotal(item.unitPrice, item.quantity))}
               </span>
             </div>
             {item.notes && <p className="text-sm ml-4">Obs: {item.notes}</p>}
@@ -59,9 +60,11 @@ export function OrderPrint({ order }: OrderPrintProps) {
 
       <div className="border-t-2 border-dashed border-foreground pt-2 mb-3">
         {(() => {
-          const subtotal = order.items.reduce(
-            (s, it) => s + it.product.price * it.quantity,
-            0,
+          const subtotal = fromCents(
+            order.items.reduce(
+              (s, it) => s + toCents(it.unitPrice) * it.quantity,
+              0,
+            ),
           );
           return (
             <div>

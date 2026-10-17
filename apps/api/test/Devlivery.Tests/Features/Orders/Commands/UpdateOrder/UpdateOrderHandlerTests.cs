@@ -165,6 +165,56 @@ public sealed class UpdateOrderHandlerTests
         await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 
+    [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    public async Task GivenCatalogPriceChanged_WhenUpdatingExistingItem_ThenPreservesRecordedPrice(int quantity)
+    {
+        // Arrange
+        var product = new ProductBuilder().WithPrice(20m).Build();
+        var originalItem = new OrderItemBuilder().WithProduct(product).WithUnitPrice(9.90m).WithQuantity(1).Build();
+        var order = new OrderBuilder().WithItems(originalItem).WithDeliveryFee(0m).Build();
+        var payment = order.Payments.Single();
+        _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
+        _productRepository.GetByIdsAsync(Arg.Any<List<Guid>>(), Arg.Any<CancellationToken>()).Returns([product]);
+        var command = CreateCommand(order.Id, [new OrderItemDto(product.Id, quantity, "Updated notes")],
+            [new OrderPaymentDto(payment.Id, payment.PaymentMethod, 9.90m * quantity)]);
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        order.Items.ShouldHaveSingleItem().UnitPrice.ShouldBe(9.90m);
+        order.Total.ShouldBe(9.90m * quantity);
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GivenCatalogPriceChanged_WhenAddingNewProduct_ThenUsesCatalogPriceOnlyForNewItem()
+    {
+        // Arrange
+        var existingProduct = new ProductBuilder().WithPrice(20m).Build();
+        var newProduct = new ProductBuilder().WithPrice(30m).Build();
+        var originalItem = new OrderItemBuilder().WithProduct(existingProduct).WithUnitPrice(9.90m).WithQuantity(1).Build();
+        var order = new OrderBuilder().WithItems(originalItem).WithDeliveryFee(0m).Build();
+        var payment = order.Payments.Single();
+        _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
+        _productRepository.GetByIdsAsync(Arg.Any<List<Guid>>(), Arg.Any<CancellationToken>()).Returns([existingProduct, newProduct]);
+        var command = CreateCommand(order.Id,
+            [new OrderItemDto(existingProduct.Id, 1, null), new OrderItemDto(newProduct.Id, 1, null)],
+            [new OrderPaymentDto(payment.Id, payment.PaymentMethod, 39.90m)]);
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        order.Items.Single(i => i.ProductId == existingProduct.Id).UnitPrice.ShouldBe(9.90m);
+        order.Items.Single(i => i.ProductId == newProduct.Id).UnitPrice.ShouldBe(30m);
+        order.Total.ShouldBe(39.90m);
+    }
+
     private static UpdateOrderCommand CreateCommand(Guid orderId, OrderItemDto[] items, OrderPaymentDto[] payments)
     {
         return new UpdateOrderCommand(orderId, items, "João Silva", null, "Rua das Flores, 123", payments);

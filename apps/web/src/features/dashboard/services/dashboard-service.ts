@@ -1,5 +1,6 @@
 import { type ApiResponse, api } from "@/shared/services/api";
 import { formatDate } from "@/shared/utils/formatters";
+import { moneyDifference } from "@/shared/utils/money";
 import type {
   DashboardStats,
   ExpensesByCategory,
@@ -88,20 +89,25 @@ interface UpcomingExpensesDto {
 }
 
 export const dashboardService = {
-  async getStats(startDate?: Date, endDate?: Date): Promise<DashboardStats> {
+  async getStats(
+    startDate?: Date,
+    endDate?: Date,
+    signal?: AbortSignal,
+  ): Promise<DashboardStats> {
     let url = "/dashboard/stats";
     const params = new URLSearchParams();
     if (startDate) params.set("startDate", formatDate(startDate));
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<DashboardStatsDto>>(url);
+    const res = await api.get<ApiResponse<DashboardStatsDto>>(url, signal);
     return res.data;
   },
 
   async getPaymentBreakdown(
     startDate?: Date,
     endDate?: Date,
+    signal?: AbortSignal,
   ): Promise<PaymentBreakdown> {
     let url = "/dashboard/payment-breakdown";
     const params = new URLSearchParams();
@@ -109,7 +115,7 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<PaymentBreakdownDto>>(url);
+    const res = await api.get<ApiResponse<PaymentBreakdownDto>>(url, signal);
 
     return res.data;
   },
@@ -117,6 +123,7 @@ export const dashboardService = {
   async getOrdersByStatus(
     startDate?: Date,
     endDate?: Date,
+    signal?: AbortSignal,
   ): Promise<OrdersByStatus> {
     let url = "/dashboard/orders-by-status";
     const params = new URLSearchParams();
@@ -124,7 +131,7 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<OrdersByStatusDto>>(url);
+    const res = await api.get<ApiResponse<OrdersByStatusDto>>(url, signal);
     return {
       Pending: res.data.pending,
       Preparing: res.data.preparing,
@@ -137,6 +144,7 @@ export const dashboardService = {
   async getSalesOverTime(
     startDate?: Date,
     endDate?: Date,
+    signal?: AbortSignal,
   ): Promise<ExpenseTimeSeries[]> {
     let url = "/dashboard/sales-over-time";
     const params = new URLSearchParams();
@@ -144,13 +152,14 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<SalesOverTimeDto>>(url);
+    const res = await api.get<ApiResponse<SalesOverTimeDto>>(url, signal);
     return res.data.data;
   },
 
   async getTopProducts(
     startDate?: Date,
     endDate?: Date,
+    signal?: AbortSignal,
   ): Promise<Array<{ name: string; quantity: number }>> {
     let url = "/dashboard/top-products";
     const params = new URLSearchParams();
@@ -158,13 +167,14 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<TopProductsDto>>(url);
+    const res = await api.get<ApiResponse<TopProductsDto>>(url, signal);
     return res.data.products;
   },
 
   async getExpensesByCategory(
     startDate?: Date,
     endDate?: Date,
+    signal?: AbortSignal,
   ): Promise<ExpensesByCategory[]> {
     let url = "/dashboard/expenses-by-category";
     const params = new URLSearchParams();
@@ -172,7 +182,7 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<ExpensesByCategoryDto>>(url);
+    const res = await api.get<ApiResponse<ExpensesByCategoryDto>>(url, signal);
 
     return res.data.categories;
   },
@@ -180,6 +190,7 @@ export const dashboardService = {
   async getExpensesByStatus(
     startDate?: Date,
     endDate?: Date,
+    signal?: AbortSignal,
   ): Promise<ExpensesByStatus[]> {
     let url = "/dashboard/expenses-by-status";
     const params = new URLSearchParams();
@@ -187,7 +198,7 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<ExpensesByStatusDto>>(url);
+    const res = await api.get<ApiResponse<ExpensesByStatusDto>>(url, signal);
 
     return res.data.statuses;
   },
@@ -195,6 +206,7 @@ export const dashboardService = {
   async getExpensesOverTime(
     startDate?: Date,
     endDate?: Date,
+    signal?: AbortSignal,
   ): Promise<ExpenseTimeSeries[]> {
     let url = "/dashboard/expenses-over-time";
     const params = new URLSearchParams();
@@ -202,7 +214,7 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<ExpensesOverTimeDto>>(url);
+    const res = await api.get<ApiResponse<ExpensesOverTimeDto>>(url, signal);
 
     return res.data.data;
   },
@@ -210,6 +222,7 @@ export const dashboardService = {
   async getExpenseSummary(
     startDate?: Date,
     endDate?: Date,
+    signal?: AbortSignal,
   ): Promise<ExpenseSummaryDto> {
     let url = "/dashboard/expense-summary";
     const params = new URLSearchParams();
@@ -217,20 +230,23 @@ export const dashboardService = {
     if (endDate) params.set("endDate", formatDate(endDate));
     if (params.toString()) url = `${url}?${params.toString()}`;
 
-    const res = await api.get<ApiResponse<ExpenseSummaryDto>>(url);
+    const res = await api.get<ApiResponse<ExpenseSummaryDto>>(url, signal);
 
     return res.data;
   },
 
-  async getUpcomingExpenses(days = 7): Promise<UpcomingExpenseDto[]> {
+  async getUpcomingExpenses(
+    days = 7,
+    signal?: AbortSignal,
+  ): Promise<UpcomingExpenseDto[]> {
     const url = `/dashboard/upcoming-expenses?days=${days}`;
 
-    const res = await api.get<ApiResponse<UpcomingExpensesDto>>(url);
+    const res = await api.get<ApiResponse<UpcomingExpensesDto>>(url, signal);
 
     return res.data.expenses;
   },
 
   calculateNetProfit(revenue: number, expenses: number): number {
-    return revenue - expenses;
+    return moneyDifference(revenue, expenses);
   },
 };

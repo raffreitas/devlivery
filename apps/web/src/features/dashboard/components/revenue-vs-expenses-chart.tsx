@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { formatMoney, parseLocalDate } from "@/shared/utils/formatters";
+import { moneyDifference } from "@/shared/utils/money";
 
 interface RevenueVsExpensesChartProps {
   revenueData: { date: string; total: number }[];
@@ -164,12 +165,17 @@ export function RevenueVsExpensesChart({
                               </span>
                               <span
                                 className={`font-bold ${
-                                  data.revenue - data.expenses >= 0
+                                  moneyDifference(
+                                    data.revenue,
+                                    data.expenses,
+                                  ) >= 0
                                     ? "text-green-600"
                                     : "text-red-600"
                                 }`}
                               >
-                                {formatMoney(data.revenue - data.expenses)}
+                                {formatMoney(
+                                  moneyDifference(data.revenue, data.expenses),
+                                )}
                               </span>
                             </div>
                           </div>

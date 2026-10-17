@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { LoadingState, TableSkeleton } from "@/shared/components/loading";
 import { Modal } from "@/shared/components/modal";
+import { QueryState } from "@/shared/components/query-state";
 import { Button } from "@/shared/components/ui/button";
 import {
   Drawer,
@@ -44,7 +45,11 @@ export function ExpensesPage() {
   const {
     expenses,
     summary,
+    isSaving,
     loading,
+    error,
+    hasData,
+    refetch,
     createExpense,
     updateExpense,
     deleteExpense,
@@ -52,21 +57,17 @@ export function ExpensesPage() {
   } = useExpenses({ duePeriod, categoryId, status });
 
   const handleSubmit = async (data: ExpenseFormData) => {
-    try {
-      if (editingExpense) {
-        await updateExpense(editingExpense.id, data);
-        toast.add({
-          type: "success",
-          title: "Despesa atualizada com sucesso!",
-        });
-      } else {
-        await createExpense(data);
-        toast.add({ type: "success", title: "Despesa criada com sucesso!" });
-      }
-      handleCloseModal();
-    } catch {
-      // Reported by the global MutationCache.
+    if (editingExpense) {
+      await updateExpense(editingExpense.id, data);
+      toast.add({
+        type: "success",
+        title: "Despesa atualizada com sucesso!",
+      });
+    } else {
+      await createExpense(data);
+      toast.add({ type: "success", title: "Despesa criada com sucesso!" });
     }
+    handleCloseModal();
   };
 
   const handleEdit = (expense: Expense) => {
@@ -128,48 +129,58 @@ export function ExpensesPage() {
           </Button>
         </div>
 
-        <LoadingState
-          isLoading={loading}
-          skeleton={
-            <div className="flex flex-col gap-4 sm:gap-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="h-24 bg-accent animate-pulse rounded-lg" />
-                <div className="h-24 bg-accent animate-pulse rounded-lg" />
-                <div className="h-24 bg-accent animate-pulse rounded-lg" />
-              </div>
-              <div className="bg-card p-4 rounded-lg border">
-                <TableSkeleton rows={5} columns={9} />
-              </div>
-            </div>
-          }
+        <QueryState
+          isPending={loading}
+          error={error}
+          hasData={hasData}
+          refetch={refetch}
         >
-          <ExpenseSummaryCard summary={summary} />
+          {" "}
+          <LoadingState
+            isLoading={loading}
+            skeleton={
+              <div className="flex flex-col gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="h-24 bg-accent animate-pulse rounded-lg" />
+                  <div className="h-24 bg-accent animate-pulse rounded-lg" />
+                  <div className="h-24 bg-accent animate-pulse rounded-lg" />
+                </div>
+                <div className="bg-card p-4 rounded-lg border">
+                  <TableSkeleton rows={5} columns={9} />
+                </div>
+              </div>
+            }
+          >
+            <ExpenseSummaryCard summary={summary} />
 
-          <ExpensesFilters
-            period={duePeriod}
-            categoryId={categoryId}
-            status={status}
-            onDuePeriodChange={setDuePeriod}
-            onCategoryChange={setCategoryId}
-            onStatusChange={setStatus}
-            onOpenFilters={() => setIsFiltersOpen(true)}
-          />
+            <ExpensesFilters
+              period={duePeriod}
+              categoryId={categoryId}
+              status={status}
+              onDuePeriodChange={setDuePeriod}
+              onCategoryChange={setCategoryId}
+              onStatusChange={setStatus}
+              onOpenFilters={() => setIsFiltersOpen(true)}
+            />
 
-          <ExpenseList
-            expenses={expenses}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onMarkAsPaid={handleMarkAsPaid}
-          />
-        </LoadingState>
+            <ExpenseList
+              expenses={expenses}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onMarkAsPaid={handleMarkAsPaid}
+            />
+          </LoadingState>
+        </QueryState>
       </div>
 
       <Modal
+        dismissible={!isSaving}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={editingExpense ? "Editar Despesa" : "Nova Despesa"}
       >
         <ExpenseForm
+          isSubmitting={isSaving}
           expense={editingExpense}
           onSubmit={handleSubmit}
           onCancel={handleCloseModal}

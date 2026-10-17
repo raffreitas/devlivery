@@ -20,6 +20,7 @@ interface ProductDto {
 
 interface OrderItemDto {
   product: ProductDto;
+  unitPrice: number;
   quantity: number;
   notes?: string | null;
 }
@@ -63,6 +64,7 @@ function mapOrder(dto: OrderDto): Order {
     id: dto.id,
     items: dto.items.map((i) => ({
       product: mapProduct(i.product),
+      unitPrice: i.unitPrice,
       quantity: i.quantity,
       notes: i.notes ?? undefined,
     })),
@@ -84,11 +86,14 @@ function mapOrder(dto: OrderDto): Order {
 }
 
 export const orderService = {
-  getAll: async (params?: {
-    startDate?: string;
-    endDate?: string;
-    paymentMethod?: string;
-  }): Promise<Order[]> => {
+  getAll: async (
+    params?: {
+      startDate?: string;
+      endDate?: string;
+      paymentMethod?: string;
+    },
+    signal?: AbortSignal,
+  ): Promise<Order[]> => {
     let url = "/orders";
     if (params?.startDate || params?.endDate || params?.paymentMethod) {
       const qp = new URLSearchParams();
@@ -97,13 +102,16 @@ export const orderService = {
       if (params.paymentMethod) qp.set("paymentMethod", params.paymentMethod);
       url = `${url}?${qp.toString()}`;
     }
-    const res = await api.get<ApiResponse<OrderDto[] | null>>(url);
+    const res = await api.get<ApiResponse<OrderDto[] | null>>(url, signal);
     const list = res.data ?? [];
     return list.map(mapOrder);
   },
 
-  getById: async (id: string): Promise<Order | null> => {
-    const res = await api.get<ApiResponse<OrderDto | null>>(`/orders/${id}`);
+  getById: async (id: string, signal?: AbortSignal): Promise<Order | null> => {
+    const res = await api.get<ApiResponse<OrderDto | null>>(
+      `/orders/${id}`,
+      signal,
+    );
     return res.data ? mapOrder(res.data) : null;
   },
 

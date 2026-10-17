@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import { FormError } from "@/shared/components/form-error";
 import { LoadingButton } from "@/shared/components/loading";
 import { Modal } from "@/shared/components/modal";
 import { Button } from "@/shared/components/ui/button";
@@ -21,6 +22,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { toast } from "@/shared/components/ui/toast";
+import { applyFormError } from "@/shared/utils/form-errors";
 import {
   useExpenseCategories,
   useExpenseCategoriesManagement,
@@ -54,7 +56,9 @@ export function CreateCategoryDialog({
 }: CreateCategoryDialogProps) {
   const formId = useId();
   const { data: categories } = useExpenseCategories();
-  const { createCategory, isCreating } = useExpenseCategoriesManagement();
+  const { createCategory, isCreating } = useExpenseCategoriesManagement({
+    skipGlobalErrorToast: true,
+  });
   const isSubcategory = !categoryOnly && !!initialParentCategoryId;
 
   const form = useForm<CreateCategoryFormData>({
@@ -86,6 +90,7 @@ export function CreateCategoryDialog({
   const needsParentSelection = !isSubcategory && categoryType === "subcategory";
 
   const handleSubmit = async (data: CreateCategoryFormData) => {
+    form.clearErrors();
     try {
       let finalParentId: string | undefined;
 
@@ -112,8 +117,8 @@ export function CreateCategoryDialog({
       form.reset();
       onOpenChange(false);
       onSuccess(created);
-    } catch {
-      // Reported by the global MutationCache.
+    } catch (error) {
+      applyFormError(form, error);
     }
   };
 
@@ -132,12 +137,14 @@ export function CreateCategoryDialog({
     : "Preencha os dados para criar uma nova categoria de despesa.";
 
   const handleClose = () => {
+    if (isCreating) return;
     form.reset();
     onOpenChange(false);
   };
 
   return (
     <Modal
+      dismissible={!isCreating}
       isOpen={open}
       onClose={handleClose}
       title={title}
@@ -177,164 +184,174 @@ export function CreateCategoryDialog({
           form.handleSubmit(handleSubmit)();
         }}
       >
-        <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
-          {isSubcategory && selectedParentCategory && (
-            <div className="p-3 bg-muted rounded-md">
-              <p className="text-xs text-muted-foreground mb-1">
-                Categoria Pai:
-              </p>
-              <p className="font-medium text-sm">
-                {selectedParentCategory.name}
-              </p>
-            </div>
-          )}
-
-          {!isSubcategory && !categoryOnly && (
-            <Controller
-              control={form.control}
-              name="categoryType"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={`${formId}-category-type`}>
-                    Tipo
-                  </FieldLabel>
-                  <Select
-                    name={field.name}
-                    onValueChange={(value) => {
-                      if (value === null) return;
-                      field.onChange(value as "main" | "subcategory");
-                      if (value === "main") {
-                        form.setValue("parentCategoryId", undefined);
-                      }
-                    }}
-                    value={field.value || "main"}
-                  >
-                    <SelectTrigger
-                      id={`${formId}-category-type`}
-                      className="w-full"
-                      aria-invalid={fieldState.invalid}
-                      aria-describedby={
-                        fieldState.invalid
-                          ? `${formId}-category-type-error`
-                          : undefined
-                      }
-                    >
-                      <SelectValue placeholder="Selecione o tipo">
-                        {field.value === "subcategory"
-                          ? "Subcategoria"
-                          : "Categoria Principal"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="main">
-                          Categoria Principal
-                        </SelectItem>
-                        <SelectItem value="subcategory">
-                          Subcategoria
-                        </SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid && (
-                    <FieldError
-                      id={`${formId}-category-type-error`}
-                      errors={[fieldState.error]}
-                    />
-                  )}
-                </Field>
-              )}
-            />
-          )}
-
-          {needsParentSelection && (
-            <Controller
-              control={form.control}
-              name="parentCategoryId"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={`${formId}-category-parent`}>
-                    Categoria Pai
-                  </FieldLabel>
-                  <Select
-                    name={field.name}
-                    onValueChange={(value) =>
-                      field.onChange(value ?? undefined)
-                    }
-                    value={field.value || null}
-                  >
-                    <SelectTrigger
-                      id={`${formId}-category-parent`}
-                      className="w-full"
-                      aria-invalid={fieldState.invalid}
-                      aria-describedby={
-                        fieldState.invalid
-                          ? `${formId}-category-parent-error`
-                          : undefined
-                      }
-                    >
-                      <SelectValue placeholder="Selecione a categoria pai">
-                        {
-                          parentCategories.find((cat) => cat.id === field.value)
-                            ?.name
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {parentCategories.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid && (
-                    <FieldError
-                      id={`${formId}-category-parent-error`}
-                      errors={[fieldState.error]}
-                    />
-                  )}
-                </Field>
-              )}
-            />
-          )}
-
-          <Controller
-            control={form.control}
-            name="name"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={`${formId}-category-name`}>
-                  {isSubcategory ? "Nome da Subcategoria" : "Nome da Categoria"}
-                </FieldLabel>
-                <Input
-                  {...field}
-                  id={`${formId}-category-name`}
-                  placeholder={
-                    isSubcategory
-                      ? "Ex: Combustível, Manutenção..."
-                      : "Ex: Operacional, Marketing..."
-                  }
-                  autoFocus
-                  aria-invalid={fieldState.invalid}
-                  aria-describedby={
-                    fieldState.invalid
-                      ? `${formId}-category-name-error`
-                      : undefined
-                  }
-                />
-                {fieldState.invalid && (
-                  <FieldError
-                    id={`${formId}-category-name-error`}
-                    errors={[fieldState.error]}
-                  />
-                )}
-              </Field>
+        <fieldset
+          disabled={isCreating}
+          inert={isCreating}
+          className="flex flex-col gap-4"
+        >
+          <FormError message={form.formState.errors.root?.server?.message} />
+          <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
+            {isSubcategory && selectedParentCategory && (
+              <div className="p-3 bg-muted rounded-md">
+                <p className="text-xs text-muted-foreground mb-1">
+                  Categoria Pai:
+                </p>
+                <p className="font-medium text-sm">
+                  {selectedParentCategory.name}
+                </p>
+              </div>
             )}
-          />
-        </FieldGroup>
+
+            {!isSubcategory && !categoryOnly && (
+              <Controller
+                control={form.control}
+                name="categoryType"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`${formId}-category-type`}>
+                      Tipo
+                    </FieldLabel>
+                    <Select
+                      name={field.name}
+                      onValueChange={(value) => {
+                        if (value === null) return;
+                        field.onChange(value as "main" | "subcategory");
+                        if (value === "main") {
+                          form.setValue("parentCategoryId", undefined);
+                        }
+                      }}
+                      value={field.value || "main"}
+                    >
+                      <SelectTrigger
+                        id={`${formId}-category-type`}
+                        className="w-full"
+                        aria-invalid={fieldState.invalid}
+                        aria-describedby={
+                          fieldState.invalid
+                            ? `${formId}-category-type-error`
+                            : undefined
+                        }
+                      >
+                        <SelectValue placeholder="Selecione o tipo">
+                          {field.value === "subcategory"
+                            ? "Subcategoria"
+                            : "Categoria Principal"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="main">
+                            Categoria Principal
+                          </SelectItem>
+                          <SelectItem value="subcategory">
+                            Subcategoria
+                          </SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-category-type-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+            )}
+
+            {needsParentSelection && (
+              <Controller
+                control={form.control}
+                name="parentCategoryId"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`${formId}-category-parent`}>
+                      Categoria Pai
+                    </FieldLabel>
+                    <Select
+                      name={field.name}
+                      onValueChange={(value) =>
+                        field.onChange(value ?? undefined)
+                      }
+                      value={field.value || null}
+                    >
+                      <SelectTrigger
+                        id={`${formId}-category-parent`}
+                        className="w-full"
+                        aria-invalid={fieldState.invalid}
+                        aria-describedby={
+                          fieldState.invalid
+                            ? `${formId}-category-parent-error`
+                            : undefined
+                        }
+                      >
+                        <SelectValue placeholder="Selecione a categoria pai">
+                          {
+                            parentCategories.find(
+                              (cat) => cat.id === field.value,
+                            )?.name
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {parentCategories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-category-parent-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+            )}
+
+            <Controller
+              control={form.control}
+              name="name"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={`${formId}-category-name`}>
+                    {isSubcategory
+                      ? "Nome da Subcategoria"
+                      : "Nome da Categoria"}
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id={`${formId}-category-name`}
+                    placeholder={
+                      isSubcategory
+                        ? "Ex: Combustível, Manutenção..."
+                        : "Ex: Operacional, Marketing..."
+                    }
+                    autoFocus
+                    aria-invalid={fieldState.invalid}
+                    aria-describedby={
+                      fieldState.invalid
+                        ? `${formId}-category-name-error`
+                        : undefined
+                    }
+                  />
+                  {fieldState.invalid && (
+                    <FieldError
+                      id={`${formId}-category-name-error`}
+                      errors={[fieldState.error]}
+                    />
+                  )}
+                </Field>
+              )}
+            />
+          </FieldGroup>
+        </fieldset>
       </form>
     </Modal>
   );

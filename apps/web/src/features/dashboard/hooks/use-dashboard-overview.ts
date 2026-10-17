@@ -1,47 +1,61 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/shared/services/query-keys";
 import { dashboardService } from "../services/dashboard-service";
 
 export function useDashboardOverview(startDate?: Date, endDate?: Date) {
   const statsQuery = useQuery({
-    queryKey: ["dashboard", "stats", { startDate, endDate }],
-    queryFn: () => dashboardService.getStats(startDate, endDate),
+    queryKey: [
+      ...queryKeys.dashboard,
+      "stats",
+      queryKeys.period(startDate, endDate),
+    ],
+    queryFn: ({ signal }) =>
+      dashboardService.getStats(startDate, endDate, signal),
     staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
   });
 
   const expenseSummaryQuery = useQuery({
-    queryKey: ["dashboard", "expense-summary", { startDate, endDate }],
-    queryFn: () => dashboardService.getExpenseSummary(startDate, endDate),
+    queryKey: [
+      ...queryKeys.dashboard,
+      "expense-summary",
+      queryKeys.period(startDate, endDate),
+    ],
+    queryFn: ({ signal }) =>
+      dashboardService.getExpenseSummary(startDate, endDate, signal),
     staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
   });
 
   const salesOverTimeQuery = useQuery({
-    queryKey: ["dashboard", "sales-over-time", { startDate, endDate }],
-    queryFn: () => dashboardService.getSalesOverTime(startDate, endDate),
+    queryKey: [
+      ...queryKeys.dashboard,
+      "sales-over-time",
+      queryKeys.period(startDate, endDate),
+    ],
+    queryFn: ({ signal }) =>
+      dashboardService.getSalesOverTime(startDate, endDate, signal),
     staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
   });
 
   const expensesOverTimeQuery = useQuery({
-    queryKey: ["dashboard", "expenses-over-time", { startDate, endDate }],
-    queryFn: () => dashboardService.getExpensesOverTime(startDate, endDate),
+    queryKey: [
+      ...queryKeys.dashboard,
+      "expenses-over-time",
+      queryKeys.period(startDate, endDate),
+    ],
+    queryFn: ({ signal }) =>
+      dashboardService.getExpensesOverTime(startDate, endDate, signal),
     staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
-  });
-
-  const upcomingExpensesQuery = useQuery({
-    queryKey: ["dashboard", "upcoming-expenses"],
-    queryFn: () => dashboardService.getUpcomingExpenses(7),
-    staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
   });
 
   const expensesByStatusQuery = useQuery({
-    queryKey: ["dashboard", "expenses-by-status", { startDate, endDate }],
-    queryFn: () => dashboardService.getExpensesByStatus(startDate, endDate),
+    queryKey: [
+      ...queryKeys.dashboard,
+      "expenses-by-status",
+      queryKeys.period(startDate, endDate),
+    ],
+    queryFn: ({ signal }) =>
+      dashboardService.getExpensesByStatus(startDate, endDate, signal),
     staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
   });
 
   const isFetching =
@@ -49,10 +63,16 @@ export function useDashboardOverview(startDate?: Date, endDate?: Date) {
     expenseSummaryQuery.isFetching ||
     salesOverTimeQuery.isFetching ||
     expensesOverTimeQuery.isFetching ||
-    upcomingExpensesQuery.isFetching ||
     expensesByStatusQuery.isFetching;
 
   return {
+    queries: {
+      stats: statsQuery,
+      expenseSummary: expenseSummaryQuery,
+      salesOverTime: salesOverTimeQuery,
+      expensesOverTime: expensesOverTimeQuery,
+      expensesByStatus: expensesByStatusQuery,
+    },
     stats: statsQuery.data ?? {
       totalOrders: 0,
       totalRevenue: 0,
@@ -69,7 +89,6 @@ export function useDashboardOverview(startDate?: Date, endDate?: Date) {
     },
     salesOverTime: salesOverTimeQuery.data ?? [],
     expensesOverTime: expensesOverTimeQuery.data ?? [],
-    upcomingExpenses: upcomingExpensesQuery.data ?? [],
     expensesByStatus: expensesByStatusQuery.data ?? [],
     isFetching,
   };

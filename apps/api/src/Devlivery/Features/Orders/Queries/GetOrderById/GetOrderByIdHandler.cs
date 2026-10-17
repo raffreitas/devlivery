@@ -45,6 +45,7 @@ public sealed class GetOrderByIdHandler(ApplicationDbContext dbContext)
                     productsDictionary[i.ProductId].Available,
                     productsDictionary[i.ProductId].CreatedAt,
                     productsDictionary[i.ProductId].UpdatedAt),
+                i.UnitPrice,
                 i.Quantity,
                 i.Notes)).ToList(),
             order.Customer.Name,

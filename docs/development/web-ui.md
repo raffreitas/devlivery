@@ -58,3 +58,14 @@ Referências: [estilos do shadcn](https://ui.shadcn.com/docs/changelog/2025-12-s
 - Provoque erros nos formulários de login, produtos, despesas, categorias, caixa e pedidos. Cada controle inválido deve referenciar seu erro renderizado; descrições devem permanecer associadas mesmo quando houver erro.
 - Abra múltiplas instâncias de um formulário e adicione/remova pagamentos em pedidos: não pode haver IDs duplicados ou associações com outra linha. Ao revisitar um campo inválido com leitor de tela, sua mensagem deve estar disponível.
 - Execute `pnpm lint` e `pnpm build` em `apps/web`.
+- Execute também `pnpm test`. Testes ficam ao lado do código, usando `.test.ts` sem JSX e `.test.tsx` com JSX. A infraestrutura compartilhada fica em `apps/web/test/`, fora de `src`, com alias `@test/*`. Futuros testes e2e ficam em `test/e2e/`, com configuração própria.
+
+## Dados, salvamento e valores financeiros
+
+- Formulários recebem `onSubmit` assíncrono: resolução indica sucesso, rejeição indica falha. Feche o modal e limpe os campos somente após sucesso. Durante o envio, bloqueie edição, novo envio e fechamento do modal.
+- Erros de formulário são associados aos campos e resumidos em um alerta persistente. Essas mutations usam `skipGlobalErrorToast`; evite exibir o mesmo erro em toast e no formulário.
+- Consultas distinguem carregamento, falha, vazio confirmado e sucesso. Falha ao atualizar mantém os dados anteriores com aviso de desatualização. Somente 404 da sessão ativa significa que nenhum caixa está aberto.
+- Use as chaves e invalidações de `shared/services/query-keys.ts`. Cada operação invalida também as consultas de dashboard e caixa que dependem dela. Encaminhe o `AbortSignal` das queries aos serviços HTTP.
+- Some e compare dinheiro em centavos usando `shared/utils/money.ts`; os payloads HTTP permanecem em reais.
+- Itens de pedidos usam `unitPrice`, o preço registrado na venda, para apresentação, edição e impressão. `product.price` continua sendo o preço atual do catálogo. A API preserva o preço dos produtos existentes, inclusive ao aumentar quantidade; produtos novos recebem o preço atual validado pelo servidor.
+- Publique a API que fornece `unitPrice` na listagem e no detalhe dos pedidos antes do frontend correspondente. A alteração é aditiva e não exige migração de banco.

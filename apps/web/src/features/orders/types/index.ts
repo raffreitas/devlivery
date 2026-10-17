@@ -1,5 +1,6 @@
 import z from "zod";
 import type { Product } from "@/features/products/types";
+import { toCents } from "@/shared/utils/money";
 import { isValidBrazilianPhone } from "@/shared/utils/validators";
 
 export type PaymentMethod = "Cash" | "CreditCard" | "DebitCard" | "Pix";
@@ -12,6 +13,7 @@ export type OrderStatus =
 
 export interface OrderItem {
   product: Product;
+  unitPrice: number;
   quantity: number;
   notes?: string;
 }
@@ -84,7 +86,8 @@ export const orderFormSchema = z
             category: z.string().optional(),
             available: z.boolean().optional(),
           }),
-          quantity: z.number().min(1, "Quantidade deve ser maior que 0"),
+          unitPrice: z.number().nonnegative(),
+          quantity: z.number().int().min(1, "Quantidade deve ser maior que 0"),
           notes: z.string().optional(),
         }),
       )
@@ -92,11 +95,14 @@ export const orderFormSchema = z
   })
   .superRefine((data, ctx) => {
     const subtotal = data.items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+      (sum, item) => sum + toCents(item.unitPrice) * item.quantity,
       0,
     );
-    const totalOrder = subtotal + data.deliveryFee;
-    const totalPayments = data.payments.reduce((sum, p) => sum + p.amount, 0);
+    const totalOrder = subtotal + toCents(data.deliveryFee);
+    const totalPayments = data.payments.reduce(
+      (sum, p) => sum + toCents(p.amount),
+      0,
+    );
     if (totalPayments < totalOrder) {
       ctx.addIssue({
         code: "custom",

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+import { QueryRegion } from "@/shared/components/query-region";
 import { Button } from "@/shared/components/ui/button";
 import {
   Drawer,
@@ -24,6 +25,7 @@ import {
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
 import { formatMoney } from "@/shared/utils/formatters";
+import { sumMoney } from "@/shared/utils/money";
 import { StatCard } from "../../../shared/components/stat-card";
 import { DashboardFiltersContent } from "../components/dashboard-filters-content";
 import { DashboardHeader } from "../components/dashboard-header";
@@ -67,20 +69,10 @@ export function DashboardPage() {
   const {
     stats,
     expenseSummary,
-    salesOverTime: overviewSalesOverTime,
-    expensesOverTime: overviewExpensesOverTime,
-    expensesByStatus: overviewExpensesByStatus,
+    salesOverTime,
+    expensesOverTime,
+    expensesByStatus,
   } = overview;
-
-  const salesOverTime =
-    sales.salesOverTime.length > 0
-      ? sales.salesOverTime
-      : overviewSalesOverTime;
-
-  const expensesOverTime =
-    expenses.expensesOverTime.length > 0
-      ? expenses.expensesOverTime
-      : overviewExpensesOverTime;
 
   const handlePeriodFilterChange = (dateRange: DateRange | undefined) => {
     if (!dateRange) {
@@ -98,12 +90,10 @@ export function DashboardPage() {
     expenseSummary.paid,
   );
 
-  const expensesByStatus =
-    expenses.expensesByStatus.length > 0
-      ? expenses.expensesByStatus
-      : overviewExpensesByStatus;
-
-  const pendingExpensesTotal = expenseSummary.pending + expenseSummary.overdue;
+  const pendingExpensesTotal = sumMoney([
+    expenseSummary.pending,
+    expenseSummary.overdue,
+  ]);
 
   return (
     <>
@@ -120,33 +110,43 @@ export function DashboardPage() {
             isFetching ? "opacity-60" : "opacity-100"
           }`}
         >
-          <StatCard
-            title="Receita Total"
-            value={formatMoney(stats.totalRevenue)}
-            icon={<DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />}
-            color="green"
-          />
+          <QueryRegion queries={[overview.queries.stats]}>
+            <StatCard
+              title="Receita Total"
+              value={formatMoney(stats.totalRevenue)}
+              icon={<DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />}
+              color="green"
+            />
+          </QueryRegion>
 
-          <StatCard
-            title="Despesas Pagas"
-            value={formatMoney(expenseSummary.paid)}
-            icon={<TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" />}
-            color="red"
-          />
+          <QueryRegion queries={[overview.queries.expenseSummary]}>
+            <StatCard
+              title="Despesas Pagas"
+              value={formatMoney(expenseSummary.paid)}
+              icon={<TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" />}
+              color="red"
+            />
+          </QueryRegion>
 
-          <StatCard
-            title="Lucro Líquido"
-            value={formatMoney(netProfit)}
-            icon={<TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />}
-            color={netProfit >= 0 ? "green" : "red"}
-          />
+          <QueryRegion
+            queries={[overview.queries.stats, overview.queries.expenseSummary]}
+          >
+            <StatCard
+              title="Lucro Líquido"
+              value={formatMoney(netProfit)}
+              icon={<TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />}
+              color={netProfit >= 0 ? "green" : "red"}
+            />
+          </QueryRegion>
 
-          <StatCard
-            title="Pedidos"
-            value={stats.totalOrders}
-            icon={<AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
-            color="orange"
-          />
+          <QueryRegion queries={[overview.queries.stats]}>
+            <StatCard
+              title="Pedidos"
+              value={stats.totalOrders}
+              icon={<AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
+              color="orange"
+            />
+          </QueryRegion>
         </div>
 
         <div
@@ -154,10 +154,17 @@ export function DashboardPage() {
             isFetching ? "opacity-60" : "opacity-100"
           }`}
         >
-          <RevenueVsExpensesChart
-            revenueData={salesOverTime}
-            expensesData={expensesOverTime}
-          />
+          <QueryRegion
+            queries={[
+              overview.queries.salesOverTime,
+              overview.queries.expensesOverTime,
+            ]}
+          >
+            <RevenueVsExpensesChart
+              revenueData={salesOverTime}
+              expensesData={expensesOverTime}
+            />
+          </QueryRegion>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -173,15 +180,23 @@ export function DashboardPage() {
                 sales.isFetching ? "opacity-60" : "opacity-100"
               }`}
             >
-              <SalesChart data={salesOverTime} />
+              <QueryRegion queries={[overview.queries.salesOverTime]}>
+                <SalesChart data={salesOverTime} />
+              </QueryRegion>
             </div>
             <div
               className={`grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 transition-opacity duration-200 ${
                 sales.isFetching ? "opacity-60" : "opacity-100"
               }`}
             >
-              <PaymentBreakdownCard paymentBreakdown={sales.paymentBreakdown} />
-              <TopProductsCard data={sales.topProducts} />
+              <QueryRegion queries={[sales.queries.paymentBreakdown]}>
+                <PaymentBreakdownCard
+                  paymentBreakdown={sales.paymentBreakdown}
+                />
+              </QueryRegion>
+              <QueryRegion queries={[sales.queries.topProducts]}>
+                <TopProductsCard data={sales.topProducts} />
+              </QueryRegion>
             </div>
           </TabsContent>
 
@@ -191,15 +206,21 @@ export function DashboardPage() {
                 expenses.isFetching ? "opacity-60" : "opacity-100"
               }`}
             >
-              <ExpenseStatusChart data={expensesByStatus} />
-              <ExpensesByCategoryChart data={expenses.expensesByCategory} />
+              <QueryRegion queries={[overview.queries.expensesByStatus]}>
+                <ExpenseStatusChart data={expensesByStatus} />
+              </QueryRegion>
+              <QueryRegion queries={[expenses.queries.expensesByCategory]}>
+                <ExpensesByCategoryChart data={expenses.expensesByCategory} />
+              </QueryRegion>
             </div>
             <div
               className={`transition-opacity duration-200 ${
                 expenses.isFetching ? "opacity-60" : "opacity-100"
               }`}
             >
-              <ExpensesOverTimeChart data={expensesOverTime} />
+              <QueryRegion queries={[overview.queries.expensesOverTime]}>
+                <ExpensesOverTimeChart data={expensesOverTime} />
+              </QueryRegion>
             </div>
           </TabsContent>
 
@@ -209,32 +230,42 @@ export function DashboardPage() {
                 isFetching ? "opacity-60" : "opacity-100"
               }`}
             >
-              <StatCard
-                title="Total de Pedidos"
-                value={stats.totalOrders}
-                icon={<BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />}
-                color="orange"
-              />
-              <StatCard
-                title="Ticket Médio"
-                value={formatMoney(stats.averageOrderValue)}
-                icon={<DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />}
-                color="green"
-              />
-              <StatCard
-                title="Despesas Pendentes"
-                value={formatMoney(pendingExpensesTotal)}
-                icon={<AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
-                color="amber"
-              />
+              <QueryRegion queries={[overview.queries.stats]}>
+                <StatCard
+                  title="Total de Pedidos"
+                  value={stats.totalOrders}
+                  icon={<BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />}
+                  color="orange"
+                />
+              </QueryRegion>
+              <QueryRegion queries={[overview.queries.stats]}>
+                <StatCard
+                  title="Ticket Médio"
+                  value={formatMoney(stats.averageOrderValue)}
+                  icon={<DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />}
+                  color="green"
+                />
+              </QueryRegion>
+              <QueryRegion queries={[overview.queries.expenseSummary]}>
+                <StatCard
+                  title="Despesas Pendentes"
+                  value={formatMoney(pendingExpensesTotal)}
+                  icon={<AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
+                  color="amber"
+                />
+              </QueryRegion>
             </div>
             <div
               className={`grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 transition-opacity duration-200 ${
                 isFetching ? "opacity-60" : "opacity-100"
               }`}
             >
-              <SalesChart data={salesOverTime} />
-              <ExpensesOverTimeChart data={expensesOverTime} />
+              <QueryRegion queries={[overview.queries.salesOverTime]}>
+                <SalesChart data={salesOverTime} />
+              </QueryRegion>
+              <QueryRegion queries={[overview.queries.expensesOverTime]}>
+                <ExpensesOverTimeChart data={expensesOverTime} />
+              </QueryRegion>
             </div>
           </TabsContent>
         </Tabs>
