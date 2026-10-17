@@ -11,6 +11,7 @@ import {
 import { useEffect, useId, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useProducts } from "@/features/products/hooks/use-products";
+import { InputMoney } from "@/shared/components/input-money";
 import { LoadingButton } from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -20,7 +21,6 @@ import {
   FieldLabel,
 } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
 import {
   ToggleGroup,
@@ -201,7 +201,7 @@ export function OrderForm({
         <div className="space-y-3">
           <h3 className="text-lg font-semibold">Dados do Cliente</h3>
 
-          <FieldGroup className="gap-4">
+          <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
             <Controller
               control={form.control}
               name="customerName"

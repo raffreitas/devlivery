@@ -48,10 +48,8 @@ export function DashboardPage() {
   const [activeTab, setActiveTab] = useState("vendas");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
-  // Dados sempre necessários (overview)
   const overview = useDashboardOverview(period?.from, period?.to);
 
-  // Dados condicionais por tab
   const sales = useDashboardSales(
     period?.from,
     period?.to,
@@ -63,11 +61,9 @@ export function DashboardPage() {
     activeTab === "despesas",
   );
 
-  // Combinar isFetching de todos os hooks
   const isFetching =
     overview.isFetching || sales.isFetching || expenses.isFetching;
 
-  // Extrair dados do overview
   const {
     stats,
     expenseSummary,
@@ -76,13 +72,11 @@ export function DashboardPage() {
     expensesByStatus: overviewExpensesByStatus,
   } = overview;
 
-  // Usar salesOverTime do hook de vendas se disponível, senão do overview
   const salesOverTime =
     sales.salesOverTime.length > 0
       ? sales.salesOverTime
       : overviewSalesOverTime;
 
-  // Usar expensesOverTime do hook de despesas se disponível, senão do overview
   const expensesOverTime =
     expenses.expensesOverTime.length > 0
       ? expenses.expensesOverTime
@@ -99,19 +93,16 @@ export function DashboardPage() {
     }
   };
 
-  // Calcular lucro líquido
   const netProfit = dashboardService.calculateNetProfit(
     stats.totalRevenue,
     expenseSummary.paid,
   );
 
-  // Usar expensesByStatus do hook de despesas se disponível, senão do overview
   const expensesByStatus =
     expenses.expensesByStatus.length > 0
       ? expenses.expensesByStatus
       : overviewExpensesByStatus;
 
-  // Calcular despesas pendentes (Pending + Overdue)
   const pendingExpensesTotal = expenseSummary.pending + expenseSummary.overdue;
 
   return (
@@ -124,7 +115,6 @@ export function DashboardPage() {
           onOpenFilters={() => setIsFiltersOpen(true)}
         />
 
-        {/* Cards Principais - Apenas 4 métricas essenciais */}
         <div
           className={`grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4 transition-opacity duration-200 ${
             isFetching ? "opacity-60" : "opacity-100"
@@ -159,7 +149,6 @@ export function DashboardPage() {
           />
         </div>
 
-        {/* Gráfico Principal - Receitas vs Despesas */}
         <div
           className={`transition-opacity duration-200 ${
             isFetching ? "opacity-60" : "opacity-100"
@@ -171,7 +160,6 @@ export function DashboardPage() {
           />
         </div>
 
-        {/* Tabs para organizar gráficos detalhados */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 lg:w-fit">
             <TabsTrigger value="vendas">Vendas</TabsTrigger>

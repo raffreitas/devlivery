@@ -18,9 +18,9 @@ export function TopProductsCard({ data }: TopProductsCardProps) {
         <CardTitle>Produtos Mais Vendidos</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-8">
+        <div>
           {data.length > 0 ? (
-            <div className="max-h-70 space-y-8 overflow-y-auto pr-2">
+            <div className="max-h-70 flex flex-col gap-3 overflow-y-auto pr-2">
               {data.map((item) => (
                 <div key={item.name} className="flex items-center">
                   <div className="space-y-1 flex-1">

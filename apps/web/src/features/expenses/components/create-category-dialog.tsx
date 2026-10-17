@@ -55,8 +55,6 @@ export function CreateCategoryDialog({
   const formId = useId();
   const { data: categories } = useExpenseCategories();
   const { createCategory, isCreating } = useExpenseCategoriesManagement();
-  // Se tem initialParentCategoryId, é subcategoria
-  // Se categoryOnly é true, força ser categoria principal
   const isSubcategory = !categoryOnly && !!initialParentCategoryId;
 
   const form = useForm<CreateCategoryFormData>({
@@ -68,14 +66,12 @@ export function CreateCategoryDialog({
     },
   });
 
-  // Atualiza o nome quando initialName muda
   useEffect(() => {
     if (initialName && open) {
       form.setValue("name", initialName);
     }
   }, [initialName, open, form]);
 
-  // Reset form quando modal abre/fecha
   useEffect(() => {
     if (open) {
       form.reset({
@@ -87,13 +83,10 @@ export function CreateCategoryDialog({
   }, [open, initialName, initialParentCategoryId, isSubcategory, form]);
 
   const categoryType = form.watch("categoryType");
-  // Se escolheu "subcategory" no tipo, precisa selecionar categoria pai
   const needsParentSelection = !isSubcategory && categoryType === "subcategory";
 
   const handleSubmit = async (data: CreateCategoryFormData) => {
     try {
-      // Se é subcategoria (tem initialParentCategoryId), usa ele
-      // Se escolheu "subcategory" no tipo, precisa ter selecionado categoria pai
       let finalParentId: string | undefined;
 
       if (initialParentCategoryId) {
@@ -103,7 +96,6 @@ export function CreateCategoryDialog({
         // Subcategoria criada escolhendo tipo "Subcategoria" e selecionando categoria pai
         finalParentId = data.parentCategoryId;
       } else {
-        // Categoria principal
         finalParentId = undefined;
       }
 
@@ -185,8 +177,7 @@ export function CreateCategoryDialog({
           form.handleSubmit(handleSubmit)();
         }}
       >
-        <FieldGroup>
-          {/* Mostra categoria pai se for subcategoria */}
+        <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
           {isSubcategory && selectedParentCategory && (
             <div className="p-3 bg-muted rounded-md">
               <p className="text-xs text-muted-foreground mb-1">
@@ -198,7 +189,6 @@ export function CreateCategoryDialog({
             </div>
           )}
 
-          {/* Se não é subcategoria e não é categoryOnly, permite escolher tipo */}
           {!isSubcategory && !categoryOnly && (
             <Controller
               control={form.control}
@@ -213,7 +203,6 @@ export function CreateCategoryDialog({
                     onValueChange={(value) => {
                       if (value === null) return;
                       field.onChange(value as "main" | "subcategory");
-                      // Limpa parentCategoryId quando muda para "main"
                       if (value === "main") {
                         form.setValue("parentCategoryId", undefined);
                       }
@@ -258,7 +247,6 @@ export function CreateCategoryDialog({
             />
           )}
 
-          {/* Se escolheu subcategoria mas não tem initialParentCategoryId, mostra select de categoria pai */}
           {needsParentSelection && (
             <Controller
               control={form.control}

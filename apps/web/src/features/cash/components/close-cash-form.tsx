@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Banknote, PlusIcon, TrendingUp } from "lucide-react";
 import { useId } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { InputMoney } from "@/shared/components/input-money";
 import {
   Alert,
   AlertDescription,
@@ -15,7 +16,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/shared/components/ui/field";
-import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { formatMoney } from "@/shared/utils/formatters";
 import {
@@ -65,8 +65,7 @@ export function CloseCashForm({
 
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
-      <FieldGroup>
-        {/* Breakdown do valor esperado */}
+      <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
         <Alert>
           <Banknote className="w-5 h-5" />
           <AlertTitle>Composição do Valor Esperado</AlertTitle>
@@ -108,7 +107,6 @@ export function CloseCashForm({
           </AlertDescription>
         </Alert>
 
-        {/* Valor real contado */}
         <Controller
           control={form.control}
           name="closingAmount"
@@ -144,7 +142,6 @@ export function CloseCashForm({
           )}
         />
 
-        {/* Diferença - sempre visível quando há valor digitado */}
         {closingAmount > 0 && (
           <Alert>
             <AlertTitle>

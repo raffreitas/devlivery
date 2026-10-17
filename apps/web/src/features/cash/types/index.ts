@@ -12,7 +12,7 @@ export interface CashSession {
   id: string;
   attendant: string;
   openingAmount: number;
-  expectedCashAmount: number; // Opening + cash sales only
+  expectedCashAmount: number;
   startAt: string; // ISO date string
   endAt?: string; // ISO date string
   closingAmount?: number;
@@ -47,13 +47,12 @@ export type CloseCashSessionFormData = z.infer<
   typeof closeCashSessionFormSchema
 >;
 
-// Cash Deposit Types
 export interface CashDeposit {
   id: string;
   cashSessionId: string;
   amount: number;
   depositedAt: string; // ISO date string
-  attendant: string; // Attendant who made the deposit
+  attendant: string;
   notes?: string;
 }
 

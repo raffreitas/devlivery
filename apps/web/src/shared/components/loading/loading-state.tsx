@@ -10,12 +10,6 @@ interface LoadingStateProps {
   className?: string;
 }
 
-/**
- * LoadingState - Componente para gerenciar estados de loading inicial
- *
- * Usado quando não há dados ainda (primeira carga).
- * Mostra skeleton por padrão, ou spinner centralizado se especificado.
- */
 export function LoadingState({
   isLoading,
   children,
@@ -45,7 +39,6 @@ export function LoadingState({
       return <>{skeleton}</>;
     }
 
-    // Fallback: spinner centralizado
     return (
       <div
         className={`flex flex-col items-center justify-center h-64 gap-3 ${className ?? ""}`}

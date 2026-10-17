@@ -1,5 +1,5 @@
 import { formatMoney, removeChars } from "@/shared/utils/formatters";
-import { Input } from "./input";
+import { Input } from "./ui/input";
 
 type BaseInputProps = Omit<
   React.ComponentProps<typeof Input>,

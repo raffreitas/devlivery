@@ -8,7 +8,6 @@ import type {
   PaymentMethodTotal,
 } from "../types";
 
-// DTOs from backend
 interface CashSessionDto {
   id: string;
   attendantId: string;

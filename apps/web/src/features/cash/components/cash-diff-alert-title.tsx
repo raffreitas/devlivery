@@ -1,5 +1,5 @@
+import { cn } from "cn";
 import { CheckIcon, CircleAlertIcon, TriangleAlertIcon } from "lucide-react";
-import { cn } from "@/shared/lib/utils";
 import { formatMoney } from "@/shared/utils/formatters";
 
 export function CashDiffAlertTitle({ difference }: { difference: number }) {

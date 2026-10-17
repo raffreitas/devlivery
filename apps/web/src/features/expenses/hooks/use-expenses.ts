@@ -35,7 +35,6 @@ export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
     placeholderData: (previousData) => previousData,
   });
 
-  // Calcula sumário/totalizadores
   const summary: ExpenseSummary = useMemo(() => {
     const expenses = expensesQuery.data ?? [];
 

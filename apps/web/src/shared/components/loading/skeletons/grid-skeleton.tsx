@@ -8,9 +8,6 @@ interface GridSkeletonProps {
   showImage?: boolean;
 }
 
-/**
- * GridSkeleton - Skeleton loader para grids de cards
- */
 export function GridSkeleton({
   items = 8,
   columns = 4,
@@ -30,7 +27,7 @@ export function GridSkeleton({
 
   return (
     <div
-      className={`grid ${gridCols[columns as keyof typeof gridCols] ?? gridCols[4]} gap-6 ${className ?? ""}`}
+      className={`grid ${gridCols[columns as keyof typeof gridCols] ?? gridCols[4]} gap-4 sm:gap-6 ${className ?? ""}`}
     >
       {itemKeys.map((key) => (
         <CardSkeleton key={key} showImage={showImage} />

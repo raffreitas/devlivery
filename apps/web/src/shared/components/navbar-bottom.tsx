@@ -1,6 +1,6 @@
+import { cn } from "cn";
 import { Link, useLocation } from "react-router-dom";
 import { navItems } from "@/shared/constants/nav-items";
-import { cn } from "@/shared/lib/utils";
 
 export function NavbarBottom() {
   const location = useLocation();

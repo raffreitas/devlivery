@@ -26,10 +26,8 @@ export function useDateRangeFilter(options?: UseDateRangeFilterOptions) {
   // Ref estável para o debounceMs para evitar recriar o efeito
   const debounceRef = useRef(debounceMs);
 
-  // Debounce: aplica mudanças após delay
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Validação: apenas aplica se as datas forem válidas
       if (inputStartDate && inputEndDate && inputStartDate <= inputEndDate) {
         setStartDate(inputStartDate);
         setEndDate(inputEndDate);

@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useId } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { InputMoney } from "@/shared/components/input-money";
 import { LoadingButton } from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -9,7 +10,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/shared/components/ui/field";
-import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
 import {
   type CreateCashDepositFormData,
@@ -41,7 +41,7 @@ export function CashDepositForm({
 
   return (
     <form onSubmit={form.handleSubmit(handleFormSubmit)}>
-      <FieldGroup>
+      <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
         <Controller
           control={form.control}
           name="amount"

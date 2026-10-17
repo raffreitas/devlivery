@@ -12,16 +12,23 @@ pnpm dlx shadcn@latest add <componente> --dry-run
 pnpm dlx shadcn@latest add <componente> --overwrite --yes
 ```
 
-Depois de **todo** `add`, corrija o bug do CLI com o alias `@/shared/lib/utils`. O CLI reescreve esse import como o pacote npm `cn` e o instala como dependência:
-
-```bash
-sed -i 's#from "cn"#from "@/shared/lib/utils"#' src/shared/components/ui/*.tsx
-pnpm remove cn
-```
+Componentes oficiais e composições do projeto importam `cn` diretamente do pacote `cn`, conforme a [recomendação atual do shadcn](https://ui.shadcn.com/docs/changelog/2026-09-cn). Não reescreva esses imports para o helper local nem reinstale `clsx` ou `tailwind-merge`. O arquivo `src/shared/lib/utils.ts` apenas reexporta `cn` para compatibilidade com o alias de utilitários do CLI.
 
 Também remova o `"use client"` que alguns arquivos trazem (o projeto tem `rsc: false`) e rode `pnpm format`.
 
 ## Regras
+
+### Espaçamentos
+
+- Preserve os controles oficiais do Vega (36 px de altura), mas use densidade compacta nos formulários: `<FieldGroup className="gap-5 *:data-[slot=field]:gap-2">`, ou seja, 20 px entre campos e 8 px entre label e controle (os valores do estilo Nova). O ajuste fica no consumidor; não altere `ui/field.tsx`.
+- O `Modal` usa `gap-4` entre cabeçalho, conteúdo e rodapé e título em `text-base`.
+- Use 8 px (`gap-2`) entre ícones/textos e ações relacionadas, 12 px (`gap-3`) em listas simples e 16 px (`gap-4`) entre blocos relacionados.
+- Seções de página e grades de cards usam 16 px no mobile e 24 px a partir de `sm` (`gap-4 sm:gap-6`). Grades de indicadores podem usar 12/16 px para agrupar métricas relacionadas.
+- Cards seguem o padding oficial: 24 px no tamanho padrão e 16 px com `size="sm"`. Preserve a adaptação 16/24 px nas composições responsivas existentes.
+- Defina o espaçamento entre filhos com uma única fonte. `CardContent` já usa `flex` e `gap-3`; use apenas `gap-*` para ajustar essa distância, sem somar `space-y-*` ou margens nos mesmos filhos.
+- Modais reservam a linha de rodapé somente quando ele é informado. O padding de 24 px do diálogo e a área de rolagem dos formulários permanecem preservados.
+
+### Composição e manutenção
 
 - Não personalize arquivos de `src/shared/components/ui/`. Adapte os consumidores ou crie um componente composto em `src/shared/components/`, como `option-combobox.tsx` e `modal.tsx`.
 - O `biome.json` desliga, apenas para `apps/web/src/shared/components/ui/**`, regras que disparam no código oficial:
@@ -36,6 +43,7 @@ Também remova o `"use client"` que alguns arquivos trazem (o projeto tem `rsc: 
 - Calendários da aplicação usam `AccessibleCalendar`, fora de `ui/`, que encaminha o ref ao `CalendarDayButton` oficial para recuperar o foco por teclado. O `DateRangePicker` também fica fora de `ui/` por ser uma composição do projeto.
 - Comboboxes de subcategoria reiniciam por `parentCategoryId`; resultados assíncronos de instâncias desmontadas não podem atualizar a seleção do formulário.
 - Ícones dentro de componentes: sem classes de tamanho; use `data-icon="inline-start"` ou `"inline-end"`.
+- Carregamento (`src/shared/components/loading/`): `LoadingState` com o skeleton adequado na primeira carga; `LoadingOverlay position="top-bar"` para refetch de página, ou `inline`/`badge` para feedback numa seção; `LoadingButton` em mutations. Refetch nunca bloqueia a UI.
 - Toasts: `toast.add({ type, title })` de `@/shared/components/ui/toast`. Erros de mutation já são exibidos pelo `MutationCache` global.
 - Rotas: cada página entra em `src/app-routes.tsx` com `lazy`, para virar um chunk próprio. Redirecionamentos durante o render usam `<Navigate>`; chamar `navigate()` no render entra em loop enquanto o chunk da rota carrega.
 - Empilhamento: no registro, o viewport do toast e os overlays (Dialog, Drawer) usam `z-50`, e o portal aberto por último fica por cima. `src/index.css` eleva `[data-slot="toast-viewport"]` para `z-index: 100`, mantendo `ui/toast.tsx` intacto.

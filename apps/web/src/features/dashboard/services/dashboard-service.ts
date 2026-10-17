@@ -230,7 +230,6 @@ export const dashboardService = {
     return res.data.expenses;
   },
 
-  // Helper method for backward compatibility
   calculateNetProfit(revenue: number, expenses: number): number {
     return revenue - expenses;
   },

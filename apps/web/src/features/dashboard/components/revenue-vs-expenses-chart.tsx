@@ -25,7 +25,6 @@ export function RevenueVsExpensesChart({
   revenueData,
   expensesData,
 }: RevenueVsExpensesChartProps) {
-  // Combina os dados de receitas e despesas por data
   const combinedData = useMemo(() => {
     const dataMap = new Map<
       string,
@@ -52,7 +51,6 @@ export function RevenueVsExpensesChart({
       }
     });
 
-    // Sort by full date. Backend now emits ISO date strings (yyyy-MM-dd).
     return Array.from(dataMap.values()).sort((a, b) => {
       const dateA = parseLocalDate(a.date);
       const dateB = parseLocalDate(b.date);
