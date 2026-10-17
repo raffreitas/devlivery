@@ -1,224 +1,185 @@
-import { useMemo } from "react";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { useId } from "react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { formatMoney, parseLocalDate } from "@/shared/utils/formatters";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/shared/components/ui/chart";
+import { formatMoney } from "@/shared/utils/formatters";
 import { moneyDifference } from "@/shared/utils/money";
+import {
+  combineFinancialSeries,
+  formatChartDate,
+  formatChartFullDate,
+  formatChartMoney,
+  type TimeSeriesPoint,
+} from "../utils/chart-data";
+import { ChartDataTable } from "./chart-data-table";
+import { ChartTooltipValue } from "./chart-tooltip-value";
 
-interface RevenueVsExpensesChartProps {
-  revenueData: { date: string; total: number }[];
-  expensesData: { date: string; total: number }[];
-}
+const chartConfig = {
+  revenue: { label: "Receitas", color: "var(--chart-revenue)" },
+  expenses: { label: "Despesas", color: "var(--chart-expense)" },
+} satisfies ChartConfig;
 
 export function RevenueVsExpensesChart({
   revenueData,
   expensesData,
-}: RevenueVsExpensesChartProps) {
-  const combinedData = useMemo(() => {
-    const dataMap = new Map<
-      string,
-      { date: string; revenue: number; expenses: number }
-    >();
-
-    revenueData.forEach((item) => {
-      if (!dataMap.has(item.date)) {
-        dataMap.set(item.date, { date: item.date, revenue: 0, expenses: 0 });
-      }
-      const entry = dataMap.get(item.date);
-      if (entry) {
-        entry.revenue = item.total;
-      }
-    });
-
-    expensesData.forEach((item) => {
-      if (!dataMap.has(item.date)) {
-        dataMap.set(item.date, { date: item.date, revenue: 0, expenses: 0 });
-      }
-      const entry = dataMap.get(item.date);
-      if (entry) {
-        entry.expenses = item.total;
-      }
-    });
-
-    return Array.from(dataMap.values()).sort((a, b) => {
-      const dateA = parseLocalDate(a.date);
-      const dateB = parseLocalDate(b.date);
-      if (!dateA || !dateB) return 0;
-      return dateA.getTime() - dateB.getTime();
-    });
-  }, [revenueData, expensesData]);
+}: {
+  revenueData: TimeSeriesPoint[];
+  expensesData: TimeSeriesPoint[];
+}) {
+  const id = useId().replace(/:/g, "");
+  const combinedData = combineFinancialSeries(revenueData, expensesData);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Receitas vs Despesas</CardTitle>
       </CardHeader>
-      <CardContent className="pl-2">
-        <div className="h-75 w-full">
-          {combinedData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={combinedData}>
+      <CardContent>
+        {combinedData.length > 0 ? (
+          <>
+            <ChartContainer config={chartConfig} className="h-75 w-full">
+              <AreaChart
+                accessibilityLayer
+                title="Receitas vs Despesas"
+                data={combinedData}
+              >
                 <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1} />
-                  </linearGradient>
                   <linearGradient
-                    id="colorExpenses"
+                    id={`${id}-revenue`}
                     x1="0"
                     y1="0"
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1} />
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-revenue)"
+                      stopOpacity={0.4}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-revenue)"
+                      stopOpacity={0.05}
+                    />
+                  </linearGradient>
+                  <linearGradient
+                    id={`${id}-expenses`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-expenses)"
+                      stopOpacity={0.4}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-expenses)"
+                      stopOpacity={0.05}
+                    />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <CartesianGrid vertical={false} />
                 <XAxis
                   dataKey="date"
-                  stroke="#888888"
-                  fontSize={12}
+                  tick={{ fill: "var(--muted-foreground)" }}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => {
-                    const d = parseLocalDate(value);
-                    if (d) {
-                      return new Intl.DateTimeFormat("pt-BR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                      }).format(d);
-                    }
-                    return value;
-                  }}
+                  tickMargin={8}
+                  tickFormatter={formatChartDate}
                 />
                 <YAxis
-                  stroke="#888888"
-                  fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `R$${value}`}
+                  width={72}
+                  tick={{ fill: "var(--muted-foreground)" }}
+                  tickFormatter={formatChartMoney}
                 />
-                <Tooltip
-                  cursor={{ stroke: "#888888", strokeWidth: 1 }}
-                  content={({ active, payload }) => {
-                    if (active && payload?.length) {
-                      const data = payload[0].payload as {
-                        date: string;
-                        revenue: number;
-                        expenses: number;
-                      };
-                      return (
-                        <div className="rounded-lg border bg-background p-2 shadow-sm">
-                          <div className="space-y-2">
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                Data
-                              </span>
-                              <span className="font-bold text-muted-foreground">
-                                {(() => {
-                                  const d = parseLocalDate(data.date);
-                                  if (d) {
-                                    return new Intl.DateTimeFormat("pt-BR", {
-                                      day: "2-digit",
-                                      month: "2-digit",
-                                      year: "numeric",
-                                    }).format(d);
-                                  }
-                                  return data.date;
-                                })()}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="flex flex-col">
-                                <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                  Receitas
-                                </span>
-                                <span className="font-bold text-green-600">
-                                  {formatMoney(data.revenue)}
-                                </span>
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                  Despesas
-                                </span>
-                                <span className="font-bold text-red-600">
-                                  {formatMoney(data.expenses)}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex flex-col border-t pt-2">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                Lucro Líquido
-                              </span>
-                              <span
-                                className={`font-bold ${
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      labelFormatter={(value) =>
+                        formatChartFullDate(String(value))
+                      }
+                      formatter={(value, name, item, index) => {
+                        const point =
+                          item.payload as (typeof combinedData)[number];
+                        return (
+                          <>
+                            <ChartTooltipValue
+                              label={
+                                name === "revenue" ? "Receitas" : "Despesas"
+                              }
+                              value={formatMoney(Number(value))}
+                            />
+                            {index === 1 && (
+                              <ChartTooltipValue
+                                label="Lucro líquido"
+                                value={formatMoney(
                                   moneyDifference(
-                                    data.revenue,
-                                    data.expenses,
-                                  ) >= 0
-                                    ? "text-green-600"
-                                    : "text-red-600"
-                                }`}
-                              >
-                                {formatMoney(
-                                  moneyDifference(data.revenue, data.expenses),
+                                    point.revenue,
+                                    point.expenses,
+                                  ),
                                 )}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
+                              />
+                            )}
+                          </>
+                        );
+                      }}
+                    />
+                  }
                 />
                 <Area
-                  type="monotone"
+                  type="linear"
                   dataKey="revenue"
-                  stroke="#22c55e"
-                  fillOpacity={1}
-                  fill="url(#colorRevenue)"
-                  name="Receitas"
+                  stroke="var(--color-revenue)"
+                  strokeWidth={2}
+                  fill={`url(#${id}-revenue)`}
                 />
                 <Area
-                  type="monotone"
+                  type="linear"
                   dataKey="expenses"
-                  stroke="#ef4444"
-                  fillOpacity={1}
-                  fill="url(#colorExpenses)"
-                  name="Despesas"
+                  stroke="var(--color-expenses)"
+                  strokeWidth={2}
+                  strokeDasharray="5 3"
+                  fill={`url(#${id}-expenses)`}
                 />
+                <ChartLegend content={<ChartLegendContent />} />
               </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              Nenhum dado disponível para o período
-            </div>
-          )}
-        </div>
-        <div className="mt-4 flex justify-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-green-500" />
-            <span className="text-sm text-muted-foreground">Receitas</span>
+            </ChartContainer>
+            <ChartDataTable
+              caption="Receitas vs Despesas"
+              columns={["Data", "Receitas", "Despesas", "Lucro líquido"]}
+              rows={combinedData.map((point) => ({
+                key: point.date,
+                values: [
+                  formatChartFullDate(point.date),
+                  formatMoney(point.revenue),
+                  formatMoney(point.expenses),
+                  formatMoney(moneyDifference(point.revenue, point.expenses)),
+                ],
+              }))}
+            />
+          </>
+        ) : (
+          <div className="flex h-75 items-center justify-center text-muted-foreground">
+            Nenhum dado disponível para o período
           </div>
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-red-500" />
-            <span className="text-sm text-muted-foreground">Despesas</span>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

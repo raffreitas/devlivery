@@ -50,7 +50,7 @@ export function StatsSidebar({
         <span className="text-sm font-medium text-secondary-foreground">
           Ticket Médio
         </span>
-        <span className="text-lg sm:text-xl font-bold text-primary">
+        <span className="text-lg sm:text-xl font-bold text-primary-text">
           {formatMoney(averageOrderValue)}
         </span>
       </div>

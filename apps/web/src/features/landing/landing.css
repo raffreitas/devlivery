@@ -6,7 +6,6 @@
   color-scheme: light;
   background: #fff;
   color: var(--lp-ink);
-  font-family: Inter, sans-serif;
   line-height: 1.6;
 }
 .lp *, .lp *::before, .lp *::after { box-sizing: border-box; }

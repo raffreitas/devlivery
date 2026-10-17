@@ -16,6 +16,10 @@ Componentes oficiais e composições do projeto importam `cn` diretamente do pac
 
 Também remova o `"use client"` que alguns arquivos trazem (o projeto tem `rsc: false`) e rode `pnpm format`.
 
+O preset atual é `b3kbO1glU` (Vega, zinc, orange, Inter). A fonte `Inter Variable` vem do pacote local `@fontsource-variable/inter`; o corpo, os títulos e a landing page usam a mesma família, sem carregar Google Fonts. Após aplicar um preset, normalize também imports e exports com `pnpm exec biome check --write src/shared/components/ui`.
+
+Para textos laranja sobre superfícies do tema, use `text-primary-text`. O token mantém a cor primária no modo claro e usa o laranja legível de `sidebar-primary` no escuro. Preserve `primary`/`primary-foreground` nos botões e demais controles preenchidos. Não use o token de texto sobre superfícies que permanecem brancas no modo escuro.
+
 ## Regras
 
 ### Espaçamentos
@@ -51,6 +55,18 @@ Também remova o `"use client"` que alguns arquivos trazem (o projeto tem `rsc: 
 Referências: [estilos do shadcn](https://ui.shadcn.com/docs/changelog/2025-12-shadcn-create), [componentes Base UI](https://ui.shadcn.com/docs/components/base) e [CLI](https://ui.shadcn.com/docs/cli).
 
 ## Verificação de regressões
+
+### Gráficos do dashboard
+
+- Use o `ChartContainer` oficial com altura explícita e componha Recharts com `ChartTooltipContent` e `ChartLegendContent`. A configuração (`ChartConfig`) define os rótulos e referencia variáveis CSS; não personalize `ui/chart.tsx`.
+- `src/index.css` mantém os tokens semânticos `chart-sales`, `chart-revenue`, `chart-expense`, `chart-info`, `chart-warning`, `chart-ready` e `chart-neutral`, com cores adaptadas ao tema. Os tokens `chart-1` a `chart-5` continuam pertencendo ao preset. As categorias usam a paleta `chart-category-1` a `chart-category-8`.
+- A cor de categoria depende do nome fornecido pela API, preservando-a ao filtrar ou reordenar. A paleta é finita e cores podem se repetir; mantenha todas as categorias na legenda e na tabela de valores. Quando a API fornecer ID de categoria, use-o como identidade estável entre renomeações.
+- Receitas e despesas também se distinguem pelo traçado. Preserve `accessibilityLayer` e a opção de abrir os dados em tabela, incluindo valores zero. Os IDs de gradientes vêm de `useId()` por instância.
+- Transformações e formatadores compartilhados ficam em `features/dashboard/utils/chart-data.ts`. Dados derivados não precisam de estado ou efeito; o React Compiler já está habilitado.
+- `ui/chart.tsx` injeta CSS com a implementação oficial do shadcn. Somente esse arquivo tem a exceção `security/noDangerouslySetInnerHtml` no Biome. Nomes de categorias são codificados antes de entrar nas chaves de `ChartConfig`; rótulos são renderizados como texto React e as cores vêm de tokens internos.
+- Ao alterar gráficos, verifique os temas claro/escuro, largura mobile, legendas com mais de seis categorias, tabelas pelo teclado e duas instâncias do gráfico financeiro na mesma tela.
+
+### Fluxos gerais
 
 - Crie uma subcategoria em A, selecione B e confira que a opção de A desapareceu. Ao voltar para A, ela deve aparecer após a atualização das categorias. Confira também o `categoryId` enviado ao salvar a despesa.
 - Atrase a resposta de criação e troque a categoria ou feche o formulário antes da conclusão. A resposta antiga não deve mudar a seleção atual.

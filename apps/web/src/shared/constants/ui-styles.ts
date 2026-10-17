@@ -44,6 +44,7 @@ export function getPaymentMethodStyle(method: PaymentMethod) {
 // Order Status Colors
 export const ORDER_STATUS_STYLES = {
   Pending: {
+    chartColor: "var(--chart-warning)",
     variant: "default" as const,
     className:
       "bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700",
@@ -51,6 +52,7 @@ export const ORDER_STATUS_STYLES = {
     label: "Pendente",
   },
   Preparing: {
+    chartColor: "var(--chart-info)",
     variant: "default" as const,
     className:
       "bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700",
@@ -58,6 +60,7 @@ export const ORDER_STATUS_STYLES = {
     label: "Em Preparo",
   },
   Ready: {
+    chartColor: "var(--chart-ready)",
     variant: "default" as const,
     className:
       "bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-200 border border-violet-300 dark:border-violet-700",
@@ -65,6 +68,7 @@ export const ORDER_STATUS_STYLES = {
     label: "Pronto",
   },
   Delivered: {
+    chartColor: "var(--chart-revenue)",
     variant: "default" as const,
     className:
       "bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-700",
@@ -72,6 +76,7 @@ export const ORDER_STATUS_STYLES = {
     label: "Entregue",
   },
   Canceled: {
+    chartColor: "var(--chart-expense)",
     variant: "default" as const,
     className:
       "bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-700",
