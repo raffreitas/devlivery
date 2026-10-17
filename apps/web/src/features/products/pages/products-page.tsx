@@ -1,6 +1,5 @@
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { BottomSheet } from "@/shared/components/bottom-sheet";
 import {
   GridSkeleton,
   LoadingOverlay,
@@ -17,6 +16,14 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/shared/components/ui/drawer";
 import { ProductCard } from "../components/product-card";
 import { ProductForm } from "../components/product-form";
 import { ProductsFilters } from "../components/products-filters";
@@ -106,7 +113,7 @@ export function ProductsPage() {
             onClick={() => setIsModalOpen(true)}
             className="w-full sm:w-auto"
           >
-            <PlusIcon className="w-4 h-4 mr-2" />
+            <PlusIcon data-icon="inline-start" />
             Novo Produto
           </Button>
         </div>
@@ -189,27 +196,29 @@ export function ProductsPage() {
         />
       </Modal>
 
-      <BottomSheet
-        isOpen={isFiltersOpen}
-        onClose={() => setIsFiltersOpen(false)}
-        title="Filtros"
+      <Drawer
+        open={isFiltersOpen}
+        onOpenChange={setIsFiltersOpen}
+        showSwipeHandle
       >
-        <div className="space-y-4">
-          <ProductsFiltersContent
-            searchTerm={searchTerm}
-            filterCategory={filterCategory}
-            categories={categories}
-            onSearchChange={setSearchTerm}
-            onCategoryChange={setFilterCategory}
-          />
-
-          <div className="pt-4 pb-2 border-t border-border">
-            <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
-              Aplicar Filtros
-            </Button>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Filtros</DrawerTitle>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <ProductsFiltersContent
+              searchTerm={searchTerm}
+              filterCategory={filterCategory}
+              categories={categories}
+              onSearchChange={setSearchTerm}
+              onCategoryChange={setFilterCategory}
+            />
           </div>
-        </div>
-      </BottomSheet>
+          <DrawerFooter>
+            <DrawerClose render={<Button />}>Aplicar Filtros</DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

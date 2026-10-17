@@ -41,7 +41,12 @@ export function ProductsFiltersContent({
 
       <div className="flex flex-col gap-2">
         <Label>Categoria</Label>
-        <Select onValueChange={onCategoryChange} value={filterCategory}>
+        <Select
+          onValueChange={(value) => {
+            if (value !== null) onCategoryChange(value as string);
+          }}
+          value={filterCategory}
+        >
           <SelectTrigger className="w-full cursor-pointer">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Filter className="w-4 h-4" />
@@ -51,14 +56,11 @@ export function ProductsFiltersContent({
             </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all" onSelect={() => onCategoryChange("all")}>
-              Todas as categorias
-            </SelectItem>
+            <SelectItem value="all">Todas as categorias</SelectItem>
             {categories.map((category) => (
               <SelectItem
                 key={category}
                 value={category}
-                onSelect={() => onCategoryChange(category)}
                 className="cursor-pointer"
               >
                 {category}

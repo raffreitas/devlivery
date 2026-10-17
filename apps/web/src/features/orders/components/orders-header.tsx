@@ -20,7 +20,7 @@ export function OrdersHeader({ onNewOrder }: OrdersHeaderProps) {
       <div className="flex flex-col items-center gap-2 w-full sm:w-auto sm:flex-row">
         <CashStatusBadge />
         <Button onClick={onNewOrder} className="w-full sm:w-auto">
-          <PlusIcon className="w-4 h-4 mr-2" />
+          <PlusIcon data-icon="inline-start" />
           Novo Pedido
         </Button>
       </div>

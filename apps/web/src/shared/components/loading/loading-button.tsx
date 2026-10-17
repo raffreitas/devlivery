@@ -30,7 +30,7 @@ export function LoadingButton({
       disabled={disabled || isLoading}
       {...props}
     >
-      {isLoading && <Spinner className="w-4 h-4" />}
+      {isLoading && <Spinner data-icon="inline-start" />}
       <span>{isLoading && loadingText ? loadingText : children}</span>
     </Button>
   );

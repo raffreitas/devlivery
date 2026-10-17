@@ -1,7 +1,7 @@
 import { Filter } from "lucide-react";
 import type { DateRange } from "react-day-picker";
+import { DateRangePicker } from "@/shared/components/date-range-picker";
 import { Button } from "@/shared/components/ui/button";
-import { DateRangePicker } from "@/shared/components/ui/date-range-picker";
 import { Label } from "@/shared/components/ui/label";
 import {
   Select,
@@ -51,8 +51,8 @@ export function ExpensesFilters({
       {/* Mobile: Botão Filtros */}
       <div className="sm:hidden">
         <Button variant="secondary" onClick={onOpenFilters} className="w-full">
-          <Filter className="w-4 h-4" />
-          <span className="ml-2">Filtros</span>
+          <Filter data-icon="inline-start" />
+          <span>Filtros</span>
           {activeFiltersCount > 0 && (
             <span className="ml-2 px-1.5 py-0.5 bg-orange-500 text-white text-xs font-bold rounded-full min-w-5 text-center">
               {activeFiltersCount}
@@ -71,11 +71,17 @@ export function ExpensesFilters({
             <Select
               value={categoryId ?? "all"}
               onValueChange={(value) =>
-                onCategoryChange(value === "all" ? undefined : value)
+                onCategoryChange(
+                  value === "all" ? undefined : (value ?? undefined),
+                )
               }
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Todas" />
+                <SelectValue placeholder="Todas">
+                  {categoryId
+                    ? categories?.find((cat) => cat.id === categoryId)?.name
+                    : "Todas"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
@@ -103,7 +109,9 @@ export function ExpensesFilters({
               }
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Todos" />
+                <SelectValue placeholder="Todos">
+                  {status ? statusLabels[status as ExpenseStatus] : "Todos"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>

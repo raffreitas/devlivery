@@ -2,11 +2,18 @@ import { addMonths, endOfMonth, startOfMonth } from "date-fns";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { toast } from "sonner";
-import { BottomSheet } from "@/shared/components/bottom-sheet";
 import { LoadingState, TableSkeleton } from "@/shared/components/loading";
 import { Modal } from "@/shared/components/modal";
 import { Button } from "@/shared/components/ui/button";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/shared/components/ui/drawer";
+import { toast } from "@/shared/components/ui/toast";
 import { ExpenseForm } from "../components/expense-form";
 import { ExpenseList } from "../components/expense-list";
 import { ExpenseSummaryCard } from "../components/expense-summary-card";
@@ -48,28 +55,27 @@ export function ExpensesPage() {
     try {
       if (editingExpense) {
         await updateExpense(editingExpense.id, data);
-        toast.success("Despesa atualizada com sucesso!");
+        toast.add({
+          type: "success",
+          title: "Despesa atualizada com sucesso!",
+        });
       } else {
         await createExpense(data);
-        toast.success("Despesa criada com sucesso!");
+        toast.add({ type: "success", title: "Despesa criada com sucesso!" });
       }
       handleCloseModal();
-    } catch (error) {
-      // Tratamento de erros específicos do backend
-      const errorMessage =
-        error instanceof Error &&
-        error.message.includes("Só é possível atualizar uma despesa")
-          ? "Não é permitido editar uma despesa cancelada."
-          : "Erro ao salvar despesa";
-      toast.error(errorMessage);
-      console.error(error);
+    } catch {
+      // Reported by the global MutationCache.
     }
   };
 
   const handleEdit = (expense: Expense) => {
     // Despesas canceladas não podem ser editadas.
     if (expense.status === "Cancelled") {
-      toast.error("Não é permitido editar uma despesa cancelada.");
+      toast.add({
+        type: "error",
+        title: "Não é permitido editar uma despesa cancelada.",
+      });
       return;
     }
     setEditingExpense(expense);
@@ -79,25 +85,18 @@ export function ExpensesPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteExpense(id);
-      toast.success("Despesa excluída com sucesso!");
-    } catch (error) {
-      toast.error("Erro ao excluir despesa");
-      console.error(error);
+      toast.add({ type: "success", title: "Despesa excluída com sucesso!" });
+    } catch {
+      // Reported by the global MutationCache.
     }
   };
 
   const handleMarkAsPaid = async (id: string, paymentDate: string) => {
     try {
       await markAsPaid(id, paymentDate);
-      toast.success("Despesa marcada como paga!");
-    } catch (error) {
-      // O backend retorna erro específico se tentar pagar despesa cancelada
-      const errorMessage =
-        error instanceof Error && error.message.includes("cancelada")
-          ? "Não é possível pagar uma despesa cancelada."
-          : "Erro ao marcar despesa como paga";
-      toast.error(errorMessage);
-      console.error(error);
+      toast.add({ type: "success", title: "Despesa marcada como paga!" });
+    } catch {
+      // Reported by the global MutationCache.
     }
   };
 
@@ -125,7 +124,7 @@ export function ExpensesPage() {
             </p>
           </div>
           <Button onClick={handleOpenCreateModal}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus data-icon="inline-start" />
             Nova Despesa
           </Button>
         </div>
@@ -182,28 +181,30 @@ export function ExpensesPage() {
         />
       </Modal>
 
-      <BottomSheet
-        isOpen={isFiltersOpen}
-        onClose={() => setIsFiltersOpen(false)}
-        title="Filtros"
+      <Drawer
+        open={isFiltersOpen}
+        onOpenChange={setIsFiltersOpen}
+        showSwipeHandle
       >
-        <div className="space-y-4">
-          <ExpensesFiltersContent
-            period={duePeriod}
-            categoryId={categoryId}
-            status={status}
-            onDuePeriodChange={setDuePeriod}
-            onCategoryChange={setCategoryId}
-            onStatusChange={setStatus}
-          />
-
-          <div className="pt-4 pb-2 border-t border-border">
-            <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
-              Aplicar Filtros
-            </Button>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Filtros</DrawerTitle>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <ExpensesFiltersContent
+              period={duePeriod}
+              categoryId={categoryId}
+              status={status}
+              onDuePeriodChange={setDuePeriod}
+              onCategoryChange={setCategoryId}
+              onStatusChange={setStatus}
+            />
           </div>
-        </div>
-      </BottomSheet>
+          <DrawerFooter>
+            <DrawerClose render={<Button />}>Aplicar Filtros</DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }

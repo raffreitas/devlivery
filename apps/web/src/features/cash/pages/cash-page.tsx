@@ -105,7 +105,7 @@ export function CashPage() {
                   o fluxo de caixa do seu estabelecimento
                 </p>
                 <Button onClick={() => setIsOpenModalOpen(true)} size="lg">
-                  <WalletIcon className="w-4 h-4 mr-2" />
+                  <WalletIcon data-icon="inline-start" />
                   Abrir Caixa
                 </Button>
               </CardContent>

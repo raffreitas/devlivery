@@ -1,7 +1,5 @@
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { toast } from "sonner";
-import { BottomSheet } from "@/shared/components/bottom-sheet";
 import {
   GridSkeleton,
   LoadingOverlay,
@@ -9,6 +7,15 @@ import {
 } from "@/shared/components/loading";
 import { Modal } from "@/shared/components/modal";
 import { Button } from "@/shared/components/ui/button";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/shared/components/ui/drawer";
+import { toast } from "@/shared/components/ui/toast";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
 import { OrdersFilters } from "../components/orders-filters";
@@ -71,9 +78,10 @@ export function OrdersPage() {
       }
       setIsModalOpen(false);
       setEditingOrder(null);
-      toast.success(
-        `Pedido ${editingOrder ? "atualizado" : "criado"} com sucesso!`,
-      );
+      toast.add({
+        type: "success",
+        title: `Pedido ${editingOrder ? "atualizado" : "criado"} com sucesso!`,
+      });
     } catch {
       // Error is handled by the mutation's onError or toast
     }
@@ -187,30 +195,32 @@ export function OrdersPage() {
         />
       </Modal>
 
-      <BottomSheet
-        isOpen={isFiltersOpen}
-        onClose={() => setIsFiltersOpen(false)}
-        title="Filtros"
+      <Drawer
+        open={isFiltersOpen}
+        onOpenChange={setIsFiltersOpen}
+        showSwipeHandle
       >
-        <div className="space-y-4">
-          <OrdersFiltersContent
-            statusFilter={statusFilter}
-            paymentFilter={paymentFilter}
-            statusOptions={statusOptions}
-            paymentOptions={paymentOptions}
-            period={period}
-            onStatusChange={setStatusFilter}
-            onPaymentChange={setPaymentFilter}
-            onDateChange={handlePeriodFilterChange}
-          />
-
-          <div className="pt-4 pb-2 border-t border-border">
-            <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
-              Aplicar Filtros
-            </Button>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Filtros</DrawerTitle>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <OrdersFiltersContent
+              statusFilter={statusFilter}
+              paymentFilter={paymentFilter}
+              statusOptions={statusOptions}
+              paymentOptions={paymentOptions}
+              period={period}
+              onStatusChange={setStatusFilter}
+              onPaymentChange={setPaymentFilter}
+              onDateChange={handlePeriodFilterChange}
+            />
           </div>
-        </div>
-      </BottomSheet>
+          <DrawerFooter>
+            <DrawerClose render={<Button />}>Aplicar Filtros</DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }
