@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar</title>
+<!-- Referência estática exportada do canvas de design do Devlivery. Não é código de produção: reconstrua com os componentes do app. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="_shared/tokens.css">
+<link rel="stylesheet" href="_shared/app.css">
+<link rel="stylesheet" href="_shared/components.css">
+<style>
+
+body{margin:0}
+.lg{min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--text);font:400 13px/18px var(--font-sans)}
+.lg-top{display:flex;align-items:center;justify-content:space-between;padding:20px 24px}
+.lg-main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px 64px}
+.lg-col{width:100%;max-width:360px;display:flex;flex-direction:column;gap:24px}
+.lg-word{font:700 22px/28px var(--font-sans);letter-spacing:-0.04em}
+.lg-word b{color:var(--brand)}
+.lg-h{margin:0;font:600 24px/30px var(--font-sans);letter-spacing:-0.02em}
+.lg-sub{margin:6px 0 0;color:var(--text-muted);font-size:14px;line-height:20px}
+.lg-card{display:flex;flex-direction:column;gap:16px;padding:24px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-1)}
+.lf{display:grid;gap:6px}
+.lf > span{display:flex;justify-content:space-between;font:500 12px/16px var(--font-sans);color:var(--text-muted)}
+.lbox{display:flex;align-items:center;height:38px;border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--bg)}
+.lbox:focus-within{border-color:var(--focus);box-shadow:0 0 0 1px var(--focus)}
+.lbox.err{border-color:var(--danger)}
+.lbox input{flex:1;min-width:0;width:100%;height:100%;border:0;outline:0;background:transparent;color:var(--text);font:400 14px/20px var(--font-sans);padding:0 12px}
+.lbox input::placeholder{color:var(--text-muted)}
+.eye{width:38px;height:36px;border:0;background:transparent;color:var(--text-muted);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border-radius:var(--radius-md)}
+.eye:hover{color:var(--text)}
+.eye svg{width:16px;height:16px}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--bg);font:400 13px/18px var(--font-sans)}
+.alert svg{width:16px;height:16px;flex:none;margin-top:1px}
+.alert.danger{color:var(--danger)}
+.alert.warning{color:var(--warning)}
+.alert span{color:var(--text)}
+.lg-btn{height:38px;justify-content:center;font-size:14px}
+.lg-foot{display:flex;justify-content:space-between;gap:12px;padding:16px 24px;color:var(--text-muted);font-size:12px;line-height:16px}
+
+</style>
+</head>
+<body>
+<div id="root" style="min-height: 100vh;">
+
+<div class="lg" data-theme="dark">
+<header class="lg-top">
+<span class="lg-word" aria-label="Devlivery">Devlivery<b>.</b></span>
+<button type="button" class="btn btn-ghost btn-sm" aria-label="Alternar tema" style="width: 32px; padding: 0px; justify-content: center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg></button>
+</header>
+
+<main class="lg-main">
+<div class="lg-col">
+<div>
+<h1 id="lg-h" class="lg-h">Entrar</h1>
+<p class="lg-sub">Acesse o painel do seu estabelecimento.</p>
+</div>
+
+<form class="lg-card" aria-labelledby="lg-h">
+
+
+<label class="lf"><span>E-mail</span>
+<span class="lbox"><input type="email" autocomplete="email" placeholder="voce@estabelecimento.com" aria-invalid="false" value="" style=""></span>
+</label>
+<label class="lf"><span>Senha</span>
+<span class="lbox"><input type="password" autocomplete="current-password" placeholder="Sua senha" aria-invalid="false" value="" style=""><button type="button" class="eye" aria-label="Mostrar senha" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12c1-2.5 5-7 10-7s9 4.5 10 7c-1 2.5-5 7-10 7S3 14.5 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></span>
+</label>
+<button type="submit" class="btn btn-primary lg-btn" aria-disabled="false">Entrar <span class="kbd">Enter</span></button>
+</form>
+
+<p class="muted" style="margin: 0px; font-size: 12px; line-height: 16px;">Esqueceu a senha ou precisa de acesso? Fale com o responsável pelo estabelecimento.</p>
+</div>
+</main>
+
+<footer class="lg-foot"><span>© 2026 Devlivery</span><span>Gestão de pedidos, caixa e despesas para delivery</span></footer>
+</div>
+</div>
+</body>
+</html>

@@ -19,6 +19,7 @@ Este diretório registra o produto, suas regras, as decisões técnicas e os pro
 | [Desenvolvimento local](development/local-development.md) | Preparação do ambiente, migrações, execução e verificações |
 | [Estratégia de testes](development/testing-strategy.md) | Níveis de teste, responsabilidades, lacunas e comandos |
 | [Configuração](development/configuration.md) | Variáveis da API, frontend, telemetria e backup |
+| [Design do Devlivery](design/README.md) | Diretrizes visuais, padrões de tela, componentes e telas de referência da V2 |
 | [Componentes de interface do web](development/web-ui.md) | shadcn/ui base-vega sobre Base UI, CLI e convenções de formulários, ícones e toasts |
 
 ## Operar

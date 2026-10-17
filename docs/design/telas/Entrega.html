@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entregar e cancelar</title>
+<!-- Referência estática exportada do canvas de design do Devlivery. Não é código de produção: reconstrua com os componentes do app. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="_shared/tokens.css">
+<link rel="stylesheet" href="_shared/app.css">
+<link rel="stylesheet" href="_shared/components.css">
+<style>
+
+body{margin:0}
+.dlg{width:100%;max-width:480px;background:var(--surface-1);color:var(--text);border:1px solid var(--line);border-radius:var(--radius-xl);box-shadow:var(--shadow-pop);font-family:var(--font-sans);font-size:13px;line-height:18px;overflow:hidden}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;padding:16px 12px 0 20px}
+.dlg-body{display:flex;flex-direction:column;gap:14px;padding:14px 20px 18px}
+.dlg-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.pay4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface-2);color:var(--text-muted);font:500 13px/18px var(--font-sans);cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--surface-3);color:var(--text);border-color:var(--line-strong)}
+.fld{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--bg)}
+.fld input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:500 15px/20px var(--font-sans);font-variant-numeric:tabular-nums}
+.sum-row{display:flex;justify-content:space-between}
+.reason{display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--bg);cursor:pointer;color:var(--text);font:500 13px/18px var(--font-sans);text-align:left;width:100%}
+.reason[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-soft)}
+.reason i{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line-strong);box-sizing:border-box;flex:none}
+.reason[aria-pressed="true"] i{border:4px solid var(--brand)}
+
+
+body{margin:0}
+a{color:var(--brand-text)}
+.board4{display:grid;grid-template-columns:repeat(4,minmax(260px,1fr));gap:12px;padding:16px;align-items:start;overflow-x:auto}
+.col-hint{font:400 12px/16px var(--font-sans);color:var(--text-muted);padding:0 4px 4px}
+.closed{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 16px 10px 24px;border-bottom:1px solid var(--line);background:var(--surface-2);font:500 13px/18px var(--font-sans)}
+.closed svg{width:16px;height:16px;color:var(--warning);flex:none}
+.limit{display:inline-flex;align-items:center;gap:6px;font:400 12px/16px var(--font-sans);color:var(--text-muted)}
+.limit b{color:var(--danger);font-weight:600}
+.link-btn{flex:1;justify-content:center}
+
+
+body{margin:0}
+.sb-item{display:flex;align-items:center;gap:10px;height:30px;padding:0 8px;border-radius:var(--radius-md);color:var(--text-muted);font:500 13px/18px var(--font-sans);text-decoration:none}
+.sb-item:hover{background:var(--surface-2);color:var(--text)}
+.sb-item svg{width:16px;height:16px;flex:none}
+.sb-item.on{background:var(--surface-3);color:var(--text)}
+.sb-item .badge{margin-left:auto;font:500 11px/16px var(--font-sans);color:var(--text-muted)}
+.sb-tool{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:var(--radius-md);border:1px solid var(--line);background:var(--surface-1);color:var(--text-muted);cursor:pointer}
+.sb-tool svg{width:15px;height:15px}
+
+</style>
+</head>
+<body>
+<div id="root" style="min-height: 100vh;">
+
+<div data-theme="dark" style="position: relative; min-height: 100vh; background: var(--bg);">
+<div aria-hidden="true" style="pointer-events: none;">
+
+<div class="app" data-theme="dark">
+
+
+<nav aria-label="Principal" style="width: 240px; min-height: 100%; box-sizing: border-box; flex: 0 0 240px; display: flex; flex-direction: column; gap: 16px; padding: 14px 10px 12px 12px; background: var(--bg); color: var(--text); font-family: var(--font-sans);">
+<div style="display: flex; align-items: center; gap: 8px; padding: 0px 2px;">
+<button type="button" aria-label="Trocar estabelecimento" style="flex: 1 1 0%; min-width: 0px; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0px 6px; border: 0px; border-radius: var(--radius-md); background: transparent; color: var(--text); cursor: pointer; font: 600 13px/18px var(--font-sans);">
+<svg width="20" height="20" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="var(--surface-3)"></rect><path fill="var(--text)" fill-rule="evenodd" d="M15 15h12c9.4 0 16 7.2 16 17s-6.6 17-16 17H15Z M23 22.5h4c5 0 8.4 3.9 8.4 9.5s-3.4 9.5-8.4 9.5h-4Z"></path><circle cx="50.5" cy="45" r="4.5" fill="var(--brand)"></circle></svg>
+<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Cantina do Bairro</span>
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color: var(--text-muted); flex: 0 0 auto;"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<a class="sb-tool" href="NovoPedido.html" aria-label="Novo pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></a>
+</div>
+<button type="button" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0px 8px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-1); color: var(--text-muted); font: 400 13px/18px var(--font-sans); cursor: pointer;">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<span style="flex: 1 1 0%; text-align: left;">Buscar ou executar</span>
+<span class="kbd">Ctrl K</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 1px;">
+<span style="padding: 6px 8px 4px; font: 500 12px/16px var(--font-sans); color: var(--text-muted);">Operação</span>
+
+<a href="Pedidos.html" class="sb-item on" aria-current="page">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2zM9 7h6M9 11h6M9 15h4"></path></svg>
+<span>Pedidos</span>
+<span class="badge">8</span>
+</a>
+
+<a href="Caixa.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v13H3zM3 7l3-4h12l3 4M16 13.5h2"></path></svg>
+<span>Caixa</span>
+<span class="badge"></span>
+</a>
+
+<a href="Dashboard.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>
+<span>Dashboard</span>
+<span class="badge"></span>
+</a>
+
+<a href="Produtos.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"></path></svg>
+<span>Produtos</span>
+<span class="badge"></span>
+</a>
+
+<a href="Despesas.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h9l5 5v15H6zM14 2v6h6M9 14h8"></path></svg>
+<span>Despesas</span>
+<span class="badge">3</span>
+</a>
+
+</div>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+<a href="Caixa.html" style="display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-1); color: var(--text); text-decoration: none; font: 500 12px/16px var(--font-sans);">
+<span style="width: 8px; height: 8px; border-radius: 50%; background: var(--status-delivered); border: 0px; box-sizing: border-box; flex: 0 0 auto;"></span>
+<span style="flex: 1 1 0%;">Caixa aberto</span>
+<span class="muted num" style="font-weight: 400;">desde 18:20</span>
+</a>
+<div style="display: flex; align-items: center; gap: 8px; padding: 4px 6px;">
+<span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 50%; background: var(--surface-3); color: var(--text); display: inline-flex; align-items: center; justify-content: center; font: 600 10px/1 var(--font-sans);">AL</span>
+<span style="flex: 1 1 0%; font: 500 13px/18px var(--font-sans);">Ana Lima</span>
+<button type="button" class="sb-tool" aria-label="Alternar tema" style="border: 0px; background: transparent;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="view">
+
+<header class="view-head">
+<h1 class="view-title">Pedidos <span class="sep">/</span> <span class="muted" style="font-weight: 500;">Hoje, 19:53</span></h1>
+<div class="row">
+<span class="limit">Atraso a partir de 40 min</span>
+<a class="btn btn-primary" href="NovoPedido.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Novo pedido <span class="kbd">C</span></a>
+</div>
+</header>
+
+
+
+<div class="view-bar">
+<div class="tabs" role="group" aria-label="Pedidos">
+<button type="button" class="tab" aria-pressed="true">Em aberto <span class="count">8</span></button>
+<button type="button" class="tab" aria-pressed="false">Finalizados <span class="count">6</span></button>
+</div>
+<div class="row">
+<button type="button" class="btn btn-ghost btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>Filtrar</button>
+<div class="seg" role="group" aria-label="Visualização"><button type="button" aria-pressed="false">Lista</button><button type="button" aria-pressed="true">Quadro</button></div>
+</div>
+</div>
+
+<div class="view-body">
+<section class="board4" aria-label="Quadro de pedidos">
+
+<div class="col">
+<div class="col-head">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-pending"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 2"></circle></svg>
+<span>Pendente</span><span class="count">2</span>
+<span class="sum">R$ 171,00</span>
+</div>
+<div class="col-hint">Criados com Só criar. Imprimir já move para Em preparo.</div>
+
+
+<article class="dv-card"><div class="dv-card-top"><span>#48</span><span class="dv-num dv-elapsed">2 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-pending"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 2"></circle></svg><div style="min-width: 0px;"><div class="dv-card-name">Rafaela Costa</div><div class="dv-card-addr">R. Barão de Jaguara, 1050, ap. 31, Centro</div></div></div><ul class="dv-card-items"><li><b>1×</b>Pizza grande<span class="dv-card-opts">½ Calabresa, ½ Crocante</span></li><li><b>1×</b>Coca-Cola 2 L</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="3" width="12" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"></rect><path d="M1 5.8h12" stroke="currentColor" stroke-width="1.3"></path></svg>Crédito</span><span class="dv-card-total">R$ 105,00</span></div><div class="dv-card-action"><button type="button" class="btn btn-sm link-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z"></path></svg>Imprimir e preparar</button></div></article>
+
+<article class="dv-card"><div class="dv-card-top"><span>#47</span><span class="dv-num dv-elapsed">4 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-pending"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 2"></circle></svg><div style="min-width: 0px;"><div class="dv-card-name">Bruno Teixeira</div><div class="dv-card-addr">Av. Júlio de Mesquita, 410, Cambuí</div></div></div><ul class="dv-card-items"><li><b>1×</b>Calzone de bacon</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1.5L12.5 7 7 12.5 1.5 7Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>Pix</span><span class="dv-card-total">R$ 66,00</span></div><div class="dv-card-action"><button type="button" class="btn btn-sm link-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z"></path></svg>Imprimir e preparar</button></div></article>
+
+
+</div>
+
+<div class="col">
+<div class="col-head">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg>
+<span>Em preparo</span><span class="count">3</span>
+<span class="sum">R$ 323,00</span>
+</div>
+
+
+
+<article class="dv-card"><div class="dv-card-top"><span>#46</span><span class="dv-num dv-elapsed">9 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">Maria Souza</div><div class="dv-card-addr">R. das Palmeiras, 120, Cambuí</div></div></div><ul class="dv-card-items"><li><b>1×</b>Calzone caipira<span class="dv-card-opts">+ Palmito</span></li><li><b>1×</b>Calzone calabresa</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1.5L12.5 7 7 12.5 1.5 7Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>Pix</span><span class="dv-card-total">R$ 127,00</span></div><div class="dv-card-action"><button type="button" class="btn btn-sm link-btn">Marcar pronto <span class="kbd">P</span></button></div></article>
+
+<article class="dv-card"><div class="dv-card-top"><span>#45</span><span class="dv-num dv-elapsed">23 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">Carlos Mendes</div><div class="dv-card-addr">R. Coronel Quirino, 822, Cambuí</div></div></div><div class="dv-card-note">Alterado às 19:50, cozinha avisada</div><ul class="dv-card-items"><li><b>1×</b>Pizza pequena crocante</li><li><b>1×</b>Calzone de bacon</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="3.5" width="12" height="7" rx="1.2" stroke="currentColor" stroke-width="1.3"></rect><circle cx="7" cy="7" r="1.6" stroke="currentColor" stroke-width="1.3"></circle></svg>Dinheiro, troco R$ 24,00</span><span class="dv-card-total">R$ 126,00</span></div><div class="dv-card-action"><button type="button" class="btn btn-sm link-btn">Marcar pronto <span class="kbd">P</span></button></div></article>
+
+<article class="dv-card dv-card-late"><div class="dv-card-top"><span>#44</span><span class="dv-num dv-elapsed dv-late"><svg viewBox="0 0 14 14" width="12" height="12" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 4.2V7.4l2 1.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"></path></svg>41 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">Lúcia Ferraz</div><div class="dv-card-addr">R. Antônio Lapa, 75, Cambuí</div></div></div><ul class="dv-card-items"><li><b>1×</b>Calzone vegetariano, sem alho frito</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="3" width="12" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"></rect><path d="M1 5.8h12" stroke="currentColor" stroke-width="1.3"></path></svg>Débito</span><span class="dv-card-total">R$ 70,00</span></div><div class="dv-card-action"><button type="button" class="btn btn-sm link-btn">Marcar pronto <span class="kbd">P</span></button></div></article>
+
+
+</div>
+
+<div class="col">
+<div class="col-head">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-ready"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 1 1 3.5 7Z" fill="currentColor"></path></svg>
+<span>Pronto</span><span class="count">1</span>
+<span class="sum">R$ 90,00</span>
+</div>
+
+<button type="button" class="btn btn-sm" style="justify-content: center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>Saiu para entrega (1) <span class="kbd">S</span></button>
+
+<article class="dv-card"><div class="dv-card-top"><span>#43</span><span class="dv-num dv-elapsed">33 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-ready"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 1 1 3.5 7Z" fill="currentColor"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">João Pedro</div><div class="dv-card-addr">Av. Norte-Sul, 2400, ap. 52</div></div></div><div class="dv-card-note">Interfone quebrado, ligar ao chegar</div><ul class="dv-card-items"><li><b>1×</b>Pizza grande<span class="dv-card-opts">½ Frango, ½ Calabresa</span></li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="3.5" width="12" height="7" rx="1.2" stroke="currentColor" stroke-width="1.3"></rect><circle cx="7" cy="7" r="1.6" stroke="currentColor" stroke-width="1.3"></circle></svg>Dinheiro, troco R$ 10,00</span><span class="dv-card-total">R$ 90,00</span></div></article>
+
+
+</div>
+
+<div class="col">
+<div class="col-head">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-out"><circle cx="7" cy="7" r="7" fill="currentColor"></circle><path d="M4 7h5.2M7.4 4.6L9.8 7 7.4 9.4" stroke="var(--surface-1)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg>
+<span>Saiu para entrega</span><span class="count">2</span>
+<span class="sum">R$ 155,00</span>
+</div>
+<div class="col-hint">Com o entregador.</div>
+
+
+<article class="dv-card"><div class="dv-card-top"><span>#42</span><span class="dv-num dv-elapsed">saiu há 12 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-out"><circle cx="7" cy="7" r="7" fill="currentColor"></circle><path d="M4 7h5.2M7.4 4.6L9.8 7 7.4 9.4" stroke="var(--surface-1)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">Tatiane Rocha</div><div class="dv-card-addr">R. Maria Monteiro, 120, Cambuí</div></div></div><ul class="dv-card-items"><li><b>1×</b>Calzone de frango</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="3" width="12" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"></rect><path d="M1 5.8h12" stroke="currentColor" stroke-width="1.3"></path></svg>Crédito</span><span class="dv-card-total">R$ 71,00</span></div><div class="dv-card-action"><a class="btn btn-sm link-btn" href="Entrega.html">Marcar entregue <span class="kbd">E</span></a></div></article>
+
+<article class="dv-card"><div class="dv-card-top"><span>#41</span><span class="dv-num dv-elapsed">saiu há 12 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-out"><circle cx="7" cy="7" r="7" fill="currentColor"></circle><path d="M4 7h5.2M7.4 4.6L9.8 7 7.4 9.4" stroke="var(--surface-1)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">André Lopes</div><div class="dv-card-addr">R. Sampainho, 300, Cambuí</div></div></div><ul class="dv-card-items"><li><b>1×</b>Calzone caipira</li><li><b>1×</b>Coca-Cola 2 L</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1.5L12.5 7 7 12.5 1.5 7Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>Pix</span><span class="dv-card-total">R$ 84,00</span></div><div class="dv-card-action"><a class="btn btn-sm link-btn" href="Entrega.html">Marcar entregue <span class="kbd">E</span></a></div></article>
+
+
+</div>
+
+</section>
+</div>
+
+</main>
+</div>
+</div>
+<div style="position: absolute; inset: 0px; background: rgba(0, 0, 0, 0.55); display: flex; align-items: flex-start; justify-content: center; padding: 140px 16px 32px; box-sizing: border-box;">
+
+
+<section class="dlg" role="dialog" aria-modal="true" aria-labelledby="dl-h">
+<div class="dlg-head">
+<h2 id="dl-h" style="margin: 0px; font: 600 15px/20px var(--font-sans);">Entregar pedido #42</h2>
+<a class="btn btn-ghost btn-sm" href="Pedidos.html" aria-label="Fechar" style="width: 28px; padding: 0px; justify-content: center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+</div>
+<div class="dlg-body">
+<div class="sum-row"><span class="muted">Tatiane Rocha, R. Maria Monteiro, 120</span><span class="num" style="font-weight: 600;">R$ 71,00</span></div>
+<div style="display: grid; gap: 8px;">
+<span style="font-weight: 500;">Como o cliente pagou?</span>
+<div class="pay4" role="group" aria-label="Forma de pagamento">
+<button type="button" class="pill" aria-pressed="true">Dinheiro</button><button type="button" class="pill" aria-pressed="false">Crédito</button><button type="button" class="pill" aria-pressed="false">Débito</button><button type="button" class="pill" aria-pressed="false">Pix</button>
+</div>
+<span class="muted" style="font-size: 12px;">Previsto no lançamento: Crédito, R$ 71,00. Se mudou, escolha a forma usada.</span>
+</div>
+
+<label style="display: grid; gap: 6px;"><span style="font-weight: 500;">Valor recebido</span>
+<span class="fld"><span class="muted">R$</span><input aria-label="Valor recebido" value="100,00" style=""></span></label>
+<div class="sum-row" style="font: 600 15px/20px var(--font-sans);"><span>Troco</span><span class="num" style="color: var(--text);">R$ 29,00</span></div>
+
+<button type="button" class="btn btn-ghost btn-sm" style="align-self: flex-start; padding: 0px 6px;">Pagou com duas formas</button>
+</div>
+<div class="dlg-foot">
+<a class="btn btn-ghost" href="Pedidos.html">Voltar</a>
+<button type="button" class="btn btn-primary" style="opacity: 1;">Confirmar entrega <span class="kbd">Enter</span></button>
+</div>
+</section>
+
+
+
+
+</div>
+</div>
+</div>
+</body>
+</html>

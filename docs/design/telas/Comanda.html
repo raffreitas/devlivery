@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comanda impressa (80 mm): opções, alteração e troco</title>
+<!-- Referência estática exportada do canvas de design do Devlivery. Não é código de produção: reconstrua com os componentes do app. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="_shared/tokens.css">
+<link rel="stylesheet" href="_shared/app.css">
+<link rel="stylesheet" href="_shared/components.css">
+<style>
+
+body{margin:0}
+.slip{width:302px;box-sizing:border-box;padding:18px 16px 22px;background:#ffffff;color:#000000;font-family:"Geist",system-ui,sans-serif;font-feature-settings:"tnum" 1;box-shadow:0 1px 3px rgba(0,0,0,0.25)}
+.cut{border:0;border-top:1.5px dashed #000000;margin:12px 0}
+.bar{display:flex;justify-content:space-between;align-items:center;background:#000000;color:#ffffff;padding:6px 10px;font:700 15px/20px "Geist",sans-serif}
+.k-item{display:grid;grid-template-columns:40px 1fr;gap:2px 4px;font:700 19px/24px "Geist",sans-serif;padding:4px 0}
+.k-sub{grid-column:2;font:600 16px/21px "Geist",sans-serif}
+.k-note{grid-column:2;justify-self:start;margin-top:2px;padding:1px 6px;background:#000000;color:#ffffff;font:700 14px/20px "Geist",sans-serif}
+.e-row{display:flex;justify-content:space-between;gap:8px;font:400 13px/19px "Geist",sans-serif}
+.e-row .m{font-family:"Geist Mono",monospace}
+.lbl{font:600 11px/16px "Geist",sans-serif;margin-bottom:2px}
+.cap{font:500 12px/16px "Geist",sans-serif;color:#3a3a3a;text-align:center;max-width:302px}
+.tag{display:inline-block;padding:0 6px;border:2px solid #000000;font:800 13px/20px "Geist",sans-serif}
+
+</style>
+</head>
+<body>
+<div id="root" style="min-height: 100vh;">
+
+<div style="width: 1100px; height: 900px; box-sizing: border-box; padding: 40px; background: rgb(217, 217, 220); display: flex; gap: 36px; align-items: flex-start; justify-content: center; font-family: Geist, system-ui, sans-serif;">
+
+<div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+<span class="cap">Via da cozinha com opções: meio a meio e acréscimos aparecem embaixo do item, em letra grande</span>
+<article class="slip" aria-label="Via da cozinha do pedido 49">
+<div class="bar"><span>Cozinha</span><span>19:54</span></div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px;">
+<span style="font: 800 46px / 48px Geist, sans-serif; letter-spacing: -0.03em;">#49</span>
+<span style="font: 600 13px / 18px Geist, sans-serif; text-align: right;">Entrega<br>Maria Souza</span>
+</div>
+<hr class="cut">
+<div class="k-item"><span>1×</span><span>Pizza grande</span><span class="k-sub">½ Calabresa</span><span class="k-sub">½ Crocante</span></div>
+<div class="k-item"><span>1×</span><span>Calzone caipira</span><span class="k-sub">+ Palmito</span><span class="k-note">Sem alho frito</span></div>
+<div class="k-item"><span>1×</span><span>Calzone calabresa</span></div>
+<hr class="cut">
+<div style="font: 600 13px / 18px Geist, sans-serif;">3 itens</div>
+</article>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+<span class="cap">Alteração depois de impresso: a cozinha recebe só o que mudou</span>
+<article class="slip" aria-label="Alteração do pedido 45">
+<div class="bar"><span>Alteração</span><span>19:50</span></div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px;">
+<span style="font: 800 46px / 48px Geist, sans-serif; letter-spacing: -0.03em;">#45</span>
+<span style="font: 600 13px / 18px Geist, sans-serif; text-align: right;">Carlos Mendes<br>1ª via às 19:30</span>
+</div>
+<hr class="cut">
+<div style="margin-bottom: 6px;"><span class="tag">Remover</span></div>
+<div class="k-item" style="text-decoration: line-through;"><span>1×</span><span>Pizza pequena de frango</span></div>
+<div style="margin: 10px 0px 6px;"><span class="tag">Adicionar</span></div>
+<div class="k-item"><span>1×</span><span>Calzone de bacon</span></div>
+<hr class="cut">
+<div class="lbl">Continua igual</div>
+<div style="font: 600 15px / 20px Geist, sans-serif;">1× Pizza pequena crocante</div>
+</article>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+<span class="cap">Via da entrega com o troco que o entregador precisa levar</span>
+<article class="slip" aria-label="Via da entrega do pedido 45">
+<div style="text-align: center;">
+<div style="font: 700 17px / 22px Geist, sans-serif; letter-spacing: -0.02em;">Cantina do Bairro</div>
+</div>
+<hr class="cut">
+<div style="display: flex; justify-content: space-between; align-items: baseline;">
+<span style="font: 800 30px / 34px Geist, sans-serif; letter-spacing: -0.03em;">#45</span>
+<span style="font: 500 12px / 16px Geist, sans-serif; text-align: right;">15/10/2026<br>19:50</span>
+</div>
+<hr class="cut">
+<div class="lbl">Cliente</div>
+<div style="font: 700 15px / 20px Geist, sans-serif;">Carlos Mendes</div>
+<div style="font: 400 13px / 18px Geist, sans-serif;">(19) 99102-3381</div>
+<div class="lbl" style="margin-top: 8px;">Endereço</div>
+<div style="font: 600 14px / 19px Geist, sans-serif;">R. Coronel Quirino, 822<br>Cambuí</div>
+<hr class="cut">
+<div class="e-row"><span><b>1×</b> Pizza pequena crocante</span><span class="m">59,00</span></div>
+<div class="e-row"><span><b>1×</b> Calzone de bacon</span><span class="m">60,00</span></div>
+<hr class="cut">
+<div class="e-row"><span>Itens</span><span class="m">119,00</span></div>
+<div class="e-row"><span>Taxa, Cambuí</span><span class="m">7,00</span></div>
+<div class="e-row" style="font: 800 18px / 26px Geist, sans-serif;"><span>Total</span><span class="m">R$ 126,00</span></div>
+<hr class="cut">
+<div class="lbl">Pagamento na entrega</div>
+<div class="e-row" style="font-weight: 700; font-size: 14px;"><span>Dinheiro</span><span class="m">R$ 150,00</span></div>
+<div style="margin-top: 8px; padding: 8px; border: 2px solid rgb(0, 0, 0); display: flex; justify-content: space-between; font: 800 16px / 22px Geist, sans-serif;"><span>Levar troco</span><span class="m">R$ 24,00</span></div>
+</article>
+</div>
+
+</div>
+</div>
+</body>
+</html>

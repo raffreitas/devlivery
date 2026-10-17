@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Novo pedido ao lado do WhatsApp</title>
+<!-- Referência estática exportada do canvas de design do Devlivery. Não é código de produção: reconstrua com os componentes do app. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="_shared/tokens.css">
+<link rel="stylesheet" href="_shared/app.css">
+<link rel="stylesheet" href="_shared/components.css">
+<style>
+
+body{margin:0}
+.chat{flex:1 1 560px;min-width:0;display:flex;flex-direction:column;background:#e9e7e3;color:#1c1b19;font-family:var(--font-sans)}
+.bubble{max-width:72%;padding:8px 12px;border-radius:10px;font:400 14px/20px var(--font-sans);box-shadow:0 1px 1px rgba(0,0,0,0.08)}
+.bubble small{display:block;margin-top:2px;font-size:11px;color:#5f5f5f;text-align:right}
+.panel{flex:0 0 480px;max-width:100%;box-sizing:border-box;display:flex;flex-direction:column;background:var(--surface-1);color:var(--text);border-left:1px solid var(--line);font-family:var(--font-sans);font-size:13px;line-height:18px;font-feature-settings:"tnum" 1}
+.sec{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.sec-t{font:500 12px/16px var(--font-sans);color:var(--text-muted)}
+.fld{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px;border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--bg);color:var(--text-muted)}
+.fld input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:500 13px/18px var(--font-sans)}
+.fld svg{width:14px;height:14px;flex:none}
+.match{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--bg)}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--surface-3);display:inline-flex;align-items:center;justify-content:center;font:600 11px/1 var(--font-sans);flex:none}
+.addr{display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--brand);border-radius:var(--radius-md);background:var(--brand-soft)}
+.zone{margin-left:auto;font:500 12px/16px var(--font-sans);color:var(--text-muted);white-space:nowrap}
+.it{border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--bg)}
+.it-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 10px}
+.it-row + .it-row{border-top:1px solid var(--line)}
+.qty{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:var(--radius-sm);background:var(--surface-3);font:600 12px/16px var(--font-sans)}
+.opts{padding:10px 10px 12px 44px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px;background:var(--surface-1)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip2{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface-2);color:var(--text-muted);font:500 12px/16px var(--font-sans);cursor:pointer}
+.chip2[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-soft);color:var(--text)}
+.pay4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.pill{height:32px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface-2);color:var(--text-muted);font:500 12px/16px var(--font-sans);cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--surface-3);color:var(--text);border-color:var(--line-strong)}
+.tot{display:grid;gap:4px}
+.tot div{display:flex;justify-content:space-between}
+
+</style>
+</head>
+<body>
+<div id="root" style="min-height: 100vh;">
+
+<div data-theme="dark" style="display: flex; flex-wrap: wrap; min-height: 100vh; background: var(--bg);">
+
+<section class="chat" aria-label="Exemplo: conversa com a cliente no WhatsApp Web, aberto ao lado">
+<div style="display: flex; align-items: center; gap: 10px; height: 56px; padding: 0px 20px; background: rgb(246, 245, 243); border-bottom: 1px solid rgb(217, 215, 211);">
+<span class="avatar" style="background: rgb(217, 215, 211); color: rgb(28, 27, 25);">MS</span>
+<span style="font: 600 14px/18px var(--font-sans);">Maria Souza</span>
+<span style="margin-left: auto; font: 500 12px/16px var(--font-sans); color: rgb(95, 95, 95);">WhatsApp Web, metade esquerda da tela</span>
+</div>
+<div style="flex: 1 1 0%; display: flex; flex-direction: column; gap: 10px; padding: 24px 32px;">
+<div class="bubble" style="align-self: flex-start; background: rgb(255, 255, 255);">Boa noite! Quero o de sempre, o calzone caipira, mas hoje com palmito a mais. E um de calabresa também.<small>19:52</small></div>
+<div class="bubble" style="align-self: flex-start; background: rgb(255, 255, 255);">Mesmo endereço, pago no Pix.<small>19:52</small></div>
+<div class="bubble" style="align-self: flex-end; background: rgb(220, 239, 217);">Boa noite, Maria! Anotado, já já sai.<small>19:53</small></div>
+</div>
+</section>
+
+<aside class="panel" aria-labelledby="np2-h">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 52px; padding: 0px 12px 0px 20px; border-bottom: 1px solid var(--line);">
+<h1 id="np2-h" style="margin: 0px; font: 600 15px/20px var(--font-sans);">Novo pedido <span class="muted" style="font-weight: 500;">#49</span></h1>
+<a class="btn btn-ghost btn-sm" href="Pedidos.html" aria-label="Fechar" style="width: 28px; padding: 0px; justify-content: center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+</div>
+
+<div style="flex: 1 1 0%; overflow: auto;">
+<div class="sec">
+<span class="sec-t">Cliente</span>
+<label class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"></path></svg><input aria-label="Telefone do cliente" value="(19) 99812-4410" style=""></label>
+<div class="match">
+<span class="avatar">MS</span>
+<span style="display: grid; flex: 1 1 0%; min-width: 0px;"><span style="font-weight: 600;">Maria Souza</span><span class="muted" style="font-size: 12px;">14 pedidos, o último em 8 de outubro</span></span>
+<button type="button" class="btn btn-sm">Repetir último</button>
+</div>
+<div class="addr">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto;"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+<span style="display: grid; min-width: 0px;"><span style="font-weight: 500;">R. das Palmeiras, 120</span><span class="muted" style="font-size: 12px;">Cambuí, endereço principal</span></span>
+<span class="zone">Taxa R$ 6,00</span>
+</div>
+<button type="button" class="btn btn-ghost btn-sm" style="align-self: flex-start; padding: 0px 6px;">Outro endereço (2 salvos)</button>
+</div>
+
+<div class="sec">
+<span class="sec-t">Itens</span>
+<label class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><input placeholder="Adicionar produto" aria-label="Adicionar produto" style=""><span class="kbd">/</span></label>
+<div class="it">
+<div class="it-row"><span class="qty">1</span><span style="display: grid; min-width: 0px;"><span style="font-weight: 500;">Calzone caipira</span><span class="muted" style="font-size: 12px;">+ Palmito</span></span><span class="num" style="font-weight: 600;">R$ 71,00</span></div>
+<div class="opts">
+<span class="sec-t">Acréscimos</span>
+<div class="chips" role="group" aria-label="Acréscimos do calzone caipira">
+<button type="button" class="chip2" aria-pressed="true">+ Palmito <span class="muted num">R$ 6,00</span></button><button type="button" class="chip2" aria-pressed="false">+ Queijo canastra <span class="muted num">R$ 8,00</span></button><button type="button" class="chip2" aria-pressed="false">+ Bacon <span class="muted num">R$ 7,00</span></button><button type="button" class="chip2" aria-pressed="false">+ Catupiry <span class="muted num">R$ 6,00</span></button>
+</div>
+<span class="sec-t">Retirar</span>
+<div class="chips" role="group" aria-label="Retirar ingredientes">
+<button type="button" class="chip2" aria-pressed="false">Sem alho frito</button><button type="button" class="chip2" aria-pressed="false">Sem frango</button><button type="button" class="chip2" aria-pressed="false">Sem queijo canastra</button>
+</div>
+</div>
+<div class="it-row"><span class="qty">1</span><span style="font-weight: 500;">Calzone calabresa</span><span class="num" style="font-weight: 600;">R$ 50,00</span></div>
+</div>
+</div>
+
+<div class="sec">
+<span class="sec-t">Pagamento</span>
+<div class="pay4" role="group" aria-label="Forma de pagamento">
+<button type="button" class="pill" aria-pressed="false">Dinheiro</button><button type="button" class="pill" aria-pressed="false">Crédito</button><button type="button" class="pill" aria-pressed="false">Débito</button><button type="button" class="pill" aria-pressed="true">Pix</button>
+</div>
+<div class="tot">
+<div class="muted"><span>Itens</span><span class="num">R$ 121,00</span></div>
+<div class="muted"><span>Taxa de entrega, Cambuí</span><span class="num">R$ 6,00</span></div>
+<div style="font: 600 16px/22px var(--font-sans);"><span>Total</span><span class="num">R$ 127,00</span></div>
+</div>
+</div>
+</div>
+
+<div style="display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line);">
+<button type="button" class="btn">Só criar</button>
+<button type="button" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z"></path></svg>Criar e imprimir <span class="kbd">Ctrl Enter</span></button>
+</div>
+</aside>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página não encontrada (404)</title>
+<!-- Referência estática exportada do canvas de design do Devlivery. Não é código de produção: reconstrua com os componentes do app. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="_shared/tokens.css">
+<link rel="stylesheet" href="_shared/app.css">
+<link rel="stylesheet" href="_shared/components.css">
+<style>
+
+body{margin:0}
+.nf{min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--text);font:400 13px/18px var(--font-sans)}
+.nf-top{padding:20px 24px}
+.nf-word{font:700 22px/28px var(--font-sans);letter-spacing:-0.04em;color:var(--text);text-decoration:none}
+.nf-word b{color:var(--brand)}
+.nf-main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px 96px}
+.nf-col{width:100%;max-width:440px;display:flex;flex-direction:column;gap:20px}
+.nf-code{display:inline-flex;align-items:center;gap:8px;font:500 12px/16px var(--font-sans);color:var(--text-muted)}
+.nf-code i{width:8px;height:8px;border-radius:50%;border:1.5px dashed var(--text-muted);box-sizing:border-box}
+.nf-h{margin:0;font:600 24px/30px var(--font-sans);letter-spacing:-0.02em}
+.nf-p{margin:0;color:var(--text-muted);font-size:14px;line-height:20px}
+.nf-path{display:inline-flex;align-items:center;height:22px;padding:0 6px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--line);color:var(--text);font:500 12px/16px var(--font-sans)}
+.nf-links{display:grid;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-1);overflow:hidden}
+.nf-links a{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-bottom:1px solid var(--line);color:var(--text);text-decoration:none;font:500 13px/18px var(--font-sans)}
+.nf-links a:last-child{border-bottom:0}
+.nf-links a:hover{background:var(--surface-2)}
+.nf-links svg{width:16px;height:16px;color:var(--text-muted);flex:none}
+.nf-links .k{margin-left:auto}
+
+</style>
+</head>
+<body>
+<div id="root" style="min-height: 100vh;">
+
+<div class="nf" data-theme="dark">
+<header class="nf-top"><a class="nf-word" href="Pedidos.html" aria-label="Devlivery, ir para pedidos">Devlivery<b>.</b></a></header>
+<main class="nf-main">
+<div class="nf-col">
+<span class="nf-code"><i aria-hidden="true"></i>Erro 404</span>
+<div style="display: grid; gap: 8px;">
+<h1 class="nf-h">Página não encontrada</h1>
+<p class="nf-p">O endereço <span class="nf-path">/relatorios</span> não existe ou foi removido. Confira o link ou siga para uma das telas abaixo.</p>
+</div>
+<nav class="nf-links" aria-label="Telas principais">
+<a href="Pedidos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2zM9 7h6M9 11h6M9 15h4"></path></svg>Pedidos</a>
+<a href="Caixa.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v13H3zM3 7l3-4h12l3 4M16 13.5h2"></path></svg>Caixa</a>
+<a href="Dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>Dashboard</a>
+</nav>
+<div class="row">
+<a class="btn btn-primary" href="Pedidos.html">Ir para pedidos</a>
+<button type="button" class="btn btn-ghost">Voltar à página anterior</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body>
+</html>
