@@ -24,13 +24,13 @@ Também remova o `"use client"` que alguns arquivos trazem (o projeto tem `rsc: 
 ## Regras
 
 - Não personalize arquivos de `src/shared/components/ui/`. Adapte os consumidores ou crie um componente composto em `src/shared/components/`, como `option-combobox.tsx` e `modal.tsx`.
-- `input-money.tsx` fica em `ui/`, mas é do projeto e não vem do registro.
 - O `biome.json` desliga, apenas para `apps/web/src/shared/components/ui/**`, regras que disparam no código oficial:
   - `a11y/noLabelWithoutControl`
   - `a11y/useKeyWithClickEvents`
   - `a11y/useSemanticElements`
   - `suspicious/noArrayIndexKey`
   - `suspicious/noDoubleEquals`
+- O SonarQube exclui `src/shared/components/ui/**` da análise (`sonar.exclusions` em `.github/workflows/web-app-ci.yaml`), pois o código vem do registro. Por isso, `ui/` contém apenas arquivos oficiais; componentes do projeto, como `input-money.tsx`, ficam em `src/shared/components/`.
 - Formulários: `Controller` + `Field`, com `aria-invalid` no controle e `data-invalid` no `Field`.
 - Gere IDs por instância com `useId()`. Vincule `FieldLabel.htmlFor` ao controle e use `aria-describedby` para as descrições e erros renderizados. Nas linhas dinâmicas, derive os IDs da chave estável do `useFieldArray`.
 - Calendários da aplicação usam `AccessibleCalendar`, fora de `ui/`, que encaminha o ref ao `CalendarDayButton` oficial para recuperar o foco por teclado. O `DateRangePicker` também fica fora de `ui/` por ser uma composição do projeto.
