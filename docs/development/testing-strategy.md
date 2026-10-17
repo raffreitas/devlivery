@@ -12,7 +12,7 @@ Os testes devem proteger invariantes de domínio, comportamento dos casos de uso
 | Handler e validação | Orquestração, resultados, dependências e entradas inválidas | xUnit, NSubstitute e FluentValidation |
 | Integração de persistência | SQL, filtros e consultas que dependem do PostgreSQL | Testcontainers PostgreSQL em cenários específicos |
 | Contrato HTTP | Pipeline, autenticação, tenant, serialização, status HTTP e persistência ponta a ponta | `ApiFactory` (`WebApplicationFactory` + Testcontainers PostgreSQL com as migrations reais); cada teste cria seu próprio estabelecimento via `ApiTenant` |
-| Frontend | Componentes e fluxos da interface | Sem suíte automatizada no checkout atual |
+| Frontend | Cálculos, hooks, componentes e fluxos da interface | Vitest, Testing Library e MSW em jsdom |
 
 O pacote `coverlet.collector` gera cobertura no CI e o SonarQube recebe o relatório. Não existe limite numérico de cobertura configurado; cobertura não substitui cenários de comportamento.
 
@@ -22,7 +22,7 @@ O pacote `coverlet.collector` gera cobertura no CI e o SonarQube recebe o relat�
 - Mudança em comando, consulta ou validator: teste da classe correspondente, incluindo falhas esperadas.
 - Mudança em SQL, Dapper, mapeamento EF ou filtro de tenant: teste com PostgreSQL real via Testcontainers.
 - Mudança em autenticação, middleware, representação HTTP ou endpoint: teste de contrato HTTP em `Features/<Feature>/Api`.
-- Mudança no frontend: executar lint e build e verificar manualmente o fluxo afetado enquanto não houver testes automatizados.
+- Mudança no frontend: adicionar regressões de comportamento, executar testes, lint e build e verificar manualmente os fluxos afetados no navegador.
 
 A suíte segue a pirâmide de testes: regras e ramos de erro ficam nos testes de domínio e de handler; os testes HTTP de comandos são finos (caminho feliz e contratos que só existem nessa camada, como 401, formato do 422 e isolamento de tenant), enquanto consultas recebem mais cenários porque sua lógica está no SQL ou LINQ executado pelo PostgreSQL.
 
@@ -40,6 +40,7 @@ Com dependências restauradas e Docker disponível, a partir da raiz:
 
 ```powershell
 dotnet test apps/api/Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
+pnpm --dir apps/web test
 pnpm --dir apps/web lint
 pnpm --dir apps/web build
 git diff --check
@@ -48,6 +49,10 @@ git diff --check
 Testcontainers exige acesso ao daemon Docker. Uma falha ao iniciar o container é ambiental e não comprova falha da regra testada; registre a limitação se não for possível repetir a execução em ambiente válido.
 
 ## Critério de conclusão
+
+Os testes do frontend ficam ao lado do arquivo correspondente, com o mesmo nome-base: `money.test.ts`, `use-orders.test.tsx` e `products-page.test.tsx`. Use `.test.ts` sem JSX e `.test.tsx` com JSX; não use `.spec.*`. A infraestrutura compartilhada (setup, renderização com providers e servidor MSW) fica em `apps/web/test/`, fora de `src`, e usa o alias `@test/*`. Futuros testes ponta a ponta ficam em `apps/web/test/e2e/`, com configuração própria. Fixtures e handlers exclusivos de uma feature permanecem próximos dela.
+
+Cada teste usa um QueryClient isolado, sem retries, e handlers HTTP resetados entre cenários. Teste resultados observáveis, incluindo respostas atrasadas, falhas, preservação de preenchimento, mudanças de período e valores monetários. A CI executa a suíte com `pnpm test`.
 
 Uma mudança está verificada quando:
 

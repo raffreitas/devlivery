@@ -1,12 +1,12 @@
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { BottomSheet } from "@/shared/components/bottom-sheet";
 import {
   GridSkeleton,
   LoadingOverlay,
   LoadingState,
 } from "@/shared/components/loading";
 import { Modal } from "@/shared/components/modal";
+import { QueryState } from "@/shared/components/query-state";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,14 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/shared/components/ui/drawer";
 import { ProductCard } from "../components/product-card";
 import { ProductForm } from "../components/product-form";
 import { ProductsFilters } from "../components/products-filters";
@@ -28,6 +36,9 @@ export function ProductsPage() {
   const {
     products,
     loading,
+    error,
+    hasData,
+    refetch,
     isFetching,
     createProduct,
     updateProduct,
@@ -46,11 +57,11 @@ export function ProductsPage() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
-  const handleCreateOrUpdate = (data: ProductFormData) => {
+  const handleCreateOrUpdate = async (data: ProductFormData) => {
     if (editingProduct) {
-      updateProduct(editingProduct.id, data);
+      await updateProduct(editingProduct.id, data);
     } else {
-      createProduct(data);
+      await createProduct(data);
     }
     setIsModalOpen(false);
     setEditingProduct(null);
@@ -68,7 +79,7 @@ export function ProductsPage() {
       await deleteProduct(id);
       setAlert({ open: false, productId: null });
     } catch {
-      // Error is handled by the mutation's onError
+      // Reported by the global MutationCache.
     }
   };
 
@@ -89,7 +100,7 @@ export function ProductsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       <LoadingOverlay isFetching={isFetching} position="top-bar" />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -106,7 +117,7 @@ export function ProductsPage() {
             onClick={() => setIsModalOpen(true)}
             className="w-full sm:w-auto"
           >
-            <PlusIcon className="w-4 h-4 mr-2" />
+            <PlusIcon data-icon="inline-start" />
             Novo Produto
           </Button>
         </div>
@@ -121,35 +132,43 @@ export function ProductsPage() {
         onOpenFilters={() => setIsFiltersOpen(true)}
       />
 
-      <LoadingState
-        isLoading={loading && products.length === 0}
-        skeleton={<GridSkeleton items={10} columns={5} />}
+      <QueryState
+        isPending={loading}
+        error={error}
+        hasData={hasData}
+        refetch={refetch}
       >
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">
-              {products.length === 0
-                ? "Nenhum produto cadastrado. Comece criando um novo produto!"
-                : "Nenhum produto encontrado com os filtros aplicados."}
-            </p>
-          </div>
-        ) : (
-          <div
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 transition-opacity duration-200 ${
-              isFetching ? "opacity-60" : "opacity-100"
-            }`}
-          >
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onEdit={handleEdit}
-                onDelete={(productId) => setAlert({ open: true, productId })}
-              />
-            ))}
-          </div>
-        )}
-      </LoadingState>
+        {" "}
+        <LoadingState
+          isLoading={loading && products.length === 0}
+          skeleton={<GridSkeleton items={10} columns={5} />}
+        >
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground text-lg">
+                {products.length === 0
+                  ? "Nenhum produto cadastrado. Comece criando um novo produto!"
+                  : "Nenhum produto encontrado com os filtros aplicados."}
+              </p>
+            </div>
+          ) : (
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 transition-opacity duration-200 ${
+                isFetching ? "opacity-60" : "opacity-100"
+              }`}
+            >
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onEdit={handleEdit}
+                  onDelete={(productId) => setAlert({ open: true, productId })}
+                />
+              ))}
+            </div>
+          )}
+        </LoadingState>
+      </QueryState>
 
       <AlertDialog
         open={alert.open}
@@ -176,6 +195,7 @@ export function ProductsPage() {
       </AlertDialog>
 
       <Modal
+        dismissible={!(isCreating || isUpdating)}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={editingProduct ? "Editar Produto" : "Novo Produto"}
@@ -189,27 +209,29 @@ export function ProductsPage() {
         />
       </Modal>
 
-      <BottomSheet
-        isOpen={isFiltersOpen}
-        onClose={() => setIsFiltersOpen(false)}
-        title="Filtros"
+      <Drawer
+        open={isFiltersOpen}
+        onOpenChange={setIsFiltersOpen}
+        showSwipeHandle
       >
-        <div className="space-y-4">
-          <ProductsFiltersContent
-            searchTerm={searchTerm}
-            filterCategory={filterCategory}
-            categories={categories}
-            onSearchChange={setSearchTerm}
-            onCategoryChange={setFilterCategory}
-          />
-
-          <div className="pt-4 pb-2 border-t border-border">
-            <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
-              Aplicar Filtros
-            </Button>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Filtros</DrawerTitle>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <ProductsFiltersContent
+              searchTerm={searchTerm}
+              filterCategory={filterCategory}
+              categories={categories}
+              onSearchChange={setSearchTerm}
+              onCategoryChange={setFilterCategory}
+            />
           </div>
-        </div>
-      </BottomSheet>
+          <DrawerFooter>
+            <DrawerClose render={<Button />}>Aplicar Filtros</DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { TrashIcon, XIcon } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { formatMoney } from "@/shared/utils/formatters";
+import { itemTotal } from "@/shared/utils/money";
 
 interface OrderItemsTableItem {
   fieldId: string;
@@ -12,6 +13,7 @@ interface OrderItemsTableItem {
     category?: string;
     available?: boolean;
   };
+  unitPrice: number;
   quantity: number;
   notes?: string;
 }
@@ -37,7 +39,6 @@ export function OrderItemsTable({
 
   return (
     <div className="border border-border rounded-lg overflow-hidden flex flex-col">
-      {/* Mobile view */}
       <div className="sm:hidden flex-1 overflow-y-auto">
         <div className="divide-y divide-border">
           {items.map((item, index) => (
@@ -63,14 +64,14 @@ export function OrderItemsTable({
                   className="ml-2"
                   onClick={() => onRemoveItem(index)}
                 >
-                  <XIcon className="w-4 h-4 text-destructive" />
+                  <XIcon className="text-destructive" />
                 </Button>
               </div>
               <div className="flex justify-between text-xs text-secondary-foreground">
                 <span>Qtd: {item.quantity}</span>
-                <span>Unit: {formatMoney(item.product.price)}</span>
+                <span>Unit: {formatMoney(item.unitPrice)}</span>
                 <span className="font-medium text-foreground">
-                  {formatMoney(item.product.price * item.quantity)}
+                  {formatMoney(itemTotal(item.unitPrice, item.quantity))}
                 </span>
               </div>
             </div>
@@ -78,7 +79,6 @@ export function OrderItemsTable({
         </div>
       </div>
 
-      {/* Desktop view */}
       <div className="hidden sm:flex flex-col flex-1">
         <div className="overflow-x-auto overflow-y-auto flex-1">
           <table className="min-w-full divide-y divide-border">
@@ -123,10 +123,10 @@ export function OrderItemsTable({
                     {item.quantity}
                   </td>
                   <td className="px-4 py-3 text-sm text-foreground text-right">
-                    {formatMoney(item.product.price)}
+                    {formatMoney(item.unitPrice)}
                   </td>
                   <td className="px-4 py-3 text-sm font-semibold text-foreground text-right">
-                    {formatMoney(item.product.price * item.quantity)}
+                    {formatMoney(itemTotal(item.unitPrice, item.quantity))}
                   </td>
                   <td className="px-4 py-3 text-sm text-center">
                     <Button
@@ -136,7 +136,7 @@ export function OrderItemsTable({
                       onClick={() => onRemoveItem(index)}
                       className="hover:bg-destructive/10"
                     >
-                      <TrashIcon className="w-4 h-4 text-destructive" />
+                      <TrashIcon className="text-destructive" />
                     </Button>
                   </td>
                 </tr>

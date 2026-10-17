@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import type { DateRange } from "react-day-picker";
+import {
+  invalidateAfterMutation,
+  queryKeys,
+} from "@/shared/services/query-keys";
 import { formatDate } from "@/shared/utils/formatters";
+import { fromCents, toCents } from "@/shared/utils/money";
 import { expenseService } from "../services/expense-service";
 import type { ExpenseFormData, ExpenseStatus, ExpenseSummary } from "../types";
 
@@ -18,51 +23,61 @@ export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
     queryKey: [
       "expenses",
       {
-        startDate: duePeriod?.from,
-        endDate: duePeriod?.to,
+        ...queryKeys.period(duePeriod?.from, duePeriod?.to),
         categoryId,
         status,
       },
     ],
-    queryFn: () =>
-      expenseService.getAll({
-        startDate: duePeriod?.from ? formatDate(duePeriod.from) : undefined,
-        endDate: duePeriod?.to ? formatDate(duePeriod.to) : undefined,
-        categoryId,
-        status,
-      }),
+    queryFn: ({ signal }) =>
+      expenseService.getAll(
+        {
+          startDate: duePeriod?.from ? formatDate(duePeriod.from) : undefined,
+          endDate: duePeriod?.to ? formatDate(duePeriod.to) : undefined,
+          categoryId,
+          status,
+        },
+        signal,
+      ),
     staleTime: 30_000,
     placeholderData: (previousData) => previousData,
   });
 
-  // Calcula sumário/totalizadores
   const summary: ExpenseSummary = useMemo(() => {
     const expenses = expensesQuery.data ?? [];
 
     return {
-      total: expenses.reduce((sum, exp) => sum + exp.amount, 0),
-      paid: expenses
-        .filter((exp) => exp.status === "Paid")
-        .reduce((sum, exp) => sum + exp.amount, 0),
-      pending: expenses
-        .filter((exp) => exp.status === "Pending" || exp.status === "DueToday")
-        .reduce((sum, exp) => sum + exp.amount, 0),
-      overdue: expenses
-        .filter((exp) => exp.status === "Overdue")
-        .reduce((sum, exp) => sum + exp.amount, 0),
+      total: fromCents(
+        expenses.reduce((sum, exp) => sum + toCents(exp.amount), 0),
+      ),
+      paid: fromCents(
+        expenses
+          .filter((exp) => exp.status === "Paid")
+          .reduce((sum, exp) => sum + toCents(exp.amount), 0),
+      ),
+      pending: fromCents(
+        expenses
+          .filter(
+            (exp) => exp.status === "Pending" || exp.status === "DueToday",
+          )
+          .reduce((sum, exp) => sum + toCents(exp.amount), 0),
+      ),
+      overdue: fromCents(
+        expenses
+          .filter((exp) => exp.status === "Overdue")
+          .reduce((sum, exp) => sum + toCents(exp.amount), 0),
+      ),
       count: expenses.length,
     };
   }, [expensesQuery.data]);
 
   const createMutation = useMutation({
     mutationFn: expenseService.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["cash-sessions"] });
-    },
+    meta: { skipGlobalErrorToast: true },
+    onSuccess: () => invalidateAfterMutation(queryClient, "expenses"),
   });
 
   const updateMutation = useMutation({
+    meta: { skipGlobalErrorToast: true },
     mutationFn: ({
       id,
       data,
@@ -70,33 +85,27 @@ export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
       id: string;
       data: Partial<ExpenseFormData>;
     }) => expenseService.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["cash-sessions"] });
-    },
+    onSuccess: () => invalidateAfterMutation(queryClient, "expenses"),
   });
 
   const markAsPaidMutation = useMutation({
     mutationFn: ({ id, paymentDate }: { id: string; paymentDate: string }) =>
       expenseService.markAsPaid(id, paymentDate),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["cash-sessions"] });
-    },
+    onSuccess: () => invalidateAfterMutation(queryClient, "expenses"),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => expenseService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["cash-sessions"] });
-    },
+    onSuccess: () => invalidateAfterMutation(queryClient, "expenses"),
   });
 
   return {
     expenses: expensesQuery.data ?? [],
     summary,
+    isSaving: createMutation.isPending || updateMutation.isPending,
     loading: expensesQuery.isLoading,
+    error: expensesQuery.error,
+    hasData: expensesQuery.data !== undefined,
     isFetching: expensesQuery.isFetching,
     refetch: expensesQuery.refetch,
     createExpense: (data: ExpenseFormData) => createMutation.mutateAsync(data),
@@ -110,8 +119,8 @@ export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
 
 export function useExpense(id: string | undefined) {
   return useQuery({
-    queryKey: ["expenses", id],
-    queryFn: () => expenseService.getById(id as string),
+    queryKey: [...queryKeys.expenses, id],
+    queryFn: ({ signal }) => expenseService.getById(id as string, signal),
     enabled: !!id,
     staleTime: 30_000,
   });
@@ -119,24 +128,26 @@ export function useExpense(id: string | undefined) {
 
 export function useExpenseCategories() {
   return useQuery({
-    queryKey: ["expense-categories"],
-    queryFn: () => expenseService.getAllCategories(),
+    queryKey: queryKeys.categories,
+    queryFn: ({ signal }) => expenseService.getAllCategories(signal),
     staleTime: 60_000, // Cache por 1 minuto (categorias não mudam frequentemente)
   });
 }
 
-export function useExpenseCategoriesManagement() {
+export function useExpenseCategoriesManagement(
+  options: { skipGlobalErrorToast?: boolean } = {},
+) {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
+    meta: options,
     mutationFn: (data: { name: string; parentCategoryId?: string }) =>
       expenseService.createCategory(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expense-categories"] });
-    },
+    onSuccess: () => invalidateAfterMutation(queryClient, "categories"),
   });
 
   const updateMutation = useMutation({
+    meta: options,
     mutationFn: ({
       id,
       data,
@@ -144,16 +155,12 @@ export function useExpenseCategoriesManagement() {
       id: string;
       data: { name?: string; isActive?: boolean };
     }) => expenseService.updateCategory(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expense-categories"] });
-    },
+    onSuccess: () => invalidateAfterMutation(queryClient, "categories"),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => expenseService.deleteCategory(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expense-categories"] });
-    },
+    onSuccess: () => invalidateAfterMutation(queryClient, "categories"),
   });
 
   return {

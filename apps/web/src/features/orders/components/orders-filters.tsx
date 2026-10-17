@@ -1,7 +1,7 @@
 import { Filter } from "lucide-react";
 import type { DateRange } from "react-day-picker";
+import { DateRangePicker } from "@/shared/components/date-range-picker";
 import { Button } from "@/shared/components/ui/button";
-import { DateRangePicker } from "@/shared/components/ui/date-range-picker";
 import { Label } from "@/shared/components/ui/label";
 import {
   Select,
@@ -36,17 +36,15 @@ export function OrdersFilters({
   onDateChange,
   onOpenFilters,
 }: OrdersFiltersProps) {
-  // Contagem de filtros ativos
   const activeFiltersCount =
     (statusFilter !== "all" ? 1 : 0) + (paymentFilter !== "all" ? 1 : 0);
 
   return (
     <>
-      {/* Mobile: Botão Filtros */}
       <div className="sm:hidden">
         <Button variant="secondary" onClick={onOpenFilters} className="w-full">
-          <Filter className="w-4 h-4" />
-          <span className="ml-2">Filtros</span>
+          <Filter data-icon="inline-start" />
+          <span>Filtros</span>
           {activeFiltersCount > 0 && (
             <span className="ml-2 px-1.5 py-0.5 bg-orange-500 text-white text-xs font-bold rounded-full min-w-5 text-center">
               {activeFiltersCount}
@@ -55,14 +53,19 @@ export function OrdersFilters({
         </Button>
       </div>
 
-      {/* Desktop: Inline Filters */}
       <div className="hidden sm:block bg-card rounded-lg border border-border shadow-sm p-4">
         <div className="flex flex-col sm:flex-row items-end gap-2 sm:gap-4 pb-2 sm:pb-1 px-1">
           <div className="w-full sm:flex-1 sm:min-w-50 flex flex-col gap-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
               Status do Pedido
             </Label>
-            <Select onValueChange={onStatusChange}>
+            <Select<OrderStatus | "all">
+              value={statusFilter}
+              onValueChange={(value) => {
+                if (value !== null)
+                  onStatusChange(value as OrderStatus | "all");
+              }}
+            >
               <SelectTrigger className="w-full">
                 <span>
                   {statusFilter === "all"
@@ -71,14 +74,11 @@ export function OrdersFilters({
                 </span>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" onSelect={() => onStatusChange("all")}>
-                  Todos os status
-                </SelectItem>
+                <SelectItem value="all">Todos os status</SelectItem>
                 {statusOptions.map((option) => (
                   <SelectItem
                     key={option}
                     value={option}
-                    onSelect={() => onStatusChange(option)}
                     className="cursor-pointer"
                   >
                     {getOrderStatusOptionLabel(option)}
@@ -92,7 +92,13 @@ export function OrdersFilters({
             <Label className="text-xs font-medium text-muted-foreground">
               Forma de Pagamento
             </Label>
-            <Select onValueChange={onPaymentChange}>
+            <Select<PaymentMethod | "all">
+              value={paymentFilter}
+              onValueChange={(value) => {
+                if (value !== null)
+                  onPaymentChange(value as PaymentMethod | "all");
+              }}
+            >
               <SelectTrigger className="w-full">
                 <span>
                   {paymentFilter === "all"
@@ -101,14 +107,11 @@ export function OrdersFilters({
                 </span>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" onSelect={() => onPaymentChange("all")}>
-                  Todas as formas
-                </SelectItem>
+                <SelectItem value="all">Todas as formas</SelectItem>
                 {paymentOptions.map((option) => (
                   <SelectItem
                     key={option}
                     value={option}
-                    onSelect={() => onPaymentChange(option)}
                     className="cursor-pointer"
                   >
                     {getPaymentOptionLabel(option)}

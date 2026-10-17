@@ -12,11 +12,14 @@ export function NotFoundPage() {
         <p className="text-lg sm:text-xl text-muted-foreground mb-8">
           Página não encontrada
         </p>
-        <Button asChild size="lg">
-          <Link to="/">
-            <Home className="size-4" />
-            Voltar para Home
-          </Link>
+        <Button
+          size="lg"
+          nativeButton={false}
+          role="link"
+          render={<Link to="/" />}
+        >
+          <Home data-icon="inline-start" />
+          Voltar para Home
         </Button>
       </div>
     </div>

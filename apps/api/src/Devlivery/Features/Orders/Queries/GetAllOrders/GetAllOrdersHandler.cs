@@ -56,6 +56,7 @@ public sealed class GetAllOrdersHandler(ApplicationDbContext dbContext)
                     productsDictionary[i.ProductId].Available,
                     productsDictionary[i.ProductId].CreatedAt,
                     productsDictionary[i.ProductId].UpdatedAt),
+                i.UnitPrice,
                 i.Quantity,
                 i.Notes)).OrderByDescending(x => x.Quantity).ToArray(),
             o.Customer.Name,

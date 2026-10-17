@@ -1,17 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useId } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { FormError } from "@/shared/components/form-error";
+import { InputMoney } from "@/shared/components/input-money";
 import { LoadingButton } from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
-import { InputMoney } from "@/shared/components/ui/input-money";
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/components/ui/field";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { applyFormError } from "@/shared/utils/form-errors";
 import {
   type CreateCashDepositFormData,
   createCashDepositFormSchema,
@@ -26,6 +27,7 @@ export function CashDepositForm({
   onSubmit,
   isLoading = false,
 }: CashDepositFormProps) {
+  const formId = useId();
   const form = useForm<CreateCashDepositFormData>({
     resolver: zodResolver(createCashDepositFormSchema),
     defaultValues: {
@@ -40,73 +42,108 @@ export function CashDepositForm({
   };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleFormSubmit)}
-        className="space-y-4"
+    <form
+      onSubmit={form.handleSubmit(async (data) => {
+        form.clearErrors();
+        try {
+          await handleFormSubmit(data);
+        } catch (error) {
+          applyFormError(form, error, {});
+        }
+      })}
+    >
+      <fieldset
+        inert={form.formState.isSubmitting || isLoading}
+        disabled={form.formState.isSubmitting || isLoading}
+        className="flex min-h-0 flex-1 flex-col gap-4"
       >
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Valor do Aporte (R$) <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
+        <FormError message={form.formState.errors.root?.server?.message} />
+        <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
+          <Controller
+            control={form.control}
+            name="amount"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${formId}-cash-deposit-amount`}>
+                  Valor do Aporte (R$){" "}
+                  <span className="text-destructive">*</span>
+                </FieldLabel>
                 <InputMoney
+                  {...field}
+                  id={`${formId}-cash-deposit-amount`}
                   disabled={isLoading}
-                  value={field.value}
-                  onChange={field.onChange}
                   placeholder="0.00"
+                  aria-invalid={fieldState.invalid}
+                  aria-describedby={
+                    fieldState.invalid
+                      ? `${formId}-cash-deposit-amount-error`
+                      : undefined
+                  }
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                {fieldState.invalid && (
+                  <FieldError
+                    id={`${formId}-cash-deposit-amount-error`}
+                    errors={[fieldState.error]}
+                  />
+                )}
+              </Field>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Motivo ou Observações (Opcional)</FormLabel>
-              <FormControl>
+          <Controller
+            control={form.control}
+            name="notes"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${formId}-cash-deposit-notes`}>
+                  Motivo ou Observações (Opcional)
+                </FieldLabel>
                 <Textarea
+                  {...field}
+                  id={`${formId}-cash-deposit-notes`}
                   disabled={isLoading}
                   placeholder="Motivo do aporte (ex: Troco, Falta de dinheiro...)"
                   className="resize-none"
                   rows={3}
-                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  aria-describedby={
+                    fieldState.invalid
+                      ? `${formId}-cash-deposit-notes-error`
+                      : undefined
+                  }
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                {fieldState.invalid && (
+                  <FieldError
+                    id={`${formId}-cash-deposit-notes-error`}
+                    errors={[fieldState.error]}
+                  />
+                )}
+              </Field>
+            )}
+          />
 
-        <div className="flex gap-2 pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={isLoading}
-            onClick={() => form.reset()}
-            className="flex-1"
-          >
-            Limpar
-          </Button>
-          <LoadingButton
-            type="submit"
-            isLoading={isLoading}
-            loadingText="Adicionando..."
-            variant="default"
-            className="flex-1"
-          >
-            Adicionar Aporte
-          </LoadingButton>
-        </div>
-      </form>
-    </Form>
+          <Field orientation="horizontal">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isLoading}
+              onClick={() => form.reset()}
+              className="flex-1"
+            >
+              Limpar
+            </Button>
+            <LoadingButton
+              type="submit"
+              isLoading={isLoading}
+              loadingText="Adicionando..."
+              variant="default"
+              className="flex-1"
+            >
+              Adicionar Aporte
+            </LoadingButton>
+          </Field>
+        </FieldGroup>
+      </fieldset>
+    </form>
   );
 }

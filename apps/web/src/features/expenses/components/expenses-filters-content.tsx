@@ -1,5 +1,5 @@
 import type { DateRange } from "react-day-picker";
-import { DateRangePicker } from "@/shared/components/ui/date-range-picker";
+import { DateRangePicker } from "@/shared/components/date-range-picker";
 import { Label } from "@/shared/components/ui/label";
 import {
   Select,
@@ -39,11 +39,11 @@ export function ExpensesFiltersContent({
   const { data: categories } = useExpenseCategories();
 
   const handleCategoryChange = (value: string) => {
-    onCategoryChange(value === "all" ? undefined : value);
+    onCategoryChange(value === "all" ? undefined : (value ?? undefined));
   };
 
   const handleStatusChange = (value: ExpenseStatus | "all") => {
-    onStatusChange(value === "all" ? undefined : value);
+    onStatusChange(value === "all" ? undefined : (value ?? undefined));
   };
 
   return (
@@ -52,10 +52,16 @@ export function ExpensesFiltersContent({
         <Label>Categoria</Label>
         <Select
           value={categoryId ?? "all"}
-          onValueChange={handleCategoryChange}
+          onValueChange={(value) => {
+            if (value !== null) handleCategoryChange(value as string);
+          }}
         >
           <SelectTrigger className="w-full cursor-pointer">
-            <SelectValue placeholder="Todas" />
+            <SelectValue placeholder="Todas">
+              {categoryId
+                ? categories?.find((cat) => cat.id === categoryId)?.name
+                : "Todas"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas</SelectItem>
@@ -72,9 +78,17 @@ export function ExpensesFiltersContent({
 
       <div className="flex flex-col gap-2">
         <Label>Status</Label>
-        <Select value={status ?? "all"} onValueChange={handleStatusChange}>
+        <Select
+          value={status ?? "all"}
+          onValueChange={(value) => {
+            if (value !== null)
+              handleStatusChange(value as ExpenseStatus | "all");
+          }}
+        >
           <SelectTrigger className="w-full cursor-pointer">
-            <SelectValue placeholder="Todos" />
+            <SelectValue placeholder="Todos">
+              {status ? statusLabels[status as ExpenseStatus] : "Todos"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>

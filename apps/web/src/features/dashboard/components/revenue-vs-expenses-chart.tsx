@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { formatMoney, parseLocalDate } from "@/shared/utils/formatters";
+import { moneyDifference } from "@/shared/utils/money";
 
 interface RevenueVsExpensesChartProps {
   revenueData: { date: string; total: number }[];
@@ -25,7 +26,6 @@ export function RevenueVsExpensesChart({
   revenueData,
   expensesData,
 }: RevenueVsExpensesChartProps) {
-  // Combina os dados de receitas e despesas por data
   const combinedData = useMemo(() => {
     const dataMap = new Map<
       string,
@@ -52,7 +52,6 @@ export function RevenueVsExpensesChart({
       }
     });
 
-    // Sort by full date. Backend now emits ISO date strings (yyyy-MM-dd).
     return Array.from(dataMap.values()).sort((a, b) => {
       const dateA = parseLocalDate(a.date);
       const dateB = parseLocalDate(b.date);
@@ -166,12 +165,17 @@ export function RevenueVsExpensesChart({
                               </span>
                               <span
                                 className={`font-bold ${
-                                  data.revenue - data.expenses >= 0
+                                  moneyDifference(
+                                    data.revenue,
+                                    data.expenses,
+                                  ) >= 0
                                     ? "text-green-600"
                                     : "text-red-600"
                                 }`}
                               >
-                                {formatMoney(data.revenue - data.expenses)}
+                                {formatMoney(
+                                  moneyDifference(data.revenue, data.expenses),
+                                )}
                               </span>
                             </div>
                           </div>

@@ -8,7 +8,6 @@ import type {
   PaymentMethodTotal,
 } from "../types";
 
-// DTOs from backend
 interface CashSessionDto {
   id: string;
   attendantId: string;
@@ -92,24 +91,27 @@ function mapDepositDtoToDomain(dto: CashDepositDto): CashDeposit {
 }
 
 export const cashService = {
-  async getAll(): Promise<CashSession[]> {
+  async getAll(signal?: AbortSignal): Promise<CashSession[]> {
     const response = await api.get<ApiResponse<CashSessionDto[]>>(
       "/cash-register/sessions",
+      signal,
     );
     return response.data?.map(mapDtoToDomain) ?? [];
   },
 
-  async getById(id: string): Promise<CashSession> {
+  async getById(id: string, signal?: AbortSignal): Promise<CashSession> {
     const response = await api.get<ApiResponse<CashSessionDto>>(
       `/cash-register/sessions/${id}`,
+      signal,
     );
     return mapDtoToDomain(response.data ?? ({} as CashSessionDto));
   },
 
-  async getActive(): Promise<CashSession | null> {
+  async getActive(signal?: AbortSignal): Promise<CashSession | null> {
     try {
       const response = await api.get<ApiResponse<CashSessionDto>>(
         "/cash-register/sessions/active",
+        signal,
       );
       return mapDtoToDomain(response.data ?? ({} as CashSessionDto));
     } catch (error) {
@@ -166,9 +168,13 @@ export const cashService = {
     return mapDepositDtoToDomain(response.data);
   },
 
-  async getDeposits(sessionId: string): Promise<CashDeposit[]> {
+  async getDeposits(
+    sessionId: string,
+    signal?: AbortSignal,
+  ): Promise<CashDeposit[]> {
     const response = await api.get<ApiResponse<CashDepositDto[]>>(
       `/cash-register/sessions/${sessionId}/deposits`,
+      signal,
     );
     return response.data?.map(mapDepositDtoToDomain) ?? [];
   },

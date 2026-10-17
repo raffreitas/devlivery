@@ -66,7 +66,7 @@ export function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
             title="Editar"
             onClick={() => onEdit(product)}
           >
-            <Edit2 className="w-4 h-4" />
+            <Edit2 />
           </Button>
 
           <Button
@@ -76,7 +76,7 @@ export function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
             title="Excluir"
             onClick={() => onDelete(product.id)}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 />
           </Button>
         </div>
       </CardFooter>

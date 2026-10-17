@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Status das despesas
 export const ExpenseStatus = {
   PAID: "Paid",
   PENDING: "Pending",
@@ -11,7 +10,6 @@ export const ExpenseStatus = {
 
 export type ExpenseStatus = (typeof ExpenseStatus)[keyof typeof ExpenseStatus];
 
-// Category - representa categoria e subcategoria
 export interface Category {
   id: string;
   name: string;
@@ -19,7 +17,6 @@ export interface Category {
   subcategories: Category[];
 }
 
-// Interface principal da despesa
 export interface Expense {
   id: string;
   category: Category;
@@ -33,7 +30,6 @@ export interface Expense {
   updatedAt: Date;
 }
 
-// Schema Zod para validação do formulário
 export const expenseFormSchema = z.object({
   categoryId: z.uuid("Categoria é obrigatória"),
   subcategoryId: z.string().optional(),
@@ -50,7 +46,6 @@ export const expenseFormSchema = z.object({
 
 export type ExpenseFormData = z.infer<typeof expenseFormSchema>;
 
-// Filtros
 export interface ExpenseFilters {
   startDate?: Date;
   endDate?: Date;
@@ -58,7 +53,6 @@ export interface ExpenseFilters {
   status?: ExpenseStatus;
 }
 
-// Sumário/Totalizadores
 export interface ExpenseSummary {
   total: number;
   paid: number;

@@ -16,19 +16,17 @@ export function DashboardFilters({
 }: DashboardFiltersProps) {
   return (
     <>
-      {/* Mobile: Botão para abrir Bottom Sheet */}
       <div className="lg:hidden">
         <Button
           variant="secondary"
           onClick={onOpenFilters}
           className="w-full sm:w-auto"
         >
-          <Filter className="w-4 h-4" />
+          <Filter data-icon="inline-start" />
           Filtros
         </Button>
       </div>
 
-      {/* Desktop: Filtros inline */}
       <div className="hidden lg:flex items-center gap-3">
         <DashboardFiltersContent period={period} onDateChange={onDateChange} />
       </div>

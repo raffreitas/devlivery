@@ -24,6 +24,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { formatMoney } from "@/shared/utils/formatters";
+import { moneyDifference, sumMoney } from "@/shared/utils/money";
 import type { CashDeposit, CashSession } from "../types";
 
 interface CashSummaryCardProps {
@@ -41,9 +42,10 @@ export function CashSummaryCard({
 }: CashSummaryCardProps) {
   const isOpen = session.status === "Open";
   const expectedCashAmount = session.expectedCashAmount;
-  const difference = session.closingAmount
-    ? session.closingAmount - expectedCashAmount
-    : 0;
+  const difference = moneyDifference(
+    session.closingAmount ?? 0,
+    expectedCashAmount,
+  );
 
   const cashSalesAmount = session.paymentBreakdown.find(
     (payment) => payment.method === "Cash",
@@ -52,7 +54,6 @@ export function CashSummaryCard({
   const startDate = new Date(session.startAt);
   const endDate = session.endAt ? new Date(session.endAt) : null;
 
-  // Calculate session duration
   const getDuration = () => {
     const end = endDate || new Date();
     const durationMs = end.getTime() - startDate.getTime();
@@ -61,10 +62,7 @@ export function CashSummaryCard({
     return `${hours}h ${minutes}m`;
   };
 
-  const totalDeposits = deposits?.reduce(
-    (sum, deposit) => sum + deposit.amount,
-    0,
-  );
+  const totalDeposits = sumMoney(deposits.map((deposit) => deposit.amount));
 
   return (
     <Card className="p-4 sm:p-6 gap-1">
@@ -112,7 +110,6 @@ export function CashSummaryCard({
         </div>
       </div>
 
-      {/* Session period */}
       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
         <div className="flex items-center gap-1">
           <Calendar className="w-4 h-4" />
@@ -128,7 +125,6 @@ export function CashSummaryCard({
         <div className="text-xs text-muted-foreground">({getDuration()})</div>
       </div>
 
-      {/* Cash flow explanation */}
       <Alert>
         <AlertTitle>Dinheiro Esperado no Caixa:</AlertTitle>
         <AlertDescription>
@@ -136,7 +132,6 @@ export function CashSummaryCard({
         </AlertDescription>
       </Alert>
 
-      {/* Cash amounts */}
       <div className="space-y-3 border-t border-border pt-4 mt-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Abertura</span>
@@ -230,10 +225,9 @@ export function CashSummaryCard({
           )}
         </div>
 
-        {/* Deposits list - if any */}
         {deposits && deposits.length > 0 && (
           <div className="border-t border-border">
-            <Accordion type="single" collapsible>
+            <Accordion>
               <AccordionItem value="deposits-list">
                 <AccordionTrigger>
                   <span className="flex items-center gap-2">
@@ -286,9 +280,8 @@ export function CashSummaryCard({
           </div>
         )}
 
-        {/* Sales summary - collapsed, secondary info */}
         <div className="border-t border-border">
-          <Accordion type="single" collapsible>
+          <Accordion>
             <AccordionItem value="sales-summary">
               <AccordionTrigger>
                 <span className="flex items-center gap-2">
@@ -346,7 +339,6 @@ export function CashSummaryCard({
         </div>
       </div>
 
-      {/* Notes */}
       {session.notes && (
         <div className="mt-4 pt-4 border-t border-border">
           <p className="text-xs text-muted-foreground mb-1">Observações:</p>

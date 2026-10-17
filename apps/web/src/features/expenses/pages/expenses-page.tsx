@@ -2,11 +2,19 @@ import { addMonths, endOfMonth, startOfMonth } from "date-fns";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { toast } from "sonner";
-import { BottomSheet } from "@/shared/components/bottom-sheet";
 import { LoadingState, TableSkeleton } from "@/shared/components/loading";
 import { Modal } from "@/shared/components/modal";
+import { QueryState } from "@/shared/components/query-state";
 import { Button } from "@/shared/components/ui/button";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/shared/components/ui/drawer";
+import { toast } from "@/shared/components/ui/toast";
 import { ExpenseForm } from "../components/expense-form";
 import { ExpenseList } from "../components/expense-list";
 import { ExpenseSummaryCard } from "../components/expense-summary-card";
@@ -37,7 +45,11 @@ export function ExpensesPage() {
   const {
     expenses,
     summary,
+    isSaving,
     loading,
+    error,
+    hasData,
+    refetch,
     createExpense,
     updateExpense,
     deleteExpense,
@@ -45,31 +57,26 @@ export function ExpensesPage() {
   } = useExpenses({ duePeriod, categoryId, status });
 
   const handleSubmit = async (data: ExpenseFormData) => {
-    try {
-      if (editingExpense) {
-        await updateExpense(editingExpense.id, data);
-        toast.success("Despesa atualizada com sucesso!");
-      } else {
-        await createExpense(data);
-        toast.success("Despesa criada com sucesso!");
-      }
-      handleCloseModal();
-    } catch (error) {
-      // Tratamento de erros específicos do backend
-      const errorMessage =
-        error instanceof Error &&
-        error.message.includes("Só é possível atualizar uma despesa")
-          ? "Não é permitido editar uma despesa cancelada."
-          : "Erro ao salvar despesa";
-      toast.error(errorMessage);
-      console.error(error);
+    if (editingExpense) {
+      await updateExpense(editingExpense.id, data);
+      toast.add({
+        type: "success",
+        title: "Despesa atualizada com sucesso!",
+      });
+    } else {
+      await createExpense(data);
+      toast.add({ type: "success", title: "Despesa criada com sucesso!" });
     }
+    handleCloseModal();
   };
 
   const handleEdit = (expense: Expense) => {
     // Despesas canceladas não podem ser editadas.
     if (expense.status === "Cancelled") {
-      toast.error("Não é permitido editar uma despesa cancelada.");
+      toast.add({
+        type: "error",
+        title: "Não é permitido editar uma despesa cancelada.",
+      });
       return;
     }
     setEditingExpense(expense);
@@ -79,25 +86,18 @@ export function ExpensesPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteExpense(id);
-      toast.success("Despesa excluída com sucesso!");
-    } catch (error) {
-      toast.error("Erro ao excluir despesa");
-      console.error(error);
+      toast.add({ type: "success", title: "Despesa excluída com sucesso!" });
+    } catch {
+      // Reported by the global MutationCache.
     }
   };
 
   const handleMarkAsPaid = async (id: string, paymentDate: string) => {
     try {
       await markAsPaid(id, paymentDate);
-      toast.success("Despesa marcada como paga!");
-    } catch (error) {
-      // O backend retorna erro específico se tentar pagar despesa cancelada
-      const errorMessage =
-        error instanceof Error && error.message.includes("cancelada")
-          ? "Não é possível pagar uma despesa cancelada."
-          : "Erro ao marcar despesa como paga";
-      toast.error(errorMessage);
-      console.error(error);
+      toast.add({ type: "success", title: "Despesa marcada como paga!" });
+    } catch {
+      // Reported by the global MutationCache.
     }
   };
 
@@ -113,8 +113,7 @@ export function ExpensesPage() {
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Header */}
+      <div className="flex flex-col gap-4 sm:gap-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -125,85 +124,93 @@ export function ExpensesPage() {
             </p>
           </div>
           <Button onClick={handleOpenCreateModal}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus data-icon="inline-start" />
             Nova Despesa
           </Button>
         </div>
 
-        <LoadingState
-          isLoading={loading}
-          skeleton={
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="h-24 bg-accent animate-pulse rounded-lg" />
-                <div className="h-24 bg-accent animate-pulse rounded-lg" />
-                <div className="h-24 bg-accent animate-pulse rounded-lg" />
-              </div>
-              <div className="bg-card p-4 rounded-lg border">
-                <TableSkeleton rows={5} columns={9} />
-              </div>
-            </div>
-          }
+        <QueryState
+          isPending={loading}
+          error={error}
+          hasData={hasData}
+          refetch={refetch}
         >
-          {/* Summary Cards */}
-          <ExpenseSummaryCard summary={summary} />
+          {" "}
+          <LoadingState
+            isLoading={loading}
+            skeleton={
+              <div className="flex flex-col gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="h-24 bg-accent animate-pulse rounded-lg" />
+                  <div className="h-24 bg-accent animate-pulse rounded-lg" />
+                  <div className="h-24 bg-accent animate-pulse rounded-lg" />
+                </div>
+                <div className="bg-card p-4 rounded-lg border">
+                  <TableSkeleton rows={5} columns={9} />
+                </div>
+              </div>
+            }
+          >
+            <ExpenseSummaryCard summary={summary} />
 
-          {/* Filters */}
-          <ExpensesFilters
-            period={duePeriod}
-            categoryId={categoryId}
-            status={status}
-            onDuePeriodChange={setDuePeriod}
-            onCategoryChange={setCategoryId}
-            onStatusChange={setStatus}
-            onOpenFilters={() => setIsFiltersOpen(true)}
-          />
+            <ExpensesFilters
+              period={duePeriod}
+              categoryId={categoryId}
+              status={status}
+              onDuePeriodChange={setDuePeriod}
+              onCategoryChange={setCategoryId}
+              onStatusChange={setStatus}
+              onOpenFilters={() => setIsFiltersOpen(true)}
+            />
 
-          {/* List */}
-          <ExpenseList
-            expenses={expenses}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onMarkAsPaid={handleMarkAsPaid}
-          />
-        </LoadingState>
+            <ExpenseList
+              expenses={expenses}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onMarkAsPaid={handleMarkAsPaid}
+            />
+          </LoadingState>
+        </QueryState>
       </div>
 
-      {/* Modal Create/Edit */}
       <Modal
+        dismissible={!isSaving}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={editingExpense ? "Editar Despesa" : "Nova Despesa"}
       >
         <ExpenseForm
+          isSubmitting={isSaving}
           expense={editingExpense}
           onSubmit={handleSubmit}
           onCancel={handleCloseModal}
         />
       </Modal>
 
-      <BottomSheet
-        isOpen={isFiltersOpen}
-        onClose={() => setIsFiltersOpen(false)}
-        title="Filtros"
+      <Drawer
+        open={isFiltersOpen}
+        onOpenChange={setIsFiltersOpen}
+        showSwipeHandle
       >
-        <div className="space-y-4">
-          <ExpensesFiltersContent
-            period={duePeriod}
-            categoryId={categoryId}
-            status={status}
-            onDuePeriodChange={setDuePeriod}
-            onCategoryChange={setCategoryId}
-            onStatusChange={setStatus}
-          />
-
-          <div className="pt-4 pb-2 border-t border-border">
-            <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
-              Aplicar Filtros
-            </Button>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Filtros</DrawerTitle>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <ExpensesFiltersContent
+              period={duePeriod}
+              categoryId={categoryId}
+              status={status}
+              onDuePeriodChange={setDuePeriod}
+              onCategoryChange={setCategoryId}
+              onStatusChange={setStatus}
+            />
           </div>
-        </div>
-      </BottomSheet>
+          <DrawerFooter>
+            <DrawerClose render={<Button />}>Aplicar Filtros</DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }

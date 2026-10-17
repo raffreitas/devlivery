@@ -1,25 +1,29 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useId } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { FormError } from "@/shared/components/form-error";
+import { InputMoney } from "@/shared/components/input-money";
 import { LoadingButton } from "@/shared/components/loading";
+import { OptionCombobox } from "@/shared/components/option-combobox";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
-import { Combobox } from "@/shared/components/ui/combobox";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldTitle,
+} from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { applyFormError } from "@/shared/utils/form-errors";
 import { type ProductFormData, productFormSchema } from "../types";
 
 interface ProductFormProps {
   initialData: (ProductFormData & { id?: string }) | null;
-  onSubmit: (data: ProductFormData) => void | Promise<void>;
+  onSubmit: (data: ProductFormData) => Promise<void>;
   onCancel: () => void;
   categoryOptions?: { value: string; label: string }[];
   isSubmitting?: boolean;
@@ -32,6 +36,7 @@ export function ProductForm({
   categoryOptions,
   isSubmitting: externalIsSubmitting,
 }: ProductFormProps) {
+  const formId = useId();
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -44,123 +49,204 @@ export function ProductForm({
   });
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do Produto</FormLabel>
-              <FormControl>
+    <form
+      onSubmit={form.handleSubmit(async (data) => {
+        form.clearErrors();
+        try {
+          await onSubmit(data);
+        } catch (error) {
+          applyFormError(form, error, {});
+        }
+      })}
+    >
+      <fieldset
+        inert={form.formState.isSubmitting || externalIsSubmitting === true}
+        disabled={form.formState.isSubmitting || externalIsSubmitting === true}
+        className="flex min-h-0 flex-1 flex-col gap-4"
+      >
+        <FormError message={form.formState.errors.root?.server?.message} />
+        <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
+          <Controller
+            control={form.control}
+            name="name"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${formId}-product-name`}>
+                  Nome do Produto
+                </FieldLabel>
                 <Input
+                  {...field}
+                  id={`${formId}-product-name`}
                   type="text"
                   placeholder="Digite o nome do produto"
                   required
-                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  aria-describedby={
+                    fieldState.invalid
+                      ? `${formId}-product-name-error`
+                      : undefined
+                  }
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                {fieldState.invalid && (
+                  <FieldError
+                    id={`${formId}-product-name-error`}
+                    errors={[fieldState.error]}
+                  />
+                )}
+              </Field>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
+          <Controller
+            control={form.control}
+            name="description"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${formId}-product-description`}>
+                  Descrição
+                </FieldLabel>
                 <Textarea
+                  {...field}
+                  id={`${formId}-product-description`}
                   placeholder="Digite a descrição do produto"
                   rows={3}
                   required
-                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  aria-describedby={
+                    fieldState.invalid
+                      ? `${formId}-product-description-error`
+                      : undefined
+                  }
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                {fieldState.invalid && (
+                  <FieldError
+                    id={`${formId}-product-description-error`}
+                    errors={[fieldState.error]}
+                  />
+                )}
+              </Field>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Preço (R$)</FormLabel>
-              <FormControl>
-                <InputMoney {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <Controller
+            control={form.control}
+            name="price"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${formId}-product-price`}>
+                  Preço (R$)
+                </FieldLabel>
+                <InputMoney
+                  {...field}
+                  id={`${formId}-product-price`}
+                  aria-invalid={fieldState.invalid}
+                  aria-describedby={
+                    fieldState.invalid
+                      ? `${formId}-product-price-error`
+                      : undefined
+                  }
+                />
+                {fieldState.invalid && (
+                  <FieldError
+                    id={`${formId}-product-price-error`}
+                    errors={[fieldState.error]}
+                  />
+                )}
+              </Field>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoria</FormLabel>
-              <FormControl>
-                <Combobox
+          <Controller
+            control={form.control}
+            name="category"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${formId}-product-category`}>
+                  Categoria
+                </FieldLabel>
+                <OptionCombobox
+                  id={`${formId}-product-category`}
+                  name={field.name}
+                  inputRef={field.ref}
                   placeholder="Pesquisar ou criar uma categoria"
                   options={categoryOptions ?? []}
                   value={field.value}
-                  onChange={field.onChange}
-                  allowCustomValue
-                  className="max-w-full w-full"
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  // Categoria de produto é texto livre: o rótulo é o próprio valor
+                  onCreate={async (label) => ({ value: label, label })}
+                  aria-invalid={fieldState.invalid}
+                  aria-describedby={
+                    fieldState.invalid
+                      ? `${formId}-product-category-error`
+                      : undefined
+                  }
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                {fieldState.invalid && (
+                  <FieldError
+                    id={`${formId}-product-category-error`}
+                    errors={[fieldState.error]}
+                  />
+                )}
+              </Field>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="available"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>Disponível</FormLabel>
-                <p className="text-sm text-muted-foreground">
-                  Este produto estará visível para registro de pedidos.
-                </p>
-              </div>
-            </FormItem>
-          )}
-        />
+          <Controller
+            control={form.control}
+            name="available"
+            render={({ field, fieldState }) => (
+              <FieldLabel htmlFor={`${formId}-product-available`}>
+                <Field
+                  orientation="horizontal"
+                  data-invalid={fieldState.invalid}
+                >
+                  <Checkbox
+                    id={`${formId}-product-available`}
+                    name={field.name}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    aria-invalid={fieldState.invalid}
+                    aria-describedby={`${formId}-product-available-description`}
+                  />
+                  <FieldContent>
+                    <FieldTitle>Disponível</FieldTitle>
+                    <FieldDescription
+                      id={`${formId}-product-available-description`}
+                    >
+                      Este produto estará visível para registro de pedidos.
+                    </FieldDescription>
+                  </FieldContent>
+                </Field>
+              </FieldLabel>
+            )}
+          />
 
-        <div className="flex gap-2 justify-center sm:justify-end pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            className="flex-1 sm:flex-initial"
+          <Field
+            orientation="horizontal"
+            className="justify-center sm:justify-end"
           >
-            Cancelar
-          </Button>
-          <LoadingButton
-            type="submit"
-            className="flex-1 sm:flex-initial"
-            isLoading={
-              form.formState.isSubmitting || externalIsSubmitting === true
-            }
-            loadingText={initialData?.id ? "Atualizando..." : "Criando..."}
-          >
-            {initialData?.id ? "Atualizar" : "Criar"} Produto
-          </LoadingButton>
-        </div>
-      </form>
-    </Form>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              className="flex-1 sm:flex-initial"
+            >
+              Cancelar
+            </Button>
+            <LoadingButton
+              type="submit"
+              className="flex-1 sm:flex-initial"
+              isLoading={
+                form.formState.isSubmitting || externalIsSubmitting === true
+              }
+              loadingText={initialData?.id ? "Atualizando..." : "Criando..."}
+            >
+              {initialData?.id ? "Atualizar" : "Criar"} Produto
+            </LoadingButton>
+          </Field>
+        </FieldGroup>
+      </fieldset>
+    </form>
   );
 }

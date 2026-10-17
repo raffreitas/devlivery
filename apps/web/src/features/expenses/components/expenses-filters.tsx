@@ -1,7 +1,7 @@
 import { Filter } from "lucide-react";
 import type { DateRange } from "react-day-picker";
+import { DateRangePicker } from "@/shared/components/date-range-picker";
 import { Button } from "@/shared/components/ui/button";
-import { DateRangePicker } from "@/shared/components/ui/date-range-picker";
 import { Label } from "@/shared/components/ui/label";
 import {
   Select,
@@ -42,17 +42,15 @@ export function ExpensesFilters({
 }: ExpensesFiltersProps) {
   const { data: categories } = useExpenseCategories();
 
-  // Contagem de filtros ativos
   const activeFiltersCount =
     (categoryId ? 1 : 0) + (status ? 1 : 0) + (period ? 1 : 0);
 
   return (
     <>
-      {/* Mobile: Botão Filtros */}
       <div className="sm:hidden">
         <Button variant="secondary" onClick={onOpenFilters} className="w-full">
-          <Filter className="w-4 h-4" />
-          <span className="ml-2">Filtros</span>
+          <Filter data-icon="inline-start" />
+          <span>Filtros</span>
           {activeFiltersCount > 0 && (
             <span className="ml-2 px-1.5 py-0.5 bg-orange-500 text-white text-xs font-bold rounded-full min-w-5 text-center">
               {activeFiltersCount}
@@ -61,7 +59,6 @@ export function ExpensesFilters({
         </Button>
       </div>
 
-      {/* Desktop: Inline Filters */}
       <div className="hidden sm:block bg-card rounded-lg border border-border shadow-sm p-4">
         <div className="flex flex-col sm:flex-row items-end gap-2 sm:gap-4 pb-2 sm:pb-1 px-1">
           <div className="w-full sm:flex-1 sm:min-w-50 flex flex-col gap-1.5">
@@ -71,11 +68,17 @@ export function ExpensesFilters({
             <Select
               value={categoryId ?? "all"}
               onValueChange={(value) =>
-                onCategoryChange(value === "all" ? undefined : value)
+                onCategoryChange(
+                  value === "all" ? undefined : (value ?? undefined),
+                )
               }
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Todas" />
+                <SelectValue placeholder="Todas">
+                  {categoryId
+                    ? categories?.find((cat) => cat.id === categoryId)?.name
+                    : "Todas"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
@@ -103,7 +106,9 @@ export function ExpensesFilters({
               }
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Todos" />
+                <SelectValue placeholder="Todos">
+                  {status ? statusLabels[status as ExpenseStatus] : "Todos"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>

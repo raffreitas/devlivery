@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { BottomSheet } from "@/shared/components/bottom-sheet";
+import { cn } from "cn";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +7,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/shared/components/ui/drawer";
+import { useMediaQuery } from "@/shared/hooks/use-media-query";
 
 interface ModalProps {
   isOpen: boolean;
@@ -16,14 +24,11 @@ interface ModalProps {
   description?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  dismissible?: boolean;
 }
 
 /**
- * Responsive modal component that uses:
- * - shadcn Dialog on desktop/tablet (lg+)
- * - BottomSheet on mobile (md and below)
- *
- * Automatically detects screen size on mount and on window resize
+ * Modal responsivo: Dialog a partir do breakpoint lg e Drawer abaixo dele.
  */
 export function Modal({
   isOpen,
@@ -32,59 +37,47 @@ export function Modal({
   description,
   children,
   footer,
+  dismissible = true,
 }: ModalProps) {
-  const [isMobile, setIsMobile] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const handleOpenChange = (open: boolean) => {
+    if (!open && dismissible) onClose();
+  };
 
-  useEffect(() => {
-    setIsHydrated(true);
-
-    // Check initial screen size
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024); // lg breakpoint in Tailwind
-    };
-
-    checkMobile();
-
-    // Listen to window resize
-    const handleResize = () => checkMobile();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Avoid hydration mismatch by only rendering after hydration
-  if (!isHydrated) return null;
-
-  // Mobile: BottomSheet with higher z-index to stay above navigation
-  if (isMobile) {
+  if (isDesktop) {
     return (
-      <BottomSheet isOpen={isOpen} onClose={onClose} title={title}>
-        <div className="space-y-4">
-          {children}
-          {footer && (
-            <div className="pt-4 border-t border-border">{footer}</div>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+        <DialogContent
+          className={cn(
+            "max-h-[calc(100dvh-2rem)] gap-4 sm:max-w-3xl",
+            footer
+              ? "grid-rows-[auto_minmax(0,1fr)_auto]"
+              : "grid-rows-[auto_minmax(0,1fr)]",
           )}
-        </div>
-      </BottomSheet>
+        >
+          <DialogHeader>
+            <DialogTitle className="text-base">{title}</DialogTitle>
+            {description && (
+              <DialogDescription>{description}</DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="-mx-6 overflow-y-auto px-6">{children}</div>
+          {footer && <DialogFooter>{footer}</DialogFooter>}
+        </DialogContent>
+      </Dialog>
     );
   }
 
-  // Desktop: shadcn Dialog
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        className="sm:max-w-3xl"
-        aria-describedby={description ? "modal-description" : undefined}
-      >
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
-        </DialogHeader>
-
-        <div className="py-4">{children}</div>
-
-        {footer && <DialogFooter>{footer}</DialogFooter>}
-      </DialogContent>
-    </Dialog>
+    <Drawer open={isOpen} onOpenChange={handleOpenChange} showSwipeHandle>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle className="text-base">{title}</DrawerTitle>
+          {description && <DrawerDescription>{description}</DrawerDescription>}
+        </DrawerHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">{children}</div>
+        {footer && <DrawerFooter>{footer}</DrawerFooter>}
+      </DrawerContent>
+    </Drawer>
   );
 }

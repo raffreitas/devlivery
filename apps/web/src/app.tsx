@@ -1,5 +1,5 @@
 import { AppRoutes } from "./app-routes";
-import { Toaster } from "./shared/components/ui/sonner";
+import { Toaster } from "./shared/components/ui/toast";
 import { AuthProvider } from "./shared/contexts/auth-context";
 import { ThemeProvider } from "./shared/contexts/theme-context";
 
@@ -9,7 +9,7 @@ export function App() {
       <AuthProvider>
         <AppRoutes />
       </AuthProvider>
-      <Toaster richColors />
+      <Toaster />
     </ThemeProvider>
   );
 }

@@ -31,7 +31,7 @@ export function PaymentBreakdownCard({
         <CardTitle>Resumo de Vendas</CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent>
         {entries.map((method) => {
           const style = PAYMENT_METHOD_STYLES[method];
           const Icon = style.icon;

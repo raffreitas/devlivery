@@ -40,7 +40,7 @@ From the repository root, run:
 dotnet test apps/api/Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
 ```
 
-Add regression tests for changed behavior. No numeric coverage threshold is configured in CI. The web package has no test script; run lint/build and manually verify affected flows.
+Add regression tests for changed behavior. No numeric coverage threshold is configured in CI. Frontend tests use Vitest, Testing Library, and MSW. Keep them next to the corresponding source files: `.test.ts` without JSX and `.test.tsx` with JSX; do not use `.spec.*`. Shared test infrastructure belongs in `apps/web/test/`, imported via `@test/*`; future end-to-end tests belong in `apps/web/test/e2e/`. Run `pnpm test`, lint/build, and manually verify affected flows.
 
 ## Commit & Pull Request Guidelines
 

@@ -16,6 +16,7 @@ public sealed record GetAllOrdersResponse(
 
 public sealed record OrderItemDto(
     ProductDto Product,
+    decimal UnitPrice,
     int Quantity,
     string? Notes);
 

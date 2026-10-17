@@ -1,14 +1,22 @@
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { toast } from "sonner";
-import { BottomSheet } from "@/shared/components/bottom-sheet";
 import {
   GridSkeleton,
   LoadingOverlay,
   LoadingState,
 } from "@/shared/components/loading";
 import { Modal } from "@/shared/components/modal";
+import { QueryState } from "@/shared/components/query-state";
 import { Button } from "@/shared/components/ui/button";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/shared/components/ui/drawer";
+import { toast } from "@/shared/components/ui/toast";
 import { OrderCard } from "../components/order-card";
 import { OrderForm } from "../components/order-form";
 import { OrdersFilters } from "../components/orders-filters";
@@ -45,6 +53,9 @@ export function OrdersPage() {
   const {
     orders,
     loading,
+    error,
+    hasData,
+    refetch,
     isFetching,
     createOrder,
     updateOrder,
@@ -63,20 +74,17 @@ export function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
 
   const handleCreateOrUpdateOrder = async (data: OrderFormData) => {
-    try {
-      if (editingOrder) {
-        await updateOrder(editingOrder.id, data);
-      } else {
-        await createOrder(data);
-      }
-      setIsModalOpen(false);
-      setEditingOrder(null);
-      toast.success(
-        `Pedido ${editingOrder ? "atualizado" : "criado"} com sucesso!`,
-      );
-    } catch {
-      // Error is handled by the mutation's onError or toast
+    if (editingOrder) {
+      await updateOrder(editingOrder.id, data);
+    } else {
+      await createOrder(data);
     }
+    setIsModalOpen(false);
+    setEditingOrder(null);
+    toast.add({
+      type: "success",
+      title: `Pedido ${editingOrder ? "atualizado" : "criado"} com sucesso!`,
+    });
   };
 
   const handleEditOrder = (order: Order) => {
@@ -136,45 +144,54 @@ export function OrdersPage() {
           onOpenFilters={() => setIsFiltersOpen(true)}
         />
 
-        <LoadingState
-          isLoading={loading && orders.length === 0}
-          skeleton={<GridSkeleton items={6} columns={3} />}
+        <QueryState
+          isPending={loading}
+          error={error}
+          hasData={hasData}
+          refetch={refetch}
         >
-          {filteredByPayment.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-sm sm:text-lg">
-                {orders.length === 0
-                  ? "Nenhum pedido cadastrado. Comece criando um novo pedido!"
-                  : "Nenhum pedido encontrado com o filtro aplicado."}
-              </p>
-            </div>
-          ) : (
-            <div
-              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 transition-opacity duration-200 ${
-                isFetching ? "opacity-60" : "opacity-100"
-              }`}
-            >
-              {filteredByPayment
-                .sort(
-                  (a, b) =>
-                    new Date(b.createdAt).getTime() -
-                    new Date(a.createdAt).getTime(),
-                )
-                .map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onEdit={handleEditOrder}
-                    onUpdateStatus={updateOrderStatus}
-                    onDelete={deleteOrder}
-                  />
-                ))}
-            </div>
-          )}
-        </LoadingState>
+          {" "}
+          <LoadingState
+            isLoading={loading && orders.length === 0}
+            skeleton={<GridSkeleton items={6} columns={3} />}
+          >
+            {filteredByPayment.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-sm sm:text-lg">
+                  {orders.length === 0
+                    ? "Nenhum pedido cadastrado. Comece criando um novo pedido!"
+                    : "Nenhum pedido encontrado com o filtro aplicado."}
+                </p>
+              </div>
+            ) : (
+              <div
+                className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 transition-opacity duration-200 ${
+                  isFetching ? "opacity-60" : "opacity-100"
+                }`}
+              >
+                {filteredByPayment
+                  .sort(
+                    (a, b) =>
+                      new Date(b.createdAt).getTime() -
+                      new Date(a.createdAt).getTime(),
+                  )
+                  .map((order) => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      onEdit={handleEditOrder}
+                      onUpdateStatus={updateOrderStatus}
+                      onDelete={deleteOrder}
+                    />
+                  ))}
+              </div>
+            )}
+          </LoadingState>
+        </QueryState>
       </div>
 
       <Modal
+        dismissible={!(isCreating || isUpdating)}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={editingOrder ? "Editar Pedido" : "Novo Pedido"}
@@ -187,30 +204,32 @@ export function OrdersPage() {
         />
       </Modal>
 
-      <BottomSheet
-        isOpen={isFiltersOpen}
-        onClose={() => setIsFiltersOpen(false)}
-        title="Filtros"
+      <Drawer
+        open={isFiltersOpen}
+        onOpenChange={setIsFiltersOpen}
+        showSwipeHandle
       >
-        <div className="space-y-4">
-          <OrdersFiltersContent
-            statusFilter={statusFilter}
-            paymentFilter={paymentFilter}
-            statusOptions={statusOptions}
-            paymentOptions={paymentOptions}
-            period={period}
-            onStatusChange={setStatusFilter}
-            onPaymentChange={setPaymentFilter}
-            onDateChange={handlePeriodFilterChange}
-          />
-
-          <div className="pt-4 pb-2 border-t border-border">
-            <Button onClick={() => setIsFiltersOpen(false)} className="w-full">
-              Aplicar Filtros
-            </Button>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Filtros</DrawerTitle>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <OrdersFiltersContent
+              statusFilter={statusFilter}
+              paymentFilter={paymentFilter}
+              statusOptions={statusOptions}
+              paymentOptions={paymentOptions}
+              period={period}
+              onStatusChange={setStatusFilter}
+              onPaymentChange={setPaymentFilter}
+              onDateChange={handlePeriodFilterChange}
+            />
           </div>
-        </div>
-      </BottomSheet>
+          <DrawerFooter>
+            <DrawerClose render={<Button />}>Aplicar Filtros</DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }

@@ -1,5 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import {
+  invalidateAfterMutation,
+  queryKeys,
+} from "@/shared/services/query-keys";
 import { productService } from "../services/product-service";
 import type { Product, ProductFormData } from "../types";
 
@@ -7,36 +10,35 @@ export function useProducts() {
   const queryClient = useQueryClient();
 
   const productsQuery = useQuery({
-    queryKey: ["products"],
-    queryFn: productService.getAll,
+    queryKey: queryKeys.products,
+    queryFn: ({ signal }) => productService.getAll(signal),
     staleTime: 60_000,
     placeholderData: (previousData) => previousData,
   });
 
   const createMutation = useMutation({
     mutationFn: productService.create,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
+    meta: { skipGlobalErrorToast: true },
+    onSuccess: () => invalidateAfterMutation(queryClient, "products"),
   });
 
   const updateMutation = useMutation({
+    meta: { skipGlobalErrorToast: true },
     mutationFn: ({ id, data }: { id: string; data: ProductFormData }) =>
       productService.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
+    onSuccess: () => invalidateAfterMutation(queryClient, "products"),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => productService.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
-    onError: (error) => {
-      const message =
-        error instanceof Error ? error.message : "Falha ao deletar o produto.";
-      toast.error(message);
-    },
+    onSuccess: () => invalidateAfterMutation(queryClient, "products"),
   });
 
   return {
     products: (productsQuery.data ?? []) as Product[],
     loading: productsQuery.isLoading,
+    error: productsQuery.error,
+    hasData: productsQuery.data !== undefined,
     isFetching: productsQuery.isFetching,
     refetch: productsQuery.refetch,
     createProduct: (data: ProductFormData) => createMutation.mutateAsync(data),

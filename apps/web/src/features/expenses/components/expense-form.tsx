@@ -1,21 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { useEffect, useMemo } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { toast } from "sonner";
+import { useEffect, useId, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { FormError } from "@/shared/components/form-error";
+import { InputMoney } from "@/shared/components/input-money";
 import { LoadingButton, LoadingState } from "@/shared/components/loading";
+import { QueryState } from "@/shared/components/query-state";
 import { Button } from "@/shared/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { applyFormError } from "@/shared/utils/form-errors";
 import { useExpenseCategories } from "../hooks/use-expenses";
 import type { Expense, ExpenseFormData } from "../types";
 import { expenseFormSchema } from "../types";
@@ -35,8 +35,13 @@ export function ExpenseForm({
   onCancel,
   isSubmitting = false,
 }: ExpenseFormProps) {
-  const { data: categories, isLoading: loadingCategories } =
-    useExpenseCategories();
+  const formId = useId();
+  const {
+    data: categories,
+    isLoading: loadingCategories,
+    error: categoryError,
+    refetch: refetchCategories,
+  } = useExpenseCategories();
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseFormSchema),
@@ -59,7 +64,6 @@ export function ExpenseForm({
     defaultValue: expense?.category.id,
   });
 
-  // Encontra a categoria selecionada e suas subcategorias
   const selectedCategory = useMemo(() => {
     return categories?.find((cat) => cat.id === selectedCategoryId);
   }, [categories, selectedCategoryId]);
@@ -97,187 +101,306 @@ export function ExpenseForm({
         form.reset();
       }
     } catch (error) {
-      toast.error("Erro ao salvar despesa");
-      console.error("Failed to save expense:", error);
+      applyFormError(form, error, {
+        subcategoryId: "subcategoryId",
+        categoryId: "categoryId",
+      });
     }
   };
 
   return (
-    <LoadingState
-      isLoading={loadingCategories}
-      skeleton={
-        <div className="p-4 space-y-4">
-          <div className="h-10 bg-accent animate-pulse rounded-md" />
-          <div className="h-10 bg-accent animate-pulse rounded-md" />
-          <div className="h-10 bg-accent animate-pulse rounded-md" />
-        </div>
-      }
+    <QueryState
+      isPending={loadingCategories}
+      error={categoryError}
+      hasData={categories !== undefined}
+      refetch={refetchCategories}
     >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          {/* Categoria */}
-          <FormField
-            control={form.control}
-            name="categoryId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoria</FormLabel>
-                <FormControl>
-                  <CategoryCombobox
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Selecione ou crie uma categoria"
-                    allowCreate
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Subcategoria */}
-          <FormField
-            control={form.control}
-            name="subcategoryId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Subcategoria (opcional)</FormLabel>
-                <FormControl>
-                  <SubcategoryCombobox
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Selecione ou crie uma subcategoria"
-                    parentCategoryId={selectedCategoryId}
-                    allowCreate
-                    disabled={!selectedCategoryId}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Fornecedor */}
-          <FormField
-            control={form.control}
-            name="supplier"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fornecedor (opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Nome do fornecedor"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Descrição */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descrição (opcional)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Detalhes adicionais..."
-                    className="resize-none"
-                    rows={3}
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Valor */}
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Valor</FormLabel>
-                <FormControl>
-                  <InputMoney value={field.value} onChange={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Data de Vencimento */}
-          <FormField
-            control={form.control}
-            name="dueDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Data de Vencimento</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} value={field.value ?? ""} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Data de Pagamento */}
-          <FormField
-            control={form.control}
-            name="paymentDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Data de Pagamento{" "}
-                  {expense?.status === "Paid"
-                    ? "(obrigatória)"
-                    : expense
-                      ? "(somente leitura)"
-                      : "(opcional)"}
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                    value={field.value ?? ""}
-                    readOnly={!!expense && expense.status !== "Paid"}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Botões */}
-          <div className="flex gap-2 justify-center sm:justify-end pt-2">
-            {onCancel && (
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1 sm:flex-initial"
-                onClick={onCancel}
-                disabled={isSubmitting}
-              >
-                Cancelar
-              </Button>
-            )}
-            <LoadingButton
-              type="submit"
-              isLoading={isSubmitting}
-              loadingText="Salvando..."
-              className="flex-1 sm:flex-initial"
-            >
-              {expense ? "Atualizar" : "Criar Despesa"}
-            </LoadingButton>
+      <LoadingState
+        isLoading={loadingCategories}
+        skeleton={
+          <div className="p-4 space-y-4">
+            <div className="h-10 bg-accent animate-pulse rounded-md" />
+            <div className="h-10 bg-accent animate-pulse rounded-md" />
+            <div className="h-10 bg-accent animate-pulse rounded-md" />
           </div>
+        }
+      >
+        <form
+          onSubmit={form.handleSubmit(async (data) => {
+            form.clearErrors();
+            try {
+              await handleSubmit(data);
+            } catch (error) {
+              applyFormError(form, error, {
+                subcategoryId: "subcategoryId",
+                categoryId: "categoryId",
+              });
+            }
+          })}
+        >
+          <fieldset
+            inert={form.formState.isSubmitting || isSubmitting}
+            disabled={form.formState.isSubmitting || isSubmitting}
+            className="flex min-h-0 flex-1 flex-col gap-4"
+          >
+            <FormError message={form.formState.errors.root?.server?.message} />
+            <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
+              <Controller
+                control={form.control}
+                name="categoryId"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`${formId}-expense-category`}>
+                      Categoria
+                    </FieldLabel>
+                    <CategoryCombobox
+                      id={`${formId}-expense-category`}
+                      name={field.name}
+                      inputRef={field.ref}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      placeholder="Selecione ou crie uma categoria"
+                      aria-invalid={fieldState.invalid}
+                      aria-describedby={
+                        fieldState.invalid
+                          ? `${formId}-expense-category-error`
+                          : undefined
+                      }
+                      allowCreate
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-expense-category-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="subcategoryId"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    data-disabled={!selectedCategoryId}
+                  >
+                    <FieldLabel htmlFor={`${formId}-expense-subcategory`}>
+                      Subcategoria (opcional)
+                    </FieldLabel>
+                    <SubcategoryCombobox
+                      id={`${formId}-expense-subcategory`}
+                      name={field.name}
+                      inputRef={field.ref}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      placeholder="Selecione ou crie uma subcategoria"
+                      parentCategoryId={selectedCategoryId}
+                      aria-invalid={fieldState.invalid}
+                      aria-describedby={
+                        fieldState.invalid
+                          ? `${formId}-expense-subcategory-error`
+                          : undefined
+                      }
+                      allowCreate
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-expense-subcategory-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="supplier"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`${formId}-expense-supplier`}>
+                      Fornecedor (opcional)
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={`${formId}-expense-supplier`}
+                      placeholder="Nome do fornecedor"
+                      value={field.value ?? ""}
+                      aria-invalid={fieldState.invalid}
+                      aria-describedby={
+                        fieldState.invalid
+                          ? `${formId}-expense-supplier-error`
+                          : undefined
+                      }
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-expense-supplier-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="description"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`${formId}-expense-description`}>
+                      Descrição (opcional)
+                    </FieldLabel>
+                    <Textarea
+                      {...field}
+                      id={`${formId}-expense-description`}
+                      placeholder="Detalhes adicionais..."
+                      className="resize-none"
+                      rows={3}
+                      value={field.value ?? ""}
+                      aria-invalid={fieldState.invalid}
+                      aria-describedby={
+                        fieldState.invalid
+                          ? `${formId}-expense-description-error`
+                          : undefined
+                      }
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-expense-description-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="amount"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`${formId}-expense-amount`}>
+                      Valor
+                    </FieldLabel>
+                    <InputMoney
+                      {...field}
+                      id={`${formId}-expense-amount`}
+                      aria-invalid={fieldState.invalid}
+                      aria-describedby={
+                        fieldState.invalid
+                          ? `${formId}-expense-amount-error`
+                          : undefined
+                      }
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-expense-amount-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="dueDate"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`${formId}-expense-due-date`}>
+                      Data de Vencimento
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={`${formId}-expense-due-date`}
+                      type="date"
+                      value={field.value ?? ""}
+                      aria-invalid={fieldState.invalid}
+                      aria-describedby={
+                        fieldState.invalid
+                          ? `${formId}-expense-due-date-error`
+                          : undefined
+                      }
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-expense-due-date-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="paymentDate"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`${formId}-expense-payment-date`}>
+                      Data de Pagamento{" "}
+                      {expense?.status === "Paid"
+                        ? "(obrigatória)"
+                        : expense
+                          ? "(somente leitura)"
+                          : "(opcional)"}
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={`${formId}-expense-payment-date`}
+                      type="date"
+                      value={field.value ?? ""}
+                      readOnly={!!expense && expense.status !== "Paid"}
+                      aria-invalid={fieldState.invalid}
+                      aria-describedby={
+                        fieldState.invalid
+                          ? `${formId}-expense-payment-date-error`
+                          : undefined
+                      }
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-expense-payment-date-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Field
+                orientation="horizontal"
+                className="justify-center sm:justify-end"
+              >
+                {onCancel && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 sm:flex-initial"
+                    onClick={onCancel}
+                    disabled={isSubmitting}
+                  >
+                    Cancelar
+                  </Button>
+                )}
+                <LoadingButton
+                  type="submit"
+                  isLoading={isSubmitting}
+                  loadingText="Salvando..."
+                  className="flex-1 sm:flex-initial"
+                >
+                  {expense ? "Atualizar" : "Criar Despesa"}
+                </LoadingButton>
+              </Field>
+            </FieldGroup>
+          </fieldset>
         </form>
-      </Form>
-    </LoadingState>
+      </LoadingState>
+    </QueryState>
   );
 }

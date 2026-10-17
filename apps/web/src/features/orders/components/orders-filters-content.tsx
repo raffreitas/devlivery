@@ -1,5 +1,5 @@
 import type { DateRange } from "react-day-picker";
-import { DateRangePicker } from "@/shared/components/ui/date-range-picker";
+import { DateRangePicker } from "@/shared/components/date-range-picker";
 import { Label } from "@/shared/components/ui/label";
 import {
   Select,
@@ -36,7 +36,12 @@ export function OrdersFiltersContent({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <Label>Status</Label>
-        <Select onValueChange={onStatusChange}>
+        <Select<OrderStatus | "all">
+          value={statusFilter}
+          onValueChange={(value) => {
+            if (value !== null) onStatusChange(value as OrderStatus | "all");
+          }}
+        >
           <SelectTrigger className="w-full cursor-pointer">
             <span>
               {statusFilter === "all"
@@ -45,14 +50,11 @@ export function OrdersFiltersContent({
             </span>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all" onSelect={() => onStatusChange("all")}>
-              Todos
-            </SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
             {statusOptions.map((option) => (
               <SelectItem
                 key={option}
                 value={option}
-                onSelect={() => onStatusChange(option)}
                 className="cursor-pointer"
               >
                 {getOrderStatusOptionLabel(option)}
@@ -64,7 +66,12 @@ export function OrdersFiltersContent({
 
       <div className="flex flex-col gap-2">
         <Label>Pagamento</Label>
-        <Select onValueChange={onPaymentChange}>
+        <Select<PaymentMethod | "all">
+          value={paymentFilter}
+          onValueChange={(value) => {
+            if (value !== null) onPaymentChange(value as PaymentMethod | "all");
+          }}
+        >
           <SelectTrigger className="w-full  cursor-pointer">
             <span>
               {paymentFilter === "all"
@@ -73,14 +80,11 @@ export function OrdersFiltersContent({
             </span>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all" onSelect={() => onPaymentChange("all")}>
-              Todos
-            </SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
             {paymentOptions.map((option) => (
               <SelectItem
                 key={option}
                 value={option}
-                onSelect={() => onPaymentChange(option)}
                 className="cursor-pointer"
               >
                 {getPaymentOptionLabel(option)}

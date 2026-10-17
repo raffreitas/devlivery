@@ -103,12 +103,10 @@ export function ExpenseList({
     id: null,
   });
 
-  // Open confirmation dialog
   const handleDelete = (id: string) => {
     setAlert({ open: true, id });
   };
 
-  // Called when user confirms deletion in the dialog
   const confirmDelete = async () => {
     const id = alert.id;
     if (!id) return;
@@ -151,7 +149,6 @@ export function ExpenseList({
           <CardTitle>Despesas</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Mobile: Card View */}
           <div className="md:hidden space-y-4">
             {expenses.map((expense) => {
               const config = statusConfig[expense.status];
@@ -173,22 +170,24 @@ export function ExpenseList({
                       </p>
                     </div>
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={deletingId === expense.id}
-                          className="h-8 w-8 p-0"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={deletingId === expense.id}
+                            className="h-8 w-8 p-0"
+                          />
+                        }
+                      >
+                        <MoreVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() => onEdit(expense)}
                           disabled={expense.status === ExpenseStatus.CANCELLED}
                         >
-                          <Pencil className="mr-2 h-4 w-4" />
+                          <Pencil />
                           Editar
                         </DropdownMenuItem>
                         {expense.status !== ExpenseStatus.PAID &&
@@ -196,7 +195,7 @@ export function ExpenseList({
                             <DropdownMenuItem
                               onClick={() => handleMarkAsPaid(expense)}
                             >
-                              <CheckCircle2 className="mr-2 h-4 w-4" />
+                              <CheckCircle2 />
                               Marcar como Pago
                             </DropdownMenuItem>
                           )}
@@ -205,7 +204,7 @@ export function ExpenseList({
                           onClick={() => handleDelete(expense.id)}
                           className="text-destructive"
                         >
-                          <Trash2 className="mr-2 h-4 w-4" />
+                          <Trash2 />
                           Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -254,7 +253,7 @@ export function ExpenseList({
                         Status
                       </span>
                       <Badge className={config.className}>
-                        <StatusIcon className="mr-1 h-3 w-3" />
+                        <StatusIcon data-icon="inline-start" />
                         {config.label}
                       </Badge>
                     </div>
@@ -264,7 +263,6 @@ export function ExpenseList({
             })}
           </div>
 
-          {/* Desktop: Table View */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
@@ -310,20 +308,22 @@ export function ExpenseList({
                       </TableCell>
                       <TableCell>
                         <Badge className={config.className}>
-                          <StatusIcon className="mr-1 h-3 w-3" />
+                          <StatusIcon data-icon="inline-start" />
                           {config.label}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              disabled={deletingId === expense.id}
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
+                          <DropdownMenuTrigger
+                            render={
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={deletingId === expense.id}
+                              />
+                            }
+                          >
+                            <MoreVertical className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
@@ -332,7 +332,7 @@ export function ExpenseList({
                                 expense.status === ExpenseStatus.CANCELLED
                               }
                             >
-                              <Pencil className="mr-2 h-4 w-4" />
+                              <Pencil />
                               Editar
                             </DropdownMenuItem>
                             {expense.status !== ExpenseStatus.PAID &&
@@ -340,7 +340,7 @@ export function ExpenseList({
                                 <DropdownMenuItem
                                   onClick={() => handleMarkAsPaid(expense)}
                                 >
-                                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                                  <CheckCircle2 />
                                   Marcar como Pago
                                 </DropdownMenuItem>
                               )}
@@ -349,7 +349,7 @@ export function ExpenseList({
                               onClick={() => handleDelete(expense.id)}
                               className="text-destructive"
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
+                              <Trash2 />
                               Excluir
                             </DropdownMenuItem>
                           </DropdownMenuContent>

@@ -1,5 +1,5 @@
+import { cn } from "cn";
 import { Spinner } from "@/shared/components/ui/spinner";
-import { cn } from "@/shared/lib/utils";
 
 interface LoadingOverlayProps {
   isFetching: boolean;
@@ -8,26 +8,6 @@ interface LoadingOverlayProps {
   className?: string;
 }
 
-/**
- * LoadingOverlay - Componente para indicar refetch em background
- *
- * Usado quando há dados existentes e está fazendo refetch.
- * Não bloqueia a UI, apenas mostra feedback discreto.
- *
- * PADRÃO RECOMENDADO: Use `position="top-bar"` (progress bar) para refetch de páginas completas.
- *
- * Variantes:
- * - top-bar: Progress bar no topo (PADRÃO - use para refetch de páginas)
- * - inline: Spinner inline discreto (use para seções específicas)
- * - badge: Badge com spinner (use quando precisa de mais destaque)
- *
- * @example
- * // Padrão: Progress bar no topo
- * <LoadingOverlay isFetching={isFetching} position="top-bar" />
- *
- * // Spinner inline em header
- * <LoadingOverlay isFetching={isFetching} position="inline" />
- */
 export function LoadingOverlay({
   isFetching,
   message = "Atualizando...",
@@ -36,7 +16,6 @@ export function LoadingOverlay({
 }: LoadingOverlayProps) {
   if (!isFetching) return null;
 
-  // Barra sutil no topo (estilo moderno como Linear, Vercel)
   if (position === "top-bar") {
     return (
       <div
@@ -56,7 +35,6 @@ export function LoadingOverlay({
     );
   }
 
-  // Badge discreto (para casos onde precisa de mais destaque)
   if (position === "badge") {
     return (
       <div
@@ -72,7 +50,6 @@ export function LoadingOverlay({
     );
   }
 
-  // Inline discreto (padrão)
   return (
     <div
       className={cn(

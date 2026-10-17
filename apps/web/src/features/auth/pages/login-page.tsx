@@ -1,24 +1,30 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useId, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Navigate, useNavigate } from "react-router-dom";
 import { LoadingButton } from "@/shared/components/loading";
 import { Card } from "@/shared/components/ui/card";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/shared/components/ui/input-group";
+import { toast } from "@/shared/components/ui/toast";
 import { useAuth } from "@/shared/contexts/auth-context";
+import { ApiError } from "@/shared/services/api";
 import { type AuthFormData, authFormSchema } from "../types";
 
 export function LoginPage() {
+  const formId = useId();
   const { login, loading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -43,23 +49,24 @@ export function LoginPage() {
         typeof error === "object" &&
         "status" in error &&
         error.status === 429;
-      toast.error(
-        limited
+      toast.add({
+        type: "error",
+        title: limited
           ? "Muitas tentativas. Aguarde antes de tentar novamente."
-          : "Credenciais inválidas",
-      );
+          : error instanceof ApiError && error.status !== 401
+            ? error.message
+            : "Credenciais inv\u00e1lidas",
+      });
     }
   };
 
   if (isAuthenticated) {
-    navigate("/", { replace: true });
-    return null;
+    return <Navigate to="/" replace />;
   }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-orange-50 via-background to-orange-50 dark:from-orange-950/20 dark:via-background dark:to-orange-950/20 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Branding */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold tracking-[-0.048em] text-[#182230] dark:text-foreground">
             Devlivery
@@ -67,60 +74,81 @@ export function LoginPage() {
           </h1>
         </div>
 
-        {/* Login Card */}
         <Card className="p-8">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleAuthenticate)}
-              className="space-y-5"
-            >
-              <FormField
+          <form onSubmit={form.handleSubmit(handleAuthenticate)} noValidate>
+            <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
+              <Controller
                 control={form.control}
                 name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="seu@email.com"
-                        autoComplete="email"
-                        {...field}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`${formId}-login-email`}>
+                      E-mail
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={`${formId}-login-email`}
+                      type="email"
+                      placeholder="seu@email.com"
+                      autoComplete="email"
+                      aria-invalid={fieldState.invalid}
+                      aria-describedby={
+                        fieldState.invalid
+                          ? `${formId}-login-email-error`
+                          : undefined
+                      }
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-login-email-error`}
+                        errors={[fieldState.error]}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                    )}
+                  </Field>
                 )}
               />
 
-              <FormField
+              <Controller
                 control={form.control}
                 name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Senha</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder="••••••••"
-                          autoComplete="current-password"
-                          {...field}
-                        />
-                        <button
-                          type="button"
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`${formId}-login-password`}>
+                      Senha
+                    </FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput
+                        {...field}
+                        id={`${formId}-login-password`}
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        aria-invalid={fieldState.invalid}
+                        aria-describedby={
+                          fieldState.invalid
+                            ? `${formId}-login-password-error`
+                            : undefined
+                        }
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupButton
+                          size="icon-xs"
+                          aria-label={
+                            showPassword ? "Ocultar senha" : "Mostrar senha"
+                          }
                           onClick={() => setShowPassword(!showPassword)}
                         >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                          {showPassword ? <EyeOff /> : <Eye />}
+                        </InputGroupButton>
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-login-password-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
                 )}
               />
 
@@ -132,11 +160,10 @@ export function LoginPage() {
               >
                 Entrar
               </LoadingButton>
-            </form>
-          </Form>
+            </FieldGroup>
+          </form>
         </Card>
 
-        {/* Footer */}
         <p className="text-center text-sm text-muted-foreground mt-6">
           © {currentYear} Devlivery. Todos os direitos reservados.
         </p>

@@ -21,6 +21,7 @@ public sealed record OrderPaymentDto(
 
 public sealed record OrderItemDto(
     ProductDto Product,
+    decimal UnitPrice,
     int Quantity,
     string? Notes);
 

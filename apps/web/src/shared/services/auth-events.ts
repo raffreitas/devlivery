@@ -5,7 +5,6 @@ class AuthEventEmitter {
 
   subscribe(listener: AuthEventListener): () => void {
     this.listeners.push(listener);
-    // Retorna função de unsubscribe
     return () => {
       this.listeners = this.listeners.filter((l) => l !== listener);
     };
