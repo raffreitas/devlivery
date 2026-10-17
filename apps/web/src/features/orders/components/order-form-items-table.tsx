@@ -171,7 +171,7 @@ export function OrderItemsTable({
           <span className="text-base sm:text-lg font-bold text-foreground">
             Total:
           </span>
-          <span className="text-xl sm:text-2xl font-bold text-primary">
+          <span className="text-xl sm:text-2xl font-bold text-primary-text">
             {formatMoney(total)}
           </span>
         </div>

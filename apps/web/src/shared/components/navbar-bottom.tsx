@@ -19,7 +19,7 @@ export function NavbarBottom() {
               className={cn(
                 "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200",
                 active
-                  ? "text-primary font-medium"
+                  ? "text-primary-text font-medium"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >

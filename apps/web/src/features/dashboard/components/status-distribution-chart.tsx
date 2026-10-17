@@ -1,108 +1,99 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Pie, PieChart } from "recharts";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-
-interface StatusDistributionChartProps {
-  data: { status: string; count: number }[];
-}
-
-const COLORS = {
-  Pending: "#f59e0b", // amber-500
-  Preparing: "#3b82f6", // blue-500
-  Ready: "#22c55e", // green-500
-  Delivered: "#a855f7", // purple-500
-  Canceled: "#ef4444", // red-500
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  Pending: "Pendente",
-  Preparing: "Preparando",
-  Ready: "Pronto",
-  Delivered: "Entregue",
-  Canceled: "Cancelado",
-};
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/shared/components/ui/chart";
+import { ORDER_STATUS_STYLES } from "@/shared/constants/ui-styles";
+import { ChartDataTable } from "./chart-data-table";
+import { ChartTooltipValue } from "./chart-tooltip-value";
 
 export function StatusDistributionChart({
   data,
-}: StatusDistributionChartProps) {
-  const chartData = data.filter((d) => d.count > 0);
-
+}: {
+  data: { status: string; count: number }[];
+}) {
+  const statuses = new Map(Object.entries(ORDER_STATUS_STYLES));
+  const chartConfig: ChartConfig = Object.fromEntries(
+    [...statuses].map(([status, style]) => [
+      status,
+      { label: style.label, color: style.chartColor },
+    ]),
+  );
+  const chartData = data
+    .filter((point) => point.count > 0)
+    .map((point) => ({
+      ...point,
+      fill: statuses.get(point.status)?.chartColor ?? "var(--chart-neutral)",
+    }));
   return (
     <Card>
       <CardHeader>
         <CardTitle>Status dos Pedidos</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-75 w-full">
-          {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+        {chartData.length > 0 ? (
+          <>
+            <ChartContainer config={chartConfig} className="h-75 w-full">
+              <PieChart accessibilityLayer title="Status dos Pedidos">
                 <Pie
                   data={chartData}
-                  cx="50%"
-                  cy="50%"
+                  dataKey="count"
+                  nameKey="status"
                   innerRadius={60}
                   outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="count"
-                >
-                  {chartData.map((entry) => (
-                    <Cell
-                      key={`cell-${entry.status}`}
-                      fill={
-                        COLORS[entry.status as keyof typeof COLORS] || "#8884d8"
-                      }
+                  paddingAngle={3}
+                />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      hideLabel
+                      nameKey="status"
+                      formatter={(value, name) => (
+                        <ChartTooltipValue
+                          label={chartConfig[String(name)]?.label ?? name}
+                          value={`${value} pedidos`}
+                        />
+                      )}
                     />
-                  ))}
-                </Pie>
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (active && payload?.length) {
-                      const data = payload[0].payload;
-                      return (
-                        <div className="rounded-lg border bg-background p-2 shadow-sm">
-                          <div className="flex flex-col">
-                            <span className="text-[0.70rem] uppercase text-muted-foreground">
-                              {STATUS_LABELS[data.status] || data.status}
-                            </span>
-                            <span className="font-bold">
-                              {data.count} pedidos
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
+                  }
+                />
+                <ChartLegend
+                  content={
+                    <ChartLegendContent
+                      nameKey="status"
+                      className="flex-wrap"
+                    />
+                  }
                 />
               </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              Nenhum dado disponível
-            </div>
-          )}
-        </div>
-        <div className="mt-4 flex flex-wrap justify-center gap-4">
-          {chartData.map((entry) => (
-            <div key={entry.status} className="flex items-center gap-2">
-              <div
-                className="h-3 w-3 rounded-full"
-                style={{
-                  backgroundColor:
-                    COLORS[entry.status as keyof typeof COLORS] || "#8884d8",
-                }}
-              />
-              <span className="text-sm text-muted-foreground">
-                {STATUS_LABELS[entry.status] || entry.status}
-              </span>
-            </div>
-          ))}
-        </div>
+            </ChartContainer>
+            <ChartDataTable
+              caption="Status dos Pedidos"
+              columns={["Status", "Quantidade"]}
+              rows={chartData.map((point) => ({
+                key: point.status,
+                values: [
+                  statuses.get(point.status)?.label ?? point.status,
+                  point.count,
+                ],
+              }))}
+            />
+          </>
+        ) : (
+          <div className="flex h-75 items-center justify-center text-muted-foreground">
+            Nenhum dado disponível
+          </div>
+        )}
       </CardContent>
     </Card>
   );

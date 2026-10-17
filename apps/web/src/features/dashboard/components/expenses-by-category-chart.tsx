@@ -1,32 +1,42 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Pie, PieChart } from "recharts";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/shared/components/ui/chart";
 import { formatMoney } from "@/shared/utils/formatters";
 import type { ExpensesByCategory } from "../types";
-
-interface ExpensesByCategoryChartProps {
-  data: ExpensesByCategory[];
-}
-
-const COLORS = [
-  "#3b82f6", // blue-500
-  "#22c55e", // green-500
-  "#f59e0b", // amber-500
-  "#ef4444", // red-500
-  "#a855f7", // purple-500
-  "#06b6d4", // cyan-500
-  "#f97316", // orange-500
-  "#8b5cf6", // violet-500
-];
+import { categoryChartColor, categoryChartKey } from "../utils/chart-data";
+import { ChartDataTable } from "./chart-data-table";
+import { ChartTooltipValue } from "./chart-tooltip-value";
 
 export function ExpensesByCategoryChart({
   data,
-}: ExpensesByCategoryChartProps) {
-  const chartData = data.filter((d) => d.total > 0);
+}: {
+  data: ExpensesByCategory[];
+}) {
+  const chartData = data
+    .filter((point) => point.total > 0)
+    .map((point) => ({
+      ...point,
+      series: categoryChartKey(point.category),
+      fill: `var(--color-${categoryChartKey(point.category)})`,
+    }));
+  const chartConfig: ChartConfig = Object.fromEntries(
+    chartData.map((point) => [
+      point.series,
+      { label: point.category, color: categoryChartColor(point.category) },
+    ]),
+  );
 
   return (
     <Card>
@@ -34,87 +44,65 @@ export function ExpensesByCategoryChart({
         <CardTitle>Despesas por Categoria</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-75 w-full">
-          {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+        {chartData.length > 0 ? (
+          <>
+            <ChartContainer config={chartConfig} className="h-75 w-full">
+              <PieChart accessibilityLayer title="Despesas por Categoria">
                 <Pie
-                  data={chartData as unknown as Array<Record<string, unknown>>}
-                  cx="50%"
-                  cy="50%"
+                  data={chartData}
+                  dataKey="total"
+                  nameKey="series"
                   innerRadius={60}
                   outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="total"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${entry.category}`}
-                      fill={COLORS[index % COLORS.length]}
+                  paddingAngle={3}
+                />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      hideLabel
+                      nameKey="series"
+                      formatter={(value, _name, item) => {
+                        const point =
+                          item.payload as (typeof chartData)[number];
+                        return (
+                          <ChartTooltipValue
+                            label={point.category}
+                            value={formatMoney(Number(value))}
+                            detail={`${point.percentage.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% do total`}
+                          />
+                        );
+                      }}
                     />
-                  ))}
-                </Pie>
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (active && payload?.length) {
-                      const data = payload[0].payload as ExpensesByCategory;
-                      return (
-                        <div className="rounded-lg border bg-background p-2 shadow-sm">
-                          <div className="space-y-1">
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                Categoria
-                              </span>
-                              <span className="font-bold text-muted-foreground">
-                                {data.category}
-                              </span>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                Valor
-                              </span>
-                              <span className="font-bold">
-                                {formatMoney(data.total)}
-                              </span>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                Percentual
-                              </span>
-                              <span className="font-bold">
-                                {data.percentage.toFixed(1)}%
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
+                  }
+                />
+                <ChartLegend
+                  content={
+                    <ChartLegendContent
+                      nameKey="series"
+                      className="max-h-24 flex-wrap overflow-y-auto"
+                    />
+                  }
                 />
               </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              Nenhuma despesa no período
-            </div>
-          )}
-        </div>
-        <div className="mt-4 flex flex-wrap justify-center gap-4">
-          {chartData.slice(0, 6).map((entry, index) => (
-            <div key={entry.category} className="flex items-center gap-2">
-              <div
-                className="h-3 w-3 rounded-full"
-                style={{
-                  backgroundColor: COLORS[index % COLORS.length],
-                }}
-              />
-              <span className="text-sm text-muted-foreground">
-                {entry.category}
-              </span>
-            </div>
-          ))}
-        </div>
+            </ChartContainer>
+            <ChartDataTable
+              caption="Despesas por Categoria"
+              columns={["Categoria", "Valor", "Percentual"]}
+              rows={chartData.map((point) => ({
+                key: point.series,
+                values: [
+                  point.category,
+                  formatMoney(point.total),
+                  `${point.percentage.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`,
+                ],
+              }))}
+            />
+          </>
+        ) : (
+          <div className="flex h-75 items-center justify-center text-muted-foreground">
+            Nenhuma despesa no período
+          </div>
+        )}
       </CardContent>
     </Card>
   );

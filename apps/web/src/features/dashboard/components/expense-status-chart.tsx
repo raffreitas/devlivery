@@ -1,122 +1,112 @@
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/shared/components/ui/chart";
 import { formatMoney } from "@/shared/utils/formatters";
 import type { ExpensesByStatus } from "../types";
+import { ChartDataTable } from "./chart-data-table";
+import { ChartTooltipValue } from "./chart-tooltip-value";
 
-interface ExpenseStatusChartProps {
-  data: ExpensesByStatus[];
-}
+const statusConfig = {
+  Paid: { label: "Pago", color: "var(--chart-revenue)" },
+  Pending: { label: "Pendente", color: "var(--chart-info)" },
+  Overdue: { label: "Vencido", color: "var(--chart-expense)" },
+  DueToday: { label: "Vence Hoje", color: "var(--chart-warning)" },
+  Cancelled: { label: "Cancelado", color: "var(--chart-neutral)" },
+} satisfies ChartConfig;
 
-const STATUS_LABELS: Record<string, string> = {
-  Paid: "Pago",
-  Pending: "Pendente",
-  Overdue: "Vencido",
-  DueToday: "Vence Hoje",
-  Cancelled: "Cancelado",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  Paid: "#22c55e", // green-500
-  Pending: "#3b82f6", // blue-500
-  Overdue: "#ef4444", // red-500
-  DueToday: "#f59e0b", // amber-500
-  Cancelled: "#6b7280", // gray-500
-};
-
-export function ExpenseStatusChart({ data }: ExpenseStatusChartProps) {
-  const chartData = data.filter((d) => d.count > 0);
-
+export function ExpenseStatusChart({ data }: { data: ExpensesByStatus[] }) {
+  const chartConfig = statusConfig;
+  const statuses = new Map(Object.entries(statusConfig));
+  const chartData = data
+    .filter((point) => point.count > 0)
+    .map((point) => ({
+      ...point,
+      fill: statuses.get(point.status)?.color ?? "var(--chart-neutral)",
+    }));
+  const statusLabel = (status: string) => statuses.get(status)?.label ?? status;
   return (
     <Card>
       <CardHeader>
         <CardTitle>Status das Despesas</CardTitle>
       </CardHeader>
-      <CardContent className="pl-2">
-        <div className="h-[300px] w-full">
-          {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
+      <CardContent>
+        {chartData.length > 0 ? (
+          <>
+            <ChartContainer config={chartConfig} className="h-75 w-full">
               <BarChart
+                accessibilityLayer
+                title="Status das Despesas"
                 data={chartData}
                 layout="vertical"
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                margin={{ right: 16 }}
               >
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" stroke="#888888" fontSize={12} />
+                <CartesianGrid horizontal={false} />
+                <XAxis
+                  type="number"
+                  tick={{ fill: "var(--muted-foreground)" }}
+                  allowDecimals={false}
+                  tickLine={false}
+                  axisLine={false}
+                />
                 <YAxis
                   type="category"
+                  tick={{ fill: "var(--muted-foreground)" }}
                   dataKey="status"
-                  stroke="#888888"
-                  fontSize={12}
-                  tickFormatter={(value) => STATUS_LABELS[value] || value}
-                  width={100}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={statusLabel}
+                  width={90}
                 />
-                <Tooltip
-                  cursor={{ fill: "transparent" }}
-                  content={({ active, payload }) => {
-                    if (active && payload?.length) {
-                      const data = payload[0].payload as ExpensesByStatus;
-                      return (
-                        <div className="rounded-lg border bg-background p-2 shadow-sm">
-                          <div className="space-y-1">
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                Status
-                              </span>
-                              <span className="font-bold text-muted-foreground">
-                                {STATUS_LABELS[data.status] || data.status}
-                              </span>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                Quantidade
-                              </span>
-                              <span className="font-bold">{data.count}</span>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                Total
-                              </span>
-                              <span className="font-bold">
-                                {formatMoney(data.total)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                  {chartData.map((entry) => (
-                    <Cell
-                      key={entry.status}
-                      fill={STATUS_COLORS[entry.status] || "#8884d8"}
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      hideLabel
+                      nameKey="status"
+                      formatter={(value, _name, item) => {
+                        const point = item.payload as ExpensesByStatus;
+                        return (
+                          <ChartTooltipValue
+                            label={statusLabel(point.status)}
+                            value={`${value} despesas`}
+                            detail={formatMoney(point.total)}
+                          />
+                        );
+                      }}
                     />
-                  ))}
-                </Bar>
+                  }
+                />
+                <Bar dataKey="count" radius={[0, 4, 4, 0]} />
               </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              Nenhuma despesa no período
-            </div>
-          )}
-        </div>
+            </ChartContainer>
+            <ChartDataTable
+              caption="Status das Despesas"
+              columns={["Status", "Quantidade", "Total"]}
+              rows={chartData.map((point) => ({
+                key: point.status,
+                values: [
+                  statusLabel(point.status),
+                  point.count,
+                  formatMoney(point.total),
+                ],
+              }))}
+            />
+          </>
+        ) : (
+          <div className="flex h-75 items-center justify-center text-muted-foreground">
+            Nenhuma despesa no período
+          </div>
+        )}
       </CardContent>
     </Card>
   );

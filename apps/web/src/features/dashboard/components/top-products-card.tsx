@@ -23,15 +23,15 @@ export function TopProductsCard({ data }: TopProductsCardProps) {
             <div className="max-h-70 flex flex-col gap-3 overflow-y-auto pr-2">
               {data.map((item) => (
                 <div key={item.name} className="flex items-center">
-                  <div className="space-y-1 flex-1">
+                  <div className="flex flex-1 flex-col gap-1">
                     <p className="text-sm font-medium leading-none">
                       {item.name}
                     </p>
                     <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
                       <div
-                        className="h-full bg-primary transition-all"
+                        className="h-full bg-chart-sales transition-all"
                         style={{
-                          width: `${(item.quantity / maxQuantity) * 100}%`,
+                          width: `${maxQuantity > 0 ? (item.quantity / maxQuantity) * 100 : 0}%`,
                         }}
                       />
                     </div>

@@ -6,7 +6,7 @@ export function NotFoundPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="text-center">
-        <h1 className="text-9xl sm:text-[12rem] font-bold text-primary mb-4">
+        <h1 className="text-9xl sm:text-[12rem] font-bold text-primary-text mb-4">
           404
         </h1>
         <p className="text-lg sm:text-xl text-muted-foreground mb-8">
