@@ -135,7 +135,6 @@ export function ExpensesPage() {
           hasData={hasData}
           refetch={refetch}
         >
-          {" "}
           <LoadingState
             isLoading={loading}
             skeleton={

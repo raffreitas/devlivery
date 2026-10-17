@@ -94,18 +94,8 @@ export function ExpenseForm({
       form.setError("paymentDate", { message: "Informe a data de pagamento." });
       return;
     }
-    try {
-      await onSubmit(data);
-      if (!expense) {
-        // Reseta o form apenas em modo criação
-        form.reset();
-      }
-    } catch (error) {
-      applyFormError(form, error, {
-        subcategoryId: "subcategoryId",
-        categoryId: "categoryId",
-      });
-    }
+    await onSubmit(data);
+    if (!expense) form.reset();
   };
 
   return (
@@ -131,10 +121,15 @@ export function ExpenseForm({
             try {
               await handleSubmit(data);
             } catch (error) {
-              applyFormError(form, error, {
-                subcategoryId: "subcategoryId",
-                categoryId: "categoryId",
-              });
+              applyFormError(form, error, [
+                "categoryId",
+                "subcategoryId",
+                "supplier",
+                "description",
+                "amount",
+                "dueDate",
+                "paymentDate",
+              ]);
             }
           })}
         >
@@ -143,7 +138,10 @@ export function ExpenseForm({
             disabled={form.formState.isSubmitting || isSubmitting}
             className="flex min-h-0 flex-1 flex-col gap-4"
           >
-            <FormError message={form.formState.errors.root?.server?.message} />
+            <FormError
+              message={form.formState.errors.root?.server?.message}
+              errorType={form.formState.errors.root?.server?.type}
+            />
             <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
               <Controller
                 control={form.control}

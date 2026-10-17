@@ -48,7 +48,7 @@ export function CashDepositForm({
         try {
           await handleFormSubmit(data);
         } catch (error) {
-          applyFormError(form, error, {});
+          applyFormError(form, error, ["amount", "notes"]);
         }
       })}
     >
@@ -57,7 +57,10 @@ export function CashDepositForm({
         disabled={form.formState.isSubmitting || isLoading}
         className="flex min-h-0 flex-1 flex-col gap-4"
       >
-        <FormError message={form.formState.errors.root?.server?.message} />
+        <FormError
+          message={form.formState.errors.root?.server?.message}
+          errorType={form.formState.errors.root?.server?.type}
+        />
         <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
           <Controller
             control={form.control}

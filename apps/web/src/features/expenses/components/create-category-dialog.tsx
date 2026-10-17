@@ -118,7 +118,7 @@ export function CreateCategoryDialog({
       onOpenChange(false);
       onSuccess(created);
     } catch (error) {
-      applyFormError(form, error);
+      applyFormError(form, error, ["name", "categoryType", "parentCategoryId"]);
     }
   };
 
@@ -189,7 +189,10 @@ export function CreateCategoryDialog({
           inert={isCreating}
           className="flex flex-col gap-4"
         >
-          <FormError message={form.formState.errors.root?.server?.message} />
+          <FormError
+            message={form.formState.errors.root?.server?.message}
+            errorType={form.formState.errors.root?.server?.type}
+          />
           <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
             {isSubcategory && selectedParentCategory && (
               <div className="p-3 bg-muted rounded-md">

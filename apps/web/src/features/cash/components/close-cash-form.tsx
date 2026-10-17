@@ -73,7 +73,7 @@ export function CloseCashForm({
         try {
           await handleSubmit(data);
         } catch (error) {
-          applyFormError(form, error, {});
+          applyFormError(form, error, ["closingAmount", "notes"]);
         }
       })}
     >
@@ -82,7 +82,10 @@ export function CloseCashForm({
         disabled={form.formState.isSubmitting || isSubmitting}
         className="flex min-h-0 flex-1 flex-col gap-4"
       >
-        <FormError message={form.formState.errors.root?.server?.message} />
+        <FormError
+          message={form.formState.errors.root?.server?.message}
+          errorType={form.formState.errors.root?.server?.type}
+        />
         <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
           <Alert>
             <Banknote className="w-5 h-5" />

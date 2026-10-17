@@ -10,20 +10,18 @@ import type {
   CreateCashSessionFormData,
 } from "../types";
 
-const CASH_SESSIONS_QUERY_KEY = queryKeys.cash;
-
 export function useCashSessions() {
   const queryClient = useQueryClient();
 
   const currentSessionQuery = useQuery({
-    queryKey: [...CASH_SESSIONS_QUERY_KEY, "current"],
+    queryKey: queryKeys.currentCash,
     queryFn: ({ signal }) => cashService.getActive(signal),
     staleTime: 0,
     gcTime: 5 * 60 * 1000,
   });
 
   const sessionsQuery = useQuery({
-    queryKey: CASH_SESSIONS_QUERY_KEY,
+    queryKey: queryKeys.cash,
     queryFn: ({ signal }) => cashService.getAll(signal),
     staleTime: 60_000,
     enabled: false,
@@ -32,11 +30,11 @@ export function useCashSessions() {
   const createMutation = useMutation({
     mutationFn: (dto: CreateCashSessionFormData) => cashService.create(dto),
     meta: { skipGlobalErrorToast: true },
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       if (data) {
-        queryClient.setQueryData([...CASH_SESSIONS_QUERY_KEY, "current"], data);
+        queryClient.setQueryData(queryKeys.currentCash, data);
       }
-      await invalidateAfterMutation(queryClient, "cash");
+      invalidateAfterMutation(queryClient, "cash");
     },
   });
 
@@ -44,18 +42,14 @@ export function useCashSessions() {
     mutationFn: ({ id, dto }: { id: string; dto: CloseCashSessionFormData }) =>
       cashService.close(id, dto),
     meta: { skipGlobalErrorToast: true },
-    onSuccess: async () => {
-      queryClient.setQueryData([...CASH_SESSIONS_QUERY_KEY, "current"], null);
-      await invalidateAfterMutation(queryClient, "cash");
+    onSuccess: () => {
+      queryClient.setQueryData(queryKeys.currentCash, null);
+      invalidateAfterMutation(queryClient, "cash");
     },
   });
 
   const depositsQuery = useQuery({
-    queryKey: [
-      ...CASH_SESSIONS_QUERY_KEY,
-      "deposits",
-      currentSessionQuery.data?.id,
-    ],
+    queryKey: queryKeys.deposits(currentSessionQuery.data?.id),
     queryFn: ({ signal }) => {
       if (!currentSessionQuery.data?.id) return Promise.resolve([]);
       return cashService.getDeposits(currentSessionQuery.data.id, signal);

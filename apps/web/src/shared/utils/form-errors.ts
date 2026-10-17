@@ -4,8 +4,10 @@ import { ApiError } from "@/shared/services/api";
 export function applyFormError<T extends FieldValues>(
   form: UseFormReturn<T>,
   error: unknown,
-  aliases: Record<string, string> = {},
+  editableFields: readonly FieldPath<T>[],
 ) {
+  form.clearErrors("root.server");
+  const fields = new Set<string>(editableFields);
   const messages: string[] = [];
   const fieldErrors = error instanceof ApiError ? error.details?.errors : null;
   for (const [key, message] of Object.entries(fieldErrors ?? {})) {
@@ -14,14 +16,12 @@ export function applyFormError<T extends FieldValues>(
       .split(".")
       .map((part) => part.charAt(0).toLowerCase() + part.slice(1))
       .join(".");
-    const path = aliases[normalized] ?? normalized;
-    // Only bind errors to fields present in this form, never arbitrary server paths.
-    if (form.getValues(path as FieldPath<T>) !== undefined) {
-      form.setError(path as FieldPath<T>, { type: "server", message });
+    // A registered optional control may legitimately have an undefined value.
+    if (fields.has(normalized)) {
+      form.setError(normalized as FieldPath<T>, { type: "server", message });
+    } else {
+      messages.push(message);
     }
-    // Keep a summary for errors on structured/hidden fields (e.g. order items),
-    // as well as individual messages associated with editable controls.
-    messages.push(message);
   }
   if (
     !fieldErrors ||
@@ -29,6 +29,7 @@ export function applyFormError<T extends FieldValues>(
     messages.length > 0
   ) {
     form.setError("root.server", {
+      type: error instanceof ApiError ? error.kind : "server",
       message: messages.length
         ? [...new Set(messages)].join(" ")
         : error instanceof Error

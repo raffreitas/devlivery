@@ -1,6 +1,6 @@
 import z from "zod";
 import type { Product } from "@/features/products/types";
-import { toCents } from "@/shared/utils/money";
+import { itemsSubtotal, sumMoney, toCents } from "@/shared/utils/money";
 import { isValidBrazilianPhone } from "@/shared/utils/validators";
 
 export type PaymentMethod = "Cash" | "CreditCard" | "DebitCard" | "Pix";
@@ -94,16 +94,11 @@ export const orderFormSchema = z
       .min(1, "Adicione pelo menos um produto ao pedido"),
   })
   .superRefine((data, ctx) => {
-    const subtotal = data.items.reduce(
-      (sum, item) => sum + toCents(item.unitPrice) * item.quantity,
-      0,
+    const totalOrder = sumMoney([itemsSubtotal(data.items), data.deliveryFee]);
+    const totalPayments = sumMoney(
+      data.payments.map((payment) => payment.amount),
     );
-    const totalOrder = subtotal + toCents(data.deliveryFee);
-    const totalPayments = data.payments.reduce(
-      (sum, p) => sum + toCents(p.amount),
-      0,
-    );
-    if (totalPayments < totalOrder) {
+    if (toCents(totalPayments) < toCents(totalOrder)) {
       ctx.addIssue({
         code: "custom",
         message: "O total dos pagamentos é menor que o total do pedido",

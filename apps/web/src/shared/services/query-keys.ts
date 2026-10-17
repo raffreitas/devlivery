@@ -24,12 +24,12 @@ const affectedQueries = {
   cash: [queryKeys.cash],
 } as const;
 
-export async function invalidateAfterMutation(
+export function invalidateAfterMutation(
   client: QueryClient,
   feature: keyof typeof affectedQueries,
 ) {
-  // A successful write stays successful even if a subsequent refresh fails.
-  await Promise.allSettled(
+  // Refresh in the background: a confirmed write must not wait for read retries.
+  void Promise.allSettled(
     affectedQueries[feature].map((queryKey) =>
       client.invalidateQueries({ queryKey }),
     ),

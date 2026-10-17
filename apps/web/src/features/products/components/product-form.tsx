@@ -55,7 +55,13 @@ export function ProductForm({
         try {
           await onSubmit(data);
         } catch (error) {
-          applyFormError(form, error, {});
+          applyFormError(form, error, [
+            "name",
+            "description",
+            "price",
+            "category",
+            "available",
+          ]);
         }
       })}
     >
@@ -64,7 +70,10 @@ export function ProductForm({
         disabled={form.formState.isSubmitting || externalIsSubmitting === true}
         className="flex min-h-0 flex-1 flex-col gap-4"
       >
-        <FormError message={form.formState.errors.root?.server?.message} />
+        <FormError
+          message={form.formState.errors.root?.server?.message}
+          errorType={form.formState.errors.root?.server?.type}
+        />
         <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
           <Controller
             control={form.control}
@@ -207,7 +216,14 @@ export function ProductForm({
                     checked={field.value}
                     onCheckedChange={field.onChange}
                     aria-invalid={fieldState.invalid}
-                    aria-describedby={`${formId}-product-available-description`}
+                    aria-describedby={[
+                      `${formId}-product-available-description`,
+                      fieldState.invalid
+                        ? `${formId}-product-available-error`
+                        : undefined,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                   />
                   <FieldContent>
                     <FieldTitle>Disponível</FieldTitle>
@@ -216,6 +232,12 @@ export function ProductForm({
                     >
                       Este produto estará visível para registro de pedidos.
                     </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-product-available-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
                   </FieldContent>
                 </Field>
               </FieldLabel>

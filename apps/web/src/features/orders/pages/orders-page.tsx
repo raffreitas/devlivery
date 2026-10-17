@@ -150,7 +150,6 @@ export function OrdersPage() {
           hasData={hasData}
           refetch={refetch}
         >
-          {" "}
           <LoadingState
             isLoading={loading && orders.length === 0}
             skeleton={<GridSkeleton items={6} columns={3} />}
