@@ -8,8 +8,8 @@ export function useAuthQuery() {
   const authQuery = useQuery({
     queryKey: ["auth"],
     queryFn: authService.getAuth,
-    staleTime: Number.POSITIVE_INFINITY, // Auth state não expira automaticamente
-    gcTime: Number.POSITIVE_INFINITY, // Mantém no cache indefinidamente
+    staleTime: Number.POSITIVE_INFINITY,
+    gcTime: Number.POSITIVE_INFINITY,
   });
 
   const loginMutation = useMutation({
@@ -25,7 +25,7 @@ export function useAuthQuery() {
     mutationFn: authService.logout,
     onSuccess: () => {
       queryClient.setQueryData(["auth"], { user: null, token: null });
-      queryClient.clear(); // Limpa todo o cache ao fazer logout
+      queryClient.clear();
     },
   });
 

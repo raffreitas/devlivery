@@ -40,7 +40,6 @@ export function CashPage() {
     notes?: string;
   }) => {
     if (!currentSession) return;
-    // Backend now calculates sales totals and payment breakdown automatically
     await closeCashSession({
       id: currentSession.id,
       dto,
@@ -65,7 +64,7 @@ export function CashPage() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:gap-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Controle de Caixa
@@ -75,7 +74,6 @@ export function CashPage() {
           </p>
         </div>
 
-        {/* Cash Session Section */}
         <div className="space-y-4">
           {currentSession ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -114,7 +112,6 @@ export function CashPage() {
         </div>
       </div>
 
-      {/* Open Cash Modal */}
       <Modal
         isOpen={isOpenModalOpen}
         onClose={() => setIsOpenModalOpen(false)}
@@ -127,7 +124,6 @@ export function CashPage() {
         />
       </Modal>
 
-      {/* Close Cash Modal */}
       <Modal
         isOpen={isCloseModalOpen}
         onClose={() => setIsCloseModalOpen(false)}
@@ -146,7 +142,6 @@ export function CashPage() {
         )}
       </Modal>
 
-      {/* Deposit Cash Modal */}
       <Modal
         isOpen={isDepositModalOpen}
         onClose={() => setIsDepositModalOpen(false)}

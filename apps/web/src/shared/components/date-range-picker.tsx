@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -11,7 +12,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
-import { cn } from "@/shared/lib/utils";
 
 interface DateRangePickerProps extends ComponentProps<"div"> {
   date: DateRange | undefined;

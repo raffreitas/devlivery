@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useEffect, useId, useMemo } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
+import { InputMoney } from "@/shared/components/input-money";
 import { LoadingButton, LoadingState } from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -11,7 +12,6 @@ import {
   FieldLabel,
 } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { useExpenseCategories } from "../hooks/use-expenses";
 import type { Expense, ExpenseFormData } from "../types";
@@ -57,7 +57,6 @@ export function ExpenseForm({
     defaultValue: expense?.category.id,
   });
 
-  // Encontra a categoria selecionada e suas subcategorias
   const selectedCategory = useMemo(() => {
     return categories?.find((cat) => cat.id === selectedCategoryId);
   }, [categories, selectedCategoryId]);
@@ -111,8 +110,7 @@ export function ExpenseForm({
       }
     >
       <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <FieldGroup>
-          {/* Categoria */}
+        <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
           <Controller
             control={form.control}
             name="categoryId"
@@ -147,7 +145,6 @@ export function ExpenseForm({
             )}
           />
 
-          {/* Subcategoria */}
           <Controller
             control={form.control}
             name="subcategoryId"
@@ -186,7 +183,6 @@ export function ExpenseForm({
             )}
           />
 
-          {/* Fornecedor */}
           <Controller
             control={form.control}
             name="supplier"
@@ -217,7 +213,6 @@ export function ExpenseForm({
             )}
           />
 
-          {/* Descrição */}
           <Controller
             control={form.control}
             name="description"
@@ -250,7 +245,6 @@ export function ExpenseForm({
             )}
           />
 
-          {/* Valor */}
           <Controller
             control={form.control}
             name="amount"
@@ -279,7 +273,6 @@ export function ExpenseForm({
             )}
           />
 
-          {/* Data de Vencimento */}
           <Controller
             control={form.control}
             name="dueDate"
@@ -310,7 +303,6 @@ export function ExpenseForm({
             )}
           />
 
-          {/* Data de Pagamento */}
           <Controller
             control={form.control}
             name="paymentDate"
@@ -347,7 +339,6 @@ export function ExpenseForm({
             )}
           />
 
-          {/* Botões */}
           <Field
             orientation="horizontal"
             className="justify-center sm:justify-end"

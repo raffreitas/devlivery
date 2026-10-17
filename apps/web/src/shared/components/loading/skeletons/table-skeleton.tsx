@@ -7,9 +7,6 @@ interface TableSkeletonProps {
   className?: string;
 }
 
-/**
- * TableSkeleton - Skeleton loader para tabelas
- */
 export function TableSkeleton({
   rows = 5,
   columns = 4,
@@ -31,13 +28,11 @@ export function TableSkeleton({
   return (
     <div className={className}>
       <div className="space-y-2">
-        {/* Header */}
         <div className="flex gap-4 pb-2 border-b">
           {headerKeys.map((key) => (
             <Skeleton key={key} className="h-4 flex-1" />
           ))}
         </div>
-        {/* Rows */}
         {rowKeys.map(({ rowKey, cells }) => (
           <div key={rowKey} className="flex gap-4 py-2">
             {cells.map((cellKey) => (

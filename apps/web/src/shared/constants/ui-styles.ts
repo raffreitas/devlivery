@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import type { PaymentMethod } from "@/features/orders/types";
 
-// Payment Method Colors (with dark mode support and visual distinction)
+// Payment Method Colors
 export const PAYMENT_METHOD_STYLES = {
   Cash: {
     variant: "default" as const,
@@ -41,7 +41,7 @@ export function getPaymentMethodStyle(method: PaymentMethod) {
   return PAYMENT_METHOD_STYLES[method];
 }
 
-// Order Status Colors (with dark mode support and visual distinction)
+// Order Status Colors
 export const ORDER_STATUS_STYLES = {
   Pending: {
     variant: "default" as const,

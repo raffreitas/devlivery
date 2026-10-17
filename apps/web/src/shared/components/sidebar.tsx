@@ -1,9 +1,9 @@
+import { cn } from "cn";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { navItems } from "@/shared/constants/nav-items";
-import { cn } from "@/shared/lib/utils";
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -68,23 +68,6 @@ export function Sidebar() {
           </nav>
         </div>
       </div>
-
-      {/* <div className="p-4 border-t border-gray-100">
-        <nav className="space-y-1">
-          <button
-            type="button"
-            onClick={onLogout}
-            className={cn(
-              "w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium text-red-600 hover:bg-red-50",
-              isCollapsed && "justify-center px-2",
-            )}
-            title={isCollapsed ? "Sair" : undefined}
-          >
-            <LogOut className="w-5 h-5" />
-            {!isCollapsed && <span>Sair</span>}
-          </button>
-        </nav>
-      </div> */}
     </aside>
   );
 }

@@ -48,7 +48,7 @@ export function CashPaymentBreakdown({
         </p>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="gap-4">
         {paymentBreakdown.map((item) => {
           const style =
             PAYMENT_METHOD_STYLES[
@@ -81,7 +81,6 @@ export function CashPaymentBreakdown({
                 </div>
               </div>
 
-              {/* Progress bar */}
               <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                 <Progress value={percentage} />
               </div>

@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import {
   Dialog,
   DialogContent,
@@ -44,9 +45,16 @@ export function Modal({
   if (isDesktop) {
     return (
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-3xl">
+        <DialogContent
+          className={cn(
+            "max-h-[calc(100dvh-2rem)] gap-4 sm:max-w-3xl",
+            footer
+              ? "grid-rows-[auto_minmax(0,1fr)_auto]"
+              : "grid-rows-[auto_minmax(0,1fr)]",
+          )}
+        >
           <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle className="text-base">{title}</DialogTitle>
             {description && (
               <DialogDescription>{description}</DialogDescription>
             )}
@@ -62,7 +70,7 @@ export function Modal({
     <Drawer open={isOpen} onOpenChange={handleOpenChange} showSwipeHandle>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerTitle className="text-base">{title}</DrawerTitle>
           {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
         <div className="min-h-0 flex-1 overflow-y-auto p-4">{children}</div>

@@ -37,7 +37,6 @@ export function OrderItemsTable({
 
   return (
     <div className="border border-border rounded-lg overflow-hidden flex flex-col">
-      {/* Mobile view */}
       <div className="sm:hidden flex-1 overflow-y-auto">
         <div className="divide-y divide-border">
           {items.map((item, index) => (
@@ -78,7 +77,6 @@ export function OrderItemsTable({
         </div>
       </div>
 
-      {/* Desktop view */}
       <div className="hidden sm:flex flex-col flex-1">
         <div className="overflow-x-auto overflow-y-auto flex-1">
           <table className="min-w-full divide-y divide-border">

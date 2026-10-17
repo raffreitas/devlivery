@@ -1,8 +1,8 @@
+import { cn } from "cn";
 import type * as React from "react";
 import type { ReactNode } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Spinner } from "@/shared/components/ui/spinner";
-import { cn } from "@/shared/lib/utils";
 
 interface LoadingButtonProps extends React.ComponentProps<typeof Button> {
   isLoading?: boolean;
@@ -10,12 +10,6 @@ interface LoadingButtonProps extends React.ComponentProps<typeof Button> {
   children: ReactNode;
 }
 
-/**
- * LoadingButton - Botão com estado de loading integrado
- *
- * Usado para mutações e ações do usuário.
- * Mostra spinner inline e desabilita o botão durante o loading.
- */
 export function LoadingButton({
   isLoading = false,
   loadingText,

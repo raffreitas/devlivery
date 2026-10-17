@@ -36,13 +36,11 @@ export function OrdersFilters({
   onDateChange,
   onOpenFilters,
 }: OrdersFiltersProps) {
-  // Contagem de filtros ativos
   const activeFiltersCount =
     (statusFilter !== "all" ? 1 : 0) + (paymentFilter !== "all" ? 1 : 0);
 
   return (
     <>
-      {/* Mobile: Botão Filtros */}
       <div className="sm:hidden">
         <Button variant="secondary" onClick={onOpenFilters} className="w-full">
           <Filter data-icon="inline-start" />
@@ -55,7 +53,6 @@ export function OrdersFilters({
         </Button>
       </div>
 
-      {/* Desktop: Inline Filters */}
       <div className="hidden sm:block bg-card rounded-lg border border-border shadow-sm p-4">
         <div className="flex flex-col sm:flex-row items-end gap-2 sm:gap-4 pb-2 sm:pb-1 px-1">
           <div className="w-full sm:flex-1 sm:min-w-50 flex flex-col gap-1.5">

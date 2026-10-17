@@ -64,7 +64,6 @@ export function LoginPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-orange-50 via-background to-orange-50 dark:from-orange-950/20 dark:via-background dark:to-orange-950/20 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Branding */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold tracking-[-0.048em] text-[#182230] dark:text-foreground">
             Devlivery
@@ -72,10 +71,9 @@ export function LoginPage() {
           </h1>
         </div>
 
-        {/* Login Card */}
         <Card className="p-8">
           <form onSubmit={form.handleSubmit(handleAuthenticate)} noValidate>
-            <FieldGroup>
+            <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
               <Controller
                 control={form.control}
                 name="email"
@@ -163,7 +161,6 @@ export function LoginPage() {
           </form>
         </Card>
 
-        {/* Footer */}
         <p className="text-center text-sm text-muted-foreground mt-6">
           © {currentYear} Devlivery. Todos os direitos reservados.
         </p>

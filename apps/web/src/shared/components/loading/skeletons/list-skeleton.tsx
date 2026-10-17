@@ -7,9 +7,6 @@ interface ListSkeletonProps {
   showAvatar?: boolean;
 }
 
-/**
- * ListSkeleton - Skeleton loader para listas
- */
 export function ListSkeleton({
   items = 3,
   className,

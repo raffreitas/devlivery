@@ -75,7 +75,7 @@ export function ProductsPage() {
       await deleteProduct(id);
       setAlert({ open: false, productId: null });
     } catch {
-      // Error is handled by the mutation's onError
+      // Reported by the global MutationCache.
     }
   };
 
@@ -96,7 +96,7 @@ export function ProductsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       <LoadingOverlay isFetching={isFetching} position="top-bar" />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -142,7 +142,7 @@ export function ProductsPage() {
           </div>
         ) : (
           <div
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 transition-opacity duration-200 ${
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 transition-opacity duration-200 ${
               isFetching ? "opacity-60" : "opacity-100"
             }`}
           >

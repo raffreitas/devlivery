@@ -24,7 +24,6 @@ export function SubcategoryCombobox({
   const { data: categories } = useExpenseCategories();
   const { createCategory, isCreating } = useExpenseCategoriesManagement();
 
-  // Encontra a categoria pai e suas subcategorias
   const parentCategory = categories?.find((cat) => cat.id === parentCategoryId);
   const options =
     parentCategory?.subcategories

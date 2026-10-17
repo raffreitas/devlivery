@@ -83,7 +83,7 @@ export function OrdersPage() {
         title: `Pedido ${editingOrder ? "atualizado" : "criado"} com sucesso!`,
       });
     } catch {
-      // Error is handled by the mutation's onError or toast
+      // Reported by the global MutationCache.
     }
   };
 

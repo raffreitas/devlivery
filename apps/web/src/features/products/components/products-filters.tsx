@@ -25,13 +25,11 @@ export function ProductsFilters({
   onCategoryChange,
   onOpenFilters,
 }: ProductsFiltersProps) {
-  // Contagem de filtros ativos
   const activeFiltersCount =
     (searchTerm ? 1 : 0) + (filterCategory !== "all" ? 1 : 0);
 
   return (
     <>
-      {/* Mobile: Botão Filtros */}
       <div className="sm:hidden">
         <Button variant="secondary" onClick={onOpenFilters} className="w-full">
           <Filter data-icon="inline-start" />
@@ -44,7 +42,6 @@ export function ProductsFilters({
         </Button>
       </div>
 
-      {/* Desktop: Inline Filters */}
       <div className="hidden sm:block bg-card rounded-lg border border-border shadow-sm p-4">
         <div className="flex flex-col sm:flex-row gap-4 items-center">
           <div className="relative flex-1 w-full">

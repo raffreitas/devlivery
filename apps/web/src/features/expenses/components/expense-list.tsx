@@ -103,12 +103,10 @@ export function ExpenseList({
     id: null,
   });
 
-  // Open confirmation dialog
   const handleDelete = (id: string) => {
     setAlert({ open: true, id });
   };
 
-  // Called when user confirms deletion in the dialog
   const confirmDelete = async () => {
     const id = alert.id;
     if (!id) return;
@@ -151,7 +149,6 @@ export function ExpenseList({
           <CardTitle>Despesas</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Mobile: Card View */}
           <div className="md:hidden space-y-4">
             {expenses.map((expense) => {
               const config = statusConfig[expense.status];
@@ -266,7 +263,6 @@ export function ExpenseList({
             })}
           </div>
 
-          {/* Desktop: Table View */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>

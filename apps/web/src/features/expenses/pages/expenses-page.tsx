@@ -112,8 +112,7 @@ export function ExpensesPage() {
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Header */}
+      <div className="flex flex-col gap-4 sm:gap-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -132,7 +131,7 @@ export function ExpensesPage() {
         <LoadingState
           isLoading={loading}
           skeleton={
-            <div className="space-y-6">
+            <div className="flex flex-col gap-4 sm:gap-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="h-24 bg-accent animate-pulse rounded-lg" />
                 <div className="h-24 bg-accent animate-pulse rounded-lg" />
@@ -144,10 +143,8 @@ export function ExpensesPage() {
             </div>
           }
         >
-          {/* Summary Cards */}
           <ExpenseSummaryCard summary={summary} />
 
-          {/* Filters */}
           <ExpensesFilters
             period={duePeriod}
             categoryId={categoryId}
@@ -158,7 +155,6 @@ export function ExpensesPage() {
             onOpenFilters={() => setIsFiltersOpen(true)}
           />
 
-          {/* List */}
           <ExpenseList
             expenses={expenses}
             onEdit={handleEdit}
@@ -168,7 +164,6 @@ export function ExpensesPage() {
         </LoadingState>
       </div>
 
-      {/* Modal Create/Edit */}
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}

@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useId } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { InputMoney } from "@/shared/components/input-money";
 import { LoadingButton } from "@/shared/components/loading";
 import { OptionCombobox } from "@/shared/components/option-combobox";
 import { Button } from "@/shared/components/ui/button";
@@ -15,7 +16,6 @@ import {
   FieldTitle,
 } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import { InputMoney } from "@/shared/components/ui/input-money";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { type ProductFormData, productFormSchema } from "../types";
 
@@ -48,7 +48,7 @@ export function ProductForm({
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
-      <FieldGroup>
+      <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
         <Controller
           control={form.control}
           name="name"

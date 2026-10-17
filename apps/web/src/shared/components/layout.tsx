@@ -17,11 +17,9 @@ export function Layout() {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      {/* Sidebar for Desktop */}
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-h-screen relative">
-        {/* Mobile Header */}
         <header className="sm:hidden bg-sidebar border-b border-sidebar-border h-16 px-4 flex items-center justify-between sticky top-0 z-40">
           <h1 className="text-xl font-bold tracking-[-0.048em] text-[#182230] dark:text-foreground">
             Devlivery
@@ -31,20 +29,8 @@ export function Layout() {
           <NavbarUserSection onLogout={onLogout} />
         </header>
 
-        {/* Desktop Header (Minimal - mainly for user profile if not in sidebar, but we put generic actions here if needed) */}
-        {/* For now, Sidebar handles most, but we can keep a top bar for Profile if we want.
-             In this design, let's put Profile in Sidebar?
-             Actually, let's keep a top bar on desktop for "Search" or "Notifications" in future,
-             but for now let's just keep the content area clean.
-             Wait, where is the User Profile on Desktop? The Sidebar has "Logout" but maybe not the full User Menu.
-             Let's put the User Section in the top right of the main content area for Desktop as well.
-         */}
         <header className="hidden sm:flex bg-sidebar border-b border-sidebar-border h-16 px-6 items-center justify-between sticky top-0 z-40">
-          <h2 className="text-lg font-semibold text-foreground">
-            {/* Contextual Title could go here, leveraging a context or route matching.
-                   For now, let's leave it empty or show Breadcrumbs. */}
-            Bem-vindo
-          </h2>
+          <h2 className="text-lg font-semibold text-foreground">Bem-vindo</h2>
           {env.MODE === "development" && <Badge>DEV ENV</Badge>}
           <div className="flex items-center gap-4">
             <NavbarUserSection onLogout={onLogout} />
@@ -57,7 +43,6 @@ export function Layout() {
           </div>
         </main>
 
-        {/* Bottom Nav for Mobile */}
         <NavbarBottom />
       </div>
     </div>

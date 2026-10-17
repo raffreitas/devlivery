@@ -7,9 +7,6 @@ interface CardSkeletonProps {
   lines?: number;
 }
 
-/**
- * CardSkeleton - Skeleton loader para cards
- */
 export function CardSkeleton({
   className,
   showImage = false,

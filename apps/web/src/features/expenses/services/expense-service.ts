@@ -51,7 +51,6 @@ function parseDateOnly(dateString?: string | null): Date | undefined {
 }
 
 function mapExpenseStatus(status: string): Expense["status"] {
-  // Mapeia os valores do backend para os tipos do frontend
   switch (status) {
     case "Paid":
       return "Paid";
@@ -64,7 +63,6 @@ function mapExpenseStatus(status: string): Expense["status"] {
     case "Cancelled":
       return "Cancelled";
     default:
-      // Fallback para valores desconhecidos
       return status as Expense["status"];
   }
 }
@@ -184,13 +182,12 @@ export const expenseService = {
       throw new Error("Erro ao criar categoria: ID não retornado");
     }
 
-    // Construir o objeto Category diretamente a partir da resposta
     // Não precisamos buscar na lista porque temos todos os dados necessários
     const createdCategory: Category = {
       id: res.data.categoryId,
       name: data.name,
       isActive: true,
-      subcategories: [], // Nova categoria não tem subcategorias ainda
+      subcategories: [],
     };
 
     return createdCategory;
