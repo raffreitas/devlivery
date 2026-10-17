@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celular: novo pedido</title>
+<!-- Referência estática exportada do canvas de design do Devlivery. Não é código de produção: reconstrua com os componentes do app. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="_shared/tokens.css">
+<link rel="stylesheet" href="_shared/app.css">
+<link rel="stylesheet" href="_shared/components.css">
+<style>
+
+body{margin:0}
+.sec{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.lbl{font:500 12px/16px var(--font-sans);color:var(--text-muted)}
+.fld{display:flex;align-items:center;gap:10px;height:48px;padding:0 12px;border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--surface-1)}
+.fld input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:500 16px/22px var(--font-sans)}
+.fld svg{width:18px;height:18px;color:var(--text-muted);flex:none}
+.card{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface-1)}
+.li{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface-1)}
+.li .o{grid-column:2 / 4;font:400 13px/18px var(--font-sans);color:var(--text-muted)}
+.step{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden}
+.step button{width:36px;height:36px;border:0;background:var(--surface-2);color:var(--text);font:500 18px/1 var(--font-sans);cursor:pointer}
+.step span{min-width:28px;text-align:center;font:600 14px/20px var(--font-sans)}
+.pay4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.pill{height:44px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface-1);color:var(--text-muted);font:500 13px/16px var(--font-sans);cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--surface-3);color:var(--text);border-color:var(--line-strong)}
+
+</style>
+</head>
+<body>
+<div id="root" style="min-height: 100vh;">
+
+<div data-theme="dark" style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 14px; line-height: 20px; overflow: hidden; font-feature-settings: &quot;tnum&quot;;">
+<header style="display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 4px; border-bottom: 1px solid var(--line);">
+<a class="btn btn-ghost" href="MPedidos.html" aria-label="Voltar" style="width: 44px; height: 44px; padding: 0px; justify-content: center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="width: 20px; height: 20px;"><path d="M15 18l-6-6 6-6"></path></svg></a>
+<h1 style="margin: 0px; font: 700 18px/24px var(--font-sans);">Novo pedido <span class="muted" style="font-weight: 500;">#49</span></h1>
+</header>
+<div style="flex: 1 1 0%; overflow: auto;">
+<div class="sec">
+<span class="lbl">Cliente</span>
+<label class="fld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"></path></svg><input type="tel" inputmode="tel" aria-label="Telefone do cliente" value="(19) 99812-4410" style=""></label>
+<div class="card">
+<span style="display: grid; flex: 1 1 0%; min-width: 0px;"><span style="font-weight: 600;">Maria Souza</span><span class="muted" style="font-size: 13px;">R. das Palmeiras, 120, Cambuí. Taxa R$ 6,00</span></span>
+<button type="button" class="btn" style="height: 40px;">Repetir último</button>
+</div>
+</div>
+<div class="sec">
+<span class="lbl">Itens</span>
+<div class="li"><span class="step"><button type="button" aria-label="Remover um calzone caipira">−</button><span>1</span><button type="button" aria-label="Adicionar um calzone caipira">+</button></span><span style="font-weight: 500;">Calzone caipira</span><span class="num" style="font-weight: 600;">R$ 71,00</span><span class="o">+ Palmito. Toque para mudar opções</span></div>
+<div class="li"><span class="step"><button type="button" aria-label="Remover um calzone calabresa">−</button><span>1</span><button type="button" aria-label="Adicionar um calzone calabresa">+</button></span><span style="font-weight: 500;">Calzone calabresa</span><span class="num" style="font-weight: 600;">R$ 50,00</span></div>
+<a class="btn" href="MAdicionarProduto.html" style="height: 48px; justify-content: center; border-style: dashed;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Adicionar produto</a>
+</div>
+<div class="sec" style="border-bottom: 0px;">
+<span class="lbl">Pagamento na entrega</span>
+<div class="pay4" role="group" aria-label="Forma de pagamento">
+<button type="button" class="pill" aria-pressed="false">Dinheiro</button><button type="button" class="pill" aria-pressed="false">Crédito</button><button type="button" class="pill" aria-pressed="false">Débito</button><button type="button" class="pill" aria-pressed="true">Pix</button>
+</div>
+
+<span class="muted" style="font-size: 12px; line-height: 16px;">A comanda sai na impressora do balcão, mesmo lançando pelo celular.</span>
+</div>
+</div>
+<footer style="display: flex; align-items: center; gap: 12px; padding: 12px 16px 18px; background: var(--surface-1); border-top: 1px solid var(--line);">
+<span style="display: grid;"><span class="muted" style="font-size: 12px; line-height: 16px;">Total com taxa</span><span class="num" style="font: 700 18px/24px var(--font-sans);">R$ 127,00</span></span>
+<button type="button" class="btn btn-primary" aria-disabled="false" style="flex: 1 1 0%; height: 48px; justify-content: center; font-size: 15px;">Criar e imprimir</button>
+</footer>
+</div>
+</div>
+</body>
+</html>

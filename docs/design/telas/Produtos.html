@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Produtos: tamanhos, opções e margem</title>
+<!-- Referência estática exportada do canvas de design do Devlivery. Não é código de produção: reconstrua com os componentes do app. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="_shared/tokens.css">
+<link rel="stylesheet" href="_shared/app.css">
+<link rel="stylesheet" href="_shared/components.css">
+<style>
+
+body{margin:0}
+.pr-wrap{display:grid;grid-template-columns:minmax(0,1fr) 400px;min-height:100%}
+@media (max-width:1100px){.pr-wrap{grid-template-columns:minmax(0,1fr)}}
+.phead,.prow{display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(150px,1.2fr) 84px 140px 72px 34px;align-items:center;gap:14px;padding:0 16px 0 24px;box-sizing:border-box}
+.phead{height:34px;border-bottom:1px solid var(--line);font:500 12px/16px var(--font-sans);color:var(--text-muted)}
+.prow{min-height:44px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);font:500 13px/18px var(--font-sans);text-align:left;cursor:pointer;width:100%}
+.prow:hover{background:var(--surface-2)}
+.prow[aria-current="true"]{background:var(--brand-soft)}
+.prow .dim{color:var(--text-muted);font-weight:400}
+.r{text-align:right;font-variant-numeric:tabular-nums}
+.mg-low{color:var(--warning)}
+.dot{width:8px;height:8px;border-radius:50%;justify-self:end}
+.on{background:var(--status-delivered)}
+.offd{border:1.5px solid var(--text-muted);box-sizing:border-box}
+.detail{border-left:1px solid var(--line);display:flex;flex-direction:column}
+.dsec{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.dt{font:500 12px/16px var(--font-sans);color:var(--text-muted)}
+.sz{display:grid;grid-template-columns:1fr 96px 96px;gap:8px;align-items:center}
+.inp{height:30px;box-sizing:border-box;padding:0 8px;border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--bg);color:var(--text);font:500 13px/18px var(--font-sans);text-align:right;font-variant-numeric:tabular-nums;width:100%}
+.grp{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--bg)}
+.sw{position:relative;width:30px;height:18px;border-radius:9px;background:var(--brand);flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:15px;width:12px;height:12px;border-radius:50%;background:var(--on-brand)}
+
+
+body{margin:0}
+.sb-item{display:flex;align-items:center;gap:10px;height:30px;padding:0 8px;border-radius:var(--radius-md);color:var(--text-muted);font:500 13px/18px var(--font-sans);text-decoration:none}
+.sb-item:hover{background:var(--surface-2);color:var(--text)}
+.sb-item svg{width:16px;height:16px;flex:none}
+.sb-item.on{background:var(--surface-3);color:var(--text)}
+.sb-item .badge{margin-left:auto;font:500 11px/16px var(--font-sans);color:var(--text-muted)}
+.sb-tool{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:var(--radius-md);border:1px solid var(--line);background:var(--surface-1);color:var(--text-muted);cursor:pointer}
+.sb-tool svg{width:15px;height:15px}
+
+</style>
+</head>
+<body>
+<div id="root" style="min-height: 100vh;">
+
+<div class="app" data-theme="dark">
+
+
+<nav aria-label="Principal" style="width: 240px; min-height: 100%; box-sizing: border-box; flex: 0 0 240px; display: flex; flex-direction: column; gap: 16px; padding: 14px 10px 12px 12px; background: var(--bg); color: var(--text); font-family: var(--font-sans);">
+<div style="display: flex; align-items: center; gap: 8px; padding: 0px 2px;">
+<button type="button" aria-label="Trocar estabelecimento" style="flex: 1 1 0%; min-width: 0px; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0px 6px; border: 0px; border-radius: var(--radius-md); background: transparent; color: var(--text); cursor: pointer; font: 600 13px/18px var(--font-sans);">
+<svg width="20" height="20" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="var(--surface-3)"></rect><path fill="var(--text)" fill-rule="evenodd" d="M15 15h12c9.4 0 16 7.2 16 17s-6.6 17-16 17H15Z M23 22.5h4c5 0 8.4 3.9 8.4 9.5s-3.4 9.5-8.4 9.5h-4Z"></path><circle cx="50.5" cy="45" r="4.5" fill="var(--brand)"></circle></svg>
+<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Cantina do Bairro</span>
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color: var(--text-muted); flex: 0 0 auto;"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<a class="sb-tool" href="NovoPedido.html" aria-label="Novo pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></a>
+</div>
+<button type="button" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0px 8px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-1); color: var(--text-muted); font: 400 13px/18px var(--font-sans); cursor: pointer;">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<span style="flex: 1 1 0%; text-align: left;">Buscar ou executar</span>
+<span class="kbd">Ctrl K</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 1px;">
+<span style="padding: 6px 8px 4px; font: 500 12px/16px var(--font-sans); color: var(--text-muted);">Operação</span>
+
+<a href="Pedidos.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2zM9 7h6M9 11h6M9 15h4"></path></svg>
+<span>Pedidos</span>
+<span class="badge">8</span>
+</a>
+
+<a href="Caixa.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v13H3zM3 7l3-4h12l3 4M16 13.5h2"></path></svg>
+<span>Caixa</span>
+<span class="badge"></span>
+</a>
+
+<a href="Dashboard.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>
+<span>Dashboard</span>
+<span class="badge"></span>
+</a>
+
+<a href="Produtos.html" class="sb-item on" aria-current="page">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"></path></svg>
+<span>Produtos</span>
+<span class="badge"></span>
+</a>
+
+<a href="Despesas.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h9l5 5v15H6zM14 2v6h6M9 14h8"></path></svg>
+<span>Despesas</span>
+<span class="badge">3</span>
+</a>
+
+</div>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+<a href="Caixa.html" style="display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-1); color: var(--text); text-decoration: none; font: 500 12px/16px var(--font-sans);">
+<span style="width: 8px; height: 8px; border-radius: 50%; background: var(--status-delivered); border: 0px; box-sizing: border-box; flex: 0 0 auto;"></span>
+<span style="flex: 1 1 0%;">Caixa aberto</span>
+<span class="muted num" style="font-weight: 400;">desde 18:20</span>
+</a>
+<div style="display: flex; align-items: center; gap: 8px; padding: 4px 6px;">
+<span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 50%; background: var(--surface-3); color: var(--text); display: inline-flex; align-items: center; justify-content: center; font: 600 10px/1 var(--font-sans);">AL</span>
+<span style="flex: 1 1 0%; font: 500 13px/18px var(--font-sans);">Ana Lima</span>
+<button type="button" class="sb-tool" aria-label="Alternar tema" style="border: 0px; background: transparent;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="view">
+
+<header class="view-head">
+<h1 class="view-title">Produtos <span class="sep">/</span> <span class="muted" style="font-weight: 500;">Cardápio</span></h1>
+<div class="row">
+<button type="button" class="btn">Grupos de opções</button>
+<button type="button" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Novo produto <span class="kbd">C</span></button>
+</div>
+</header>
+<div class="view-bar">
+<div class="tabs" role="group" aria-label="Disponibilidade"><button type="button" class="tab" aria-pressed="true">Todos <span class="count">11</span></button><button type="button" class="tab" aria-pressed="false">Indisponíveis <span class="count">1</span></button></div>
+<span class="muted" style="font-size: 12px;">Acréscimos e meio a meio agora são opções dos produtos, não itens soltos.</span>
+</div>
+
+<div class="view-body">
+<div class="pr-wrap">
+<section aria-label="Produtos por categoria">
+<div class="phead"><span>Produto</span><span>Opções</span><span class="r">Custo</span><span class="r">Preço</span><span class="r">Margem</span><span></span></div>
+
+<div class="group-head"><span>Calzones</span><span class="count">5</span><span class="sum">Margem média 63,2%</span></div>
+
+<button type="button" class="prow" aria-current="false">
+<span>Calzone caipira</span>
+<span class="dim">Acréscimos, retirar</span>
+<span class="r dim">R$ 24,80</span>
+<span class="r">R$ 65,00</span>
+<span class="r">61,8%</span>
+<span class="dot on" title="Disponível" aria-label="Disponível"></span>
+</button>
+
+<button type="button" class="prow" aria-current="false">
+<span>Calzone de bacon</span>
+<span class="dim">Acréscimos, retirar</span>
+<span class="r dim">R$ 21,50</span>
+<span class="r">R$ 60,00</span>
+<span class="r">64,2%</span>
+<span class="dot on" title="Disponível" aria-label="Disponível"></span>
+</button>
+
+<button type="button" class="prow" aria-current="false">
+<span>Calzone de frango</span>
+<span class="dim">Acréscimos, retirar</span>
+<span class="r dim">R$ 23,90</span>
+<span class="r">R$ 65,00</span>
+<span class="r">63,2%</span>
+<span class="dot on" title="Disponível" aria-label="Disponível"></span>
+</button>
+
+<button type="button" class="prow" aria-current="false">
+<span>Calzone vegetariano</span>
+<span class="dim">Acréscimos, retirar</span>
+<span class="r dim">R$ 22,10</span>
+<span class="r">R$ 65,00</span>
+<span class="r">66,0%</span>
+<span class="dot on" title="Disponível" aria-label="Disponível"></span>
+</button>
+
+<button type="button" class="prow" aria-current="false">
+<span>Calzone calabresa</span>
+<span class="dim">Acréscimos, retirar</span>
+<span class="r dim">R$ 19,70</span>
+<span class="r">R$ 50,00</span>
+<span class="r">60,6%</span>
+<span class="dot on" title="Disponível" aria-label="Disponível"></span>
+</button>
+
+
+<div class="group-head"><span>Pizzas</span><span class="count">3</span><span class="sum">Margem média 63,4%</span></div>
+
+<button type="button" class="prow" aria-current="true">
+<span>Pizza crocante</span>
+<span class="dim">2 tamanhos, meio a meio</span>
+<span class="r dim">R$ 21,40</span>
+<span class="r">a partir de R$ 59,00</span>
+<span class="r">63,7%</span>
+<span class="dot on" title="Disponível" aria-label="Disponível"></span>
+</button>
+
+<button type="button" class="prow" aria-current="false">
+<span>Pizza de frango</span>
+<span class="dim">2 tamanhos, meio a meio</span>
+<span class="r dim">R$ 23,60</span>
+<span class="r">a partir de R$ 63,00</span>
+<span class="r">62,5%</span>
+<span class="dot on" title="Disponível" aria-label="Disponível"></span>
+</button>
+
+<button type="button" class="prow" aria-current="false">
+<span>Pizza calabresa</span>
+<span class="dim">2 tamanhos, meio a meio</span>
+<span class="r dim">R$ 19,90</span>
+<span class="r">a partir de R$ 55,00</span>
+<span class="r">63,8%</span>
+<span class="dot on" title="Disponível" aria-label="Disponível"></span>
+</button>
+
+
+<div class="group-head"><span>Bebidas</span><span class="count">2</span><span class="sum">Margem média 43,6%</span></div>
+
+<button type="button" class="prow" aria-current="false">
+<span>Coca-Cola 2 L</span>
+<span class="dim">Nenhuma</span>
+<span class="r dim">R$ 8,90</span>
+<span class="r">R$ 14,00</span>
+<span class="r mg-low">36,4%</span>
+<span class="dot on" title="Disponível" aria-label="Disponível"></span>
+</button>
+
+<button type="button" class="prow" aria-current="false">
+<span>Guaraná lata</span>
+<span class="dim">Nenhuma</span>
+<span class="r dim">R$ 3,20</span>
+<span class="r">R$ 6,50</span>
+<span class="r">50,8%</span>
+<span class="dot on" title="Disponível" aria-label="Disponível"></span>
+</button>
+
+
+<div class="group-head"><span>Rodízio</span><span class="count">1</span><span class="sum">Sem custo informado</span></div>
+
+<button type="button" class="prow" aria-current="false">
+<span>Rodízio por pessoa</span>
+<span class="dim">Nenhuma</span>
+<span class="r dim">—</span>
+<span class="r">R$ 54,50</span>
+<span class="r">—</span>
+<span class="dot offd" title="Indisponível" aria-label="Indisponível"></span>
+</button>
+
+
+</section>
+
+<aside class="detail" aria-labelledby="ed-h">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 52px; padding: 0px 12px 0px 20px; border-bottom: 1px solid var(--line); box-sizing: border-box;">
+<h2 id="ed-h" style="margin: 0px; font: 600 14px/20px var(--font-sans);">Pizza crocante</h2>
+<span class="muted" style="font-size: 12px;">Pizzas</span>
+</div>
+<div class="dsec">
+<span class="dt">Tamanhos</span>
+<div class="sz dt"><span>Tamanho</span><span style="text-align: right;">Custo</span><span style="text-align: right;">Preço</span></div>
+<div class="sz"><span>Pequena (25 cm)</span><input class="inp" aria-label="Custo da pequena" value="21,40" style=""><input class="inp" aria-label="Preço da pequena" value="59,00" style=""></div>
+<div class="sz"><span>Grande (35 cm)</span><input class="inp" aria-label="Custo da grande" value="30,60" style=""><input class="inp" aria-label="Preço da grande" value="84,00" style=""></div>
+<span class="muted" style="font-size: 12px;">Margem: pequena 63,7%, grande 63,6%.</span>
+</div>
+<div class="dsec">
+<span class="dt">Meio a meio</span>
+<div class="grp"><span style="flex: 1 1 0%; display: grid; gap: 2px;"><span style="font-weight: 500;">Permitido na grande</span><span class="muted" style="font-size: 12px;">Cada metade custa metade do preço do seu sabor; a pizza é a soma das metades, como no cardápio atual.</span></span><span class="sw" aria-hidden="true"></span></div>
+</div>
+<div class="dsec">
+<span class="dt">Grupos de opções</span>
+<div class="grp"><span style="flex: 1 1 0%; display: grid; gap: 2px;"><span style="font-weight: 500;">Acréscimos de pizza</span><span class="muted" style="font-size: 12px;">8 opções, de R$ 3,00 a R$ 11,00. Até 4 por item.</span></span><button type="button" class="btn btn-ghost btn-sm">Editar</button></div>
+<div class="grp"><span style="flex: 1 1 0%; display: grid; gap: 2px;"><span style="font-weight: 500;">Retirar ingredientes</span><span class="muted" style="font-size: 12px;">Milho, catupiry, orégano. Sem custo.</span></span><button type="button" class="btn btn-ghost btn-sm">Editar</button></div>
+<button type="button" class="btn btn-ghost btn-sm" style="align-self: flex-start; padding: 0px 6px;">Vincular outro grupo</button>
+</div>
+<div style="margin-top: auto; display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--line);">
+<button type="button" class="btn">Cancelar</button><button type="button" class="btn btn-primary">Salvar <span class="kbd">Ctrl S</span></button>
+</div>
+</aside>
+</div>
+</div>
+
+</main>
+</div>
+</div>
+</body>
+</html>

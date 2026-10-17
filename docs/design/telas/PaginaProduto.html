@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página do produto (pública)</title>
+<!-- Referência estática exportada do canvas de design do Devlivery. Não é código de produção: reconstrua com os componentes do app. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="_shared/tokens.css">
+<link rel="stylesheet" href="_shared/app.css">
+<link rel="stylesheet" href="_shared/components.css">
+<style>
+
+body{margin:0}
+.pp{container-type:inline-size;background:var(--bg);color:var(--text);font:400 15px/24px var(--font-sans);font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased}
+.pp a{color:inherit}
+.wrap{max-width:1160px;margin:0 auto;padding:0 32px}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:24px;height:64px}
+.word{font:700 20px/24px var(--font-sans);letter-spacing:-0.04em;text-decoration:none}
+.word b{color:var(--brand)}
+.nav{display:flex;gap:4px;margin-right:auto}
+.nav a{padding:6px 10px;border-radius:var(--radius-md);color:var(--text-muted);text-decoration:none;font:500 14px/20px var(--font-sans)}
+.nav a:hover{color:var(--text);background:var(--surface-2)}
+.btn-l{height:36px;padding:0 14px;font-size:14px}
+.hero{padding:88px 0 56px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font:500 13px/18px var(--font-sans);color:var(--text-muted)}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--brand)}
+.h1{margin:20px 0 0;max-width:860px;font:600 60px/64px var(--font-sans);letter-spacing:-0.035em}
+.h1 span{color:var(--text-muted)}
+.lead{margin:20px 0 0;max-width:620px;font-size:18px;line-height:28px;color:var(--text-muted)}
+.ctas{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:32px}
+.ctas .note{font:400 13px/18px var(--font-sans);color:var(--text-muted)}
+.shot{position:relative;margin-top:64px;border:1px solid var(--line);border-radius:var(--radius-xl);background:var(--surface-1);overflow:hidden;box-shadow:var(--shadow-pop)}
+.shot-bar{display:flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.shot-bar i{width:10px;height:10px;border-radius:50%;background:var(--surface-3)}
+.shot-bar span{margin-left:10px;font:400 12px/16px var(--font-sans);color:var(--text-muted)}
+.scale{position:relative;overflow:hidden}
+.scale > div{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none}
+.desk{height:765px}
+.desk > div{width:1440px;height:1000px;transform:scale(0.7639)}
+.cap{margin:12px 0 0;font:400 13px/18px var(--font-sans);color:var(--text-muted)}
+.sec{padding:96px 0;border-top:1px solid var(--line)}
+.sec-h{margin:0;max-width:720px;font:600 40px/46px var(--font-sans);letter-spacing:-0.03em}
+.sec-p{margin:14px 0 0;max-width:620px;font-size:17px;line-height:26px;color:var(--text-muted)}
+.kick{display:block;margin-bottom:14px;font:500 13px/18px var(--font-sans);color:var(--brand-text)}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:48px 0 0;padding:0;list-style:none;border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden}
+.steps li{padding:24px;border-right:1px solid var(--line);background:var(--surface-1)}
+.steps li:last-child{border-right:0}
+.steps .n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:var(--radius-md);border:1px solid var(--line-strong);font:600 13px/1 var(--font-sans)}
+.steps h3{margin:20px 0 8px;font:600 17px/24px var(--font-sans);letter-spacing:-0.01em}
+.steps p{margin:0;color:var(--text-muted);font-size:14px;line-height:22px}
+.feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin-top:48px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden}
+.feat{padding:28px 24px;background:var(--bg)}
+.feat svg{width:20px;height:20px;color:var(--text-muted)}
+.feat h3{margin:18px 0 8px;font:600 16px/22px var(--font-sans)}
+.feat p{margin:0;color:var(--text-muted);font-size:14px;line-height:22px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:64px;align-items:center}
+.keys{display:grid;margin-top:32px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-1);overflow:hidden}
+.keys div{display:flex;align-items:center;justify-content:space-between;gap:16px;height:52px;padding:0 18px;border-bottom:1px solid var(--line);font:500 14px/20px var(--font-sans)}
+.keys div:last-child{border-bottom:0}
+.keys .kbd{height:22px;padding:0 7px;font-size:12px}
+.ledger{margin-top:32px;padding:20px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-1);display:grid;gap:10px;font-size:14px}
+.ledger div{display:flex;justify-content:space-between;gap:16px}
+.ledger .m{color:var(--text-muted)}
+.ledger .eq{padding-top:10px;border-top:1px solid var(--line);font-weight:600}
+.ledger .warn{color:var(--warning);font-weight:600}
+.phone{justify-self:center;width:300px;padding:10px;border:1px solid var(--line-strong);border-radius:36px;background:var(--surface-1);box-shadow:var(--shadow-pop)}
+.phone .scale{height:649px;border-radius:28px}
+.phone .scale > div{width:390px;height:844px;transform:scale(0.7692)}
+.fit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:40px}
+.fit div{padding:20px;border:1px solid var(--line);border-radius:var(--radius-lg)}
+.fit b{display:block;font:600 15px/22px var(--font-sans)}
+.fit span{display:block;margin-top:6px;color:var(--text-muted);font-size:14px;line-height:22px}
+.faq{margin-top:40px;border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 0;cursor:pointer;list-style:none;font:500 16px/24px var(--font-sans)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--text-muted);font-size:20px}
+.faq details[open] summary::after{content:"−"}
+.faq p{margin:0 0 20px;max-width:720px;color:var(--text-muted);font-size:15px;line-height:24px}
+.close{padding:112px 0;border-top:1px solid var(--line);text-align:center}
+.close .sec-h{margin:0 auto;max-width:680px}
+.close .sec-p{margin:14px auto 0}
+.close .ctas{justify-content:center}
+.foot{border-top:1px solid var(--line)}
+.foot .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:16px 32px;padding-top:28px;padding-bottom:36px;color:var(--text-muted);font-size:13px;line-height:18px}
+.foot nav{display:flex;gap:20px;margin-left:auto}
+.foot a{text-decoration:none}
+.foot a:hover{color:var(--text)}
+@container (max-width: 900px){
+  .wrap{padding:0 20px}
+  .nav,.top .ghost{display:none}
+  .top .wrap{justify-content:space-between}
+  .hero{padding:48px 0 32px}
+  .h1{font-size:38px;line-height:42px}
+  .lead{font-size:16px;line-height:24px}
+  .shot.desk-only{display:none}
+  .sec{padding:64px 0}
+  .sec-h{font-size:28px;line-height:34px}
+  .sec-p{font-size:15px;line-height:24px}
+  .steps,.feats,.fit,.split{grid-template-columns:minmax(0,1fr)}
+  .steps li{border-right:0;border-bottom:1px solid var(--line)}
+  .steps li:last-child{border-bottom:0}
+  .split{gap:40px}
+  .close{padding:72px 0}
+  .foot nav{margin-left:0}
+}
+
+
+body{margin:0}
+a{color:var(--brand-text)}
+.board4{display:grid;grid-template-columns:repeat(4,minmax(260px,1fr));gap:12px;padding:16px;align-items:start;overflow-x:auto}
+.col-hint{font:400 12px/16px var(--font-sans);color:var(--text-muted);padding:0 4px 4px}
+.closed{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 16px 10px 24px;border-bottom:1px solid var(--line);background:var(--surface-2);font:500 13px/18px var(--font-sans)}
+.closed svg{width:16px;height:16px;color:var(--warning);flex:none}
+.limit{display:inline-flex;align-items:center;gap:6px;font:400 12px/16px var(--font-sans);color:var(--text-muted)}
+.limit b{color:var(--danger);font-weight:600}
+.link-btn{flex:1;justify-content:center}
+
+
+body{margin:0}
+.sb-item{display:flex;align-items:center;gap:10px;height:30px;padding:0 8px;border-radius:var(--radius-md);color:var(--text-muted);font:500 13px/18px var(--font-sans);text-decoration:none}
+.sb-item:hover{background:var(--surface-2);color:var(--text)}
+.sb-item svg{width:16px;height:16px;flex:none}
+.sb-item.on{background:var(--surface-3);color:var(--text)}
+.sb-item .badge{margin-left:auto;font:500 11px/16px var(--font-sans);color:var(--text-muted)}
+.sb-tool{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:var(--radius-md);border:1px solid var(--line);background:var(--surface-1);color:var(--text-muted);cursor:pointer}
+.sb-tool svg{width:15px;height:15px}
+
+
+body{margin:0}
+.st{display:flex;gap:6px;overflow-x:auto;padding:0 16px 10px}
+.st button{flex:none;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:18px;background:var(--surface-1);color:var(--text-muted);font:500 13px/16px var(--font-sans);cursor:pointer}
+.st button[aria-pressed="true"]{background:var(--surface-3);color:var(--text);border-color:var(--line-strong)}
+.st .n{font-weight:400;color:var(--text-muted)}
+.orow{display:grid;grid-template-columns:16px 1fr auto;gap:4px 12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--text)}
+.orow:active{background:var(--surface-2)}
+.orow .top{display:flex;justify-content:space-between;gap:8px;font:600 14px/20px var(--font-sans)}
+.orow .meta{grid-column:2 / 4;display:flex;justify-content:space-between;gap:8px;font:400 12px/16px var(--font-sans);color:var(--text-muted)}
+.orow .items{grid-column:2 / 4;font:400 13px/18px var(--font-sans);color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.late{color:var(--danger);font-weight:600}
+.tot{font:600 14px/20px var(--font-sans);font-variant-numeric:tabular-nums}
+.act{display:flex;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--surface-1)}
+.act .btn{flex:1;justify-content:center;height:44px}
+
+
+body{margin:0}
+.mn a{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:56px;color:var(--text-muted);font:500 11px/14px var(--font-sans);text-decoration:none}
+.mn a svg{width:22px;height:22px}
+.mn a[aria-current="page"]{color:var(--text)}
+.mn a[aria-current="page"] svg{color:var(--brand)}
+.mn .badge{position:absolute;top:6px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:8px;background:var(--brand);color:var(--on-brand);font:700 10px/16px var(--font-sans);text-align:center}
+.mn .new{width:48px;height:48px;border-radius:14px;background:var(--brand);color:var(--on-brand);display:inline-flex;align-items:center;justify-content:center}
+.mn .new svg{width:24px;height:24px;color:var(--on-brand)}
+
+</style>
+</head>
+<body>
+<div id="root" style="min-height: 100vh;">
+
+<div class="pp" data-theme="dark">
+
+<header class="top">
+<div class="wrap">
+<a class="word" href="#inicio" aria-label="Devlivery, início">Devlivery<b>.</b></a>
+<nav class="nav" aria-label="Seções">
+<a href="#como-funciona">Como funciona</a>
+<a href="#recursos">Recursos</a>
+<a href="#caixa">Caixa</a>
+<a href="#perguntas">Perguntas</a>
+</nav>
+<a class="btn btn-ghost btn-l ghost" href="Login.html">Entrar</a>
+<a class="btn btn-primary btn-l" href="#contato">Falar com a gente</a>
+</div>
+</header>
+
+<main id="inicio">
+<section class="hero">
+<div class="wrap">
+<span class="eyebrow"><i aria-hidden="true"></i>Para deliveries que atendem pelo WhatsApp</span>
+<h1 class="h1">Do WhatsApp à entrega, sem perder pedido nem troco. <span>Num sistema só.</span></h1>
+<p class="lead">O Devlivery organiza os pedidos, a comanda da cozinha, o caixa e as despesas do seu delivery. Feito para a equipe pequena que atende, prepara e entrega ao mesmo tempo.</p>
+<div class="ctas">
+<a class="btn btn-primary btn-l" href="#contato">Falar com a gente</a>
+<a class="btn btn-l" href="#como-funciona">Ver como funciona</a>
+</div>
+<div class="shot desk-only" aria-label="Tela de pedidos do Devlivery">
+<div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i><span>Pedidos de hoje</span></div>
+<div class="scale desk" aria-hidden="true"><div>
+
+<div class="app" data-theme="dark">
+
+
+<nav aria-label="Principal" style="width: 240px; min-height: 100%; box-sizing: border-box; flex: 0 0 240px; display: flex; flex-direction: column; gap: 16px; padding: 14px 10px 12px 12px; background: var(--bg); color: var(--text); font-family: var(--font-sans);">
+<div style="display: flex; align-items: center; gap: 8px; padding: 0px 2px;">
+<button type="button" aria-label="Trocar estabelecimento" style="flex: 1 1 0%; min-width: 0px; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0px 6px; border: 0px; border-radius: var(--radius-md); background: transparent; color: var(--text); cursor: pointer; font: 600 13px/18px var(--font-sans);">
+<svg width="20" height="20" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="var(--surface-3)"></rect><path fill="var(--text)" fill-rule="evenodd" d="M15 15h12c9.4 0 16 7.2 16 17s-6.6 17-16 17H15Z M23 22.5h4c5 0 8.4 3.9 8.4 9.5s-3.4 9.5-8.4 9.5h-4Z"></path><circle cx="50.5" cy="45" r="4.5" fill="var(--brand)"></circle></svg>
+<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Cantina do Bairro</span>
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color: var(--text-muted); flex: 0 0 auto;"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<a class="sb-tool" href="NovoPedido.html" aria-label="Novo pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></a>
+</div>
+<button type="button" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0px 8px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-1); color: var(--text-muted); font: 400 13px/18px var(--font-sans); cursor: pointer;">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<span style="flex: 1 1 0%; text-align: left;">Buscar ou executar</span>
+<span class="kbd">Ctrl K</span>
+</button>
+<div style="display: flex; flex-direction: column; gap: 1px;">
+<span style="padding: 6px 8px 4px; font: 500 12px/16px var(--font-sans); color: var(--text-muted);">Operação</span>
+
+<a href="Pedidos.html" class="sb-item on" aria-current="page">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2zM9 7h6M9 11h6M9 15h4"></path></svg>
+<span>Pedidos</span>
+<span class="badge">8</span>
+</a>
+
+<a href="Caixa.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v13H3zM3 7l3-4h12l3 4M16 13.5h2"></path></svg>
+<span>Caixa</span>
+<span class="badge"></span>
+</a>
+
+<a href="Dashboard.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>
+<span>Dashboard</span>
+<span class="badge"></span>
+</a>
+
+<a href="Produtos.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"></path></svg>
+<span>Produtos</span>
+<span class="badge"></span>
+</a>
+
+<a href="Despesas.html" class="sb-item" aria-current="false">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h9l5 5v15H6zM14 2v6h6M9 14h8"></path></svg>
+<span>Despesas</span>
+<span class="badge">3</span>
+</a>
+
+</div>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+<a href="Caixa.html" style="display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-1); color: var(--text); text-decoration: none; font: 500 12px/16px var(--font-sans);">
+<span style="width: 8px; height: 8px; border-radius: 50%; background: var(--status-delivered); border: 0px; box-sizing: border-box; flex: 0 0 auto;"></span>
+<span style="flex: 1 1 0%;">Caixa aberto</span>
+<span class="muted num" style="font-weight: 400;">desde 18:20</span>
+</a>
+<div style="display: flex; align-items: center; gap: 8px; padding: 4px 6px;">
+<span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 50%; background: var(--surface-3); color: var(--text); display: inline-flex; align-items: center; justify-content: center; font: 600 10px/1 var(--font-sans);">AL</span>
+<span style="flex: 1 1 0%; font: 500 13px/18px var(--font-sans);">Ana Lima</span>
+<button type="button" class="sb-tool" aria-label="Alternar tema" style="border: 0px; background: transparent;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="view">
+
+<header class="view-head">
+<h1 class="view-title">Pedidos <span class="sep">/</span> <span class="muted" style="font-weight: 500;">Hoje, 19:53</span></h1>
+<div class="row">
+<span class="limit">Atraso a partir de 40 min</span>
+<a class="btn btn-primary" href="NovoPedido.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Novo pedido <span class="kbd">C</span></a>
+</div>
+</header>
+
+
+
+<div class="view-bar">
+<div class="tabs" role="group" aria-label="Pedidos">
+<button type="button" class="tab" aria-pressed="true">Em aberto <span class="count">8</span></button>
+<button type="button" class="tab" aria-pressed="false">Finalizados <span class="count">6</span></button>
+</div>
+<div class="row">
+<button type="button" class="btn btn-ghost btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>Filtrar</button>
+<div class="seg" role="group" aria-label="Visualização"><button type="button" aria-pressed="false">Lista</button><button type="button" aria-pressed="true">Quadro</button></div>
+</div>
+</div>
+
+<div class="view-body">
+<section class="board4" aria-label="Quadro de pedidos">
+
+<div class="col">
+<div class="col-head">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-pending"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 2"></circle></svg>
+<span>Pendente</span><span class="count">2</span>
+<span class="sum">R$ 171,00</span>
+</div>
+<div class="col-hint">Criados com Só criar. Imprimir já move para Em preparo.</div>
+
+
+<article class="dv-card"><div class="dv-card-top"><span>#48</span><span class="dv-num dv-elapsed">2 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-pending"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 2"></circle></svg><div style="min-width: 0px;"><div class="dv-card-name">Rafaela Costa</div><div class="dv-card-addr">R. Barão de Jaguara, 1050, ap. 31, Centro</div></div></div><ul class="dv-card-items"><li><b>1×</b>Pizza grande<span class="dv-card-opts">½ Calabresa, ½ Crocante</span></li><li><b>1×</b>Coca-Cola 2 L</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="3" width="12" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"></rect><path d="M1 5.8h12" stroke="currentColor" stroke-width="1.3"></path></svg>Crédito</span><span class="dv-card-total">R$ 105,00</span></div><div class="dv-card-action"><button type="button" class="btn btn-sm link-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z"></path></svg>Imprimir e preparar</button></div></article>
+
+<article class="dv-card"><div class="dv-card-top"><span>#47</span><span class="dv-num dv-elapsed">4 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-pending"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 2"></circle></svg><div style="min-width: 0px;"><div class="dv-card-name">Bruno Teixeira</div><div class="dv-card-addr">Av. Júlio de Mesquita, 410, Cambuí</div></div></div><ul class="dv-card-items"><li><b>1×</b>Calzone de bacon</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1.5L12.5 7 7 12.5 1.5 7Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>Pix</span><span class="dv-card-total">R$ 66,00</span></div><div class="dv-card-action"><button type="button" class="btn btn-sm link-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z"></path></svg>Imprimir e preparar</button></div></article>
+
+
+</div>
+
+<div class="col">
+<div class="col-head">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg>
+<span>Em preparo</span><span class="count">3</span>
+<span class="sum">R$ 323,00</span>
+</div>
+
+
+
+<article class="dv-card"><div class="dv-card-top"><span>#46</span><span class="dv-num dv-elapsed">9 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">Maria Souza</div><div class="dv-card-addr">R. das Palmeiras, 120, Cambuí</div></div></div><ul class="dv-card-items"><li><b>1×</b>Calzone caipira<span class="dv-card-opts">+ Palmito</span></li><li><b>1×</b>Calzone calabresa</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1.5L12.5 7 7 12.5 1.5 7Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>Pix</span><span class="dv-card-total">R$ 127,00</span></div><div class="dv-card-action"><button type="button" class="btn btn-sm link-btn">Marcar pronto <span class="kbd">P</span></button></div></article>
+
+<article class="dv-card"><div class="dv-card-top"><span>#45</span><span class="dv-num dv-elapsed">23 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">Carlos Mendes</div><div class="dv-card-addr">R. Coronel Quirino, 822, Cambuí</div></div></div><div class="dv-card-note">Alterado às 19:50, cozinha avisada</div><ul class="dv-card-items"><li><b>1×</b>Pizza pequena crocante</li><li><b>1×</b>Calzone de bacon</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="3.5" width="12" height="7" rx="1.2" stroke="currentColor" stroke-width="1.3"></rect><circle cx="7" cy="7" r="1.6" stroke="currentColor" stroke-width="1.3"></circle></svg>Dinheiro, troco R$ 24,00</span><span class="dv-card-total">R$ 126,00</span></div><div class="dv-card-action"><button type="button" class="btn btn-sm link-btn">Marcar pronto <span class="kbd">P</span></button></div></article>
+
+<article class="dv-card dv-card-late"><div class="dv-card-top"><span>#44</span><span class="dv-num dv-elapsed dv-late"><svg viewBox="0 0 14 14" width="12" height="12" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 4.2V7.4l2 1.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"></path></svg>41 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">Lúcia Ferraz</div><div class="dv-card-addr">R. Antônio Lapa, 75, Cambuí</div></div></div><ul class="dv-card-items"><li><b>1×</b>Calzone vegetariano, sem alho frito</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="3" width="12" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"></rect><path d="M1 5.8h12" stroke="currentColor" stroke-width="1.3"></path></svg>Débito</span><span class="dv-card-total">R$ 70,00</span></div><div class="dv-card-action"><button type="button" class="btn btn-sm link-btn">Marcar pronto <span class="kbd">P</span></button></div></article>
+
+
+</div>
+
+<div class="col">
+<div class="col-head">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-ready"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 1 1 3.5 7Z" fill="currentColor"></path></svg>
+<span>Pronto</span><span class="count">1</span>
+<span class="sum">R$ 90,00</span>
+</div>
+
+<button type="button" class="btn btn-sm" style="justify-content: center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>Saiu para entrega (1) <span class="kbd">S</span></button>
+
+<article class="dv-card"><div class="dv-card-top"><span>#43</span><span class="dv-num dv-elapsed">33 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-ready"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 1 1 3.5 7Z" fill="currentColor"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">João Pedro</div><div class="dv-card-addr">Av. Norte-Sul, 2400, ap. 52</div></div></div><div class="dv-card-note">Interfone quebrado, ligar ao chegar</div><ul class="dv-card-items"><li><b>1×</b>Pizza grande<span class="dv-card-opts">½ Frango, ½ Calabresa</span></li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="3.5" width="12" height="7" rx="1.2" stroke="currentColor" stroke-width="1.3"></rect><circle cx="7" cy="7" r="1.6" stroke="currentColor" stroke-width="1.3"></circle></svg>Dinheiro, troco R$ 10,00</span><span class="dv-card-total">R$ 90,00</span></div></article>
+
+
+</div>
+
+<div class="col">
+<div class="col-head">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-out"><circle cx="7" cy="7" r="7" fill="currentColor"></circle><path d="M4 7h5.2M7.4 4.6L9.8 7 7.4 9.4" stroke="var(--surface-1)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg>
+<span>Saiu para entrega</span><span class="count">2</span>
+<span class="sum">R$ 155,00</span>
+</div>
+<div class="col-hint">Com o entregador.</div>
+
+
+<article class="dv-card"><div class="dv-card-top"><span>#42</span><span class="dv-num dv-elapsed">saiu há 12 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-out"><circle cx="7" cy="7" r="7" fill="currentColor"></circle><path d="M4 7h5.2M7.4 4.6L9.8 7 7.4 9.4" stroke="var(--surface-1)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">Tatiane Rocha</div><div class="dv-card-addr">R. Maria Monteiro, 120, Cambuí</div></div></div><ul class="dv-card-items"><li><b>1×</b>Calzone de frango</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="3" width="12" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"></rect><path d="M1 5.8h12" stroke="currentColor" stroke-width="1.3"></path></svg>Crédito</span><span class="dv-card-total">R$ 71,00</span></div><div class="dv-card-action"><a class="btn btn-sm link-btn" href="Entrega.html">Marcar entregue <span class="kbd">E</span></a></div></article>
+
+<article class="dv-card"><div class="dv-card-top"><span>#41</span><span class="dv-num dv-elapsed">saiu há 12 min</span></div><div class="dv-card-who"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-out"><circle cx="7" cy="7" r="7" fill="currentColor"></circle><path d="M4 7h5.2M7.4 4.6L9.8 7 7.4 9.4" stroke="var(--surface-1)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg><div style="min-width: 0px;"><div class="dv-card-name">André Lopes</div><div class="dv-card-addr">R. Sampainho, 300, Cambuí</div></div></div><ul class="dv-card-items"><li><b>1×</b>Calzone caipira</li><li><b>1×</b>Coca-Cola 2 L</li></ul><div class="dv-card-foot"><span class="dv-pay"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1.5L12.5 7 7 12.5 1.5 7Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>Pix</span><span class="dv-card-total">R$ 84,00</span></div><div class="dv-card-action"><a class="btn btn-sm link-btn" href="Entrega.html">Marcar entregue <span class="kbd">E</span></a></div></article>
+
+
+</div>
+
+</section>
+</div>
+
+</main>
+</div>
+</div></div>
+</div>
+<p class="cap">Tela de pedidos com dados de exemplo.</p>
+</div>
+</section>
+
+<section class="sec" id="como-funciona" aria-labelledby="cf-h">
+<div class="wrap">
+<span class="kick">Como funciona</span>
+<h2 class="sec-h" id="cf-h">O dia do delivery, do primeiro pedido ao fechamento.</h2>
+<p class="sec-p">O mesmo caminho que sua equipe já faz, sem caderno, sem redigitar e sem conta de cabeça no fim da noite.</p>
+<ol class="steps">
+<li><span class="n">1</span><h3>Lance ao lado do WhatsApp</h3><p>Digite o telefone e o cliente aparece com o último endereço. Itens, acréscimos e pagamento em uma tela só.</p></li>
+<li><span class="n">2</span><h3>Imprima a comanda</h3><p>A cozinha recebe só o que precisa preparar, em letra grande. O pedido passa para Em preparo sozinho.</p></li>
+<li><span class="n">3</span><h3>Despache e entregue</h3><p>Marque a saída do entregador e, na volta, confirme como o cliente pagou e quanto foi de troco.</p></li>
+<li><span class="n">4</span><h3>Feche o caixa</h3><p>Conte a gaveta antes de ver o esperado. A diferença aparece na hora, com o histórico de cada turno.</p></li>
+</ol>
+</div>
+</section>
+
+<section class="sec" id="recursos" aria-labelledby="rc-h">
+<div class="wrap">
+<span class="kick">Recursos</span>
+<h2 class="sec-h" id="rc-h">Cada parte da operação, no mesmo lugar.</h2>
+<div class="feats">
+<article class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"></rect><rect x="10" y="4" width="5" height="11" rx="1"></rect><rect x="17" y="4" width="4" height="7" rx="1"></rect></svg><h3>Pedidos em quadro</h3><p>Uma coluna por etapa, com o tempo de cada pedido e destaque para o que está atrasado.</p></article>
+<article class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z"></path></svg><h3>Comanda de 80 mm</h3><p>Via da cozinha e via da entrega na impressora térmica, com observações e o troco que o entregador deve levar.</p></article>
+<article class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v13H3zM3 7l3-4h12l3 4M16 13.5h2"></path></svg><h3>Caixa do início ao fim</h3><p>Abertura, aportes, sangrias e fechamento, cada movimento com quem fez e a que horas.</p></article>
+<article class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"></path></svg><h3>Cardápio com opções</h3><p>Tamanhos, meio a meio e acréscimos com preço, e o que está indisponível some na hora de lançar.</p></article>
+<article class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h9l5 5v15H6zM14 2v6h6M9 14h8"></path></svg><h3>Despesas que se repetem</h3><p>Contas por natureza, fornecedor e vencimento. Aluguel e luz voltam sozinhos no mês seguinte.</p></article>
+<article class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg><h3>Resumo que fecha a conta</h3><p>Receita, despesas e lucro operacional, com as retiradas dos sócios separadas e os horários de pico.</p></article>
+</div>
+</div>
+</section>
+
+<section class="sec" id="caixa" aria-labelledby="cx-h">
+<div class="wrap split">
+<div>
+<span class="kick">Caixa</span>
+<h2 class="sec-h" id="cx-h">O dinheiro da gaveta bate. Ou você sabe por quê.</h2>
+<p class="sec-p">No fechamento, quem conta informa o valor antes de ver o esperado. Pix e cartão não entram na contagem. Troco, aporte e sangria já estão na conta.</p>
+</div>
+<div class="ledger" aria-label="Exemplo de fechamento de caixa">
+<div><span class="m">Abertura</span><span>R$ 150,00</span></div>
+<div><span class="m">Recebido em dinheiro</span><span>+ R$ 200,00</span></div>
+<div><span class="m">Trocos</span><span>− R$ 39,00</span></div>
+<div><span class="m">Sangria guardada no cofre</span><span>− R$ 150,00</span></div>
+<div class="eq"><span>Esperado na gaveta</span><span>R$ 161,00</span></div>
+<div><span class="m">Contado</span><span>R$ 160,00</span></div>
+<div><span>Diferença</span><span class="warn">− R$ 1,00</span></div>
+</div>
+</div>
+</section>
+
+<section class="sec" aria-labelledby="kb-h">
+<div class="wrap split">
+<div>
+<span class="kick">No balcão e no celular</span>
+<h2 class="sec-h" id="kb-h">Rápido no computador. Inteiro no celular.</h2>
+<p class="sec-p">No computador, as ações do dia têm atalho de teclado. No celular, os mesmos pedidos e o caixa ficam a um toque, com o botão de novo pedido sempre à mão.</p>
+<div class="keys" aria-label="Atalhos de teclado">
+<div><span>Novo pedido</span><span class="kbd">C</span></div>
+<div><span>Criar e imprimir</span><span class="kbd">Ctrl Enter</span></div>
+<div><span>Marcar pronto</span><span class="kbd">P</span></div>
+<div><span>Marcar entregue</span><span class="kbd">E</span></div>
+<div><span>Buscar qualquer coisa</span><span class="kbd">Ctrl K</span></div>
+</div>
+</div>
+<div class="phone" aria-label="Devlivery no celular">
+<div class="scale" aria-hidden="true"><div>
+
+<div data-theme="dark" style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 13px; line-height: 18px; overflow: hidden;">
+<header style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px 12px;">
+<h1 style="margin: 0px; font: 700 22px/28px var(--font-sans); letter-spacing: -0.03em;">Pedidos</h1>
+<div class="row" style="gap: 4px;">
+<span class="muted num" style="font-size: 12px; margin-right: 6px;">Atraso a partir de 40 min</span>
+<button type="button" class="btn btn-ghost" aria-label="Buscar pedido" style="width: 44px; height: 44px; padding: 0px; justify-content: center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true" style="width: 20px; height: 20px;"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg></button>
+</div>
+</header>
+<div class="st" role="group" aria-label="Status">
+
+<button type="button" aria-pressed="false"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-pending"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 2"></circle></svg>Pendente <span class="n">2</span></button>
+
+<button type="button" aria-pressed="true"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg>Em preparo <span class="n">3</span></button>
+
+<button type="button" aria-pressed="false"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-ready"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 1 1 3.5 7Z" fill="currentColor"></path></svg>Pronto <span class="n">1</span></button>
+
+<button type="button" aria-pressed="false"><svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-out"><circle cx="7" cy="7" r="7" fill="currentColor"></circle><path d="M4 7h5.2M7.4 4.6L9.8 7 7.4 9.4" stroke="var(--surface-1)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg>Saiu <span class="n">2</span></button>
+
+</div>
+
+<div style="flex: 1 1 0%; overflow: auto; border-top: 1px solid var(--line);">
+
+<a class="orow" href="MPedidoDetalhe.html">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg>
+<span class="top"><span>#46 Maria Souza</span></span>
+<span class="tot">R$ 127,00</span>
+<span class="items">1× Calzone caipira (+ Palmito), 1× Calzone calabresa</span>
+<span class="meta"><span>Pix</span><span class="">9 min</span></span>
+</a>
+
+<a class="orow" href="MPedidoDetalhe.html">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg>
+<span class="top"><span>#45 Carlos Mendes</span></span>
+<span class="tot">R$ 126,00</span>
+<span class="items">1× Pizza pequena crocante, 1× Calzone de bacon</span>
+<span class="meta"><span>Dinheiro</span><span class="">23 min</span></span>
+</a>
+
+<a class="orow" href="MPedidoDetalhe.html">
+<svg viewBox="0 0 14 14" fill="none" aria-hidden="true" class="dv-status-icon dv-si-preparing"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="currentColor"></path></svg>
+<span class="top"><span>#44 Lúcia Ferraz</span></span>
+<span class="tot">R$ 70,00</span>
+<span class="items">1× Calzone vegetariano, sem alho frito</span>
+<span class="meta"><span>Débito</span><span class="late">41 min</span></span>
+</a>
+
+</div>
+
+
+<nav class="mn" aria-label="Principal" data-theme="dark" style="width: 390px; box-sizing: border-box; display: grid; grid-template-columns: repeat(5, minmax(0px, 1fr)); align-items: center; padding: 4px 6px 10px; background: var(--surface-1); border-top: 1px solid var(--line); font-family: var(--font-sans);">
+<a href="MPedidos.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2zM9 7h6M9 11h6M9 15h4"></path></svg>Pedidos<span class="badge">8</span></a>
+<a href="Caixa.html" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v13H3zM3 7l3-4h12l3 4M16 13.5h2"></path></svg>Caixa</a>
+<a href="MNovoPedido.html" aria-label="Novo pedido"><span class="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span></a>
+<a href="Dashboard.html" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>Resumo</a>
+<a href="MMais.html" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>Mais<span class="badge">1</span></a>
+</nav>
+
+</div>
+</div></div>
+</div>
+</div>
+</section>
+
+<section class="sec" aria-labelledby="pq-h">
+<div class="wrap">
+<span class="kick">Para quem é</span>
+<h2 class="sec-h" id="pq-h">Pensado para o delivery de bairro.</h2>
+<div class="fit">
+<div><b>Quem atende pelo WhatsApp</b><span>Os pedidos chegam por mensagem e alguém precisa lançar rápido, sem errar endereço nem valor.</span></div>
+<div><b>Equipe pequena</b><span>Uma pessoa no atendimento, uma na cozinha e uma na rua. Nada de telas que pedem um gerente para cada coisa.</span></div>
+<div><b>Quem quer saber se deu lucro</b><span>Saber quanto entrou, quanto saiu e quanto sobrou no mês, sem montar planilha no domingo.</span></div>
+</div>
+</div>
+</section>
+
+<section class="sec" id="perguntas" aria-labelledby="fq-h">
+<div class="wrap">
+<span class="kick">Perguntas</span>
+<h2 class="sec-h" id="fq-h">Perguntas frequentes</h2>
+<div class="faq">
+<details><summary>Preciso instalar alguma coisa?</summary><p>Não. O Devlivery funciona no navegador do computador e do celular. Para a comanda, basta uma impressora térmica de 80 mm ligada ao computador do balcão.</p></details>
+<details><summary>Funciona no celular?</summary><p>Sim. Pedidos, caixa e resumo funcionam no celular, com uma barra de atalhos embaixo e o botão de novo pedido no meio.</p></details>
+<details><summary>Os dados do meu delivery ficam separados dos outros?</summary><p>Sim. Cada estabelecimento enxerga só os próprios pedidos, caixa e despesas, e cada movimento fica registrado com quem o fez.</p></details>
+<details><summary>O cliente consegue pedir sozinho?</summary><p>Ainda não. Hoje os pedidos são lançados pela equipe. Um cardápio para o cliente montar o pedido e enviar pelo WhatsApp está nos próximos passos.</p></details>
+<details><summary>Quanto custa?</summary><p>Fale com a gente pelo WhatsApp. Contamos como funciona e combinamos um período para você testar no seu delivery.</p></details>
+</div>
+</div>
+</section>
+
+<section class="close" id="contato" aria-labelledby="ct-h">
+<div class="wrap">
+<h2 class="sec-h" id="ct-h">Teste no seu delivery.</h2>
+<p class="sec-p">Mostramos o Devlivery funcionando e ajudamos a cadastrar o seu cardápio.</p>
+<div class="ctas">
+<a class="btn btn-primary btn-l" href="#contato">Falar no WhatsApp</a>
+<a class="btn btn-l" href="Login.html">Já uso, quero entrar</a>
+</div>
+</div>
+</section>
+</main>
+
+<footer class="foot">
+<div class="wrap">
+<span class="word" style="font-size: 16px;">Devlivery<b>.</b></span>
+<span>© 2026 Devlivery. Da mesma família do Devinn, para pousadas.</span>
+<nav aria-label="Rodapé"><a href="#recursos">Recursos</a><a href="#perguntas">Perguntas</a><a href="Login.html">Entrar</a></nav>
+</div>
+</footer>
+</div>
+</div>
+</body>
+</html>

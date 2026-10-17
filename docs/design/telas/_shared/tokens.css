@@ -1,0 +1,29 @@
+/* Devlivery tokens as CSS variables, mirrored from the Devlivery design system's tokens.json (v3). */
+:root, [data-theme="dark"] {
+  --bg: #0e0e10; --surface-1: #161618; --surface-2: #1e1e21; --surface-3: #26262a;
+  --line: #232326; --line-strong: #6a6a72;
+  --text: #ededef; --text-muted: #93939c;
+  --brand: #ff6d1f; --on-brand: #0e0e10; --brand-soft: #2a1a10; --brand-text: #ff8a4c;
+  --focus: var(--brand);
+  --status-pending: #93939c; --status-preparing: var(--brand); --status-ready: #4ea7fc; --status-delivered: #4cb782; --status-canceled: #93939c;
+  --warning: #e2a336; --danger: #f2665b;
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.4); --shadow-pop: 0 16px 48px rgba(0,0,0,0.6);
+  color-scheme: dark;
+}
+[data-theme="light"] {
+  --bg: #fafafa; --surface-1: #ffffff; --surface-2: #f2f2f3; --surface-3: #ebebed;
+  --line: #e7e7e9; --line-strong: #8c8c94;
+  --text: #18181b; --text-muted: #66666f;
+  --brand: #ea5a0c; --on-brand: #18181b; --brand-soft: #fff1e8; --brand-text: #c2410c;
+  --focus: var(--brand);
+  --status-pending: #66666f; --status-preparing: var(--brand); --status-ready: #1d6fc4; --status-delivered: #24804f; --status-canceled: #66666f;
+  --warning: #9a6200; --danger: #c8321f;
+  --shadow-card: 0 1px 2px rgba(24,24,27,0.06); --shadow-pop: 0 16px 48px rgba(24,24,27,0.16);
+  color-scheme: light;
+}
+:root {
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 10px; --radius-xl: 14px;
+  --font-sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "Cascadia Mono", monospace;
+}
