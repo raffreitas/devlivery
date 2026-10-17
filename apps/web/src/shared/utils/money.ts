@@ -17,6 +17,14 @@ export function itemTotal(unitPrice: number, quantity: number): number {
   return fromCents(toCents(unitPrice) * quantity);
 }
 
+export function itemsSubtotal(
+  items: readonly { unitPrice: number; quantity: number }[],
+): number {
+  return sumMoney(
+    items.map((item) => itemTotal(item.unitPrice, item.quantity)),
+  );
+}
+
 export function moneyDifference(amount: number, expected: number): number {
   return fromCents(toCents(amount) - toCents(expected));
 }

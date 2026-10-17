@@ -1,6 +1,6 @@
 import { renderWithProviders } from "@test/render";
 import { server } from "@test/server";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
@@ -22,6 +22,70 @@ const initialData: OrderFormData = {
 };
 
 describe("OrderForm", () => {
+  it.each([20, 5])(
+    "preserves the original price when removing and readding a product whose catalog price is %s",
+    async (price) => {
+      server.use(
+        http.get("http://localhost:5000/api/v1/products", () =>
+          HttpResponse.json({
+            data: [
+              {
+                id: "product",
+                name: "Pizza",
+                price,
+                category: "Pizza",
+                description: "Pizza",
+                available: true,
+                createdAt: "2026-10-17T12:00:00Z",
+                updatedAt: "2026-10-17T12:00:00Z",
+              },
+            ],
+          }),
+        ),
+      );
+      const onSubmit = vi.fn().mockResolvedValue(undefined);
+      const user = userEvent.setup();
+      renderWithProviders(
+        <OrderForm
+          initialData={{
+            ...initialData,
+            id: "order",
+            items: [{ ...initialData.items[0], quantity: 1 }],
+            payments: [{ method: "CreditCard", amount: 9.9 }],
+          }}
+          onSubmit={onSubmit}
+          onCancel={vi.fn()}
+        />,
+      );
+      await user.click(
+        screen.getAllByRole("button", { name: "Remover Pizza" })[0],
+      );
+      await user.type(
+        screen.getByRole("combobox", { name: "Produto" }),
+        "Pizza",
+      );
+      await user.click(await screen.findByRole("option", { name: /^Pizza -/ }));
+      await user.click(screen.getByRole("button", { name: "Adicionar Item" }));
+      expect(
+        (screen.getByRole("textbox", { name: /Valor em/ }) as HTMLInputElement)
+          .value,
+      ).toContain("9,90");
+      await user.click(
+        screen.getByRole("button", { name: "Atualizar Pedido" }),
+      );
+      await waitFor(() =>
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            items: [expect.objectContaining({ unitPrice: 9.9, quantity: 1 })],
+            payments: [
+              expect.objectContaining({ method: "CreditCard", amount: 9.9 }),
+            ],
+          }),
+        ),
+      );
+    },
+  );
+
   it("shows aggregate payment validation and submits an exact payment using recorded prices", async () => {
     server.use(
       http.get("http://localhost:5000/api/v1/products", () =>

@@ -1,5 +1,5 @@
 import { formatMoney } from "@/shared/utils/formatters";
-import { fromCents, itemTotal, toCents } from "@/shared/utils/money";
+import { itemsSubtotal, itemTotal } from "@/shared/utils/money";
 import { getPaymentOptionLabel } from "../constants/payment-methods";
 import type { Order } from "../types";
 
@@ -60,12 +60,7 @@ export function OrderPrint({ order }: OrderPrintProps) {
 
       <div className="border-t-2 border-dashed border-foreground pt-2 mb-3">
         {(() => {
-          const subtotal = fromCents(
-            order.items.reduce(
-              (s, it) => s + toCents(it.unitPrice) * it.quantity,
-              0,
-            ),
-          );
+          const subtotal = itemsSubtotal(order.items);
           return (
             <div>
               <div className="flex justify-between">

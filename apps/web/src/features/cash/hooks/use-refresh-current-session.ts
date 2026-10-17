@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/shared/services/query-keys";
 
 /**
  * Hook to manually refresh the current cash session totals
@@ -10,7 +11,7 @@ export function useRefreshCurrentSession() {
 
   return () => {
     queryClient.invalidateQueries({
-      queryKey: ["cash-sessions", "current"],
+      queryKey: queryKeys.currentCash,
       exact: true,
     });
   };

@@ -19,6 +19,61 @@ const product = {
 const url = "http://localhost:5000/api/v1/products";
 
 describe("ProductsPage saving", () => {
+  it("associates server validation with the editable field without duplicating it in a root alert", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get(url, () => HttpResponse.json({ data: [product] })),
+      http.put(`${url}/${product.id}`, () =>
+        HttpResponse.json(
+          { errors: { price: "Preço inválido no servidor" } },
+          { status: 422 },
+        ),
+      ),
+    );
+    renderWithProviders(<ProductsPage />);
+    await user.click(
+      await screen.findByRole("button", { name: "Editar Pizza" }),
+    );
+    const dialog = await screen.findByRole("dialog");
+    await user.click(
+      within(dialog).getByRole("button", { name: "Atualizar Produto" }),
+    );
+    await within(dialog).findByText("Preço inválido no servidor");
+    const price = within(dialog).getByLabelText(/Preço/);
+    expect(price).toHaveAttribute("aria-invalid", "true");
+    expect(price).toHaveAccessibleDescription("Preço inválido no servidor");
+    expect(within(dialog).getAllByRole("alert")).toHaveLength(1);
+    expect(within(dialog).getByRole("alert")).toHaveAttribute(
+      "data-slot",
+      "field-error",
+    );
+    expect(
+      within(dialog).queryByText("Não foi possível salvar"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps a lost write response explicit as an unconfirmed outcome", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get(url, () => HttpResponse.json({ data: [product] })),
+      http.put(`${url}/${product.id}`, () => HttpResponse.error()),
+    );
+    renderWithProviders(<ProductsPage />);
+    await user.click(
+      await screen.findByRole("button", { name: "Editar Pizza" }),
+    );
+    const dialog = await screen.findByRole("dialog");
+    await user.click(
+      within(dialog).getByRole("button", { name: "Atualizar Produto" }),
+    );
+    const alert = await within(dialog).findByRole("alert");
+    expect(alert).toHaveTextContent("Resultado da operação não confirmado");
+    expect(alert).toHaveTextContent("Verifique os registros antes de reenviar");
+    expect(within(dialog).getByLabelText("Nome do Produto")).toHaveValue(
+      "Pizza",
+    );
+  });
+
   it("keeps the editor and input after a rejected save, and closes only after a successful retry", async () => {
     const user = userEvent.setup();
     server.use(

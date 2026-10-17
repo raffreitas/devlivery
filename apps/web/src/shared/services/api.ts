@@ -31,7 +31,7 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-export type ApiErrorKind = "http" | "network" | "timeout";
+export type ApiErrorKind = "http" | "network" | "timeout" | "unknown-outcome";
 
 export class ApiError extends Error {
   status?: number;
@@ -66,8 +66,10 @@ export function shouldRetryQuery(failureCount: number, error: Error): boolean {
   )
     return false;
   return (
-    error.kind !== "http" ||
-    [408, 500, 502, 503, 504].includes(error.status ?? 0)
+    error.kind === "network" ||
+    error.kind === "timeout" ||
+    (error.kind === "http" &&
+      [408, 500, 502, 503, 504].includes(error.status ?? 0))
   );
 }
 
@@ -84,7 +86,7 @@ function getAuthToken(): string | null {
 
 const axiosInstance = axios.create({
   baseURL: `${env.VITE_API_URL.replace(/\/$/, "")}/api/v1`,
-  timeout: 30_000,
+  transitional: { clarifyTimeoutError: true },
   headers: { "Content-Type": "application/json" },
 });
 
@@ -109,6 +111,8 @@ async function request<T>(
     const res = await axiosInstance.request({
       url,
       method: options.method ?? "GET",
+      // A read can be retried. A write may have committed even if its response is lost.
+      timeout: !options.method || options.method === "GET" ? 30_000 : 0,
       data: options.body ?? undefined,
       headers,
       signal: options.signal,
@@ -140,8 +144,18 @@ async function request<T>(
       throw new ApiError(message, status, data ?? undefined);
     }
 
-    const timeout =
-      axiosErr.code === "ECONNABORTED" || axiosErr.code === "ETIMEDOUT";
+    if (options.method && options.method !== "GET") {
+      throw new ApiError(
+        "Não foi possível confirmar o resultado da operação. Verifique os registros antes de reenviar; a gravação pode ter sido concluída.",
+        undefined,
+        undefined,
+        "unknown-outcome",
+      );
+    }
+    if (axiosErr.code === "ECONNABORTED") {
+      throw new axios.CanceledError("Requisição interrompida", axiosErr.config);
+    }
+    const timeout = axiosErr.code === "ETIMEDOUT";
     throw new ApiError(
       timeout
         ? "A requisição demorou demais. Tente novamente."

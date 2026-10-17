@@ -34,7 +34,6 @@ export function useOrders(
         signal,
       ),
     staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
   });
 
   const createMutation = useMutation({

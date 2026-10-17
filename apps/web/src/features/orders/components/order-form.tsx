@@ -28,7 +28,7 @@ import {
   ToggleGroupItem,
 } from "@/shared/components/ui/toggle-group";
 import { applyFormError } from "@/shared/utils/form-errors";
-import { fromCents, toCents } from "@/shared/utils/money";
+import { itemsSubtotal, moneyDifference, sumMoney } from "@/shared/utils/money";
 import {
   getPaymentOptionLabel,
   getPaymentOptions,
@@ -63,6 +63,9 @@ export function OrderForm({
 }: OrderFormProps) {
   const formId = useId();
   const { products } = useProducts();
+  const recordedPrices = new Map(
+    initialData?.items.map((item) => [item.product.id, item.unitPrice]),
+  );
   const [selectedProductId, setSelectedProductId] = useState<
     string | undefined
   >();
@@ -130,7 +133,7 @@ export function OrderForm({
     } else {
       append({
         product: productData,
-        unitPrice: product.price,
+        unitPrice: recordedPrices.get(product.id) ?? product.price,
         quantity,
         notes: notes || undefined,
       });
@@ -177,18 +180,12 @@ export function OrderForm({
     name: "payments",
   });
 
-  const subtotalCents = fields.reduce(
-    (sum, item) => sum + toCents(item.unitPrice) * item.quantity,
-    0,
+  const subtotal = itemsSubtotal(fields);
+  const total = sumMoney([subtotal, deliveryFee]);
+  const totalPaid = sumMoney(
+    (payments ?? []).map((payment) => payment.amount || 0),
   );
-
-  const subtotal = fromCents(subtotalCents);
-  const totalCents = subtotalCents + toCents(deliveryFee);
-  const total = fromCents(totalCents);
-
-  const totalPaid =
-    payments?.reduce((sum, p) => sum + toCents(p.amount || 0), 0) ?? 0;
-  const remainingAmount = fromCents(totalCents - totalPaid);
+  const remainingAmount = moneyDifference(total, totalPaid);
 
   useEffect(() => {
     if (
@@ -207,7 +204,15 @@ export function OrderForm({
         try {
           await handlePlaceOrder(data);
         } catch (error) {
-          applyFormError(form, error, {});
+          applyFormError(form, error, [
+            "customerName",
+            "deliveryAddress",
+            "deliveryFee",
+            "notes",
+            ...paymentFields.map(
+              (_, index) => `payments.${index}.amount` as const,
+            ),
+          ]);
         }
       })}
       className="flex flex-col sm:max-h-[calc(100vh-140px)]"
@@ -217,7 +222,10 @@ export function OrderForm({
         disabled={form.formState.isSubmitting || externalIsSubmitting === true}
         className="flex min-h-0 flex-1 flex-col gap-4"
       >
-        <FormError message={form.formState.errors.root?.server?.message} />
+        <FormError
+          message={form.formState.errors.root?.server?.message}
+          errorType={form.formState.errors.root?.server?.type}
+        />
         <div className="flex-1 overflow-y-auto px-2 space-y-4">
           <div className="space-y-3">
             <h3 className="text-lg font-semibold">Dados do Cliente</h3>
@@ -320,7 +328,12 @@ export function OrderForm({
             </h3>
 
             <ProductSelector
-              products={products.filter((p) => p.available)}
+              products={products
+                .filter((p) => p.available)
+                .map((product) => ({
+                  ...product,
+                  price: recordedPrices.get(product.id) ?? product.price,
+                }))}
               selectedProductId={selectedProductId}
               quantity={quantity}
               notes={notes}
@@ -357,7 +370,18 @@ export function OrderForm({
                       id={`${formId}-order-delivery-fee`}
                       className="h-8 w-24"
                       aria-invalid={fieldState.invalid}
+                      aria-describedby={
+                        fieldState.invalid
+                          ? `${formId}-order-delivery-fee-error`
+                          : undefined
+                      }
                     />
+                    {fieldState.invalid && (
+                      <FieldError
+                        id={`${formId}-order-delivery-fee-error`}
+                        errors={[fieldState.error]}
+                      />
+                    )}
                   </Field>
                 )}
               />

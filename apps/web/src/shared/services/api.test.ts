@@ -50,7 +50,7 @@ describe("api", () => {
     await expect(request).rejects.toSatisfy(axios.isCancel);
   });
 
-  it("times out after thirty seconds", async () => {
+  it("times out reads after thirty seconds", async () => {
     vi.useFakeTimers();
     try {
       server.use(
@@ -67,6 +67,55 @@ describe("api", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("does not abort a pending write after thirty seconds", async () => {
+    vi.useFakeTimers();
+    let release: () => void = () => {};
+    const pending = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    try {
+      server.use(
+        http.post(url, async () => {
+          await pending;
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+      let settled = false;
+      const request = api.post("/probe", {}).finally(() => {
+        settled = true;
+      });
+      await vi.advanceTimersByTimeAsync(30_001);
+      expect(settled).toBe(false);
+      release();
+      await expect(request).resolves.toBeUndefined();
+    } finally {
+      release();
+      vi.useRealTimers();
+    }
+  });
+
+  it("reports a lost write response as an unknown outcome without encouraging a retry", async () => {
+    server.use(http.post(url, () => HttpResponse.error()));
+    const error = await api.post("/probe", {}).catch((error: unknown) => error);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ kind: "unknown-outcome" });
+    expect((error as Error).message).toContain(
+      "Verifique os registros antes de reenviar",
+    );
+    expect(shouldRetryQuery(0, error as Error)).toBe(false);
+  });
+
+  it("treats a browser-aborted XHR as cancellation rather than a timeout", async () => {
+    vi.spyOn(XMLHttpRequest.prototype, "send").mockImplementation(function (
+      this: XMLHttpRequest,
+    ) {
+      this.dispatchEvent(new ProgressEvent("abort"));
+    });
+    const error = await api.get("/probe").catch((error: unknown) => error);
+    expect(axios.isCancel(error)).toBe(true);
+    expect(shouldRetryQuery(0, error as Error)).toBe(false);
   });
 
   it.each([400, 401, 403, 404, 409, 422, 429])(

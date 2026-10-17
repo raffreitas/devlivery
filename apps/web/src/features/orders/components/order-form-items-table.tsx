@@ -62,6 +62,7 @@ export function OrderItemsTable({
                   size="icon"
                   variant="ghost"
                   className="ml-2"
+                  aria-label={`Remover ${item.product.name}`}
                   onClick={() => onRemoveItem(index)}
                 >
                   <XIcon className="text-destructive" />
@@ -133,6 +134,7 @@ export function OrderItemsTable({
                       type="button"
                       size="icon"
                       variant="ghost"
+                      aria-label={`Remover ${item.product.name}`}
                       onClick={() => onRemoveItem(index)}
                       className="hover:bg-destructive/10"
                     >

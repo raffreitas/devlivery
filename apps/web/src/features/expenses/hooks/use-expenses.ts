@@ -6,7 +6,7 @@ import {
   queryKeys,
 } from "@/shared/services/query-keys";
 import { formatDate } from "@/shared/utils/formatters";
-import { fromCents, toCents } from "@/shared/utils/money";
+import { sumMoney } from "@/shared/utils/money";
 import { expenseService } from "../services/expense-service";
 import type { ExpenseFormData, ExpenseStatus, ExpenseSummary } from "../types";
 
@@ -21,7 +21,7 @@ export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
 
   const expensesQuery = useQuery({
     queryKey: [
-      "expenses",
+      ...queryKeys.expenses,
       {
         ...queryKeys.period(duePeriod?.from, duePeriod?.to),
         categoryId,
@@ -39,32 +39,29 @@ export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
         signal,
       ),
     staleTime: 30_000,
-    placeholderData: (previousData) => previousData,
   });
 
   const summary: ExpenseSummary = useMemo(() => {
     const expenses = expensesQuery.data ?? [];
 
     return {
-      total: fromCents(
-        expenses.reduce((sum, exp) => sum + toCents(exp.amount), 0),
-      ),
-      paid: fromCents(
+      total: sumMoney(expenses.map((expense) => expense.amount)),
+      paid: sumMoney(
         expenses
           .filter((exp) => exp.status === "Paid")
-          .reduce((sum, exp) => sum + toCents(exp.amount), 0),
+          .map((expense) => expense.amount),
       ),
-      pending: fromCents(
+      pending: sumMoney(
         expenses
           .filter(
             (exp) => exp.status === "Pending" || exp.status === "DueToday",
           )
-          .reduce((sum, exp) => sum + toCents(exp.amount), 0),
+          .map((expense) => expense.amount),
       ),
-      overdue: fromCents(
+      overdue: sumMoney(
         expenses
           .filter((exp) => exp.status === "Overdue")
-          .reduce((sum, exp) => sum + toCents(exp.amount), 0),
+          .map((expense) => expense.amount),
       ),
       count: expenses.length,
     };

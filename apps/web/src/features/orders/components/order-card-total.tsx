@@ -1,5 +1,5 @@
 import { formatMoney } from "@/shared/utils/formatters";
-import { fromCents, toCents } from "@/shared/utils/money";
+import { itemsSubtotal } from "@/shared/utils/money";
 import type { Order } from "../types";
 
 interface OrderCardTotalProps {
@@ -7,9 +7,7 @@ interface OrderCardTotalProps {
 }
 
 export function OrderCardTotal({ order }: OrderCardTotalProps) {
-  const subtotal = fromCents(
-    order.items.reduce((s, it) => s + toCents(it.unitPrice) * it.quantity, 0),
-  );
+  const subtotal = itemsSubtotal(order.items);
   return (
     <div className="flex justify-between items-center">
       <div className="text-sm text-muted-foreground space-y-1">
