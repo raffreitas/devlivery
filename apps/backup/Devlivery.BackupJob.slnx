@@ -1,0 +1,8 @@
+<Solution>
+    <Folder Name="/Solution Items/">
+        <File Path="README.md" />
+    </Folder>
+
+    <Project Path="src/Devlivery.BackupJob/Devlivery.BackupJob.csproj" />
+    <Project Path="test/Devlivery.BackupJob.Tests/Devlivery.BackupJob.Tests.csproj" />
+</Solution>

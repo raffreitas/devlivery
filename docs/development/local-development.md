@@ -42,6 +42,7 @@ Confirme que `VITE_API_URL` corresponde ao endereço HTTPS da API. O navegador p
 
 ```powershell
 dotnet test apps/api/Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
+dotnet test apps/backup/Devlivery.BackupJob.slnx --disable-build-servers -m:1 --verbosity minimal
 pnpm --dir apps/web lint
 pnpm --dir apps/web build
 git diff --check

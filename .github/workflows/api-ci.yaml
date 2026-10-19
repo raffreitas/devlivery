@@ -80,7 +80,7 @@ jobs:
             /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
             /d:sonar.exclusions="**/Migrations/**" \
-            /d:sonar.coverage.exclusions="**/Devlivery.BackupJob/**,**/Program.cs,**/Infrastructure/Observability/**,**/Infrastructure/Persistence/Seeder/**,**/Infrastructure/Persistence/Factory/ApplicationDbContextFactory.cs"
+            /d:sonar.coverage.exclusions="**/Program.cs,**/Infrastructure/Observability/**,**/Infrastructure/Persistence/Seeder/**,**/Infrastructure/Persistence/Factory/ApplicationDbContextFactory.cs"
 
       - name: Build
         run: |

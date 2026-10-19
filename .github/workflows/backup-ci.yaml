@@ -1,0 +1,80 @@
+name: Backup CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/backup/**"
+      - ".github/workflows/backup-ci.yaml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/backup/**"
+      - ".github/workflows/backup-ci.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  POSTGRES_CLIENT_VERSION: "17"
+
+concurrency:
+  group: backup-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: apps/backup
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.nuget/packages
+            ~/.local/share/NuGet
+          key: backup-nuget-${{ runner.os }}-dotnet-${{ hashFiles('apps/backup/**/*.csproj') }}
+          restore-keys: |
+            backup-nuget-${{ runner.os }}-dotnet-
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y --no-install-recommends "postgresql-client-${POSTGRES_CLIENT_VERSION}"
+          echo "/usr/lib/postgresql/${POSTGRES_CLIENT_VERSION}/bin" >> "$GITHUB_PATH"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: |
+          dotnet build \
+            --no-restore \
+            --configuration Release \
+            --verbosity minimal
+
+      - name: Run tests
+        run: |
+          dotnet test \
+            --no-build \
+            --configuration Release \
+            --verbosity normal
+
+      - name: Build Docker image
+        run: docker build --file src/Devlivery.BackupJob/Dockerfile --tag devlivery-backup:ci .

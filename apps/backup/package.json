@@ -1,0 +1,6 @@
+{
+  "name": "@devlivery/backup",
+  "version": "1.0.0",
+  "description": "Devlivery PostgreSQL backup job",
+  "private": true
+}

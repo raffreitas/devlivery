@@ -8,8 +8,7 @@ API HTTP da plataforma Devlivery, construída em .NET 10 e organizada por vertic
 - produtos, pedidos, despesas e sessões de caixa;
 - consultas de dashboard;
 - persistência com EF Core e Dapper em PostgreSQL;
-- health checks, OpenAPI em desenvolvimento e telemetria OpenTelemetry;
-- job independente de backup do PostgreSQL para Cloudflare R2.
+- health checks, OpenAPI em desenvolvimento e telemetria OpenTelemetry.
 
 ## Estrutura
 
@@ -19,7 +18,6 @@ apps/api/
 │   ├── Domain/                  # agregados, entidades e regras de domínio
 │   ├── Features/                # endpoints, comandos, consultas e handlers
 │   └── Infrastructure/          # identidade, persistência, tenancy e HTTP
-├── src/Devlivery.BackupJob/     # processo executável de backup
 ├── test/Devlivery.Tests/        # testes unitários e HTTP
 ├── compose.yaml                 # PostgreSQL e dashboard Aspire locais
 └── Devlivery.slnx

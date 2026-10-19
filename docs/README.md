@@ -31,7 +31,7 @@ Este diretório registra o produto, suas regras, as decisões técnicas e os pro
 
 ## Referência executável
 
-Em desenvolvimento, o contrato HTTP atual pode ser consultado no Scalar em `https://localhost:7141/scalar` ou diretamente em `https://localhost:7141/openapi/v1.json`. Os READMEs de [API](../apps/api/README.md) e [web](../apps/web/README.md) resumem as responsabilidades e os comandos de cada aplicação.
+Em desenvolvimento, o contrato HTTP atual pode ser consultado no Scalar em `https://localhost:7141/scalar` ou diretamente em `https://localhost:7141/openapi/v1.json`. Os READMEs de [API](../apps/api/README.md), [web](../apps/web/README.md) e [backup](../apps/backup/README.md) resumem as responsabilidades e os comandos de cada aplicação.
 
 ## Manutenção
 
