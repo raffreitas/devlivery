@@ -3,6 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useId, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Navigate, useNavigate } from "react-router-dom";
+import { FormError } from "@/shared/components/form-error";
 import { LoadingButton } from "@/shared/components/loading";
 import { Card } from "@/shared/components/ui/card";
 import {
@@ -18,9 +19,8 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/shared/components/ui/input-group";
-import { toast } from "@/shared/components/ui/toast";
 import { useAuth } from "@/shared/contexts/auth-context";
-import { ApiError } from "@/shared/services/api";
+import { applyFormError } from "@/shared/utils/form-errors";
 import { type AuthFormData, authFormSchema } from "../types";
 
 export function LoginPage() {
@@ -44,19 +44,7 @@ export function LoginPage() {
       await login({ email, password });
       navigate("/", { replace: true });
     } catch (error) {
-      const limited =
-        error &&
-        typeof error === "object" &&
-        "status" in error &&
-        error.status === 429;
-      toast.add({
-        type: "error",
-        title: limited
-          ? "Muitas tentativas. Aguarde antes de tentar novamente."
-          : error instanceof ApiError && error.status !== 401
-            ? error.message
-            : "Credenciais inv\u00e1lidas",
-      });
+      applyFormError(form, error, ["email", "password"]);
     }
   };
 
@@ -77,6 +65,11 @@ export function LoginPage() {
         <Card className="p-8">
           <form onSubmit={form.handleSubmit(handleAuthenticate)} noValidate>
             <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
+              <FormError
+                message={form.formState.errors.root?.server?.message}
+                errorType={form.formState.errors.root?.server?.type}
+                fallbackTitle="Não foi possível entrar"
+              />
               <Controller
                 control={form.control}
                 name="email"

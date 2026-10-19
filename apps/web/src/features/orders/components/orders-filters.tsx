@@ -6,6 +6,7 @@ import { Label } from "@/shared/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
 } from "@/shared/components/ui/select";
@@ -74,16 +75,18 @@ export function OrdersFilters({
                 </span>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os status</SelectItem>
-                {statusOptions.map((option) => (
-                  <SelectItem
-                    key={option}
-                    value={option}
-                    className="cursor-pointer"
-                  >
-                    {getOrderStatusOptionLabel(option)}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  <SelectItem value="all">Todos os status</SelectItem>
+                  {statusOptions.map((option) => (
+                    <SelectItem
+                      key={option}
+                      value={option}
+                      className="cursor-pointer"
+                    >
+                      {getOrderStatusOptionLabel(option)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
@@ -107,16 +110,18 @@ export function OrdersFilters({
                 </span>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas as formas</SelectItem>
-                {paymentOptions.map((option) => (
-                  <SelectItem
-                    key={option}
-                    value={option}
-                    className="cursor-pointer"
-                  >
-                    {getPaymentOptionLabel(option)}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  <SelectItem value="all">Todas as formas</SelectItem>
+                  {paymentOptions.map((option) => (
+                    <SelectItem
+                      key={option}
+                      value={option}
+                      className="cursor-pointer"
+                    >
+                      {getPaymentOptionLabel(option)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>

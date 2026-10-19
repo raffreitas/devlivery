@@ -87,7 +87,7 @@ describe("applyFormError", () => {
     act(() =>
       applyFormError(
         result.current.form,
-        new ApiError("Falha ao salvar", 500),
+        new ApiError("HTTP 500", 500, { detail: "Falha ao salvar" }),
         ["name"],
       ),
     );

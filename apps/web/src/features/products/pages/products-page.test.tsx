@@ -4,6 +4,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
+import { UNKNOWN_OUTCOME_MESSAGE } from "@/shared/services/error-feedback";
 import { ProductsPage } from "./products-page";
 
 const product = {
@@ -67,8 +68,8 @@ describe("ProductsPage saving", () => {
       within(dialog).getByRole("button", { name: "Atualizar Produto" }),
     );
     const alert = await within(dialog).findByRole("alert");
-    expect(alert).toHaveTextContent("Resultado da operação não confirmado");
-    expect(alert).toHaveTextContent("Verifique os registros antes de reenviar");
+    expect(alert).toHaveTextContent("Resultado não confirmado");
+    expect(alert).toHaveTextContent(UNKNOWN_OUTCOME_MESSAGE);
     expect(within(dialog).getByLabelText("Nome do Produto")).toHaveValue(
       "Pizza",
     );

@@ -4,6 +4,7 @@ import { Label } from "@/shared/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
 } from "@/shared/components/ui/select";
@@ -50,16 +51,18 @@ export function OrdersFiltersContent({
             </span>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            {statusOptions.map((option) => (
-              <SelectItem
-                key={option}
-                value={option}
-                className="cursor-pointer"
-              >
-                {getOrderStatusOptionLabel(option)}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              <SelectItem value="all">Todos</SelectItem>
+              {statusOptions.map((option) => (
+                <SelectItem
+                  key={option}
+                  value={option}
+                  className="cursor-pointer"
+                >
+                  {getOrderStatusOptionLabel(option)}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>
@@ -80,16 +83,18 @@ export function OrdersFiltersContent({
             </span>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            {paymentOptions.map((option) => (
-              <SelectItem
-                key={option}
-                value={option}
-                className="cursor-pointer"
-              >
-                {getPaymentOptionLabel(option)}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              <SelectItem value="all">Todos</SelectItem>
+              {paymentOptions.map((option) => (
+                <SelectItem
+                  key={option}
+                  value={option}
+                  className="cursor-pointer"
+                >
+                  {getPaymentOptionLabel(option)}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>

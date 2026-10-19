@@ -4,6 +4,7 @@ import { Label } from "@/shared/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -64,14 +65,16 @@ export function ExpensesFiltersContent({
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas</SelectItem>
-            {categories
-              ?.filter((cat) => cat.isActive)
-              .map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </SelectItem>
-              ))}
+            <SelectGroup>
+              <SelectItem value="all">Todas</SelectItem>
+              {categories
+                ?.filter((cat) => cat.isActive)
+                .map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>
@@ -91,12 +94,14 @@ export function ExpensesFiltersContent({
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            {Object.entries(statusLabels).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              <SelectItem value="all">Todos</SelectItem>
+              {Object.entries(statusLabels).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>

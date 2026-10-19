@@ -1,5 +1,6 @@
 import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 import { ApiError } from "@/shared/services/api";
+import { getErrorFeedback } from "@/shared/services/error-feedback";
 
 export function applyFormError<T extends FieldValues>(
   form: UseFormReturn<T>,
@@ -32,9 +33,7 @@ export function applyFormError<T extends FieldValues>(
       type: error instanceof ApiError ? error.kind : "server",
       message: messages.length
         ? [...new Set(messages)].join(" ")
-        : error instanceof Error
-          ? error.message
-          : "Não foi possível salvar. Tente novamente.",
+        : getErrorFeedback(error).description,
     });
   }
 }

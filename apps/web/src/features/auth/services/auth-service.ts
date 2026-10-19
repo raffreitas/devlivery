@@ -27,10 +27,12 @@ export const authService = {
   },
 
   login: async ({ email, password }: Credentials): Promise<AuthState> => {
-    const res = await api.post<ApiResponse<LoginResponseDto>>("/auth/login", {
-      email,
-      password,
-    });
+    // Login has no lasting side effect, so a lost response is a plain connection failure.
+    const res = await api.post<ApiResponse<LoginResponseDto>>(
+      "/auth/login",
+      { email, password },
+      { idempotent: true },
+    );
 
     const user: User = {
       id: res.data.userId,

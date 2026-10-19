@@ -101,10 +101,40 @@ describe("api", () => {
     const error = await api.post("/probe", {}).catch((error: unknown) => error);
     expect(error).toBeInstanceOf(ApiError);
     expect(error).toMatchObject({ kind: "unknown-outcome" });
-    expect((error as Error).message).toContain(
-      "Verifique os registros antes de reenviar",
-    );
+
     expect(shouldRetryQuery(0, error as Error)).toBe(false);
+  });
+
+  it("reports a lost response of an idempotent write as a connection failure", async () => {
+    server.use(http.post(url, () => HttpResponse.error()));
+    await expect(
+      api.post("/probe", {}, { idempotent: true }),
+    ).rejects.toMatchObject({ kind: "network" });
+  });
+
+  it("reports a write attempted while offline as offline rather than an unknown outcome", async () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    server.use(http.post(url, () => HttpResponse.error()));
+    const error = await api.post("/probe", {}).catch((error: unknown) => error);
+    expect(error).toMatchObject({ kind: "offline" });
+  });
+
+  it("keeps the status when the error body is not problem details", async () => {
+    server.use(
+      http.get(
+        url,
+        () =>
+          new HttpResponse("<html>Bad Gateway</html>", {
+            status: 502,
+            headers: { "Content-Type": "text/html" },
+          }),
+      ),
+    );
+    await expect(api.get("/probe")).rejects.toMatchObject({
+      status: 502,
+      details: undefined,
+      message: "HTTP 502",
+    });
   });
 
   it("treats a browser-aborted XHR as cancellation rather than a timeout", async () => {
