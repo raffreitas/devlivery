@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { getErrorFeedback } from "@/shared/services/error-feedback";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/spinner";
@@ -37,7 +38,7 @@ export function QueryState({
               : "Não foi possível carregar os dados"}
           </AlertTitle>
           <AlertDescription>
-            <p>{error.message}</p>
+            <p>{getErrorFeedback(error).description}</p>
             {hasData && (
               <p>Exibindo a última consulta concluída com sucesso.</p>
             )}

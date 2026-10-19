@@ -1,7 +1,7 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { toast } from "@/shared/components/ui/toast";
 import { shouldRetryQuery, UnauthorizedError } from "./api";
+import { notifyError } from "./error-feedback";
 
 declare module "@tanstack/react-query" {
   interface Register {
@@ -25,7 +25,7 @@ export function createAppQueryClient(onUnauthorized: () => void) {
           return;
         }
         if (!mutation.meta?.skipGlobalErrorToast) {
-          toast.add({ type: "error", title: error.message });
+          notifyError(error);
         }
       },
     }),

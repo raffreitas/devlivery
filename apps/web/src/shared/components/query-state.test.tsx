@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { ApiError } from "@/shared/services/api";
 import { QueryState } from "./query-state";
 
 describe("QueryState", () => {
@@ -20,7 +21,9 @@ describe("QueryState", () => {
       <QueryState
         {...props}
         isPending={false}
-        error={new Error("Servidor indisponível")}
+        error={
+          new ApiError("HTTP 503", 503, { detail: "Servidor indisponível" })
+        }
       >
         Nenhum registro
       </QueryState>,

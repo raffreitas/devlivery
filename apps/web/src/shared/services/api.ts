@@ -31,7 +31,12 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-export type ApiErrorKind = "http" | "network" | "timeout" | "unknown-outcome";
+export type ApiErrorKind =
+  | "http"
+  | "network"
+  | "offline"
+  | "timeout"
+  | "unknown-outcome";
 
 export class ApiError extends Error {
   status?: number;
@@ -52,7 +57,7 @@ export class ApiError extends Error {
 }
 
 export class UnauthorizedError extends ApiError {
-  constructor(message = "Não autorizado", details?: ApiProblem) {
+  constructor(message = "HTTP 401", details?: ApiProblem) {
     super(message, 401, details);
     this.name = "UnauthorizedError";
   }
@@ -67,6 +72,7 @@ export function shouldRetryQuery(failureCount: number, error: Error): boolean {
     return false;
   return (
     error.kind === "network" ||
+    error.kind === "offline" ||
     error.kind === "timeout" ||
     (error.kind === "http" &&
       [408, 500, 502, 503, 504].includes(error.status ?? 0))
@@ -90,6 +96,11 @@ const axiosInstance = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+export type RequestOptions = {
+  /** The write has no lasting side effect (e.g. login), so a lost response is safe to retry. */
+  idempotent?: boolean;
+};
+
 async function request<T>(
   path: string,
   options: {
@@ -97,9 +108,11 @@ async function request<T>(
     body?: unknown;
     headers?: Record<string, string>;
     signal?: AbortSignal;
-  } = {},
+  } & RequestOptions = {},
 ): Promise<T> {
   const url = path.startsWith("/") ? path : `/${path}`;
+  const isSafe =
+    !options.method || options.method === "GET" || options.idempotent === true;
 
   const token = getAuthToken();
   const headers: Record<string, string> = {
@@ -112,7 +125,7 @@ async function request<T>(
       url,
       method: options.method ?? "GET",
       // A read can be retried. A write may have committed even if its response is lost.
-      timeout: !options.method || options.method === "GET" ? 30_000 : 0,
+      timeout: isSafe ? 30_000 : 0,
       data: options.body ?? undefined,
       headers,
       signal: options.signal,
@@ -128,25 +141,22 @@ async function request<T>(
 
     if (axiosErr.response) {
       const status = axiosErr.response.status;
-      const data = axiosErr.response.data as ApiProblem | null;
-      const message =
-        data?.detail ||
-        data?.title ||
-        "Houve um erro ao processar sua requisição.";
+      // Proxies and gateways may answer with HTML or an empty body instead of problem details.
+      const raw = axiosErr.response.data;
+      const data =
+        raw && typeof raw === "object" ? (raw as ApiProblem) : undefined;
+      // Messages here describe the failure for logs; user-facing text lives in error-feedback.
+      const message = data?.detail || data?.title || `HTTP ${status}`;
 
-      if (status === 401) {
-        throw new UnauthorizedError(
-          message || "Sua sessão expirou. Por favor, faça login novamente.",
-          data ?? undefined,
-        );
-      }
-
-      throw new ApiError(message, status, data ?? undefined);
+      if (status === 401) throw new UnauthorizedError(message, data);
+      throw new ApiError(message, status, data);
     }
 
-    if (options.method && options.method !== "GET") {
+    // Without a response a write may still have committed, unless the browser never sent it.
+    const offline = typeof navigator !== "undefined" && !navigator.onLine;
+    if (!isSafe && !offline) {
       throw new ApiError(
-        "Não foi possível confirmar o resultado da operação. Verifique os registros antes de reenviar; a gravação pode ter sido concluída.",
+        "Response lost after the write was sent",
         undefined,
         undefined,
         "unknown-outcome",
@@ -155,11 +165,12 @@ async function request<T>(
     if (axiosErr.code === "ECONNABORTED") {
       throw new axios.CanceledError("Requisição interrompida", axiosErr.config);
     }
+    if (offline) {
+      throw new ApiError("Browser is offline", undefined, undefined, "offline");
+    }
     const timeout = axiosErr.code === "ETIMEDOUT";
     throw new ApiError(
-      timeout
-        ? "A requisição demorou demais. Tente novamente."
-        : "Não foi possível conectar ao servidor. Verifique sua conexão.",
+      timeout ? "Request timed out" : "Server unreachable",
       undefined,
       undefined,
       timeout ? "timeout" : "network",
@@ -170,8 +181,8 @@ async function request<T>(
 export const api = {
   get: <T>(path: string, signal?: AbortSignal) =>
     request<T>(path, { method: "GET", signal }),
-  post: <T>(path: string, body?: unknown) =>
-    request<T>(path, { method: "POST", body }),
+  post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    request<T>(path, { method: "POST", body, ...options }),
   put: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: "PUT", body }),
   patch: <T>(path: string, body?: unknown) =>
