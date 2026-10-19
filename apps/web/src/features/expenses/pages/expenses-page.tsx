@@ -114,7 +114,7 @@ export function ExpensesPage() {
   return (
     <>
       <div className="flex flex-col gap-4 sm:gap-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
               Despesas
@@ -123,7 +123,7 @@ export function ExpensesPage() {
               Gerencie as despesas do estabelecimento
             </p>
           </div>
-          <Button onClick={handleOpenCreateModal}>
+          <Button onClick={handleOpenCreateModal} className="w-full sm:w-auto">
             <Plus data-icon="inline-start" />
             Nova Despesa
           </Button>
