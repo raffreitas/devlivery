@@ -5,8 +5,8 @@
 Devlivery is a delivery-management monorepo:
 
 - `apps/api/src/Devlivery/`: .NET 10 API. Keep vertical slices in `Features`, business rules in `Domain`, adapters in `Infrastructure`, and shared plumbing in `Common`.
-- `apps/api/src/Devlivery.BackupJob/`: PostgreSQL backup worker.
 - `apps/api/test/Devlivery.Tests/`: backend tests, organized by feature and behavior.
+- `apps/backup/`: standalone PostgreSQL backup job (`src/Devlivery.BackupJob/`, tests in `test/Devlivery.BackupJob.Tests/`). It shares no code with the API; keep it that way so it can be removed when the hosting provides managed backups.
 - `apps/web/src/features/`: React/TypeScript features; `src/shared/` contains reusable components, hooks, and services. Static assets belong in `apps/web/public/`.
 - `docs/`: architecture, configuration, development, and deployment guides.
 
@@ -38,6 +38,7 @@ From the repository root, run:
 
 ```powershell
 dotnet test apps/api/Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
+dotnet test apps/backup/Devlivery.BackupJob.slnx --disable-build-servers -m:1 --verbosity minimal
 ```
 
 Add regression tests for changed behavior. No numeric coverage threshold is configured in CI. Frontend tests use Vitest, Testing Library, and MSW. Keep them next to the corresponding source files: `.test.ts` without JSX and `.test.tsx` with JSX; do not use `.spec.*`. Shared test infrastructure belongs in `apps/web/test/`, imported via `@test/*`; future end-to-end tests belong in `apps/web/test/e2e/`. Run `pnpm test`, lint/build, and manually verify affected flows.

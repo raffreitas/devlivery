@@ -1,6 +1,6 @@
 # Devlivery
 
-[![API CI](https://github.com/raffreitas/devlivery/actions/workflows/api-ci.yaml/badge.svg?branch=main)](https://github.com/raffreitas/devlivery/actions/workflows/api-ci.yaml) [![API Sonar Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=devlivery-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=devlivery-api) [![API Coverage](https://sonarcloud.io/api/project_badges/measure?project=devlivery-api&metric=coverage)](https://sonarcloud.io/summary/new_code?id=devlivery-api)<br>
+[![API CI](https://github.com/raffreitas/devlivery/actions/workflows/api-ci.yaml/badge.svg?branch=main)](https://github.com/raffreitas/devlivery/actions/workflows/api-ci.yaml) [![Backup CI](https://github.com/raffreitas/devlivery/actions/workflows/backup-ci.yaml/badge.svg?branch=main)](https://github.com/raffreitas/devlivery/actions/workflows/backup-ci.yaml) [![API Sonar Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=devlivery-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=devlivery-api) [![API Coverage](https://sonarcloud.io/api/project_badges/measure?project=devlivery-api&metric=coverage)](https://sonarcloud.io/summary/new_code?id=devlivery-api)<br>
 [![Web App CI](https://github.com/raffreitas/devlivery/actions/workflows/web-app-ci.yaml/badge.svg?branch=main)](https://github.com/raffreitas/devlivery/actions/workflows/web-app-ci.yaml) [![Web Sonar Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=devlivery-web&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=devlivery-web)<br>
 [![License](https://img.shields.io/github/license/raffreitas/devlivery)](LICENSE)
 
@@ -12,6 +12,7 @@ A API usa arquitetura vertical slice, com regras de negócio próximas de cada f
 
 - [API](apps/api/README.md): .NET 10, Minimal APIs, EF Core, Dapper, PostgreSQL e OpenTelemetry.
 - [Web](apps/web/README.md): React 19, TypeScript, Vite, TanStack Query e Tailwind CSS.
+- [Backup](apps/backup/README.md): job .NET 10 que exporta o PostgreSQL para o Cloudflare R2, independente da API.
 
 ## Funcionalidades
 
@@ -27,10 +28,12 @@ A API usa arquitetura vertical slice, com regras de negócio próximas de cada f
 
 ```text
 apps/
-├── api/                         # API, domínio, persistência, backup e testes
+├── api/                         # API, domínio, persistência e testes
 │   ├── src/Devlivery
-│   ├── src/Devlivery.BackupJob
 │   └── test/Devlivery.Tests
+├── backup/                      # job de backup do PostgreSQL, independente da API
+│   ├── src/Devlivery.BackupJob
+│   └── test/Devlivery.BackupJob.Tests
 └── web/                         # SPA React organizada por features
     └── src/
         ├── features
@@ -67,6 +70,7 @@ Para executar as verificações principais:
 
 ```powershell
 dotnet test apps/api/Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
+dotnet test apps/backup/Devlivery.BackupJob.slnx --disable-build-servers -m:1 --verbosity minimal
 pnpm --dir apps/web lint
 pnpm --dir apps/web build
 ```

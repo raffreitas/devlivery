@@ -13,6 +13,7 @@ Os testes devem proteger invariantes de domínio, comportamento dos casos de uso
 | Integração de persistência | SQL, filtros e consultas que dependem do PostgreSQL | Testcontainers PostgreSQL em cenários específicos |
 | Contrato HTTP | Pipeline, autenticação, tenant, serialização, status HTTP e persistência ponta a ponta | `ApiFactory` (`WebApplicationFactory` + Testcontainers PostgreSQL com as migrations reais); cada teste cria seu próprio estabelecimento via `ApiTenant` |
 | Frontend | Cálculos, hooks, componentes e fluxos da interface | Vitest, Testing Library e MSW em jsdom |
+| Job de backup | Configuração, chaves dos objetos, retenção, orquestração, cliente R2 e `pg_dump` real | xUnit, NSubstitute e Testcontainers PostgreSQL 17 em `apps/backup/test/Devlivery.BackupJob.Tests` |
 
 O pacote `coverlet.collector` gera cobertura no CI e o SonarQube recebe o relatório. Não existe limite numérico de cobertura configurado; cobertura não substitui cenários de comportamento.
 
@@ -40,11 +41,14 @@ Com dependências restauradas e Docker disponível, a partir da raiz:
 
 ```powershell
 dotnet test apps/api/Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
+dotnet test apps/backup/Devlivery.BackupJob.slnx --disable-build-servers -m:1 --verbosity minimal
 pnpm --dir apps/web test
 pnpm --dir apps/web lint
 pnpm --dir apps/web build
 git diff --check
 ```
+
+Os testes do exportador de backup executam o `pg_dump` real e são ignorados quando o PostgreSQL client 17 não está no PATH; a CI do backup instala o client e os executa.
 
 Testcontainers exige acesso ao daemon Docker. Uma falha ao iniciar o container é ambiental e não comprova falha da regra testada; registre a limitação se não for possível repetir a execução em ambiente válido.
 

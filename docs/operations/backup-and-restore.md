@@ -1,10 +1,10 @@
 # Backup e recuperação
 
-O backup roda em `Devlivery.BackupJob`, separado da API. O processo cria um dump PostgreSQL em formato custom, calcula SHA-256, envia o dump e um manifesto JSON ao Cloudflare R2 e aplica a retenção configurada.
+O backup roda em `Devlivery.BackupJob` ([`apps/backup`](../../apps/backup/README.md)), uma aplicação separada da API e sem código compartilhado com ela. O processo cria um dump PostgreSQL em formato custom, calcula SHA-256, envia o dump e um manifesto JSON ao Cloudflare R2 e aplica a retenção configurada.
 
 ## Execução
 
-Use o Dockerfile `apps/api/src/Devlivery.BackupJob/Dockerfile`, com `apps/api` como contexto. A imagem instala o PostgreSQL client 17. Configure as variáveis `Backup__*` descritas em [configuração](../development/configuration.md).
+Use o Dockerfile `apps/backup/src/Devlivery.BackupJob/Dockerfile`, com `apps/backup` como contexto. A imagem instala o PostgreSQL client 17. Configure as variáveis `Backup__*` descritas em [configuração](../development/configuration.md).
 
 No Railway, execute o job como serviço cron dedicado. Um exemplo de agenda diária às 03:00 UTC é:
 
