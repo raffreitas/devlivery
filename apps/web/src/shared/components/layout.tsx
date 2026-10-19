@@ -19,7 +19,7 @@ export function Layout() {
     <div className="flex min-h-screen bg-background text-foreground">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col min-h-screen relative">
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen relative">
         <header className="sm:hidden bg-sidebar border-b border-sidebar-border h-16 px-4 flex items-center justify-between sticky top-0 z-40">
           <h1 className="text-xl font-bold tracking-[-0.048em] text-[#182230] dark:text-foreground">
             Devlivery
