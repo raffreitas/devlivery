@@ -8,7 +8,7 @@ Este diretório registra o produto, suas regras, as decisões técnicas e os pro
 | --- | --- |
 | [Visão do produto](product/overview.md) | Qual problema o Devlivery resolve, para quem e com quais capacidades atuais? |
 | [Modelo de domínio](product/domain-model.md) | Quais são os conceitos, estados, regras e integrações entre áreas? |
-| [Backlog de decisões](product/backlog.md) | Quais comportamentos atuais aguardam decisão de produto? |
+| [Planejamento do produto](product/planning.md) | Onde acompanhar issues, prioridades, roadmap e critérios de entrega? |
 | [Arquitetura](architecture/overview.md) | Como o sistema é dividido e quais são seus limites técnicos? |
 | [ADRs](adrs/README.md) | Por que escolhas estruturais importantes foram adotadas? |
 
@@ -19,7 +19,6 @@ Este diretório registra o produto, suas regras, as decisões técnicas e os pro
 | [Desenvolvimento local](development/local-development.md) | Preparação do ambiente, migrações, execução e verificações |
 | [Estratégia de testes](development/testing-strategy.md) | Níveis de teste, responsabilidades, lacunas e comandos |
 | [Configuração](development/configuration.md) | Variáveis da API, frontend, telemetria e backup |
-| [Design do Devlivery](design/README.md) | Diretrizes visuais, padrões de tela, componentes e telas de referência da V2 |
 | [Componentes de interface do web](development/web-ui.md) | shadcn/ui base-vega sobre Base UI, CLI e convenções de formulários, ícones e toasts |
 
 ## Operar
@@ -32,7 +31,7 @@ Este diretório registra o produto, suas regras, as decisões técnicas e os pro
 
 ## Referência executável
 
-Em desenvolvimento, o contrato HTTP atual pode ser consultado no Scalar em `https://localhost:7141/scalar` ou diretamente em `https://localhost:7141/openapi/v1.json`. Os READMEs de [API](../apps/api/README.md) e [web](../apps/web/README.md) resumem as responsabilidades e os comandos de cada aplicação.
+Em desenvolvimento, o contrato HTTP atual pode ser consultado no Scalar em `https://localhost:7141/scalar` ou diretamente em `https://localhost:7141/openapi/v1.json`. Os READMEs de [API](../apps/api/README.md), [web](../apps/web/README.md) e [backup](../apps/backup/README.md) resumem as responsabilidades e os comandos de cada aplicação.
 
 ## Manutenção
 
@@ -41,3 +40,4 @@ Em desenvolvimento, o contrato HTTP atual pode ser consultado no Scalar em `http
 - Crie um ADR para decisões estruturais difíceis de reverter; não use ADR para detalhes locais de implementação.
 - Atualize os guias operacionais junto com variáveis, comandos, migrações, publicação ou garantias de segurança.
 - Descreva o comportamento existente como implementado e identifique explicitamente lacunas ou trabalho futuro.
+- Registre pendências e propostas em issues; use o [Kanban](https://github.com/users/raffreitas/projects/1) e as milestones para prioridade, status e roadmap, sem duplicar a fila nos READMEs.

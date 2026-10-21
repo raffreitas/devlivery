@@ -1,0 +1,35 @@
+name: Propor melhoria
+description: Registre uma necessidade operacional ou evolução do produto.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Necessidade e resultado esperado
+      description: Quem precisa disso, em qual situação e qual trabalho será reduzido ou erro evitado?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Escopo e critérios de aceite
+      description: Descreva resultados verificáveis e o que fica para outra entrega. Referências visuais não comprovam implementação.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependências e decisões pendentes
+      description: Vincule issues relacionadas e registre regras ainda não definidas. Para fluxos de pedidos, preserve a operação com caixa fechado.
+  - type: textarea
+    id: references
+    attributes:
+      label: Origem e referências
+      description: Links para contexto, revisão, design ou exemplos. Prioridade, área e milestone serão definidas na triagem.
+  - type: checkboxes
+    id: duplicates
+    attributes:
+      label: Verificação inicial
+      options:
+        - label: Procurei issues e itens do roadmap para evitar duplicidade.
+          required: true
