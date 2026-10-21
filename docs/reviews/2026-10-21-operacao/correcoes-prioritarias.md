@@ -45,12 +45,12 @@ Após a decisão de operar sem caixa, a suíte completa foi executada novamente:
 
 Verificada em `localhost:5173`, com a API em `localhost:5052`:
 
-1. Esc em pedido alterado abre confirmação; “Continuar preenchendo” preserva os dados ([evidência](evidencias/07-patch-protecao-descarte.png)).
-2. Duas pizzas com “Sem cebola” e “Com cebola” persistem separadamente. Excesso eletrônico bloqueia o envio ([evidência](evidencias/08-patch-observacoes-pagamentos.png)).
+1. Esc em pedido alterado abre confirmação; “Continuar preenchendo” preserva os dados.
+2. Duas pizzas com “Sem cebola” e “Com cebola” persistem separadamente. Excesso eletrônico bloqueia o envio.
 3. Pedido de R$ 70 com Pix de R$ 60 e dinheiro de R$ 20 apresenta troco de R$ 10; o comprovante contém valores, observações e UUID completo. Impressão física não foi realizada.
-4. Na versão inicial do patch, pedido pronto ficava bloqueado com caixa fechado ([evidência histórica](evidencias/09-patch-entrega-bloqueada.png)). Esse bloqueio foi removido após a decisão de negócio de permitir operação completa sem caixa. Pedidos entregues continuam sem exclusão para preservar o histórico.
-5. Despesas pagas do card (R$ 420.031,23) correspondem à soma da tabela do gráfico, incluindo pagamento cuja data difere do vencimento ([evidência](evidencias/10-patch-dashboard-coerente.png)). Valores são do banco local de desenvolvimento.
-6. O pedido criado nesta conferência, `01A1600A-DF33-7E5F-A24A-225D3B12A994` (“QA Patch - observacoes”), foi cancelado ao final, antes da entrega, sem confirmar pagamentos ([evidência](evidencias/11-patch-qa-cancelado.png)). Os registros QA da auditoria anterior foram preservados.
+4. Na versão inicial do patch, pedido pronto ficava bloqueado com caixa fechado. Esse bloqueio foi removido após a decisão de negócio de permitir operação completa sem caixa. Pedidos entregues continuam sem exclusão para preservar o histórico.
+5. Despesas pagas do card (R$ 420.031,23) correspondem à soma da tabela do gráfico, incluindo pagamento cuja data difere do vencimento. Valores são do banco local de desenvolvimento.
+6. O pedido criado nesta conferência, `01A1600A-DF33-7E5F-A24A-225D3B12A994` (“QA Patch - observacoes”), foi cancelado ao final, antes da entrega, sem confirmar pagamentos. Os registros QA da auditoria anterior foram preservados.
 
 ## Cuidados para disponibilização
 
