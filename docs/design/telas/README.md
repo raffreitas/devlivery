@@ -1,67 +1,27 @@
 # Telas de referência
 
-Uma versão por tela: o design final do Devlivery V2. Cada tela tem dois arquivos:
+Cada tela contém um PNG de aparência e um HTML estático de estrutura/textos. O HTML é referência, não código para copiar: reconstrua com os componentes do app e os tokens de `apps/web/src/index.css`. Os dados são exemplos; `data-shadcn` indica componentes de referência.
 
-- `.png`: como a tela deve ficar. Use para conferir o resultado.
-- `.html`: a mesma tela em HTML estático, para ler estrutura, textos e espaçamentos. Os elementos principais têm `data-shadcn="..."` com o componente a usar (veja [../shadcn.md](../shadcn.md); `Sheet` e `Sonner` no HTML equivalem a `Drawer` e `toast.add`).
+A fonte de verdade para escopo, prioridade, dependências e status é o [épico #52](https://github.com/raffreitas/devlivery/issues/52). Esta tabela apenas relaciona arquivos de design às issues; não representa uma fila de tarefas nem comprova implementação.
 
-O HTML é **referência, não código para copiar**: usa nomes de variável antigos do canvas e componentes de demonstração. Reconstrua com os componentes do app e os tokens de `apps/web/src/index.css`. Os dados são de exemplo.
-
-## Como lidar com o backlog
-
-Algumas telas mostram recursos que ainda não existem na API (coluna "Backlog"). Construa a tela já no layout final e deixe de fora só a parte que depende do item pendente. Exemplos: sem número do pedido até o 2.1, sem a coluna "Saiu para entrega" até o 2.5, sem recorrência até o 3.3. Itens sem mudança de API (1.1, 1.2, 1.3, 1.5, 1.8) podem entrar desde o início.
-
-## Operação
-
-| Tela | Arquivo | Código atual | Backlog |
-| --- | --- | --- | --- |
-| Pedidos (quadro e lista) | `Pedidos` | `apps/web/src/features/orders` | 1.1, 1.2, 1.4, 2.1, 2.3, 2.5 |
-| Novo pedido (diálogo sobre Pedidos) | `NovoPedido` | `features/orders` (`order-form`) | 2.2, 2.3, 2.4 (cliente pelo telefone, opções, zona) |
-| Novo pedido ao lado do WhatsApp | `NovoPedidoWhatsApp` | mesmo formulário em painel lateral estreito | 1.3, 2.2, 2.3, 2.4 |
-| Entregar e cancelar | `Entrega` | `features/orders` (mudança de status) | 1.6, 2.6 |
-| Comanda impressa (80 mm) | `Comanda` | `features/orders` (`order-print`) | 2.3, 2.8 |
-| Sidebar | `Sidebar` | `shared/components/sidebar.tsx` | — |
-
-## Dinheiro
-
-| Tela | Arquivo | Código atual | Backlog |
-| --- | --- | --- | --- |
-| Caixa: contagem cega e sangria | `Caixa` | `features/cash` | 1.5, 2.7 |
-| Caixa fechado: abrir turno | `CaixaFechado` | `features/cash` (`open-cash-form`) | — |
-| Histórico de turnos | `CaixaHistorico` | `GET /api/cash-register/sessions` (já existe) | 2.7 para a linha de sangrias |
-| Dashboard: lucro operacional e pico | `Dashboard` | `features/dashboard` | 3.1, 3.5, 3.6 |
-
-## Cadastros
-
-| Tela | Arquivo | Código atual | Backlog |
-| --- | --- | --- | --- |
-| Produtos: tamanhos, opções e margem | `Produtos` | `features/products` | 2.3, 3.4 |
-| Despesas: natureza, recorrência e retiradas | `Despesas` | `features/expenses` | 3.1, 3.2, 3.3 |
-| Nova despesa (interativo: criar subcategoria) | `DespesaNova` | `expense-form`, `create-category-dialog` | 3.2 (fornecedor), 3.3 (recorrência) |
-| Editar despesa | `DespesaEditar` | `expense-form` | 3.2, 3.3 |
-
-## Celular
-
-| Tela | Arquivo | Backlog |
+| Tela / arquivo base | Área atual | Issues relacionadas |
 | --- | --- | --- |
-| Pedidos | `MPedidos` | como `Pedidos` |
-| Detalhe do pedido | `MPedidoDetalhe` | 2.5 |
-| Novo pedido | `MNovoPedido` | 2.2, 2.3 |
-| Adicionar produto (busca, categorias e opções do item) | `MAdicionarProduto` | 2.3 |
-| Menu Mais | `MMais` | — |
-| Barra inferior (5 posições) | `MobileNav` | — |
+| `Sidebar`, `MobileNav`, `MMais` | `shared/components` | [#54](https://github.com/raffreitas/devlivery/issues/54) |
+| `Pedidos`, `MPedidos`, `MPedidoDetalhe` | `features/orders` | [#55](https://github.com/raffreitas/devlivery/issues/55), [#57](https://github.com/raffreitas/devlivery/issues/57), [#59](https://github.com/raffreitas/devlivery/issues/59), [#61](https://github.com/raffreitas/devlivery/issues/61) |
+| `NovoPedido`, `NovoPedidoWhatsApp`, `MNovoPedido` | `features/orders` | [#56](https://github.com/raffreitas/devlivery/issues/56), [#58](https://github.com/raffreitas/devlivery/issues/58) |
+| `MAdicionarProduto` | `features/orders` | [#56](https://github.com/raffreitas/devlivery/issues/56); opções futuras em [#70](https://github.com/raffreitas/devlivery/issues/70) |
+| `Entrega` | `features/orders` | [#60](https://github.com/raffreitas/devlivery/issues/60), [#61](https://github.com/raffreitas/devlivery/issues/61) |
+| `Comanda` | `features/orders` | [#62](https://github.com/raffreitas/devlivery/issues/62); confirmar largura física antes de adotar 80 mm |
+| `Caixa`, `CaixaFechado`, `CaixaHistorico` | `features/cash` | [#63](https://github.com/raffreitas/devlivery/issues/63), [#3](https://github.com/raffreitas/devlivery/issues/3), [#29](https://github.com/raffreitas/devlivery/issues/29) |
+| `Produtos` | `features/products` | [#64](https://github.com/raffreitas/devlivery/issues/64); opções e custos futuros em [#70](https://github.com/raffreitas/devlivery/issues/70) e [#73](https://github.com/raffreitas/devlivery/issues/73) |
+| `Despesas`, `DespesaNova`, `DespesaEditar` | `features/expenses` | [#65](https://github.com/raffreitas/devlivery/issues/65); recorrência e classificação futuras em [#72](https://github.com/raffreitas/devlivery/issues/72) e [#74](https://github.com/raffreitas/devlivery/issues/74) |
+| `Dashboard` | `features/dashboard` | [#66](https://github.com/raffreitas/devlivery/issues/66); análises posteriores em [#75](https://github.com/raffreitas/devlivery/issues/75) |
+| `Login`, `NaoEncontrada`, `PaginaProduto` | auth, shared/pages e landing | [#54](https://github.com/raffreitas/devlivery/issues/54) |
 
-A regra da navegação do celular está em `../diretrizes.md` e não depende da API.
+## Contratos e regras
 
-## Acesso
+Use as rotas reais versionadas em `/api/v1`, os enums da API e testes de contrato. Não use os nomes ilustrativos de endpoints ou métodos de pagamento como especificação.
 
-| Tela | Arquivo | Código atual | Backlog |
-| --- | --- | --- | --- |
-| Entrar (normal, erro, muitas tentativas) | `Login` | `features/auth/pages/login-page.tsx` | — |
-| Página não encontrada (404) | `NaoEncontrada` | `shared/pages/not-found-page.tsx` | — |
+Os pedidos funcionam com o caixa fechado, incluindo a entrega. A antiga proposta de bloqueio foi substituída por decisão de negócio. Criar, imprimir e reimprimir não pode duplicar pedidos ou recebimentos; abrir um diálogo de impressão não comprova saída física do papel.
 
-## Público
-
-| Tela | Arquivo | Código atual | Backlog |
-| --- | --- | --- | --- |
-| Página do produto (substitui a landing `/lp`) | `PaginaProduto` | `features/landing` | — (link de contato pendente) |
+As referências visuais permanecem úteis para recursos posteriores, sem obrigar sua inclusão na v2.0.0. Consulte a milestone de cada issue antes de implementar uma parte do desenho.
