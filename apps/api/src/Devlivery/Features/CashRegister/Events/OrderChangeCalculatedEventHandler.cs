@@ -5,6 +5,7 @@ using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Common.Enums;
+using Devlivery.Domain.SeedWork;
 using Devlivery.Infrastructure.Tenancy;
 
 namespace Devlivery.Features.CashRegister.Events;
@@ -54,7 +55,7 @@ public sealed class OrderChangeCalculatedEventHandler(
                 "No active cash session found for establishment {EstablishmentId}. Change for Order {OrderId} will not be recorded.",
                 tenantAccessor.Tenant.Id,
                 domainEvent.OrderId);
-            return;
+            throw new DomainException("Abra o caixa antes de registrar o troco do pedido.");
         }
 
         // Idempotency: do not create duplicate change entries for the same order

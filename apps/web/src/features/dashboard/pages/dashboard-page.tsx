@@ -112,7 +112,7 @@ export function DashboardPage() {
         >
           <QueryRegion queries={[overview.queries.stats]}>
             <StatCard
-              title="Receita Total"
+              title="Valor dos Pedidos"
               value={formatMoney(stats.totalRevenue)}
               icon={<DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />}
               color="green"
@@ -132,7 +132,7 @@ export function DashboardPage() {
             queries={[overview.queries.stats, overview.queries.expenseSummary]}
           >
             <StatCard
-              title="Lucro Líquido"
+              title="Saldo Projetado"
               value={formatMoney(netProfit)}
               icon={<TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />}
               color={netProfit >= 0 ? "green" : "red"}
@@ -148,6 +148,13 @@ export function DashboardPage() {
             />
           </QueryRegion>
         </div>
+
+        <p className="text-sm text-muted-foreground">
+          Pedidos não cancelados pela data de criação, incluindo valores ainda
+          não recebidos. Despesas pagas pela data do pagamento; pendentes pelo
+          vencimento. O saldo projetado não representa o dinheiro disponível no
+          caixa.
+        </p>
 
         <div
           className={`transition-opacity duration-200 ${

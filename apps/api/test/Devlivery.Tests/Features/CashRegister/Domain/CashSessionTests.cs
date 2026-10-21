@@ -199,7 +199,7 @@ public sealed class CashSessionTests
         totals.CashPayments.ShouldBe(60m); // 90 cash - 10 refunded - 20 change
         totals.Deposits.ShouldBe(25m);
         totals.ExpectedCashAmount.ShouldBe(185m); // 100 opening + 25 deposit + 60 cash
-        totals.TotalOrders.ShouldBe(3);
+        totals.TotalOrders.ShouldBe(2);
     }
 
     [Theory]

@@ -98,6 +98,19 @@ export const orderFormSchema = z
     const totalPayments = sumMoney(
       data.payments.map((payment) => payment.amount),
     );
+    const electronicTotal = sumMoney(
+      data.payments
+        .filter((payment) => payment.method !== "Cash")
+        .map((payment) => payment.amount),
+    );
+    if (toCents(electronicTotal) > toCents(totalOrder)) {
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "O total dos pagamentos eletrônicos não pode ser maior que o total do pedido.",
+        path: ["payments"],
+      });
+    }
     if (toCents(totalPayments) < toCents(totalOrder)) {
       ctx.addIssue({
         code: "custom",

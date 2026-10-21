@@ -16,6 +16,49 @@ const order: OrderFormData = {
 };
 
 describe("orderFormSchema", () => {
+  it.each(["Pix", "CreditCard", "DebitCard"])(
+    "rejects excess in %s even with a cash payment",
+    (method) => {
+      const result = orderFormSchema.safeParse({
+        ...order,
+        payments: [
+          { method: "Cash", amount: 1 },
+          { method, amount: 30 },
+        ],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success)
+        expect(result.error.issues).toContainEqual(
+          expect.objectContaining({
+            path: ["payments"],
+            message:
+              "O total dos pagamentos eletrônicos não pode ser maior que o total do pedido.",
+          }),
+        );
+    },
+  );
+
+  it("validates the sum of electronic methods and permits cash change only on the remainder", () => {
+    expect(
+      orderFormSchema.safeParse({
+        ...order,
+        payments: [
+          { method: "Pix", amount: 20 },
+          { method: "CreditCard", amount: 10 },
+        ],
+      }).success,
+    ).toBe(false);
+    expect(
+      orderFormSchema.safeParse({
+        ...order,
+        payments: [
+          { method: "Pix", amount: 20 },
+          { method: "Cash", amount: 10 },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
   it("accepts an exact payment using the recorded price, independently of the catalog", () => {
     expect(orderFormSchema.safeParse(order).success).toBe(true);
   });

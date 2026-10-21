@@ -2,6 +2,7 @@ using Devlivery.Domain.Aggregates.Orders.Entities;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Aggregates.Orders.ValueObjects;
+using Devlivery.Domain.Common.Enums;
 using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.Orders;
@@ -66,6 +67,9 @@ public sealed class Order : Entity
 
     public void UpdateStatus(OrderStatus newStatus)
     {
+        if (Status == OrderStatus.Delivered && newStatus == OrderStatus.Delivered)
+            return;
+
         if (Status == OrderStatus.Canceled)
         {
             throw new DomainException("Não é possível alterar o status de um pedido cancelado.");
@@ -78,6 +82,7 @@ public sealed class Order : Entity
 
         if (newStatus == OrderStatus.Delivered)
         {
+            ValidatePaymentAmounts();
             var paymentsTotal = _payments.Where(x => x.PaymentStatus != PaymentStatus.Cancelled).Sum(x => x.Amount);
             if (paymentsTotal < Total)
             {
@@ -134,6 +139,9 @@ public sealed class Order : Entity
 
     public void Delete()
     {
+        if (Status == OrderStatus.Delivered)
+            throw new DomainException("Não é possível excluir um pedido entregue. O histórico financeiro deve ser preservado.");
+
         AddDomainEvent(new OrderDeletedEvent(
             Id,
             EstablishmentId,
@@ -167,6 +175,16 @@ public sealed class Order : Entity
     private void CalculateTotal()
     {
         Total = _items.Sum(i => i.TotalPrice) + DeliveryFee;
+    }
+
+    public void ValidatePaymentAmounts()
+    {
+        var electronicTotal = _payments
+            .Where(p => p.PaymentStatus != PaymentStatus.Cancelled && p.PaymentMethod != PaymentMethod.Cash)
+            .Sum(p => p.Amount);
+
+        if (electronicTotal > Total)
+            throw new DomainException("O total dos pagamentos eletrônicos não pode ser maior que o total do pedido.");
     }
 
     public void ReconcilePayments(IEnumerable<OrderPaymentUpdate> incoming)

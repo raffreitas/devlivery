@@ -31,8 +31,9 @@ public sealed class GetExpenseSummaryHandler(
                 e.amount as "Amount"
             from public.expenses e
             where e.establishment_id = @EstablishmentId
-            and (@StartDate is null or e.due_date >= @StartDate)
-            and (@EndDate is null or e.due_date <= @EndDate)
+            and e.status != 'Cancelled'
+            and (@StartDate is null or (case when e.status = 'Paid' then e.payment_date else e.due_date end) >= @StartDate)
+            and (@EndDate is null or (case when e.status = 'Paid' then e.payment_date else e.due_date end) <= @EndDate)
             """;
 
         var parameters = new DynamicParameters();

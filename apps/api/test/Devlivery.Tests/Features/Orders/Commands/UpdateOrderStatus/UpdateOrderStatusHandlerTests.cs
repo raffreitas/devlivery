@@ -1,4 +1,5 @@
 using Devlivery.Common.Errors;
+using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.SeedWork;
@@ -18,11 +19,47 @@ public sealed class UpdateOrderStatusHandlerTests
 {
     private readonly IOrderRepository _orderRepository = Substitute.For<IOrderRepository>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly ICashSessionRepository _cashSessionRepository = Substitute.For<ICashSessionRepository>();
     private readonly UpdateOrderStatusHandler _handler;
 
     public UpdateOrderStatusHandlerTests()
     {
-        _handler = new UpdateOrderStatusHandler(_orderRepository, _unitOfWork);
+        _handler = new UpdateOrderStatusHandler(_orderRepository, _unitOfWork, _cashSessionRepository);
+    }
+
+    [Fact]
+    public async Task GivenNoActiveSession_WhenDelivering_ThenRejectsWithoutChangingOrderOrCommitting()
+    {
+        // Arrange
+        var order = new OrderBuilder().Build();
+        _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).ReturnsNull();
+
+        // Act
+        var result = await _handler.HandleAsync(new UpdateOrderStatusCommand(order.Id, OrderStatus.Delivered), CancellationToken.None);
+
+        // Assert
+        result.HasError<ValidationError>().ShouldBeTrue();
+        order.Status.ShouldBe(OrderStatus.Pending);
+        order.DomainEvents.ShouldBeEmpty();
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GivenActiveSession_WhenDelivering_ThenConfirmsAndCommits()
+    {
+        // Arrange
+        var order = new OrderBuilder().Build();
+        _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
+        _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).Returns(new CashSessionBuilder().Build());
+
+        // Act
+        var result = await _handler.HandleAsync(new UpdateOrderStatusCommand(order.Id, OrderStatus.Delivered), CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        order.Status.ShouldBe(OrderStatus.Delivered);
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

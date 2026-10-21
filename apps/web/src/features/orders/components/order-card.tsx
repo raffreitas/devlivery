@@ -24,6 +24,7 @@ interface OrderCardProps {
   onEdit: (order: Order) => void;
   onUpdateStatus: (id: string, status: OrderStatus) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  canDeliver: boolean;
 }
 
 const CLOSED_ALERT = { open: false, type: "", action: () => {} };
@@ -41,7 +42,9 @@ export function OrderCard({
   onEdit,
   onUpdateStatus,
   onDelete,
+  canDeliver,
 }: OrderCardProps) {
+  const [isAdvancing, setIsAdvancing] = useState(false);
   const { contentRef, handlePrint } = usePrintOrder();
   const [alert, setAlert] = useState({
     open: false,
@@ -57,11 +60,14 @@ export function OrderCard({
   // so the handlers below only need to avoid announcing success when the API rejects.
   const handleNextStatus = async () => {
     const next = NEXT_STATUS[order.status];
-    if (!next) return;
+    if (!next || isAdvancing || (next === "Delivered" && !canDeliver)) return;
+    setIsAdvancing(true);
     try {
       await onUpdateStatus(order.id, next);
     } catch {
       // Reported by the global MutationCache.
+    } finally {
+      setIsAdvancing(false);
     }
   };
 
@@ -112,6 +118,8 @@ export function OrderCard({
         onCancel={() => handleOpenAlert("cancelar", handleCancel)}
         onDelete={() => handleOpenAlert("excluir", handleDelete)}
         hasNextStatus={NEXT_STATUS[order.status] !== null}
+        isAdvancing={isAdvancing}
+        canDeliver={canDeliver}
       />
 
       <div style={{ display: "none" }}>

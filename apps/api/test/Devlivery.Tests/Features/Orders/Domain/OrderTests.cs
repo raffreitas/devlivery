@@ -18,6 +18,77 @@ public sealed class OrderTests
     private static readonly DeliveryAddress Address = new("Rua das Flores, 123", "Portão azul");
 
     [Fact]
+    public void GivenDeliveredCashOrderWithChange_WhenDeleting_ThenRejectsBeforeRaisingRefundEvent()
+    {
+        // Arrange
+        var order = CreateOrderWithTotal(12.34m,
+            new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash).WithAmount(20m).Build());
+        order.UpdateStatus(OrderStatus.Delivered);
+        order.ClearDomainEvents();
+
+        // Act
+        var exception = Record.Exception(order.Delete);
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>();
+        order.Change.ShouldBe(7.66m);
+        order.DomainEvents.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData(PaymentMethod.Pix)]
+    [InlineData(PaymentMethod.CreditCard)]
+    [InlineData(PaymentMethod.DebitCard)]
+    public void GivenElectronicPaymentAboveTotal_WhenDelivering_ThenRejectsWithoutConfirmingPayments(PaymentMethod method)
+    {
+        // Arrange
+        var cash = new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash).WithAmount(1m).Build();
+        var electronic = new OrderPaymentBuilder().WithPaymentMethod(method).WithAmount(20m).Build();
+        var order = CreateOrderWithTotal(10m, cash, electronic);
+
+        // Act
+        var exception = Record.Exception(() => order.UpdateStatus(OrderStatus.Delivered));
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>();
+        order.Status.ShouldBe(OrderStatus.Pending);
+        order.Change.ShouldBe(0m);
+        order.Payments.ShouldAllBe(p => p.PaymentStatus == PaymentStatus.Pending);
+        order.DomainEvents.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void GivenElectronicPaymentsWhoseSumExceedsTotal_WhenValidating_ThenRejects()
+    {
+        // Arrange
+        var order = CreateOrderWithTotal(10m,
+            new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Pix).WithAmount(6m).Build(),
+            new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.CreditCard).WithAmount(5m).Build());
+
+        // Act
+        var exception = Record.Exception(order.ValidatePaymentAmounts);
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>();
+    }
+
+    [Fact]
+    public void GivenMixedPaymentWithCashOverpayment_WhenDelivering_ThenCalculatesChangeFromCashRemainder()
+    {
+        // Arrange
+        var order = CreateOrderWithTotal(10m,
+            new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Pix).WithAmount(6m).Build(),
+            new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash).WithAmount(10m).Build());
+
+        // Act
+        order.UpdateStatus(OrderStatus.Delivered);
+
+        // Assert
+        order.Change.ShouldBe(6m);
+        order.Payments.ShouldAllBe(p => p.PaymentStatus == PaymentStatus.Confirmed);
+    }
+
+    [Fact]
     public void GivenItemsAndDeliveryFee_WhenCreatingOrder_ThenStartsPendingWithTotalOfItemsPlusFee()
     {
         // Arrange
@@ -207,13 +278,14 @@ public sealed class OrderTests
         var payment = new OrderPaymentBuilder().WithAmount(50m).Build();
         var order = CreateOrderWithTotal(50m, payment);
         order.UpdateStatus(OrderStatus.Delivered);
+        order.ClearDomainEvents();
 
         // Act
         var exception = Record.Exception(() => order.UpdateStatus(OrderStatus.Delivered));
 
         // Assert
         exception.ShouldBeNull();
-        order.DomainEvents.OfType<OrderPaymentConfirmedEvent>().ShouldHaveSingleItem();
+        order.DomainEvents.ShouldBeEmpty();
         payment.PaymentStatus.ShouldBe(PaymentStatus.Confirmed);
     }
 

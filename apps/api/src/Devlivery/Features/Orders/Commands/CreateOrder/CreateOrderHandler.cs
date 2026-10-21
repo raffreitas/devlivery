@@ -63,6 +63,8 @@ public sealed class CreateOrderHandler(
             notes: command.Notes
         );
 
+        order.ValidatePaymentAmounts();
+
         await orderRepository.AddAsync(order, cancellationToken);
         await unitOfWork.CommitAsync(cancellationToken);
 

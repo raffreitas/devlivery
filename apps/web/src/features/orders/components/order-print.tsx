@@ -1,5 +1,10 @@
 import { formatMoney } from "@/shared/utils/formatters";
-import { itemsSubtotal, itemTotal } from "@/shared/utils/money";
+import {
+  itemsSubtotal,
+  itemTotal,
+  moneyDifference,
+  sumMoney,
+} from "@/shared/utils/money";
 import { getPaymentOptionLabel } from "../constants/payment-methods";
 import type { Order } from "../types";
 
@@ -8,11 +13,24 @@ interface OrderPrintProps {
 }
 
 export function OrderPrint({ order }: OrderPrintProps) {
+  const totalPayments = sumMoney(
+    order.payments.map((payment) => payment.amount),
+  );
+  const electronicTotal = sumMoney(
+    order.payments
+      .filter((payment) => payment.method !== "Cash")
+      .map((payment) => payment.amount),
+  );
+  const change =
+    electronicTotal <= order.total
+      ? Math.max(0, moneyDifference(totalPayments, order.total))
+      : 0;
+
   return (
     <div className="print-receipt">
       <div className="text-center mb-4">
         <h1 className="text-xl font-bold">DEVLIVERY</h1>
-        <p>Pedido #{order.id.slice(0, 8).toUpperCase()}</p>
+        <p className="order-reference">Pedido #{order.id.toUpperCase()}</p>
       </div>
 
       <div className="border-t-2 border-b-2 border-dashed border-foreground py-2 mb-3">
@@ -27,7 +45,7 @@ export function OrderPrint({ order }: OrderPrintProps) {
             {order.payments.map((p) => (
               <p key={p.id} className="ml-2 flex justify-between">
                 <span>- {getPaymentOptionLabel(p.method)}</span>
-                {p.method !== "Pix" && <span>{formatMoney(p.amount)}</span>}
+                <span>{formatMoney(p.amount)}</span>
               </p>
             ))}
           </div>
@@ -37,7 +55,10 @@ export function OrderPrint({ order }: OrderPrintProps) {
       <div className="mb-3">
         <p className="font-semibold mb-2">ITENS:</p>
         {order.items.map((item) => (
-          <div key={`${item.product.id}-${item.quantity}`} className="mb-2">
+          <div
+            key={`${item.product.id}-${item.unitPrice}-${item.quantity}-${item.notes ?? ""}`}
+            className="mb-2"
+          >
             <div className="flex justify-between">
               <span>
                 {item.quantity}x {item.product.name}
@@ -77,6 +98,13 @@ export function OrderPrint({ order }: OrderPrintProps) {
                 <span>TOTAL:</span>
                 <span>{formatMoney(order.total)}</span>
               </div>
+              {change > 0 &&
+                order.payments.some((payment) => payment.method === "Cash") && (
+                  <div className="flex justify-between font-bold mt-2">
+                    <span>TROCO:</span>
+                    <span>{formatMoney(change)}</span>
+                  </div>
+                )}
             </div>
           );
         })()}

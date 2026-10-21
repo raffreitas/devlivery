@@ -27,8 +27,23 @@ public sealed class CashSession : Entity
         - _movements.Where(m => m.EntryType == CashSessionEntryType.Refund).Sum(m => m.Amount)
         - _movements.Where(m => m.EntryType == CashSessionEntryType.Change).Sum(m => m.Amount);
 
-    public int TotalOrders =>
-        _movements.Where(m => m.OrderPaymentId != null).Select(x => x.OrderPaymentId).Distinct().Count();
+    public int TotalOrders => CountOrders();
+
+    public int CountOrders(PaymentMethod? paymentMethod = null)
+    {
+        var refundedPayments = _movements
+            .Where(m => m.EntryType == CashSessionEntryType.Refund)
+            .Select(m => m.OrderPaymentId)
+            .ToHashSet();
+
+        return _movements
+            .Where(m => m.EntryType == CashSessionEntryType.Payment && m.RelatedOrderId != null &&
+                        (!paymentMethod.HasValue || m.PaymentMethod == paymentMethod) &&
+                        !refundedPayments.Contains(m.OrderPaymentId))
+            .Select(m => m.RelatedOrderId)
+            .Distinct()
+            .Count();
+    }
 
     public decimal ExpectedCashAmount => OpeningAmount + TotalDeposits() + TotalCashPayments();
 

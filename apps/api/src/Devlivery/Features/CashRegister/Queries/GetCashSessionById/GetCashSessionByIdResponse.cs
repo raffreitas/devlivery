@@ -41,7 +41,7 @@ public sealed record GetCashSessionByIdResponse(
                 return new PaymentBreakdownDto(
                     g.Key!.Value,
                     breakdownAmount,
-                    payments.Count - refunds.Count);
+                    cashSession.CountOrders(g.Key));
             })
             .Where(pb => pb.Amount > 0)
             .ToArray();
@@ -57,10 +57,6 @@ public sealed record GetCashSessionByIdResponse(
                 m.Reason))
             .ToArray();
 
-        var totalPayments = cashSession.Movements.Count(m => m.EntryType == CashSessionEntryType.Payment);
-        var totalRefunds = cashSession.Movements.Count(m => m.EntryType == CashSessionEntryType.Refund);
-        var totalOrders = totalPayments - totalRefunds;
-
         return new GetCashSessionByIdResponse(
             cashSession.Id,
             cashSession.AttendantId,
@@ -69,7 +65,7 @@ public sealed record GetCashSessionByIdResponse(
             cashSession.ClosingAmount,
             cashSession.ExpectedCashAmount,
             cashSession.TotalRevenue,
-            totalOrders,
+            cashSession.TotalOrders,
             paymentBreakdown,
             cashMovements,
             cashSession.StartAt,

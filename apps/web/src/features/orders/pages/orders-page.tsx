@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+import { useCurrentCashSession } from "@/features/cash/hooks/use-current-cash-session";
 import {
   GridSkeleton,
   LoadingOverlay,
@@ -7,6 +8,16 @@ import {
 } from "@/shared/components/loading";
 import { Modal } from "@/shared/components/modal";
 import { QueryState } from "@/shared/components/query-state";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
 import {
   Drawer,
@@ -41,6 +52,9 @@ const paymentOptions: Array<PaymentMethod> = [
 ];
 
 export function OrdersPage() {
+  const cash = useCurrentCashSession();
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const [period, setPeriod] = useState<DateRange | undefined>({
     from: new Date(),
     to: new Date(),
@@ -81,6 +95,7 @@ export function OrdersPage() {
     }
     setIsModalOpen(false);
     setEditingOrder(null);
+    setIsFormDirty(false);
     toast.add({
       type: "success",
       title: `Pedido ${editingOrder ? "atualizado" : "criado"} com sucesso!`,
@@ -95,6 +110,14 @@ export function OrdersPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingOrder(null);
+    setIsFormDirty(false);
+    setIsDiscardOpen(false);
+  };
+
+  const requestCloseModal = () => {
+    if (isCreating || isUpdating) return;
+    if (isFormDirty) setIsDiscardOpen(true);
+    else handleCloseModal();
   };
 
   const handlePeriodFilterChange = (dateRange: DateRange | undefined) => {
@@ -181,6 +204,9 @@ export function OrdersPage() {
                       onEdit={handleEditOrder}
                       onUpdateStatus={updateOrderStatus}
                       onDelete={deleteOrder}
+                      canDeliver={
+                        !!cash.currentSession && !cash.error && !cash.isLoading
+                      }
                     />
                   ))}
               </div>
@@ -192,16 +218,34 @@ export function OrdersPage() {
       <Modal
         dismissible={!(isCreating || isUpdating)}
         isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        onClose={requestCloseModal}
         title={editingOrder ? "Editar Pedido" : "Novo Pedido"}
       >
         <OrderForm
           initialData={editingOrder ? { ...editingOrder } : undefined}
           onSubmit={handleCreateOrUpdateOrder}
-          onCancel={handleCloseModal}
+          onCancel={requestCloseModal}
+          onDirtyChange={setIsFormDirty}
           isSubmitting={isCreating || isUpdating}
         />
       </Modal>
+
+      <AlertDialog open={isDiscardOpen} onOpenChange={setIsDiscardOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Descartar alterações do pedido?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Os dados preenchidos ainda não foram salvos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continuar preenchendo</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCloseModal}>
+              Descartar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Drawer
         open={isFiltersOpen}

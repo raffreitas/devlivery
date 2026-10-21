@@ -9,6 +9,8 @@ interface OrderCardActionsProps {
   onNextStatus: () => void;
   onDelete: () => void;
   hasNextStatus: boolean;
+  isAdvancing: boolean;
+  canDeliver: boolean;
 }
 
 function getNextStatusLabel(status: OrderStatus): string {
@@ -30,12 +32,13 @@ export function OrderCardActions({
   onNextStatus,
   onDelete,
   hasNextStatus,
+  isAdvancing,
+  canDeliver,
 }: OrderCardActionsProps) {
   const showEdit = order.status !== "Canceled" && order.status !== "Delivered";
   const showCancel =
     order.status !== "Canceled" && order.status !== "Delivered";
-  const showDelete =
-    order.status === "Delivered" || order.status === "Canceled";
+  const showDelete = order.status === "Canceled";
   return (
     <div className="mt-auto">
       <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-end gap-2">
@@ -53,7 +56,11 @@ export function OrderCardActions({
           </Button>
         )}
         {hasNextStatus && (
-          <Button size="sm" onClick={onNextStatus}>
+          <Button
+            size="sm"
+            onClick={onNextStatus}
+            disabled={isAdvancing || (order.status === "Ready" && !canDeliver)}
+          >
             <span className="hidden sm:inline">
               {getNextStatusLabel(order.status)}
             </span>
@@ -66,6 +73,12 @@ export function OrderCardActions({
           </Button>
         )}
       </div>
+
+      {order.status === "Ready" && !canDeliver && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Abra o caixa para marcar o pedido como entregue.
+        </p>
+      )}
 
       <div className="mt-2 sm:mt-3 text-xs text-muted-foreground">
         Criado em: {new Date(order.createdAt).toLocaleString("pt-BR")}

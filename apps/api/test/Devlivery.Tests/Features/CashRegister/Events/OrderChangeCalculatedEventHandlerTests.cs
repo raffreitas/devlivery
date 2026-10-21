@@ -118,7 +118,7 @@ public sealed class OrderChangeCalculatedEventHandlerTests
     }
 
     [Fact]
-    public async Task GivenNoActiveSession_WhenChangeCalculated_ThenSkipsWithoutFailing()
+    public async Task GivenNoActiveSession_WhenChangeCalculated_ThenThrowsToPreventUnrecordedChange()
     {
         // Arrange
         var order = GivenOrderPaidWith(new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash));
@@ -129,7 +129,7 @@ public sealed class OrderChangeCalculatedEventHandlerTests
             _handler.HandleAsync(CreateEvent(order.Id, 30m), CancellationToken.None));
 
         // Assert
-        exception.ShouldBeNull();
+        exception.ShouldBeOfType<Devlivery.Domain.SeedWork.DomainException>();
     }
 
     private Order GivenOrderPaidWith(params OrderPaymentBuilder[] payments)

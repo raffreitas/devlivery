@@ -30,6 +30,11 @@ export function usePrintOrder() {
         width: 100%;
       }
 
+      .order-reference {
+        overflow-wrap: anywhere;
+        font-size: 9px;
+      }
+
       .text-center {
         text-align: center;
       }

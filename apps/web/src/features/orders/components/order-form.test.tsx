@@ -22,6 +22,105 @@ const initialData: OrderFormData = {
 };
 
 describe("OrderForm", () => {
+  it("does not suggest cash change when an electronic amount exceeds the order", async () => {
+    server.use(
+      http.get("http://localhost:5000/api/v1/products", () =>
+        HttpResponse.json({ data: [] }),
+      ),
+    );
+    const onSubmit = vi.fn();
+    renderWithProviders(
+      <OrderForm
+        initialData={{
+          ...initialData,
+          payments: [
+            { method: "Cash", amount: 1 },
+            { method: "Pix", amount: 30 },
+          ],
+        }}
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+      />,
+    );
+    expect(
+      screen.getByText("Revise os pagamentos eletrônicos"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Troco:/)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Criar Pedido" }));
+    expect(
+      await screen.findByText(
+        "O total dos pagamentos eletrônicos não pode ser maior que o total do pedido.",
+      ),
+    ).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["Com cebola", 2],
+    [" Sem cebola ", 1],
+  ])(
+    "preserves preparation instructions when adding a repeated product with %s",
+    async (notes, lineCount) => {
+      server.use(
+        http.get("http://localhost:5000/api/v1/products", () =>
+          HttpResponse.json({
+            data: [
+              {
+                id: "product",
+                name: "Pizza",
+                price: 20,
+                category: "Pizza",
+                available: true,
+                description: "Pizza",
+                createdAt: "2026-10-17T12:00:00Z",
+                updatedAt: "2026-10-17T12:00:00Z",
+              },
+            ],
+          }),
+        ),
+      );
+      const onSubmit = vi.fn().mockResolvedValue(undefined);
+      const user = userEvent.setup();
+      renderWithProviders(
+        <OrderForm
+          initialData={{
+            ...initialData,
+            items: [
+              { ...initialData.items[0], quantity: 1, notes: "Sem cebola" },
+            ],
+            payments: [{ method: "CreditCard", amount: 9.9 }],
+          }}
+          onSubmit={onSubmit}
+          onCancel={vi.fn()}
+        />,
+      );
+
+      await user.type(
+        screen.getByRole("combobox", { name: "Produto" }),
+        "Pizza",
+      );
+      await user.click(await screen.findByRole("option", { name: /^Pizza -/ }));
+      await user.type(
+        screen.getByRole("textbox", { name: "Observações" }),
+        notes,
+      );
+      await user.click(screen.getByRole("button", { name: "Adicionar Item" }));
+      await user.click(screen.getByRole("button", { name: "Criar Pedido" }));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+      const submitted = onSubmit.mock.calls[0][0] as OrderFormData;
+      expect(submitted.items).toHaveLength(lineCount);
+      expect(submitted.items[0].notes).toBe("Sem cebola");
+      expect(
+        submitted.items.reduce((total, item) => total + item.quantity, 0),
+      ).toBe(2);
+      if (lineCount === 2) expect(submitted.items[1].notes).toBe("Com cebola");
+      expect(submitted.items.every((item) => item.unitPrice === 9.9)).toBe(
+        true,
+      );
+    },
+  );
+
   it.each([20, 5])(
     "preserves the original price when removing and readding a product whose catalog price is %s",
     async (price) => {

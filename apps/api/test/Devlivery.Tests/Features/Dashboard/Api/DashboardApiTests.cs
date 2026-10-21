@@ -33,6 +33,39 @@ public sealed class DashboardApiTests(ApiFactory api)
     private static readonly DateOnly Today = TimeProvider.System.GetBrazilToday();
 
     [Fact]
+    public async Task GivenPaidExpensesWithDifferentDueDates_WhenFilteringDashboard_ThenPaidTotalsMatchPaymentSeries()
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+        var category = await SeedCategoryAsync(tenant, "Operacional");
+        var paymentDay = new DateOnly(2026, 10, 20);
+        await SeedExpenseAsync(tenant, category, 100m, e => e.WithDueDate(paymentDay.AddMonths(1)).AsPaid(paymentDay));
+        await SeedExpenseAsync(tenant, category, 50m, e => e.WithDueDate(paymentDay).AsPaid(paymentDay.AddMonths(-1)));
+        await SeedExpenseAsync(tenant, category, 20m, e => e.WithDueDate(paymentDay));
+        await SeedExpenseAsync(tenant, category, 999m, e => e.WithDueDate(paymentDay).AsCancelled());
+        const string period = "?startDate=2026-10-20&endDate=2026-10-20";
+
+        // Act
+        var summary = await ApiTenant.ReadDataAsync<GetExpenseSummaryResponse>(
+            await tenant.Client.GetAsync($"/api/v1/dashboard/expense-summary{period}"));
+        var series = await ApiTenant.ReadDataAsync<GetExpensesOverTimeResponse>(
+            await tenant.Client.GetAsync($"/api/v1/dashboard/expenses-over-time{period}"));
+        var statuses = await ApiTenant.ReadDataAsync<GetExpensesByStatusResponse>(
+            await tenant.Client.GetAsync($"/api/v1/dashboard/expenses-by-status{period}"));
+        var categories = await ApiTenant.ReadDataAsync<GetExpensesByCategoryResponse>(
+            await tenant.Client.GetAsync($"/api/v1/dashboard/expenses-by-category{period}"));
+
+        // Assert
+        summary.Paid.ShouldBe(100m);
+        summary.Paid.ShouldBe(series.Data.Sum(p => p.Total));
+        summary.Total.ShouldBe(120m);
+        summary.Count.ShouldBe(2);
+        statuses.Statuses.Single(s => s.Status == ExpenseDisplayStatus.Paid).Total.ShouldBe(summary.Paid);
+        statuses.Statuses.ShouldNotContain(s => s.Status == ExpenseDisplayStatus.Cancelled);
+        categories.Categories.ShouldHaveSingleItem().Total.ShouldBe(summary.Total);
+    }
+
+    [Fact]
     public async Task GivenOrdersInEveryStatus_WhenGettingStats_ThenExcludesCanceledFromRevenueAndAverage()
     {
         // Arrange
