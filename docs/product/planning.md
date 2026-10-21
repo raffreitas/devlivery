@@ -4,7 +4,10 @@ O trabalho pendente é acompanhado no GitHub. Este documento define como organiz
 
 ## Onde acompanhar
 
-- [Devlivery Kanban](https://github.com/users/raffreitas/projects/1): fila, prioridade e estado de execução.
+- [Quadro V2.0.0](https://github.com/users/raffreitas/projects/1/views/1): entregas essenciais por status.
+- [Quadro Pós-V2](https://github.com/users/raffreitas/projects/1/views/7): evoluções posteriores por status.
+- [Roadmap](https://github.com/users/raffreitas/projects/1/views/4): entregas agrupadas por milestone, sem datas presumidas.
+- [Visão geral](https://github.com/users/raffreitas/projects/1/views/3): todos os itens, incluindo os que ainda aguardam triagem de milestone/prioridade.
 - [Épico da V2](https://github.com/raffreitas/devlivery/issues/52): escopo essencial, dependências e critérios de conclusão.
 - [Milestone v2.0.0](https://github.com/raffreitas/devlivery/milestone/1): entregas que compõem a nova versão.
 - [Milestone Pós-v2.0.0](https://github.com/raffreitas/devlivery/milestone/2): evoluções posteriores, sem compromisso de versão específica ou data.
@@ -42,6 +45,8 @@ Prioridade não substitui dependência: uma issue P1 pode estar bloqueada por ou
 - **In progress:** trabalho efetivamente em execução, com responsável definido; respeitar os limites já configurados no quadro.
 - **In review:** implementação submetida à revisão e ligada à PR correspondente.
 - **Done:** critérios atendidos e mudança integrada ao destino previsto. Tema/protótipo e commit isolado não comprovam conclusão de uma funcionalidade.
+
+O workflow do Project adiciona issues abertas do repositório automaticamente e define Backlog como status inicial dos novos itens. Isso não atribui prioridade, milestone ou responsável: esses campos precisam de triagem para o item aparecer na visão da release correspondente. As entregas essenciais são sub-issues do épico #52.
 
 Não mover todo o roadmap para Ready ou In progress. Novas issues entram em Backlog; manter trabalho que já estava em andamento até verificar sua situação. Corrigir duplicidades por vínculo e encerramento justificado, preservando histórico. Rascunhos do Project devem ser convertidos em issues do repositório quando o escopo estiver definido.
 
