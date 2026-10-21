@@ -1,6 +1,8 @@
 using Devlivery.Common.Errors;
 using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Events;
+using Devlivery.Domain.Aggregates.Orders.Enums;
+using Devlivery.Domain.SeedWork;
 using Devlivery.Features.Orders.Commands.DeleteOrder;
 using Devlivery.Infrastructure.Persistence;
 using Devlivery.Tests.Common.Builders;
@@ -22,6 +24,24 @@ public sealed class DeleteOrderHandlerTests
     public DeleteOrderHandlerTests()
     {
         _handler = new DeleteOrderHandler(_orderRepository, _unitOfWork);
+    }
+
+    [Fact]
+    public async Task GivenDeliveredOrder_WhenDeleting_ThenRejectsWithoutRemovingOrCommitting()
+    {
+        // Arrange
+        var order = new OrderBuilder().WithStatus(OrderStatus.Delivered).Build();
+        order.ClearDomainEvents();
+        _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => _handler.HandleAsync(new DeleteOrderCommand(order.Id), CancellationToken.None));
+
+        // Assert
+        exception.ShouldBeOfType<DomainException>();
+        order.DomainEvents.ShouldBeEmpty();
+        await _orderRepository.DidNotReceive().RemoveAsync(order, Arg.Any<CancellationToken>());
+        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

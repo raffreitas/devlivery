@@ -27,8 +27,9 @@ public sealed class GetExpensesByCategoryHandler(
             join public.expense_categories ec on ec.id = e.category_id
             left join public.expense_categories ecp on ecp.id = ec.parent_category_id
             where e.establishment_id = @EstablishmentId
-            and (@StartDate is null or e.due_date >= @StartDate)
-            and (@EndDate is null or e.due_date <= @EndDate)
+            and e.status != 'Cancelled'
+            and (@StartDate is null or (case when e.status = 'Paid' then e.payment_date else e.due_date end) >= @StartDate)
+            and (@EndDate is null or (case when e.status = 'Paid' then e.payment_date else e.due_date end) <= @EndDate)
             group by coalesce(ecp.name, ec.name)
             order by sum(e.amount) desc
             """;

@@ -128,7 +128,7 @@ export function RevenueVsExpensesChart({
                             />
                             {index === 1 && (
                               <ChartTooltipValue
-                                label="Lucro líquido"
+                                label="Saldo projetado"
                                 value={formatMoney(
                                   moneyDifference(
                                     point.revenue,
@@ -163,7 +163,7 @@ export function RevenueVsExpensesChart({
             </ChartContainer>
             <ChartDataTable
               caption="Receitas vs Despesas"
-              columns={["Data", "Receitas", "Despesas", "Lucro líquido"]}
+              columns={["Data", "Receitas", "Despesas", "Saldo projetado"]}
               rows={combinedData.map((point) => ({
                 key: point.date,
                 values: [

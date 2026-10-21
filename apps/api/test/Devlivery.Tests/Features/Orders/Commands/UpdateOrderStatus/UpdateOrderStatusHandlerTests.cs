@@ -26,6 +26,23 @@ public sealed class UpdateOrderStatusHandlerTests
     }
 
     [Fact]
+    public async Task GivenOrder_WhenDelivering_ThenConfirmsPaymentsAndCommitsWithoutRequiringCashSession()
+    {
+        // Arrange
+        var order = new OrderBuilder().Build();
+        _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>()).Returns(order);
+
+        // Act
+        var result = await _handler.HandleAsync(new UpdateOrderStatusCommand(order.Id, OrderStatus.Delivered), CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        order.Status.ShouldBe(OrderStatus.Delivered);
+        order.Payments.ShouldAllBe(p => p.PaymentStatus == PaymentStatus.Confirmed);
+        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task GivenNonexistentOrder_WhenUpdatingStatus_ThenReturnsNotFoundError()
     {
         // Arrange

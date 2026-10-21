@@ -53,6 +53,7 @@ interface OrderFormProps {
   onSubmit: (data: OrderFormData) => Promise<void>;
   onCancel: () => void;
   isSubmitting?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
 export function OrderForm({
@@ -60,6 +61,7 @@ export function OrderForm({
   onSubmit,
   onCancel,
   isSubmitting: externalIsSubmitting,
+  onDirtyChange,
 }: OrderFormProps) {
   const formId = useId();
   const { products } = useProducts();
@@ -94,6 +96,13 @@ export function OrderForm({
     name: "items",
   });
 
+  const isDirty = form.formState.isDirty;
+  useEffect(() => {
+    onDirtyChange?.(
+      isDirty || !!selectedProductId || quantity !== 1 || notes !== "",
+    );
+  }, [isDirty, selectedProductId, quantity, notes, onDirtyChange]);
+
   const {
     fields: paymentFields,
     append: appendPayment,
@@ -110,7 +119,9 @@ export function OrderForm({
     if (!product) return;
 
     const existingItemIndex = fields.findIndex(
-      (item) => item.product.id === selectedProductId,
+      (item) =>
+        item.product.id === selectedProductId &&
+        (item.notes?.trim() ?? "") === notes.trim(),
     );
 
     const productData = {
@@ -128,14 +139,14 @@ export function OrderForm({
         product: productData,
         unitPrice: existingItem.unitPrice,
         quantity: existingItem.quantity + quantity,
-        notes: notes || existingItem.notes,
+        notes: notes.trim() || undefined,
       });
     } else {
       append({
         product: productData,
         unitPrice: recordedPrices.get(product.id) ?? product.price,
         quantity,
-        notes: notes || undefined,
+        notes: notes.trim() || undefined,
       });
     }
 
@@ -185,6 +196,12 @@ export function OrderForm({
   const totalPaid = sumMoney(
     (payments ?? []).map((payment) => payment.amount || 0),
   );
+  const electronicTotal = sumMoney(
+    (payments ?? [])
+      .filter((payment) => payment.method !== "Cash")
+      .map((payment) => payment.amount || 0),
+  );
+  const hasElectronicExcess = moneyDifference(electronicTotal, total) > 0;
   const remainingAmount = moneyDifference(total, totalPaid);
 
   useEffect(() => {
@@ -458,7 +475,11 @@ export function OrderForm({
                   <span className="text-muted-foreground">
                     Total Pedido: R$ {total.toFixed(2)}
                   </span>
-                  {remainingAmount > 0 ? (
+                  {hasElectronicExcess ? (
+                    <span className="text-destructive font-bold">
+                      Revise os pagamentos eletrônicos
+                    </span>
+                  ) : remainingAmount > 0 ? (
                     <span className="text-amber-600 font-bold flex items-center gap-1">
                       <div className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
                       Falta: R$ {remainingAmount.toFixed(2)}

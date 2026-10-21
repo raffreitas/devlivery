@@ -15,7 +15,7 @@ export function OrderCardItems({ items }: OrderCardItemsProps) {
       <ul className="space-y-2">
         {items.map((item) => (
           <li
-            key={`${item.product.id}-${item.quantity}`}
+            key={`${item.product.id}-${item.unitPrice}-${item.quantity}-${item.notes ?? ""}`}
             className="flex justify-between gap-2 text-xs sm:text-sm"
           >
             <span className="text-foreground flex-1 min-w-0">

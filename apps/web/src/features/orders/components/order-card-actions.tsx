@@ -9,6 +9,7 @@ interface OrderCardActionsProps {
   onNextStatus: () => void;
   onDelete: () => void;
   hasNextStatus: boolean;
+  isAdvancing: boolean;
 }
 
 function getNextStatusLabel(status: OrderStatus): string {
@@ -30,12 +31,12 @@ export function OrderCardActions({
   onNextStatus,
   onDelete,
   hasNextStatus,
+  isAdvancing,
 }: OrderCardActionsProps) {
   const showEdit = order.status !== "Canceled" && order.status !== "Delivered";
   const showCancel =
     order.status !== "Canceled" && order.status !== "Delivered";
-  const showDelete =
-    order.status === "Delivered" || order.status === "Canceled";
+  const showDelete = order.status === "Canceled";
   return (
     <div className="mt-auto">
       <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-end gap-2">
@@ -53,7 +54,7 @@ export function OrderCardActions({
           </Button>
         )}
         {hasNextStatus && (
-          <Button size="sm" onClick={onNextStatus}>
+          <Button size="sm" onClick={onNextStatus} disabled={isAdvancing}>
             <span className="hidden sm:inline">
               {getNextStatusLabel(order.status)}
             </span>

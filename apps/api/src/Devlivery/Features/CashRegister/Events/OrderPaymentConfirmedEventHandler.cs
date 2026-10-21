@@ -31,10 +31,10 @@ public sealed class OrderPaymentConfirmedEventHandler(
         var activeSession = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
         if (activeSession is null)
         {
-            logger.LogWarning(
-                "No active cash session found for establishment {EstablishmentId}. Payment {PaymentId} will not be recorded in cash register.",
-                tenantAccessor.Tenant.Id,
-                domainEvent.PaymentId);
+            logger.LogInformation(
+                "Payment {PaymentId} confirmed outside a cash session for establishment {EstablishmentId}. It remains recorded on the order.",
+                domainEvent.PaymentId,
+                tenantAccessor.Tenant.Id);
             return;
         }
 

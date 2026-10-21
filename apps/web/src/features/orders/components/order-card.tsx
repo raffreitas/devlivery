@@ -42,6 +42,7 @@ export function OrderCard({
   onUpdateStatus,
   onDelete,
 }: OrderCardProps) {
+  const [isAdvancing, setIsAdvancing] = useState(false);
   const { contentRef, handlePrint } = usePrintOrder();
   const [alert, setAlert] = useState({
     open: false,
@@ -57,11 +58,14 @@ export function OrderCard({
   // so the handlers below only need to avoid announcing success when the API rejects.
   const handleNextStatus = async () => {
     const next = NEXT_STATUS[order.status];
-    if (!next) return;
+    if (!next || isAdvancing) return;
+    setIsAdvancing(true);
     try {
       await onUpdateStatus(order.id, next);
     } catch {
       // Reported by the global MutationCache.
+    } finally {
+      setIsAdvancing(false);
     }
   };
 
@@ -112,6 +116,7 @@ export function OrderCard({
         onCancel={() => handleOpenAlert("cancelar", handleCancel)}
         onDelete={() => handleOpenAlert("excluir", handleDelete)}
         hasNextStatus={NEXT_STATUS[order.status] !== null}
+        isAdvancing={isAdvancing}
       />
 
       <div style={{ display: "none" }}>

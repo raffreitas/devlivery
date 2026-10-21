@@ -72,6 +72,7 @@ public sealed class UpdateOrderHandler(
 
         var updates = command.Payments?.Select(p => new OrderPaymentUpdate(p.Id, p.Method, p.Amount)) ?? Enumerable.Empty<OrderPaymentUpdate>();
         order.ReconcilePayments(updates);
+        order.ValidatePaymentAmounts();
 
         await unitOfWork.CommitAsync(cancellationToken);
 

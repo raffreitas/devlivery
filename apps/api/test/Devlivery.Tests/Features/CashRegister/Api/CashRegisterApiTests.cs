@@ -24,6 +24,40 @@ namespace Devlivery.Tests.Features.CashRegister.Api;
 public sealed class CashRegisterApiTests(ApiFactory api)
 {
     [Fact]
+    public async Task GivenSplitPaymentsAndRefundedOrder_WhenReadingAllSessionEndpoints_ThenCountsDistinctActiveOrders()
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+        var orderId = Guid.NewGuid();
+        var refundedPayment = Guid.NewGuid();
+        var session = new CashSessionBuilder().WithEstablishmentId(tenant.EstablishmentId)
+            .WithAttendantId(tenant.Operator.Id).WithOpeningAmount(100m)
+            .WithPayment(2m, PaymentMethod.Cash, orderId)
+            .WithPayment(2m, PaymentMethod.Cash, orderId)
+            .WithPayment(6m, PaymentMethod.Pix, orderId)
+            .WithPayment(10m, PaymentMethod.Cash, orderPaymentId: refundedPayment)
+            .WithReversal(10m, PaymentMethod.Cash, refundedPayment).Build();
+        await tenant.SeedAsync(session);
+
+        // Act
+        var active = await ApiTenant.ReadDataAsync<GetActiveCashSessionResponse>(
+            await tenant.Client.GetAsync("/api/v1/cash-register/sessions/active"));
+        var detail = await ApiTenant.ReadDataAsync<GetCashSessionByIdResponse>(
+            await tenant.Client.GetAsync($"/api/v1/cash-register/sessions/{session.Id}"));
+        var list = await ApiTenant.ReadDataAsync<GetCashSessionsResponse[]>(
+            await tenant.Client.GetAsync("/api/v1/cash-register/sessions"));
+
+        // Assert
+        active.TotalOrders.ShouldBe(1);
+        detail.TotalOrders.ShouldBe(1);
+        list.ShouldHaveSingleItem().TotalOrders.ShouldBe(1);
+        active.ExpectedCashAmount.ShouldBe(104m);
+        active.TotalRevenue.ShouldBe(10m);
+        active.PaymentBreakdown.ShouldAllBe(b => b.Count == 1);
+        detail.PaymentBreakdown.ShouldAllBe(b => b.Count == 1);
+    }
+
+    [Fact]
     public async Task GivenNoOpenSession_WhenOpeningSession_ThenReturns201ForAuthenticatedOperator()
     {
         // Arrange
@@ -166,7 +200,7 @@ public sealed class CashRegisterApiTests(ApiFactory api)
         sessions.Select(s => s.Id).ShouldBe([open.Id, closed.Id]);
         sessions[0].TotalRevenue.ShouldBe(90m);
         sessions[0].ExpectedCashAmount.ShouldBe(185m);
-        sessions[0].TotalOrders.ShouldBe(3);
+        sessions[0].TotalOrders.ShouldBe(2);
         sessions[1].TotalRevenue.ShouldBe(15m);
     }
 

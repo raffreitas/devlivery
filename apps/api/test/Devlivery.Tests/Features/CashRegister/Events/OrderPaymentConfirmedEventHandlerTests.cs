@@ -71,7 +71,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests
     }
 
     [Fact]
-    public async Task GivenNoActiveSession_WhenPaymentConfirmed_ThenSkipsWithoutFailing()
+    public async Task GivenNoActiveSession_WhenPaymentConfirmed_ThenAllowsDeliveryOutsideCashSession()
     {
         // Arrange
         _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).ReturnsNull();

@@ -1,8 +1,10 @@
 # Backlog de decisões de produto
 
-Comportamentos encontrados durante a revisão dos testes do backend (outubro de 2026) que funcionam como implementados, mas podem não ser o comportamento desejado. Cada item precisa de uma decisão de produto antes de virar correção.
+Comportamentos encontrados durante a revisão dos testes do backend (outubro de 2026). A atualização de 21/10/2026 distingue correções já implementadas das decisões reservadas para a V2. As descrições anteriores nos itens resolvidos registram o problema que motivou a mudança.
 
-## 1. Edição de pedido recalcula o preço dos itens
+## 1. Edição de pedido recalcula o preço dos itens — resolvido
+
+**Estado atual:** itens existentes preservam o preço original, inclusive ao aumentar a quantidade ou remover e readicionar durante a edição. Produtos novos usam o preço vigente. Há testes de regressão na API e no frontend. A descrição abaixo é histórica.
 
 **Hoje:** `PUT /api/v1/orders/{id}` (`UpdateOrderHandler`) recria todos os itens com o preço **atual** do catálogo. Se o preço de um produto mudou depois da criação do pedido, qualquer edição — mesmo só do endereço — altera o total.
 
@@ -15,7 +17,9 @@ Comportamentos encontrados durante a revisão dos testes do backend (outubro de 
 
 **Impacto no front-end:** com (a), o formulário de edição precisa exibir e somar o preço salvo no item, não o do catálogo — confirmar qual preço `order-form.tsx` usa hoje. Com (b), nenhum.
 
-## 2. Exclusão de pedido entregue
+## 2. Exclusão de pedido entregue — contenção implementada
+
+**Estado atual:** toda exclusão de pedido entregue retorna 422, com caixa aberto ou fechado, e a interface não oferece a ação. Isso impede perda de histórico e o estorno incorreto de venda com troco. O fluxo explícito de estorno/arquivamento continua pendente para a V2. A descrição abaixo é histórica.
 
 **Hoje:** o front-end oferece "Excluir" para pedidos entregues e cancelados. A exclusão é física e dispara `OrderDeletedEvent`:
 
@@ -30,7 +34,9 @@ Comportamentos encontrados durante a revisão dos testes do backend (outubro de 
 
 **Impacto no front-end:** (a) exige apenas exibir o erro 422, que o tratamento global de mutations já faz; talvez esconder o botão quando não puder excluir. (b) muda listagens e filtros de pedidos e do Dashboard. (c) nenhum.
 
-## 3. Entregar um pedido já entregue
+## 3. Entregar um pedido já entregue — resolvido
+
+**Estado atual:** repetir a entrega é um no-op, sem novos eventos ou alteração de datas; o botão de avanço fica desabilitado durante a requisição. A descrição abaixo é histórica.
 
 **Hoje:** `Order.UpdateStatus(Delivered)` sobre um pedido já entregue não gera erro. Os pagamentos não são confirmados de novo, mas `OrderChangeCalculatedEvent` e `OrderStatusChangedEvent` são emitidos outra vez. Não há dano atual porque o registro de troco no caixa é idempotente, mas um duplo clique em "Marcar como Entregue" gera eventos e atualizações de `UpdatedAt` desnecessários.
 
@@ -45,7 +51,7 @@ Comportamentos encontrados durante a revisão dos testes do backend (outubro de 
 
 **Hoje:** `GET /api/v1/dashboard/stats` e `GET /api/v1/dashboard/sales-over-time` somam o total de todo pedido não cancelado — inclusive pendentes, em preparo e prontos, cujo pagamento ainda não foi confirmado. Já `GET /api/v1/dashboard/payment-breakdown` considera apenas pagamentos **confirmados** (pedidos entregues), descontando o troco.
 
-**Efeito:** na mesma tela, o card "Receita Total" e o gráfico por forma de pagamento mostram valores diferentes; o **lucro líquido** (`receita - despesas pagas`) inclui dinheiro ainda não recebido.
+**Contenção atual:** os cartões foram renomeados para "Valor dos Pedidos" e "Saldo Projetado", com uma explicação de que incluem valores ainda não recebidos. As despesas pagas são filtradas pela data do pagamento, em acordo com a série financeira. Os contratos de vendas permanecem pela data de criação; a separação de realizada/prevista fica para a V2.
 
 **Opções:**
 
@@ -55,7 +61,9 @@ Comportamentos encontrados durante a revisão dos testes do backend (outubro de 
 
 **Impacto no front-end:** (a) nenhum no código, muda os números exibidos. (b) novos campos e um card a mais em `dashboard-page.tsx`.
 
-## 5. Preço exibido nos pedidos vem do catálogo, não do item
+## 5. Preço exibido nos pedidos vem do catálogo, não do item — resolvido
+
+**Estado atual:** listagem e detalhe fornecem `unitPrice`; cards, formulário e impressão usam esse preço registrado. A descrição abaixo é histórica.
 
 **Hoje:** `GET /api/v1/orders` e `GET /api/v1/orders/{id}` devolvem cada item com o `Product` atual (nome, **preço atual**), sem o `UnitPrice` gravado no item. Se o preço do catálogo mudou, a listagem mostra um valor diferente do que compõe o total do pedido. Relacionado ao item 1.
 
@@ -68,8 +76,8 @@ Comportamentos encontrados durante a revisão dos testes do backend (outubro de 
 Comportamentos sem impacto visível hoje, mas que confundem consumidores da API:
 
 - **Pagamentos cancelados:** `GET /api/v1/orders` omite pagamentos cancelados; `GET /api/v1/orders/{id}` os inclui.
-- **Total de pedidos do caixa:** a listagem de sessões usa pagamentos distintos (inclui os estornados); a sessão ativa e o detalhe usam `pagamentos - estornos`.
-- **Resumo de despesas:** em `GET /api/v1/dashboard/expense-summary`, `total` e `count` incluem despesas canceladas, então `total ≠ paid + pending + overdue`. O front-end não usa esses dois campos.
+- **Total de pedidos do caixa — resolvido:** listagem, sessão ativa e detalhe contam pedidos distintos com pelo menos um pagamento não estornado. Pagamento misto não duplica a contagem.
+- **Resumo de despesas — resolvido:** `total` e `count` excluem despesas canceladas. Os agrupamentos por categoria/status seguem a mesma base: pagamento para pagas, vencimento para pendentes.
 - **`GET /api/v1/expenses/{id}`:** devolve o status do domínio (`Pending`) em vez do status de exibição (`Overdue`/`DueToday`) e a categoria sem a hierarquia pai/subcategoria usada pela listagem. Não é chamado por nenhuma tela (`useExpense` não tem consumidores).
 - **Nome dos filtros de data:** o Dashboard usa `startDate`/`endDate`; pedidos, caixa e despesas usam `start`/`end`.
 

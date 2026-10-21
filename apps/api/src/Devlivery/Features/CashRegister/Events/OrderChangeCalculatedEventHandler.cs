@@ -50,10 +50,10 @@ public sealed class OrderChangeCalculatedEventHandler(
         var activeSession = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
         if (activeSession is null)
         {
-            logger.LogWarning(
-                "No active cash session found for establishment {EstablishmentId}. Change for Order {OrderId} will not be recorded.",
-                tenantAccessor.Tenant.Id,
-                domainEvent.OrderId);
+            logger.LogInformation(
+                "Order {OrderId} delivered outside a cash session for establishment {EstablishmentId}. Change remains recorded on the order.",
+                domainEvent.OrderId,
+                tenantAccessor.Tenant.Id);
             return;
         }
 

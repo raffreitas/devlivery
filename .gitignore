@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Local screenshots from operational reviews
+/docs/reviews/**/evidencias/*.png
+
 # User-specific files
 *.rsuser
 *.suo

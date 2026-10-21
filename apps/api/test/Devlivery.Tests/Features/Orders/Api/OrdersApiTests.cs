@@ -7,6 +7,8 @@ using Devlivery.Domain.Aggregates.Orders.Entities;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Products;
 using Devlivery.Domain.Common.Enums;
+using Devlivery.Features.CashRegister.Commands.CreateCashSession;
+using Devlivery.Features.Dashboard.Queries.GetPaymentBreakdown;
 using Devlivery.Features.Orders.Commands.CreateOrder;
 using Devlivery.Features.Orders.Queries.GetAllOrders;
 using Devlivery.Features.Orders.Queries.GetOrderById;
@@ -137,7 +139,7 @@ public sealed class OrdersApiTests(ApiFactory api)
     }
 
     [Fact]
-    public async Task GivenAvailableProducts_WhenCreatingOrder_ThenReturns201AndPersistsPricedOrder()
+    public async Task GivenNoActiveCashSession_WhenCreatingOrder_ThenReturns201WithoutConfirmingPaymentsOrOpeningCash()
     {
         // Arrange
         var tenant = await api.CreateTenantAsync();
@@ -160,6 +162,10 @@ public sealed class OrdersApiTests(ApiFactory api)
         persisted.Total.ShouldBe(85m);
         persisted.Items.ShouldHaveSingleItem().UnitPrice.ShouldBe(40m);
         persisted.Payments.ShouldHaveSingleItem().Amount.ShouldBe(100m);
+        persisted.Status.ShouldBe(OrderStatus.Pending);
+        persisted.Payments.ShouldAllBe(p => p.PaymentStatus == PaymentStatus.Pending);
+        (await tenant.WithDbContextAsync(db => db.CashSessions.AnyAsync())).ShouldBeFalse();
+        (await tenant.WithDbContextAsync(db => db.CashSessionMovements.AnyAsync())).ShouldBeFalse();
     }
 
     [Fact]
@@ -244,29 +250,175 @@ public sealed class OrdersApiTests(ApiFactory api)
         (await LoadOrderAsync(tenant, order.Id)).Status.ShouldBe(OrderStatus.Delivered);
     }
 
-    [Fact]
-    public async Task GivenOrderDeliveredInOpenSession_WhenDeleting_ThenReturns204AndRefundsItsPayments()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenDeliveredOrderWithChange_WhenDeleting_ThenReturns422AndPreservesFinancialHistory(bool closeSession)
     {
         // Arrange
         var tenant = await api.CreateTenantAsync();
-        var pizza = await SeedProductAsync(tenant, "Pizza", 40m);
-        var order = await SeedOrderAsync(tenant, [(pizza, 1)], customer: "Maria Souza");
+        var pizza = await SeedProductAsync(tenant, "Pizza", 12.34m);
+        var order = await SeedOrderAsync(tenant, [(pizza, 1)], customer: "Maria Souza", payments:
+        [
+            new OrderPaymentBuilder().WithEstablishmentId(tenant.EstablishmentId)
+                .WithPaymentMethod(PaymentMethod.Cash).WithAmount(20m).Build()
+        ]);
         var session = new CashSessionBuilder().WithEstablishmentId(tenant.EstablishmentId)
             .WithAttendantId(tenant.Operator.Id).WithOpeningAmount(0m).Build();
         await tenant.SeedAsync(session);
         await tenant.Client.PatchAsJsonAsync($"/api/v1/orders/{order.Id}/status",
             new { Status = OrderStatus.Delivered }, ApiTenant.JsonOptions);
 
+        if (closeSession)
+            await tenant.Client.PatchAsJsonAsync($"/api/v1/cash-register/sessions/{session.Id}/close",
+                new { ClosingAmount = 12.34m }, ApiTenant.JsonOptions);
+
         // Act
         var response = await tenant.Client.DeleteAsync($"/api/v1/orders/{order.Id}");
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
-        (await tenant.WithDbContextAsync(db => db.Orders.AnyAsync(o => o.Id == order.Id))).ShouldBeFalse();
-        var refund = await tenant.WithDbContextAsync(db => db.CashSessionMovements
-            .SingleAsync(m => m.CashSessionId == session.Id && m.EntryType == CashSessionEntryType.Refund));
-        refund.Amount.ShouldBe(40m);
-        refund.Reason.ShouldBe("Pedido Excluído");
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        (await LoadOrderAsync(tenant, order.Id)).Status.ShouldBe(OrderStatus.Delivered);
+        var persisted = await tenant.WithDbContextAsync(db => db.CashSessions
+            .Include(s => s.Movements).SingleAsync(s => s.Id == session.Id));
+        persisted.TotalRevenue.ShouldBe(12.34m);
+        persisted.ExpectedCashAmount.ShouldBe(12.34m);
+        persisted.Movements.ShouldNotContain(m => m.EntryType == CashSessionEntryType.Refund);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenNoActiveCashSession_WhenOperatingOrder_ThenDeliversAndPreservesReceiptsWithoutCashMovements(bool hasClosedSession)
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+        var product = await SeedProductAsync(tenant, "Pizza", 10m);
+        if (hasClosedSession)
+        {
+            await tenant.SeedAsync(new CashSessionBuilder().WithEstablishmentId(tenant.EstablishmentId)
+                .WithAttendantId(tenant.Operator.Id).WithOpeningAmount(100m).AsClosed().Build());
+        }
+        var command = new CreateOrderCommand(
+            Items: [new CreateItem(product.Id, 1, "Sem cebola")],
+            CustomerName: "Cliente WhatsApp", CustomerPhone: null, DeliveryAddress: "Rua A, 1",
+            Payments: [new CreatePayment(PaymentMethod.Pix, 6m), new CreatePayment(PaymentMethod.Cash, 10m)],
+            DeliveryFee: 0m);
+
+        // Act
+        var response = await tenant.Client.PostAsJsonAsync("/api/v1/orders", command, ApiTenant.JsonOptions);
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var created = await ApiTenant.ReadDataAsync<CreateOrderResponse>(response);
+        foreach (var status in new[] { OrderStatus.Preparing, OrderStatus.Ready, OrderStatus.Delivered })
+        {
+            var updated = await tenant.Client.PatchAsJsonAsync($"/api/v1/orders/{created.OrderId}/status",
+                new { Status = status }, ApiTenant.JsonOptions);
+            updated.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        }
+
+        // Assert
+        var persisted = await LoadOrderAsync(tenant, created.OrderId);
+        persisted.Status.ShouldBe(OrderStatus.Delivered);
+        persisted.Payments.Count.ShouldBe(2);
+        persisted.Payments.ShouldAllBe(p => p.PaymentStatus == PaymentStatus.Confirmed && p.ConfirmedAt != null);
+        persisted.Payments.Sum(p => p.Amount).ShouldBe(16m);
+        persisted.Change.ShouldBe(6m);
+        (await tenant.WithDbContextAsync(db => db.CashSessions.CountAsync())).ShouldBe(hasClosedSession ? 1 : 0);
+        (await tenant.WithDbContextAsync(db => db.CashSessionMovements.AnyAsync())).ShouldBeFalse();
+        var breakdown = await ApiTenant.ReadDataAsync<GetPaymentBreakdownResponse>(
+            await tenant.Client.GetAsync("/api/v1/dashboard/payment-breakdown"));
+        breakdown.Total.ShouldBe(10m);
+        breakdown.Breakdown[PaymentMethod.Pix].ShouldBe(6m);
+        breakdown.Breakdown[PaymentMethod.Cash].ShouldBe(4m);
+
+        // A later session must not absorb a sale completed outside it, even after a status retry.
+        var opened = await tenant.Client.PostAsJsonAsync("/api/v1/cash-register/sessions",
+            new CreateCashSessionCommand(100m, null), ApiTenant.JsonOptions);
+        opened.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var repeated = await tenant.Client.PatchAsJsonAsync($"/api/v1/orders/{created.OrderId}/status",
+            new { Status = OrderStatus.Delivered }, ApiTenant.JsonOptions);
+        repeated.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        var afterRetry = await LoadOrderAsync(tenant, created.OrderId);
+        afterRetry.Payments.Select(p => p.ConfirmedAt).Order().ShouldBe(persisted.Payments.Select(p => p.ConfirmedAt).Order());
+        (await tenant.WithDbContextAsync(db => db.CashSessionMovements.AnyAsync())).ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData(PaymentMethod.Pix)]
+    [InlineData(PaymentMethod.CreditCard)]
+    [InlineData(PaymentMethod.DebitCard)]
+    public async Task GivenElectronicPaymentAboveTotal_WhenCreating_ThenReturns422WithoutSaving(PaymentMethod method)
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+        var product = await SeedProductAsync(tenant, "Pizza", 10m);
+        var command = new CreateOrderCommand(
+            Items: [new CreateItem(product.Id, 1, null)], CustomerName: "Cliente",
+            CustomerPhone: null, DeliveryAddress: "Rua A",
+            Payments: [new CreatePayment(PaymentMethod.Cash, 1m), new CreatePayment(method, 20m)], DeliveryFee: 0m);
+
+        // Act
+        var response = await tenant.Client.PostAsJsonAsync("/api/v1/orders", command, ApiTenant.JsonOptions);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        (await tenant.WithDbContextAsync(db => db.Orders.AnyAsync())).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task GivenElectronicPaymentAboveTotal_WhenUpdating_ThenReturns422AndPreservesOriginalPayments()
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+        var product = await SeedProductAsync(tenant, "Pizza", 10m);
+        var order = await SeedOrderAsync(tenant, [(product, 1)], "Cliente");
+        var request = new
+        {
+            Items = new[] { new { ProductId = product.Id, Quantity = 1, Notes = (string?)null } },
+            CustomerName = "Cliente", CustomerPhone = (string?)null, DeliveryAddress = "Rua B", DeliveryFee = 0m,
+            Payments = new[] { new { Id = order.Payments.Single().Id, Method = PaymentMethod.Pix, Amount = 20m } }
+        };
+
+        // Act
+        var response = await tenant.Client.PutAsJsonAsync($"/api/v1/orders/{order.Id}", request, ApiTenant.JsonOptions);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        var persisted = await LoadOrderAsync(tenant, order.Id);
+        persisted.DeliveryAddress.FullAddress.ShouldBe(order.DeliveryAddress.FullAddress);
+        persisted.Payments.ShouldHaveSingleItem().Amount.ShouldBe(10m);
+        persisted.Payments.Single().PaymentMethod.ShouldBe(PaymentMethod.Cash);
+    }
+
+    [Fact]
+    public async Task GivenRepeatedProductWithDifferentNotes_WhenCreatingAndUpdating_ThenPreservesBothLines()
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+        var product = await SeedProductAsync(tenant, "Pizza", 10m);
+        var command = new CreateOrderCommand(
+            Items: [new CreateItem(product.Id, 1, "Sem cebola"), new CreateItem(product.Id, 1, "Com cebola")],
+            CustomerName: "Cliente", CustomerPhone: null, DeliveryAddress: "Rua A",
+            Payments: [new CreatePayment(PaymentMethod.Cash, 20m)], DeliveryFee: 0m);
+
+        // Act
+        var createdResponse = await tenant.Client.PostAsJsonAsync("/api/v1/orders", command, ApiTenant.JsonOptions);
+        var created = await ApiTenant.ReadDataAsync<CreateOrderResponse>(createdResponse);
+        var persisted = await LoadOrderAsync(tenant, created.OrderId);
+        var updateResponse = await tenant.Client.PutAsJsonAsync($"/api/v1/orders/{created.OrderId}", new
+        {
+            command.Items, command.CustomerName, command.CustomerPhone, DeliveryAddress = "Rua B", command.DeliveryFee,
+            Payments = new[] { new { Id = persisted.Payments.Single().Id, Method = PaymentMethod.Cash, Amount = 20m } }
+        }, ApiTenant.JsonOptions);
+        var detail = await ApiTenant.ReadDataAsync<GetOrderByIdResponse>(
+            await tenant.Client.GetAsync($"/api/v1/orders/{created.OrderId}"));
+
+        // Assert
+        createdResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
+        updateResponse.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        detail.Items.Select(i => i.Notes).ShouldBe(["Sem cebola", "Com cebola"], ignoreOrder: true);
+        detail.Items.ShouldAllBe(i => i.Quantity == 1 && i.UnitPrice == 10m);
+        detail.Total.ShouldBe(20m);
     }
 
     [Fact]

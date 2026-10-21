@@ -118,7 +118,7 @@ public sealed class OrderChangeCalculatedEventHandlerTests
     }
 
     [Fact]
-    public async Task GivenNoActiveSession_WhenChangeCalculated_ThenSkipsWithoutFailing()
+    public async Task GivenNoActiveSession_WhenChangeCalculated_ThenAllowsDeliveryOutsideCashSession()
     {
         // Arrange
         var order = GivenOrderPaidWith(new OrderPaymentBuilder().WithPaymentMethod(PaymentMethod.Cash));
