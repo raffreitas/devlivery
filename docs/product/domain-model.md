@@ -76,7 +76,7 @@ Pagamentos podem usar dinheiro, cartão de crédito, cartão de débito ou Pix. 
 
 A soma dos pagamentos eletrônicos não pode ultrapassar o total do pedido, inclusive ao criar ou editar. Apenas o dinheiro recebido pode produzir troco sobre o restante devido. Repetir a entrega de um pedido já entregue não altera datas nem gera eventos novos. A exclusão de pedidos entregues é bloqueada para preservar o histórico financeiro; um fluxo explícito de estorno permanece uma evolução futura.
 
-Na interface, o mesmo produto com observações de preparo diferentes ocupa linhas distintas. A comanda informa todas as parcelas de pagamento, o troco previsto e o identificador completo do pedido; a numeração operacional sequencial fica para a V2.
+Na interface, o mesmo produto com observações de preparo diferentes ocupa linhas distintas. A comanda informa todas as parcelas de pagamento, o troco previsto e os últimos oito caracteres do GUID do pedido em maiúsculas. Essa referência abreviada é apenas visual; o GUID completo continua identificando o pedido na API e no banco. Um identificador sequencial próprio fica para uma evolução futura.
 
 ## Caixa
 

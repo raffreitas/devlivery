@@ -30,7 +30,9 @@ export function OrderPrint({ order }: OrderPrintProps) {
     <div className="print-receipt">
       <div className="text-center mb-4">
         <h1 className="text-xl font-bold">DEVLIVERY</h1>
-        <p className="order-reference">Pedido #{order.id.toUpperCase()}</p>
+        <p className="order-reference">
+          Pedido #{order.id.slice(-8).toUpperCase()}
+        </p>
       </div>
 
       <div className="border-t-2 border-b-2 border-dashed border-foreground py-2 mb-3">

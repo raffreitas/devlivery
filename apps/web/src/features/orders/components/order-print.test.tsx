@@ -61,21 +61,23 @@ describe("OrderPrint", () => {
     expect(screen.getByText("TROCO:").parentElement).toHaveTextContent(/6,00/);
   });
 
-  it("keeps orders with the same UUID v7 prefix distinguishable", () => {
-    const first = "01999999-0000-7000-8000-000000000001";
-    const second = "01999999-0000-7000-8000-000000000002";
+  it("prints only the last eight UUID characters in uppercase for orders sharing a prefix", () => {
+    const first = "01999999-0000-7000-8000-0000abcdef01";
+    const second = "01999999-0000-7000-8000-0000abcdef02";
     render(
       <>
         <OrderPrint order={makeOrder(first)} />
         <OrderPrint order={makeOrder(second)} />
       </>,
     );
+    expect(screen.getByText("Pedido #ABCDEF01")).toBeInTheDocument();
+    expect(screen.getByText("Pedido #ABCDEF02")).toBeInTheDocument();
     expect(
-      screen.getByText(`Pedido #${first.toUpperCase()}`),
-    ).toBeInTheDocument();
+      screen.queryByText(first.toUpperCase(), { exact: false }),
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByText(`Pedido #${second.toUpperCase()}`),
-    ).toBeInTheDocument();
+      screen.queryByText(second.toUpperCase(), { exact: false }),
+    ).not.toBeInTheDocument();
   });
 
   it("prints historical prices even after catalog prices change", () => {
