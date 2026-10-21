@@ -1,0 +1,35 @@
+name: Reportar bug
+description: Descreva um comportamento incorreto e como reproduzi-lo.
+labels: [bug]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema e impacto
+      description: O que acontece e como isso prejudica a operação?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Como reproduzir
+      description: Informe passos, resultado observado e resultado esperado. Use dados de teste e não inclua credenciais ou dados pessoais reais.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Contexto
+      description: Versão/commit, navegador, ambiente e, quando relevante, sessão de caixa, status do pedido, pagamentos e datas.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de correção
+      description: Quais resultados e regressões precisam ser verificados?
+  - type: checkboxes
+    id: duplicates
+    attributes:
+      label: Verificação inicial
+      options:
+        - label: Procurei uma issue existente para o mesmo problema.
+          required: true

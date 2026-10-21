@@ -18,11 +18,11 @@ Os papéis descrevem necessidades de uso. O checkout atual autentica usuários p
 
 ## Jornada operacional
 
-1. O operador autentica-se no estabelecimento e abre o caixa com um valor inicial.
+1. O operador autentica-se no estabelecimento; a abertura de caixa com valor inicial é opcional para operar pedidos.
 2. Produtos disponíveis compõem os itens dos pedidos.
 3. O pedido avança pelo preparo e recebe um ou mais pagamentos.
 4. Na entrega, os pagamentos pendentes são confirmados e eventual troco é calculado.
-5. Pagamentos, trocos, aportes e estornos alimentam o caixa ativo.
+5. Quando há caixa ativo, os recebimentos e trocos também são registrados nessa sessão. Sem sessão, permanecem no pedido; abrir o caixa depois não importa esses recebimentos automaticamente.
 6. Despesas são classificadas e acompanhadas por vencimento e pagamento.
 7. O dashboard consolida informações da operação e o caixa é conferido e fechado.
 
@@ -42,7 +42,7 @@ Consulte o [modelo de domínio](domain-model.md) para as regras que condicionam 
 
 ## Limites atuais
 
-O repositório atual não contém capacidades de pedido feito pelo consumidor, roteirização ou rastreamento de entregadores, controle de estoque, mensageria assíncrona ou cache distribuído. A limitação de login por IP é local à instância da API. O frontend ainda não possui suíte automatizada de testes.
+O repositório atual não contém capacidades de pedido feito pelo consumidor, roteirização ou rastreamento de entregadores, controle de estoque, mensageria assíncrona ou cache distribuído. A limitação de login por IP é local à instância da API. O frontend possui testes com Vitest, Testing Library e MSW.
 
 Esses itens são limites do estado atual, não compromissos de roadmap. Uma capacidade futura só deve ser apresentada como planejada quando houver uma decisão de produto registrada.
 
@@ -52,3 +52,4 @@ Esses itens são limites do estado atual, não compromissos de roadmap. Uma capa
 - O [modelo de domínio](domain-model.md) define vocabulário e regras de negócio.
 - O [OpenAPI](../README.md#referência-executável) define o contrato HTTP executável.
 - Os guias de operação não devem redefinir regras do produto; devem apontar para sua fonte.
+- Issues, milestones e o Project definem o trabalho pendente e o roadmap; consulte [planejamento do produto](planning.md).

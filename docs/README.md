@@ -8,7 +8,7 @@ Este diretório registra o produto, suas regras, as decisões técnicas e os pro
 | --- | --- |
 | [Visão do produto](product/overview.md) | Qual problema o Devlivery resolve, para quem e com quais capacidades atuais? |
 | [Modelo de domínio](product/domain-model.md) | Quais são os conceitos, estados, regras e integrações entre áreas? |
-| [Backlog de decisões](product/backlog.md) | Quais comportamentos atuais aguardam decisão de produto? |
+| [Planejamento do produto](product/planning.md) | Onde acompanhar issues, prioridades, roadmap e critérios de entrega? |
 | [Arquitetura](architecture/overview.md) | Como o sistema é dividido e quais são seus limites técnicos? |
 | [ADRs](adrs/README.md) | Por que escolhas estruturais importantes foram adotadas? |
 
@@ -40,3 +40,4 @@ Em desenvolvimento, o contrato HTTP atual pode ser consultado no Scalar em `http
 - Crie um ADR para decisões estruturais difíceis de reverter; não use ADR para detalhes locais de implementação.
 - Atualize os guias operacionais junto com variáveis, comandos, migrações, publicação ou garantias de segurança.
 - Descreva o comportamento existente como implementado e identifique explicitamente lacunas ou trabalho futuro.
+- Registre pendências e propostas em issues; use o [Kanban](https://github.com/users/raffreitas/projects/1) e as milestones para prioridade, status e roadmap, sem duplicar a fila nos READMEs.
