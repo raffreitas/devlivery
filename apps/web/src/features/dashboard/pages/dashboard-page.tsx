@@ -149,13 +149,6 @@ export function DashboardPage() {
           </QueryRegion>
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          Pedidos não cancelados pela data de criação, incluindo valores ainda
-          não recebidos. Despesas pagas pela data do pagamento; pendentes pelo
-          vencimento. O saldo projetado não representa o dinheiro disponível no
-          caixa.
-        </p>
-
         <div
           className={`transition-opacity duration-200 ${
             isFetching ? "opacity-60" : "opacity-100"
