@@ -1,4 +1,3 @@
-import { useCurrentCashSession } from "@/features/cash/hooks/use-current-cash-session";
 import { OrderCard } from "@/features/orders/components/order-card";
 import type { Order, OrderStatus } from "@/features/orders/types";
 
@@ -15,7 +14,6 @@ export function ActiveOrdersSection({
   onUpdateStatus,
   onDelete,
 }: ActiveOrdersSectionProps) {
-  const cash = useCurrentCashSession();
   return (
     <div className="bg-card rounded-lg shadow-md p-4 sm:p-6">
       <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">
@@ -35,9 +33,6 @@ export function ActiveOrdersSection({
               onEdit={onEdit}
               onUpdateStatus={onUpdateStatus}
               onDelete={onDelete}
-              canDeliver={
-                !!cash.currentSession && !cash.error && !cash.isLoading
-              }
             />
           ))}
         </div>

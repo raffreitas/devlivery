@@ -18,12 +18,11 @@ const order: Order = {
 };
 
 describe("OrderCard financial protections", () => {
-  it("blocks delivery when the cash session is unavailable and explains how to proceed", async () => {
+  it("allows delivery without depending on a cash session", async () => {
     const onUpdateStatus = vi.fn();
     render(
       <OrderCard
         order={order}
-        canDeliver={false}
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onUpdateStatus={onUpdateStatus}
@@ -32,10 +31,9 @@ describe("OrderCard financial protections", () => {
     const deliver = screen.getByRole("button", {
       name: /Marcar como Entregue/,
     });
-    expect(deliver).toBeDisabled();
-    expect(screen.getByText(/Abra o caixa para marcar/)).toBeInTheDocument();
+    expect(deliver).toBeEnabled();
     await userEvent.click(deliver);
-    expect(onUpdateStatus).not.toHaveBeenCalled();
+    expect(onUpdateStatus).toHaveBeenCalledWith(order.id, "Delivered");
   });
 
   it("prevents another delivery request while the first is in flight", async () => {
@@ -49,7 +47,6 @@ describe("OrderCard financial protections", () => {
     render(
       <OrderCard
         order={order}
-        canDeliver
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onUpdateStatus={onUpdateStatus}
@@ -71,7 +68,6 @@ describe("OrderCard financial protections", () => {
     render(
       <OrderCard
         order={{ ...order, status: "Delivered" }}
-        canDeliver
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onUpdateStatus={vi.fn()}

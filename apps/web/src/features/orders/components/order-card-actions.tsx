@@ -10,7 +10,6 @@ interface OrderCardActionsProps {
   onDelete: () => void;
   hasNextStatus: boolean;
   isAdvancing: boolean;
-  canDeliver: boolean;
 }
 
 function getNextStatusLabel(status: OrderStatus): string {
@@ -33,7 +32,6 @@ export function OrderCardActions({
   onDelete,
   hasNextStatus,
   isAdvancing,
-  canDeliver,
 }: OrderCardActionsProps) {
   const showEdit = order.status !== "Canceled" && order.status !== "Delivered";
   const showCancel =
@@ -56,11 +54,7 @@ export function OrderCardActions({
           </Button>
         )}
         {hasNextStatus && (
-          <Button
-            size="sm"
-            onClick={onNextStatus}
-            disabled={isAdvancing || (order.status === "Ready" && !canDeliver)}
-          >
+          <Button size="sm" onClick={onNextStatus} disabled={isAdvancing}>
             <span className="hidden sm:inline">
               {getNextStatusLabel(order.status)}
             </span>
@@ -73,12 +67,6 @@ export function OrderCardActions({
           </Button>
         )}
       </div>
-
-      {order.status === "Ready" && !canDeliver && (
-        <p className="mt-2 text-sm text-muted-foreground">
-          Abra o caixa para marcar o pedido como entregue.
-        </p>
-      )}
 
       <div className="mt-2 sm:mt-3 text-xs text-muted-foreground">
         Criado em: {new Date(order.createdAt).toLocaleString("pt-BR")}

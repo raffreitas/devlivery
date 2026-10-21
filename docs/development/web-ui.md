@@ -88,4 +88,5 @@ Referências: [estilos do shadcn](https://ui.shadcn.com/docs/changelog/2025-12-s
 - Consolide linhas de pedido somente quando produto e observações de preparo forem equivalentes. Preserve observações diferentes em linhas separadas, inclusive ao imprimir.
 - Pagamentos eletrônicos não podem exceder o total do pedido. A comanda informa valores de todas as formas e o troco previsto. Não use prefixos de UUID v7 como número único de comanda.
 - Ao fechar o formulário de pedido com alterações, solicite confirmação de descarte; durante o envio, mantenha o bloqueio de fechamento. Esse mecanismo protege Esc e os controles do modal; não é persistência de rascunho nem bloqueio de navegação entre rotas.
+- O estado do caixa é informativo para pedidos. Criação, edição, preparo, cancelamento e entrega não dependem de sessão aberta; desabilite o avanço somente enquanto a requisição estiver em andamento.
 - Publique a API que fornece `unitPrice` na listagem e no detalhe dos pedidos antes do frontend correspondente. A alteração é aditiva e não exige migração de banco.

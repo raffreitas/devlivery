@@ -2,7 +2,6 @@ using Devlivery.Common.Events;
 using Devlivery.Infrastructure.Identity.Authentication;
 using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Events;
-using Devlivery.Domain.SeedWork;
 using Devlivery.Infrastructure.Tenancy;
 
 namespace Devlivery.Features.CashRegister.Events;
@@ -32,11 +31,11 @@ public sealed class OrderPaymentConfirmedEventHandler(
         var activeSession = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
         if (activeSession is null)
         {
-            logger.LogWarning(
-                "No active cash session found for establishment {EstablishmentId}. Payment {PaymentId} will not be recorded in cash register.",
-                tenantAccessor.Tenant.Id,
-                domainEvent.PaymentId);
-            throw new DomainException("Abra o caixa antes de confirmar o pagamento do pedido.");
+            logger.LogInformation(
+                "Payment {PaymentId} confirmed outside a cash session for establishment {EstablishmentId}. It remains recorded on the order.",
+                domainEvent.PaymentId,
+                tenantAccessor.Tenant.Id);
+            return;
         }
 
         activeSession.AddPayment(

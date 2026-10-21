@@ -2,7 +2,6 @@ using Devlivery.Domain.Aggregates.CashRegister.Abstractions;
 using Devlivery.Domain.Aggregates.CashRegister.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Common.Enums;
-using Devlivery.Domain.SeedWork;
 using Devlivery.Features.CashRegister.Events;
 using Devlivery.Tests.Common.Builders;
 using Devlivery.Tests.Common.Mocks;
@@ -72,7 +71,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests
     }
 
     [Fact]
-    public async Task GivenNoActiveSession_WhenPaymentConfirmed_ThenThrowsToPreventUnrecordedPayment()
+    public async Task GivenNoActiveSession_WhenPaymentConfirmed_ThenAllowsDeliveryOutsideCashSession()
     {
         // Arrange
         _cashSessionRepository.GetActiveSessionAsync(Arg.Any<CancellationToken>()).ReturnsNull();
@@ -82,7 +81,7 @@ public sealed class OrderPaymentConfirmedEventHandlerTests
             _handler.HandleAsync(CreateEvent(PaymentMethod.Cash, 50m), CancellationToken.None));
 
         // Assert
-        exception.ShouldBeOfType<DomainException>();
+        exception.ShouldBeNull();
     }
 
     private static OrderPaymentConfirmedEvent CreateEvent(PaymentMethod method, decimal amount)

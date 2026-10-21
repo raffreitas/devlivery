@@ -63,13 +63,14 @@ stateDiagram-v2
 
 Essa sequência representa o fluxo operacional. No comportamento atual, a API aceita a mudança direta entre estados não terminais: não há uma máquina de estados que obrigue a passagem por cada etapa. Um pedido cancelado não muda novamente; um pedido entregue também não retorna a outro estado.
 
+A operação de pedidos independe de caixa aberto: o atendente pode criar, editar, preparar, cancelar e entregar pedidos com o caixa fechado. Criar um pedido mantém os pagamentos pendentes. Entregar confirma os pagamentos e preserva valores, datas e troco no próprio pedido, sem abrir uma sessão automaticamente.
+
 Para entregar um pedido:
 
-- deve existir caixa aberto; sem ele, a requisição é rejeitada sem persistir a entrega ou confirmar pagamentos;
 - a soma dos pagamentos não cancelados deve cobrir o total;
 - pagamentos pendentes são confirmados;
 - o troco é a diferença positiva entre pagamentos e total;
-- eventos atualizam o caixa ativo durante a mesma requisição.
+- se houver caixa aberto, os eventos também registram pagamento e troco nessa sessão durante a mesma requisição; sem sessão aberta, a entrega continua normalmente.
 
 Pagamentos podem usar dinheiro, cartão de crédito, cartão de débito ou Pix. Um pagamento confirmado não pode ser alterado ou removido pela reconciliação do pedido; primeiro deve existir o tratamento de estorno. Pedidos entregues ou cancelados não aceitam novos pagamentos.
 
@@ -88,7 +89,7 @@ As movimentações implementadas são:
 - **estorno:** compensa pagamentos associados a pedido cancelado ou excluído;
 - **aporte:** entrada manual no caixa, vinculada ao operador autenticado.
 
-Pagamentos, trocos e estornos são idempotentes pelas referências de pedido ou pagamento. Se não houver caixa ativo no tratamento de um pagamento ou troco, uma exceção impede o salvamento da requisição inteira; o recebimento não é descartado silenciosamente. A contagem do caixa usa pedidos distintos com pelo menos um pagamento não estornado, tanto na sessão ativa quanto no detalhe e na listagem. A contagem por forma de pagamento usa a mesma regra dentro de cada método; um pedido misto pode aparecer em dois métodos e continua sendo um único pedido no total.
+Pagamentos, trocos e estornos são idempotentes pelas referências de pedido ou pagamento. O caixa é opcional: recebimentos de entregas realizadas sem sessão aberta permanecem nos pedidos e no resumo de pagamentos confirmados do Dashboard, sem movimentar uma sessão fechada. Abrir um caixa depois não incorpora automaticamente essas vendas. Portanto, os totais de uma sessão representam somente suas movimentações, não todas as vendas do estabelecimento. A contagem do caixa usa pedidos distintos com pelo menos um pagamento não estornado, tanto na sessão ativa quanto no detalhe e na listagem. A contagem por forma de pagamento usa a mesma regra dentro de cada método; um pedido misto pode aparecer em dois métodos e continua sendo um único pedido no total.
 
 O valor esperado em dinheiro é:
 

@@ -5,7 +5,6 @@ using Devlivery.Domain.Aggregates.Orders.Abstractions;
 using Devlivery.Domain.Aggregates.Orders.Enums;
 using Devlivery.Domain.Aggregates.Orders.Events;
 using Devlivery.Domain.Common.Enums;
-using Devlivery.Domain.SeedWork;
 using Devlivery.Infrastructure.Tenancy;
 
 namespace Devlivery.Features.CashRegister.Events;
@@ -51,11 +50,11 @@ public sealed class OrderChangeCalculatedEventHandler(
         var activeSession = await cashSessionRepository.GetActiveSessionAsync(cancellationToken);
         if (activeSession is null)
         {
-            logger.LogWarning(
-                "No active cash session found for establishment {EstablishmentId}. Change for Order {OrderId} will not be recorded.",
-                tenantAccessor.Tenant.Id,
-                domainEvent.OrderId);
-            throw new DomainException("Abra o caixa antes de registrar o troco do pedido.");
+            logger.LogInformation(
+                "Order {OrderId} delivered outside a cash session for establishment {EstablishmentId}. Change remains recorded on the order.",
+                domainEvent.OrderId,
+                tenantAccessor.Tenant.Id);
+            return;
         }
 
         // Idempotency: do not create duplicate change entries for the same order

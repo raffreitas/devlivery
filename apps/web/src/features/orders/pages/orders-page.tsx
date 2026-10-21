@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { useCurrentCashSession } from "@/features/cash/hooks/use-current-cash-session";
 import {
   GridSkeleton,
   LoadingOverlay,
@@ -52,7 +51,6 @@ const paymentOptions: Array<PaymentMethod> = [
 ];
 
 export function OrdersPage() {
-  const cash = useCurrentCashSession();
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const [period, setPeriod] = useState<DateRange | undefined>({
@@ -204,9 +202,6 @@ export function OrdersPage() {
                       onEdit={handleEditOrder}
                       onUpdateStatus={updateOrderStatus}
                       onDelete={deleteOrder}
-                      canDeliver={
-                        !!cash.currentSession && !cash.error && !cash.isLoading
-                      }
                     />
                   ))}
               </div>
