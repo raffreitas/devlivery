@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using Devlivery.Common.Extensions;
 using Devlivery.Common.Handlers;
 using Devlivery.Common.Time;
@@ -30,7 +32,7 @@ public sealed class GetSalesOverTimeHandler(ApplicationDbContext dbContext)
 
         var data = salesByDate
             .Select(x => new SalesTimeSeriesItem(
-                x.Date.ToString("yyyy-MM-dd"),
+                x.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                 x.Total))
             .ToList();
 

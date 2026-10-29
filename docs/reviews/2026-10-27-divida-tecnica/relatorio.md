@@ -197,14 +197,14 @@ Mantenha o `Directory.Build.props` dentro de `apps/api` e `apps/backup` separada
 
 **Status (28/10/2026): parcial.**
 - Removidos `Microsoft.Extensions.Http.Resilience` e `Microsoft.Extensions.ServiceDiscovery`.
-- `apps/api/Directory.Build.props` liga `EnforceCodeStyleInBuild` e `TreatWarningsAsErrors`. Os avisos de vulnerabilidade do NuGet (NU1901–NU1904) não viram erro, para um advisory novo não quebrar o build.
+- `apps/api/Directory.Build.props` liga `EnforceCodeStyleInBuild` e `TreatWarningsAsErrors`. Os avisos de vulnerabilidade do NuGet (NU1901–NU1904), incluindo dependências transitivas, continuam como warning na máquina local, para um advisory novo não travar o desenvolvimento. Na CI (`CI=true`) eles viram erro, e o PR não passa com pacote vulnerável. Isso foi confirmado com um projeto descartável que referenciava `System.Text.Json 8.0.4`.
 - O build tinha 0 warnings, e um warning de teste (`CS0168`) passou a falhar a compilação, confirmando a regra.
-- `AnalysisLevel=latest-recommended` ficou pendente, porque geraria 364 warnings:
-  - 305 de CA1707 nos testes, em conflito com a convenção `Given_When_Then`;
-  - 41 de CA1848/CA1873, que pedem `LoggerMessage`;
-  - 6 de CA1711, sobre os sufixos `EventHandler`/`Collection` do projeto;
-  - 12 menores, quase todos em migrações geradas.
-- Adotar esse nível exige decidir quais regras desligar no `.editorconfig`.
+- Em 29/10/2026, a API passou a usar `AnalysisLevel=latest-recommended`. O `.editorconfig` desliga as regras que conflitam com o projeto:
+  - CA1707, só nos testes, por causa da convenção `Given_When_Then`;
+  - CA1848/CA1873, que pedem `LoggerMessage`, um ganho de desempenho irrelevante no volume atual;
+  - CA1711, porque os sufixos `EventHandler`/`Collection` são convenção do projeto.
+- As pastas de migração são marcadas como `generated_code`, e os analyzers deixam de avaliá-las.
+- Os quatro warnings restantes foram corrigidos no código: datas formatadas com `CultureInfo.InvariantCulture`, `char.ToLowerInvariant` nos nomes de campo do Problem Details e um array constante num teste. O build ficou com 0 warnings.
 - Em 29/10/2026, `apps/backup/Directory.Build.props` passou a aplicar as mesmas regras, com arquivo próprio para não acoplar o backup à API. O backup compilou com 0 warnings.
 - A migração para xUnit v3 continua pendente.
 

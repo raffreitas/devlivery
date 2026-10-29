@@ -49,7 +49,7 @@ public sealed class ApiContractTests(ApiFactory api)
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        response.Headers.GetValues("api-supported-versions").ShouldBe(new[] { "1.0" });
+        response.Headers.GetValues("api-supported-versions").ShouldHaveSingleItem().ShouldBe("1.0");
     }
 
     [Theory]
