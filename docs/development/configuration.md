@@ -11,7 +11,7 @@ Use User Secrets no desenvolvimento e variáveis de ambiente no ambiente hospeda
 | `JwtTokenSettings__Audience` | Sim | Audiência aceita nos tokens |
 | `JwtTokenSettings__SecretKey` | Sim | Chave de assinatura longa, aleatória e secreta |
 | `JwtTokenSettings__ExpirationInMinutes` | Sim | Validade do token em minutos |
-| `ALLOWED_ORIGINS` | Sim em produção | Origens CORS separadas por vírgula e sem barra final |
+| `ALLOWED_ORIGINS` | Sim | Origens CORS separadas por vírgula e sem barra final. Lida pelo `IConfiguration`, como as demais. `appsettings.Development.json` e `appsettings.Testing.json` definem `http://localhost:5173`; em outros ambientes, a API não inicia sem ela |
 | `ASPNETCORE_ENVIRONMENT` | Sim | Use `Production` no ambiente público |
 | `ASPNETCORE_URLS` ou `PORT` | Conforme a plataforma | Binding HTTP do container |
 

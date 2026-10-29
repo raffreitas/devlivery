@@ -29,8 +29,8 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 | D02 | Alta | API / Tenancy | Isolamento de tenant mantido manualmente em filtros e SQL (**resolvido**) |
 | D03 | Alta | API / Dashboard | Agregações feitas em memória sobre todos os pedidos do período |
 | D04 | Média | Testes | Consultas quase sem testes de handler; web sem cobertura medida |
-| D05 | Média | API / HTTP | Middleware de tenant com rotas públicas fixas e 401 fora do padrão |
-| D06 | Média | API / Config | CORS lê variável de ambiente diretamente e tem fallback silencioso |
+| D05 | Média | API / HTTP | Middleware de tenant com rotas públicas fixas e 401 fora do padrão (**resolvido**) |
+| D06 | Média | API / Config | CORS lê variável de ambiente diretamente e tem fallback silencioso (**resolvido**) |
 | D07 | Média | Web / Arquitetura | `shared` depende de `features/auth`; token lido em dois lugares |
 | D08 | Média | Web / Contrato | Tipos do contrato HTTP duplicados à mão, sem geração a partir do OpenAPI |
 | D09 | Média | Web / Componentes | Componentes de formulário e lista acima de 350 linhas |
@@ -114,6 +114,8 @@ O ADR-002 já aceita o filtro explícito no SQL Dapper como consequência da dec
 
 **Correção sugerida:** decidir pela metadata do endpoint (`context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>()`) e restringir o `try` à resolução do tenant.
 
+**Status (28/10/2026): resolvido.** O middleware decide pela metadata `IAllowAnonymous` e não captura mais exceções; um tenant inválido no token chega ao `GlobalExceptionHandler` e retorna 401 com Problem Details. Testado em `ApiContractTests`.
+
 ### D06 — Configuração de CORS fora do `IConfiguration`
 
 **Onde:** `Infrastructure/Http/Configuration/CorsConfiguration.cs`.
@@ -123,6 +125,8 @@ O ADR-002 já aceita o filtro explícito no SQL Dapper como consequência da dec
 - `AllowCredentials()` é desnecessário com autenticação por header `Authorization` e amplia a superfície sem benefício.
 
 **Correção sugerida:** criar um `CorsOptions` validado na inicialização (`ValidateOnStart`), como `JwtTokenSettings`, sem fallback fora de Development.
+
+**Status (28/10/2026): resolvido.** `ALLOWED_ORIGINS` é lida pelo `IConfiguration` com `GetValueOrThrow`, no mesmo padrão da connection string. Optei por isso em vez de criar um `CorsOptions`: a chave tem um valor só, e a API não inicia sem ela fora de Development/Testing. `AllowCredentials()` foi removido. `ApiContractTests` cobre uma origem permitida e uma negada.
 
 ### D07 — Dependência invertida no web e token duplicado
 
