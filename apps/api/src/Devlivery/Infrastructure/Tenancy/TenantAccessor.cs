@@ -8,7 +8,10 @@ public interface ITenantAccessor
 
 public sealed class TenantAccessor : ITenantAccessor
 {
-    public Tenant Tenant { get; private set; }
+    private Tenant? _tenant;
 
-    public void Register(Tenant tenant) => Tenant = tenant;
+    public Tenant Tenant =>
+        _tenant ?? throw new InvalidOperationException("No tenant has been registered for the current scope.");
+
+    public void Register(Tenant tenant) => _tenant = tenant;
 }

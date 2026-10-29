@@ -21,7 +21,7 @@ O pacote `coverlet.collector` gera cobertura no CI e o SonarQube recebe o relat�
 
 - Mudança em agregado ou Value Object: teste de domínio para sucesso, rejeição e fronteiras relevantes.
 - Mudança em comando, consulta ou validator: teste da classe correspondente, incluindo falhas esperadas.
-- Mudança em SQL, Dapper, mapeamento EF ou filtro de tenant: teste com PostgreSQL real via Testcontainers.
+- Mudança em SQL, Dapper, mapeamento EF ou filtro de tenant: teste com PostgreSQL real via Testcontainers. Uma nova rota de leitura entra também em `DashboardApiTests.TenantScopedReadRoutes`, que verifica se outro tenant a recebe como um tenant vazio. Uma nova entidade com `EstablishmentId` precisa implementar `ITenantScoped`; `TenantQueryFilterTests` falha se ela ficar sem filtro.
 - Mudança em autenticação, middleware, representação HTTP ou endpoint: teste de contrato HTTP em `Features/<Feature>/Api`.
 - Mudança no frontend: adicionar regressões de comportamento, executar testes, lint e build e verificar manualmente os fluxos afetados no navegador.
 

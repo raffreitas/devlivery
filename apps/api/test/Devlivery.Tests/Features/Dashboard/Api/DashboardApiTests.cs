@@ -317,6 +317,50 @@ public sealed class DashboardApiTests(ApiFactory api)
         category.Subcategories.ShouldHaveSingleItem().Name.ShouldBe("Insumos");
     }
 
+    public static TheoryData<string> TenantScopedReadRoutes => new()
+    {
+        "/api/v1/dashboard/stats",
+        "/api/v1/dashboard/orders-by-status",
+        "/api/v1/dashboard/payment-breakdown",
+        "/api/v1/dashboard/sales-over-time",
+        "/api/v1/dashboard/top-products",
+        "/api/v1/dashboard/expense-summary",
+        "/api/v1/dashboard/expenses-by-category",
+        "/api/v1/dashboard/expenses-by-status",
+        "/api/v1/dashboard/expenses-over-time",
+        "/api/v1/dashboard/upcoming-expenses?days=7",
+        "/api/v1/expenses"
+    };
+
+    [Theory]
+    [MemberData(nameof(TenantScopedReadRoutes))]
+    public async Task GivenDataInAnotherTenant_WhenReadingRoute_ThenRespondsAsAnEmptyTenant(string route)
+    {
+        // Arrange
+        var owner = await api.CreateTenantAsync();
+        var pizza = await SeedProductAsync(owner, "Pizza do outro tenant", 43.21m);
+        await SeedOrderAsync(owner, [(pizza, 2)], OrderStatus.Delivered, Payment(owner, PaymentMethod.Cash, 100m));
+        var category = await SeedCategoryAsync(owner, "Categoria do outro tenant");
+        await SeedExpenseAsync(owner, category, 12.34m, e => e.WithDueDate(Today).AsPaid(Today));
+        await SeedExpenseAsync(owner, category, 56.78m, e => e.WithDueDate(Today.AddDays(1)));
+        var intruder = await api.CreateTenantAsync();
+        var empty = await api.CreateTenantAsync();
+
+        // Act
+        var ownerResponse = await owner.Client.GetAsync(route);
+        var intruderResponse = await intruder.Client.GetAsync(route);
+        var emptyResponse = await empty.Client.GetAsync(route);
+
+        // Assert
+        new[] { ownerResponse, intruderResponse, emptyResponse }
+            .ShouldAllBe(response => response.StatusCode == HttpStatusCode.OK);
+        var ownerBody = await ownerResponse.Content.ReadAsStringAsync();
+        var intruderBody = await intruderResponse.Content.ReadAsStringAsync();
+        var emptyBody = await emptyResponse.Content.ReadAsStringAsync();
+        ownerBody.ShouldNotBe(emptyBody);
+        intruderBody.ShouldBe(emptyBody);
+    }
+
     private static DateTime Utc(int year, int month, int day, int hour, int minute) =>
         new(year, month, day, hour, minute, 0, DateTimeKind.Utc);
 

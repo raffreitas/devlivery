@@ -26,7 +26,7 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 | ID | Prioridade | Área | Item |
 | --- | --- | --- | --- |
 | D01 | Alta | API / Persistência | `row_version` em `bytea` nunca é gerado: concorrência otimista inoperante (**resolvido**) |
-| D02 | Alta | API / Tenancy | Isolamento de tenant mantido manualmente em filtros e SQL |
+| D02 | Alta | API / Tenancy | Isolamento de tenant mantido manualmente em filtros e SQL (**resolvido**) |
 | D03 | Alta | API / Dashboard | Agregações feitas em memória sobre todos os pedidos do período |
 | D04 | Média | Testes | Consultas quase sem testes de handler; web sem cobertura medida |
 | D05 | Média | API / HTTP | Middleware de tenant com rotas públicas fixas e 401 fora do padrão |
@@ -78,6 +78,13 @@ O ADR-002 já aceita o filtro explícito no SQL Dapper como consequência da dec
 - Criar uma interface `ITenantScoped { Guid EstablishmentId }` e aplicar o filtro por convenção a todas as entidades que a implementam.
 - Fazer `TenantAccessor.Tenant` lançar exceção quando nenhum tenant estiver registrado.
 - Adicionar um teste de arquitetura com duas verificações: toda entidade com `EstablishmentId` tem filtro, e todo handler que usa `IDbConnectionFactory` referencia `establishment_id`. Isso também pode ser feito por um teste HTTP multi-tenant por endpoint de consulta.
+
+**Status (28/10/2026): resolvido.**
+- As nove entidades com `EstablishmentId` implementam `ITenantScoped`. O filtro é aplicado por convenção e passa a cobrir `OrderPayment`.
+- `TenantAccessor.Tenant` lança exceção quando nenhum tenant foi registrado.
+- O seed de desenvolvimento usa `IgnoreQueryFilters()`. Antes, ele consultava com `Guid.Empty` e tentava semear a cada startup.
+- `TenantQueryFilterTests` verifica o modelo.
+- `DashboardApiTests` verifica, em 11 rotas de leitura, que outro tenant recebe a mesma resposta de um tenant vazio. Para confirmar, tirei o filtro do SQL de `GetExpenseSummary` e o teste falhou nessa rota.
 
 ### D03 — Dashboard agrega em memória
 
