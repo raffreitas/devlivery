@@ -33,7 +33,7 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 | D06 | Média | API / Config | CORS lê variável de ambiente diretamente e tem fallback silencioso (**resolvido**) |
 | D07 | Média | Web / Arquitetura | `shared` depende de `features/auth`; token lido em dois lugares (**resolvido, com ressalvas**) |
 | D08 | Média | Web / Contrato | Tipos do contrato HTTP duplicados à mão, sem geração a partir do OpenAPI |
-| D09 | Média | Web / Componentes | Componentes de formulário e lista acima de 350 linhas |
+| D09 | Média | Web / Componentes | Componentes de formulário e lista acima de 350 linhas (**parcial**) |
 | D10 | Média | API / Build | Pacotes sem uso e ausência de política de analyzers/warnings |
 | D11 | Baixa | CI | Sonar obrigatório sem segredo, `tsc` duplicado, lógica de SemVer repetida |
 | D12 | Baixa | API / Persistência | Migrações `v001`…`v019` sem nome descritivo |
@@ -181,6 +181,11 @@ Os tipos de resposta do web (`features/*/types`, `ApiResponse`, `Metadata`, `Pag
 | `features/cash/components/cash-summary-card.tsx` | 350 |
 
 `order-form.tsx` mistura seleção/consolidação de itens, pagamentos, troco, proteção contra descarte (B07) e layout. Extrair as regras para hooks (`use-order-items`, `use-order-payments`) facilita testar o que causou B01/B06 sem renderizar o formulário inteiro. Como a 2.0 vai redesenhar essas telas, vale fazer a extração junto com a migração visual, não antes.
+
+**Status (28/10/2026): resolvido para o formulário de pedidos.**
+- As regras saíram do `order-form.tsx`, que caiu de 554 para 452 linhas, sendo o restante JSX. Foram para `hooks/use-order-items.ts` (seleção, preço registrado e consolidação por produto e observação) e `hooks/use-order-payments.ts` (totais em centavos, troco, falta, excesso eletrônico, troca de formas de pagamento e preenchimento do pagamento único).
+- Os testes diretos dos hooks cobrem B01 e B06. O `order-form.test.tsx` passou sem alteração.
+- Os demais componentes grandes continuam para a 2.0.
 
 ### D10 — Higiene de build da API
 
