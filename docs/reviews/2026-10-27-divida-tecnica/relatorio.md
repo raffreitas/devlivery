@@ -34,7 +34,7 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 | D07 | Média | Web / Arquitetura | `shared` depende de `features/auth`; token lido em dois lugares (**resolvido, com ressalvas**) |
 | D08 | Média | Web / Contrato | Tipos do contrato HTTP duplicados à mão, sem geração a partir do OpenAPI |
 | D09 | Média | Web / Componentes | Componentes de formulário e lista acima de 350 linhas (**parcial**) |
-| D10 | Média | API / Build | Pacotes sem uso e ausência de política de analyzers/warnings |
+| D10 | Média | API / Build | Pacotes sem uso e ausência de política de analyzers/warnings (**parcial**) |
 | D11 | Baixa | CI | Sonar obrigatório sem segredo, `tsc` duplicado, lógica de SemVer repetida |
 | D12 | Baixa | API / Persistência | Migrações `v001`…`v019` sem nome descritivo |
 | D13 | Baixa | API / SQL | SQL com literais de enum e parâmetro sem uso |
@@ -194,6 +194,19 @@ Os tipos de resposta do web (`features/*/types`, `ApiResponse`, `Metadata`, `Pag
 - Os testes usam xUnit v2 (`2.9.3`), e a v3 já é a linha mantida. A migração é baixa prioridade, mas fica mais cara conforme a suíte cresce.
 
 Mantenha o `Directory.Build.props` dentro de `apps/api` e `apps/backup` separadamente, para preservar a independência do backup.
+
+**Status (28/10/2026): parcial.**
+- Removidos `Microsoft.Extensions.Http.Resilience` e `Microsoft.Extensions.ServiceDiscovery`.
+- `apps/api/Directory.Build.props` liga `EnforceCodeStyleInBuild` e `TreatWarningsAsErrors`. Os avisos de vulnerabilidade do NuGet (NU1901–NU1904) não viram erro, para um advisory novo não quebrar o build.
+- O build tinha 0 warnings, e um warning de teste (`CS0168`) passou a falhar a compilação, confirmando a regra.
+- `AnalysisLevel=latest-recommended` ficou pendente, porque geraria 364 warnings:
+  - 305 de CA1707 nos testes, em conflito com a convenção `Given_When_Then`;
+  - 41 de CA1848/CA1873, que pedem `LoggerMessage`;
+  - 6 de CA1711, sobre os sufixos `EventHandler`/`Collection` do projeto;
+  - 12 menores, quase todos em migrações geradas.
+- Adotar esse nível exige decidir quais regras desligar no `.editorconfig`.
+- Não foi criado `Directory.Build.props` no backup.
+- A migração para xUnit v3 continua pendente.
 
 ## Prioridade baixa
 
