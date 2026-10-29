@@ -61,4 +61,6 @@ dotnet ef migrations add NomeDaMigracao --project src/Devlivery --context Applic
 dotnet ef migrations add NomeDaMigracao --project src/Devlivery --context ApplicationIdentityDbContext --output-dir Infrastructure/Identity/Migrations
 ```
 
+Dê à migração um nome em PascalCase que descreva a mudança, como `RemoveRowVersionUseXmin`. As migrações `v001`…`v019` são anteriores a essa convenção e não devem ser renomeadas, porque o nome é registrado em `__EFMigrationsHistory`.
+
 Não coloque credenciais reais em `appsettings*.json`, `.env.example`, logs ou documentação.

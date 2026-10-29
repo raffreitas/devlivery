@@ -9,7 +9,6 @@ using Devlivery.Domain.Aggregates.Orders.Entities;
 using Devlivery.Domain.Aggregates.Products;
 using Devlivery.Domain.Aggregates.Users;
 using Devlivery.Domain.SeedWork;
-using Devlivery.Infrastructure.Persistence.Configurations;
 using Devlivery.Infrastructure.Persistence.Extensions;
 using Devlivery.Infrastructure.Tenancy;
 
@@ -37,15 +36,7 @@ public sealed class ApplicationDbContext(
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.ApplyConfiguration(new UserConfiguration());
-        modelBuilder.ApplyConfiguration(new ProductConfiguration());
-        modelBuilder.ApplyConfiguration(new OrderConfiguration());
-        modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
-        modelBuilder.ApplyConfiguration(new OrderPaymentConfiguration());
-        modelBuilder.ApplyConfiguration(new CashSessionConfiguration());
-        modelBuilder.ApplyConfiguration(new CashSessionMovementConfiguration());
-        modelBuilder.ApplyConfiguration(new ExpenseConfiguration());
-        modelBuilder.ApplyConfiguration(new ExpenseCategoryConfiguration());
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
         ApplyTenantQueryFilters(modelBuilder);
 

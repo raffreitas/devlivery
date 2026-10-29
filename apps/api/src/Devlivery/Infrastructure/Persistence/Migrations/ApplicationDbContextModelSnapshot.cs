@@ -181,7 +181,6 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
             modelBuilder.Entity("Devlivery.Domain.Aggregates.Establishments.Establishment", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -195,7 +194,8 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
 
                     b.Property<string>("TradeName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("trade_name");
 
                     b.Property<DateTime>("UpdatedAt")

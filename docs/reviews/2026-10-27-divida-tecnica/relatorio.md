@@ -35,10 +35,10 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 | D08 | Média | Web / Contrato | Tipos do contrato HTTP duplicados à mão, sem geração a partir do OpenAPI |
 | D09 | Média | Web / Componentes | Componentes de formulário e lista acima de 350 linhas (**parcial**) |
 | D10 | Média | API / Build | Pacotes sem uso e ausência de política de analyzers/warnings (**parcial**) |
-| D11 | Baixa | CI | Sonar obrigatório sem segredo, `tsc` duplicado, lógica de SemVer repetida (**parcial**) |
-| D12 | Baixa | API / Persistência | Migrações `v001`…`v019` sem nome descritivo |
+| D11 | Baixa | CI | Sonar obrigatório sem segredo, `tsc` duplicado, lógica de SemVer repetida (**resolvido**) |
+| D12 | Baixa | API / Persistência | Migrações `v001`…`v019` sem nome descritivo (**resolvido para as próximas**) |
 | D13 | Baixa | API / SQL | SQL com literais de enum e parâmetro sem uso (**resolvido**) |
-| D14 | Baixa | Repositório | Skills duplicadas em `.agents` e `.claude`; pequenos resíduos de código |
+| D14 | Baixa | Repositório | Skills duplicadas em `.agents` e `.claude`; pequenos resíduos de código (**parcial**) |
 
 ## Prioridade alta
 
@@ -205,7 +205,7 @@ Mantenha o `Directory.Build.props` dentro de `apps/api` e `apps/backup` separada
   - 6 de CA1711, sobre os sufixos `EventHandler`/`Collection` do projeto;
   - 12 menores, quase todos em migrações geradas.
 - Adotar esse nível exige decidir quais regras desligar no `.editorconfig`.
-- Não foi criado `Directory.Build.props` no backup.
+- Em 29/10/2026, `apps/backup/Directory.Build.props` passou a aplicar as mesmas regras, com arquivo próprio para não acoplar o backup à API. O backup compilou com 0 warnings.
 - A migração para xUnit v3 continua pendente.
 
 ## Prioridade baixa
@@ -217,15 +217,18 @@ Mantenha o `Directory.Build.props` dentro de `apps/api` e `apps/backup` separada
 - O cálculo de SemVer está duplicado entre `pull-request-validation.yaml` e `release.yaml`, com pequenas diferenças (`Number` vs `parseInt`, `raw`).
 - O CI do backup constrói a imagem Docker; o da API não constrói o `Dockerfile` dela, então uma quebra só aparece no deploy.
 
-**Status (28/10/2026): parcial.**
+**Status (29/10/2026): resolvido.**
 - O Sonar roda só quando `SONAR_TOKEN` existe, nos dois workflows, e build e testes passam a rodar sem ele.
 - O passo "Check types" saiu do web. Ele chamava `tsc` sobre um `tsconfig.json` de solução (`files: []`) sem `-b`, então não verificava nada; a checagem real é o `tsc -b` do `pnpm build`.
 - A CI da API passou a construir a imagem Docker, com timeout de 20 minutos. O build foi validado localmente.
-- A duplicação do cálculo de SemVer continua.
+- O cálculo de SemVer está no workflow reutilizável `release-version.yaml` (`workflow_call`), chamado por `pull-request-validation.yaml` e `release.yaml`.
+- No release, a concorrência subiu para o workflow inteiro, para que o cálculo da versão continue serializado. PRs fechados sem merge usam um grupo próprio e não substituem um release pendente.
 
 ### D12 — Migrações
 
 As 19 migrações chamam-se `v001`…`v019`. O histórico não diz o que cada uma faz, o que dificulta revisão e rollback. Para as próximas, use nomes descritivos, como o guia de desenvolvimento local já sugere (`NomeDaMigracao`). A publicação já usa *migration bundles* gerados no Dockerfile e executados no pre-deploy.
+
+**Status (29/10/2026): resolvido para as próximas migrações.** O guia de desenvolvimento local passou a exigir nomes descritivos. As migrações `v001`…`v019` ficam como estão: o nome é registrado em `__EFMigrationsHistory`, e renomeá-las quebraria os bancos já migrados.
 
 ### D13 — SQL acoplado a nomes de enum
 
@@ -238,9 +241,9 @@ Os handlers Dapper comparam `e.status != 'Cancelled'` e `= 'Paid'` como literais
 - `.agents/skills/shadcn` e `.claude/skills/shadcn` são idênticos (46 arquivos versionados nas duas pastas). Prefira uma fonte única com link ou sincronização.
 - `AddHttpContextAccessor()` é chamado em `Startup` e em `TenancyFeature`. O `ApplyConfiguration` lista as configurações uma a uma; `ApplyConfigurationsFromAssembly` eliminaria o passo manual.
 
-**Status (28/10/2026): pendente, com um achado novo.**
-- `EstablishmentConfiguration` existe, mas não está na lista do `ApplicationDbContext`, então o `Establishment` é mapeado só por convenção (`trade_name` como `text`, sem limite).
-- Trocar para `ApplyConfigurationsFromAssembly` passaria a aplicá-la e mudaria o schema para `varchar(100)`, o que exige migração. É preciso decidir entre aplicar a configuração, com migração, ou apagá-la. Até lá, a lista explícita fica.
+**Status (29/10/2026): parcial.**
+- `EstablishmentConfiguration` existia, mas não estava na lista do `ApplicationDbContext`, então o `Establishment` era mapeado só por convenção (`trade_name` como `text`, sem limite).
+- O `ApplicationDbContext` passou a usar `ApplyConfigurationsFromAssembly`, que aplica essa configuração. A migração `ApplyEstablishmentConfiguration` muda `trade_name` para `varchar(100)`. Hoje só o seed cria estabelecimentos.
 - O `AddHttpContextAccessor()` repetido é idempotente e mantém a `TenancyFeature` autocontida, por isso ficou.
 - As skills duplicadas em `.agents` e `.claude` dependem das ferramentas de agentes que você usa, então não mexi.
 
