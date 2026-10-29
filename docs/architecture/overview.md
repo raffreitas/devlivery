@@ -37,6 +37,8 @@ Handlers que registram autoria resolvem o usuário do token no banco, dentro do 
 
 Eventos de domínio são despachados pelo `UnitOfWork` antes da gravação, e as alterações dos handlers são persistidas no mesmo `SaveChanges` da operação que gerou os eventos. Os handlers de caixa decorrentes de pedidos executam dentro da requisição e recebem o contexto autenticado corrente. Se o processamento migrar para filas ou jobs, o autor e o tenant deverão ser transportados explicitamente no contrato do evento.
 
+Pedidos, pagamentos, sessões de caixa e movimentações usam concorrência otimista pela coluna de sistema `xmin` do PostgreSQL (`IsRowVersion()` em uma propriedade sombra `uint`). Quando outra operação altera a mesma linha entre a leitura e a gravação, o EF lança `DbUpdateConcurrencyException` e a API responde 409 com Problem Details. A verificação vale por linha: incluir apenas uma entidade filha, como uma nova movimentação, não altera o `xmin` do agregado pai.
+
 O banco é a fronteira de persistência compartilhada desta aplicação. Não há broker, cache distribuído ou limitador distribuído neste momento.
 
 ## Contratos HTTP

@@ -25,7 +25,7 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 
 | ID | Prioridade | Área | Item |
 | --- | --- | --- | --- |
-| D01 | Alta | API / Persistência | `row_version` em `bytea` nunca é gerado: concorrência otimista inoperante |
+| D01 | Alta | API / Persistência | `row_version` em `bytea` nunca é gerado: concorrência otimista inoperante (**resolvido**) |
 | D02 | Alta | API / Tenancy | Isolamento de tenant mantido manualmente em filtros e SQL |
 | D03 | Alta | API / Dashboard | Agregações feitas em memória sobre todos os pedidos do período |
 | D04 | Média | Testes | Consultas quase sem testes de handler; web sem cobertura medida |
@@ -53,6 +53,11 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 **Correção sugerida:** usar o `xmin` do PostgreSQL (`uint` sombra com `IsRowVersion()`, que o Npgsql mapeia para a coluna de sistema), remover as colunas `row_version` e mapear `DbUpdateConcurrencyException` para `409 Conflict` no `GlobalExceptionHandler`.
 
 **Critério de aceite:** um teste com Testcontainers que carrega o mesmo `CashSession` em dois contextos, grava os dois e espera conflito na segunda gravação.
+
+**Status (28/10/2026): resolvido.**
+- As quatro entidades usam `xmin`, e a migração `RemoveRowVersionUseXmin` remove as colunas `row_version`.
+- `DbUpdateConcurrencyException` responde 409.
+- `ConcurrencyTests` cobre `CashSession` e `Order`. Os dois testes falham com a configuração anterior e passam com a nova, o que confirma o diagnóstico.
 
 ### D02 — Isolamento de tenant mantido à mão
 

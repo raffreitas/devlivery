@@ -3,6 +3,7 @@ using Devlivery.Domain.SeedWork;
 using Devlivery.Infrastructure.Http.Models;
 
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 
 namespace Devlivery.Infrastructure.Http.ExceptionHandlers;
 
@@ -15,7 +16,7 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
     {
         // Client errors (4xx) are expected outcomes, not server failures: keep them out of error-level alerts.
         if (exception is DomainException or BadHttpRequestException or UnauthorizedAccessException
-            or UnauthorizedException)
+            or UnauthorizedException or DbUpdateConcurrencyException)
             logger.LogWarning(exception, "Requisição rejeitada: {Reason}", exception.Message);
         else
             logger.LogError(exception, "Houve um erro não tratado ao processar a requisição.");
@@ -52,6 +53,16 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
                         Title = "Acesso não autorizado",
                         Status = StatusCodes.Status401Unauthorized,
                         Detail = "Acesso não autorizado."
+                    }, cancellationToken: cancellationToken);
+                return true;
+            case DbUpdateConcurrencyException:
+                httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+                await httpContext.Response.WriteAsJsonAsync(
+                    new ApiProblemDetails
+                    {
+                        Title = "Conflito de atualização",
+                        Status = StatusCodes.Status409Conflict,
+                        Detail = "O registro foi alterado por outra operação. Atualize os dados e tente novamente."
                     }, cancellationToken: cancellationToken);
                 return true;
             default:
