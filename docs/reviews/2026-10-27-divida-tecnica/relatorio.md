@@ -28,7 +28,7 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 | D01 | Alta | API / Persistência | `row_version` em `bytea` nunca é gerado: concorrência otimista inoperante (**resolvido**) |
 | D02 | Alta | API / Tenancy | Isolamento de tenant mantido manualmente em filtros e SQL (**resolvido**) |
 | D03 | Alta | API / Dashboard | Agregações feitas em memória sobre todos os pedidos do período (**resolvido**) |
-| D04 | Média | Testes | Consultas quase sem testes de handler; web sem cobertura medida |
+| D04 | Média | Testes | Consultas quase sem testes de handler; web sem cobertura medida (**resolvido**) |
 | D05 | Média | API / HTTP | Middleware de tenant com rotas públicas fixas e 401 fora do padrão (**resolvido**) |
 | D06 | Média | API / Config | CORS lê variável de ambiente diretamente e tem fallback silencioso (**resolvido**) |
 | D07 | Média | Web / Arquitetura | `shared` depende de `features/auth`; token lido em dois lugares |
@@ -112,6 +112,18 @@ O ADR-002 já aceita o filtro explícito no SQL Dapper como consequência da dec
 - `LoginHandlerTests` usa `UseInMemoryDatabase`, a única exceção à política de PostgreSQL/Testcontainers. Por causa dela o projeto de testes carrega `Microsoft.EntityFrameworkCore.InMemory`.
 - **Web:** `features/auth` (login, sessão, expiração) e `features/landing` não têm testes. `products` tem um teste de página.
 - `web-app-ci.yaml` define `sonar.coverage.exclusions=**/*`, então o Sonar não mede cobertura do frontend. Não há gate numérico (decisão documentada), mas também não há visibilidade da evolução.
+
+**Status (28/10/2026): resolvido, exceto pela landing.**
+- Os testes de caracterização do dashboard entraram na etapa do D03.
+- `LoginHandlerTests` usa PostgreSQL via `PostgresDatabaseFixture`, e o pacote `Microsoft.EntityFrameworkCore.InMemory` saiu do projeto de testes.
+- No web, `auth-service.test.ts` e `login-page.test.tsx` cobrem:
+  - login com sucesso;
+  - credenciais rejeitadas;
+  - sessão corrompida;
+  - logout;
+  - fim da sessão em um 401.
+- O CI do web gera `lcov` com `@vitest/coverage-v8` e o envia ao Sonar. A cobertura local de linhas ficou em 50,9%.
+- `features/landing` continua sem testes, por ser uma página estática.
 
 ### D05 — Middleware de tenant
 

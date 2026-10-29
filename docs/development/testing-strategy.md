@@ -15,7 +15,7 @@ Os testes devem proteger invariantes de domínio, comportamento dos casos de uso
 | Frontend | Cálculos, hooks, componentes e fluxos da interface | Vitest, Testing Library e MSW em jsdom |
 | Job de backup | Configuração, chaves dos objetos, retenção, orquestração, cliente R2 e `pg_dump` real | xUnit, NSubstitute e Testcontainers PostgreSQL 17 em `apps/backup/test/Devlivery.BackupJob.Tests` |
 
-O pacote `coverlet.collector` gera cobertura no CI e o SonarQube recebe o relatório. Não existe limite numérico de cobertura configurado; cobertura não substitui cenários de comportamento.
+No CI, o pacote `coverlet.collector` gera a cobertura da API, e o `@vitest/coverage-v8` gera a do web (`pnpm exec vitest run --coverage`, que grava `coverage/lcov.info`). O SonarQube recebe os dois relatórios; os componentes de `src/shared/components/ui/` ficam fora da medição, por virem do registro do shadcn. Não existe limite numérico de cobertura configurado; cobertura não substitui cenários de comportamento.
 
 ## Onde adicionar testes
 
