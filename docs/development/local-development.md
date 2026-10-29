@@ -43,12 +43,13 @@ Confirme que `VITE_API_URL` corresponde ao endereço HTTPS da API. O navegador p
 ```powershell
 dotnet test apps/api/Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
 dotnet test apps/backup/Devlivery.BackupJob.slnx --disable-build-servers -m:1 --verbosity minimal
+pnpm --dir apps/web test
 pnpm --dir apps/web lint
 pnpm --dir apps/web build
 git diff --check
 ```
 
-Os testes de integração que exercitam consultas PostgreSQL iniciam o banco com Testcontainers. A maior parte da suíte atual cobre domínio, validators e handlers sem infraestrutura. Falhas de conexão com o Docker devem ser resolvidas antes de interpretar os testes dependentes de container. Consulte a [estratégia de testes](testing-strategy.md).
+Os testes de contrato HTTP e de consultas iniciam o PostgreSQL com Testcontainers; testes de domínio, validators e handlers rodam sem infraestrutura. Falhas de conexão com o Docker devem ser resolvidas antes de interpretar os testes dependentes de container. Consulte a [estratégia de testes](testing-strategy.md).
 
 ## Migrações
 
@@ -60,7 +61,6 @@ dotnet ef migrations add NomeDaMigracao --project src/Devlivery --context Applic
 dotnet ef migrations add NomeDaMigracao --project src/Devlivery --context ApplicationIdentityDbContext --output-dir Infrastructure/Identity/Migrations
 ```
 
+Dê à migração um nome em PascalCase que descreva a mudança, como `RemoveRowVersionUseXmin`. As migrações `v001`…`v019` são anteriores a essa convenção e não devem ser renomeadas, porque o nome é registrado em `__EFMigrationsHistory`.
+
 Não coloque credenciais reais em `appsettings*.json`, `.env.example`, logs ou documentação.
-
-
-O cliente HTTP acrescenta `/api/v1` à origem definida em `VITE_API_URL`. Configure apenas a origem HTTPS da API, sem barra final e sem o prefixo de versão (exemplo: `https://localhost:7141`).

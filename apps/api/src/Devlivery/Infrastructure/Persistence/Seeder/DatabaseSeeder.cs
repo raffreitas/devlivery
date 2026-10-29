@@ -13,7 +13,7 @@ public static class DatabaseSeeder
 {
     public static async Task SeedAsync(ApplicationDbContext db, UserManager<ApplicationUser> userManager)
     {
-        if (await db.Users.AnyAsync())
+        if (await db.Users.IgnoreQueryFilters().AnyAsync())
             return;
 
         var establishment = new Establishment(

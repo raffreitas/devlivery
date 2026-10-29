@@ -24,9 +24,8 @@ public sealed class CashSessionMovementConfiguration : IEntityTypeConfiguration<
         builder.Property(x => x.Reason).HasMaxLength(1000).IsRequired(false);
         builder.Property(x => x.CreatedBy).IsRequired();
         builder.Property(x => x.CreatedAt).IsRequired();
-        builder.Property<byte[]>("RowVersion")
-            .IsRowVersion()
-            .HasColumnName("row_version");
+        builder.Property<uint>("Version")
+            .IsRowVersion();
 
         builder.HasOne<Establishment>()
             .WithMany()

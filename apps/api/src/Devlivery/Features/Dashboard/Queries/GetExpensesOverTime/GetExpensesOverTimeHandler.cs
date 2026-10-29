@@ -1,4 +1,5 @@
 using System.Data;
+using System.Globalization;
 
 using Dapper;
 
@@ -45,7 +46,7 @@ public sealed class GetExpensesOverTimeHandler(
 
         var data = expensesByDate
             .Select(x => new ExpenseTimeSeriesItem(
-                x.PaymentDate.ToString("yyyy-MM-dd"),
+                x.PaymentDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                 x.Total))
             .ToList();
 

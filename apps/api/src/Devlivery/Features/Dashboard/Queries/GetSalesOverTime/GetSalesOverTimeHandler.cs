@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using Devlivery.Common.Extensions;
 using Devlivery.Common.Handlers;
 using Devlivery.Common.Time;
@@ -17,29 +19,20 @@ public sealed class GetSalesOverTimeHandler(ApplicationDbContext dbContext)
         GetSalesOverTimeQuery query,
         CancellationToken cancellationToken)
     {
-        var ordersQuery = dbContext.Orders
+        var timeZoneId = BrazilTime.TimeZone.Id;
+
+        var salesByDate = await dbContext.Orders
             .AsNoTracking()
-            .AsQueryable();
-
-        ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
-
-        ordersQuery = ordersQuery.Where(o => o.Status != OrderStatus.Canceled);
-
-        var orders = await ordersQuery.ToListAsync(cancellationToken);
-
-        var salesByDate = orders
-            .GroupBy(o => o.CreatedAt.ToBrazilTime().Date)
-            .Select(g => new
-            {
-                Date = g.Key,
-                Total = g.Sum(o => o.Total)
-            })
+            .WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate)
+            .Where(o => o.Status != OrderStatus.Canceled)
+            .GroupBy(o => TimeZoneInfo.ConvertTimeBySystemTimeZoneId(o.CreatedAt, timeZoneId).Date)
+            .Select(g => new { Date = g.Key, Total = g.Sum(o => o.Total) })
             .OrderBy(x => x.Date)
-            .ToList();
+            .ToListAsync(cancellationToken);
 
         var data = salesByDate
             .Select(x => new SalesTimeSeriesItem(
-                x.Date.ToString("yyyy-MM-dd"),
+                x.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                 x.Total))
             .ToList();
 

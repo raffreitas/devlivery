@@ -1,7 +1,6 @@
 import { type ApiResponse, api } from "@/shared/services/api";
+import { clearAuth, readAuth, writeAuth } from "@/shared/services/auth-storage";
 import type { AuthState, Credentials, User } from "../types";
-
-export const AUTH_STORAGE_KEY = "devlivery@auth";
 
 interface LoginResponseDto {
   userId: string;
@@ -10,16 +9,7 @@ interface LoginResponseDto {
 }
 
 export const authService = {
-  getAuth: (): AuthState => {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) return { user: null, token: null };
-    try {
-      const parsed = JSON.parse(raw) as AuthState;
-      return parsed;
-    } catch {
-      return { user: null, token: null };
-    }
-  },
+  getAuth: (): AuthState => readAuth(),
 
   isAuthenticated: (): boolean => {
     const { token } = authService.getAuth();
@@ -41,12 +31,12 @@ export const authService = {
     };
     const auth: AuthState = { user, token: res.data.token };
 
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+    writeAuth(auth);
     return auth;
   },
 
   logout: async (): Promise<void> => {
     // não há endpoint de logout no backend; apenas limpa o storage
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    clearAuth();
   },
 };

@@ -1,19 +1,13 @@
 import z from "zod";
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+export type {
+  SessionUser as User,
+  StoredAuth as AuthState,
+} from "@/shared/services/auth-storage";
 
 export interface Credentials {
   email: string;
   password: string;
-}
-
-export interface AuthState {
-  user: User | null;
-  token: string | null;
 }
 
 export const authFormSchema = z.object({

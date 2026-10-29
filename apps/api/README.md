@@ -53,17 +53,17 @@ Endereços locais:
 
 Em desenvolvimento, abra `/scalar/` para consultar o guia de início rápido, selecionar o contrato e testar requisições. Autentique-se pelo login e cole `data.token` no campo Bearer; o login é público e as demais operações indicam a exigência de JWT. A referência inclui descrições das áreas, resumos das operações e orientações sobre respostas e erros.
 
-Ao adicionar ou alterar um endpoint, os metadados `.Produces(...)` alinhados ao comportamento real. A apresentação e o conteúdo geral ficam em `Infrastructure/Http/Configuration/ApiDocumentation.cs`.
+Ao adicionar ou alterar um endpoint, mantenha os metadados `.Produces(...)` alinhados ao comportamento real. A apresentação e o conteúdo geral ficam em `Infrastructure/Http/Configuration/OpenApiConfiguration.cs`.
 
 ## Testes
 
-A suíte cobre principalmente domínio, validators e handlers. Cenários de integração que exercitam consultas PostgreSQL usam Testcontainers e precisam do Docker em execução.
+A suíte cobre domínio, validators, handlers e contratos HTTP (`ApiFactory`, em `Features/<Feature>/Api`). Os testes HTTP e de consultas usam PostgreSQL via Testcontainers e precisam do Docker em execução.
 
 ```powershell
 dotnet test Devlivery.slnx --no-restore --disable-build-servers -m:1 --verbosity minimal
 ```
 
-Consulte a [estratégia de testes](../../docs/development/testing-strategy.md) para os níveis cobertos e as lacunas atuais.
+Consulte a [estratégia de testes](../../docs/development/testing-strategy.md) para os níveis cobertos e as convenções.
 
 ## Configuração e operação
 

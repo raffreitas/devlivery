@@ -17,5 +17,11 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}"],
     env: { VITE_API_URL: "http://localhost:5000", MODE: "test" },
     restoreMocks: true,
+    coverage: {
+      provider: "v8",
+      reporter: ["text-summary", "lcov"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/shared/components/ui/**"],
+    },
   },
 });

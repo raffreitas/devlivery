@@ -1,3 +1,5 @@
+using System.Reflection;
+
 using Devlivery.Domain.Aggregates.CashRegister;
 using Devlivery.Domain.Aggregates.CashRegister.Entities;
 using Devlivery.Domain.Aggregates.Establishments;
@@ -6,7 +8,7 @@ using Devlivery.Domain.Aggregates.Orders;
 using Devlivery.Domain.Aggregates.Orders.Entities;
 using Devlivery.Domain.Aggregates.Products;
 using Devlivery.Domain.Aggregates.Users;
-using Devlivery.Infrastructure.Persistence.Configurations;
+using Devlivery.Domain.SeedWork;
 using Devlivery.Infrastructure.Persistence.Extensions;
 using Devlivery.Infrastructure.Tenancy;
 
@@ -34,30 +36,31 @@ public sealed class ApplicationDbContext(
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.ApplyConfiguration(new UserConfiguration());
-        modelBuilder.ApplyConfiguration(new ProductConfiguration());
-        modelBuilder.ApplyConfiguration(new OrderConfiguration());
-        modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
-        modelBuilder.ApplyConfiguration(new OrderPaymentConfiguration());
-        modelBuilder.ApplyConfiguration(new CashSessionConfiguration());
-        modelBuilder.ApplyConfiguration(new CashSessionMovementConfiguration());
-        modelBuilder.ApplyConfiguration(new ExpenseConfiguration());
-        modelBuilder.ApplyConfiguration(new ExpenseCategoryConfiguration());
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-        ApplyQueryFilters(modelBuilder);
+        ApplyTenantQueryFilters(modelBuilder);
 
         modelBuilder.UseUtcDateTimeConverter();
     }
 
-    private void ApplyQueryFilters(ModelBuilder modelBuilder)
+    private Guid CurrentTenantId => tenantAccessor.Tenant.Id;
+
+    private void ApplyTenantQueryFilters(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
-        modelBuilder.Entity<Product>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
-        modelBuilder.Entity<Order>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
-        modelBuilder.Entity<Expense>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
-        modelBuilder.Entity<Category>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
-        modelBuilder.Entity<OrderItem>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
-        modelBuilder.Entity<CashSession>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
-        modelBuilder.Entity<CashSessionMovement>().HasQueryFilter(x => x.EstablishmentId == tenantAccessor.Tenant.Id);
+        var applyFilter = typeof(ApplicationDbContext).GetMethod(
+            nameof(ApplyTenantQueryFilter),
+            BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+        var tenantScopedTypes = modelBuilder.Model.GetEntityTypes()
+            .Select(entityType => entityType.ClrType)
+            .Where(clrType => clrType.IsAssignableTo(typeof(ITenantScoped)))
+            .ToList();
+
+        foreach (var clrType in tenantScopedTypes)
+            applyFilter.MakeGenericMethod(clrType).Invoke(this, [modelBuilder]);
     }
+
+    private void ApplyTenantQueryFilter<TEntity>(ModelBuilder modelBuilder)
+        where TEntity : class, ITenantScoped =>
+        modelBuilder.Entity<TEntity>().HasQueryFilter(entity => entity.EstablishmentId == CurrentTenantId);
 }

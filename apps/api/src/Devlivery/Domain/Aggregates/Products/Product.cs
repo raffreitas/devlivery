@@ -2,7 +2,7 @@ using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.Products;
 
-public sealed class Product : Entity
+public sealed class Product : Entity, ITenantScoped
 {
     public string Name { get; private set; }
     public string Description { get; private set; }

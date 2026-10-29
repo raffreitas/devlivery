@@ -2,7 +2,7 @@ using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.Expenses;
 
-public sealed class Category : Entity
+public sealed class Category : Entity, ITenantScoped
 {
     private readonly List<Category> _subcategories = [];
 

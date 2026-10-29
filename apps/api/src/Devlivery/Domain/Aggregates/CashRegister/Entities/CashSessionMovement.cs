@@ -4,7 +4,7 @@ using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.CashRegister.Entities;
 
-public sealed class CashSessionMovement : Entity
+public sealed class CashSessionMovement : Entity, ITenantScoped
 {
     public Guid EstablishmentId { get; private set; }
     public Guid CashSessionId { get; private set; }

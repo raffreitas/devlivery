@@ -2,7 +2,7 @@
 
 namespace Devlivery.Domain.Aggregates.Users;
 
-public sealed class User : Entity
+public sealed class User : Entity, ITenantScoped
 {
     public string Name { get; private set; }
     public string Email { get; private set; }

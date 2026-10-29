@@ -2,6 +2,8 @@ using System.Diagnostics;
 
 using Devlivery.Infrastructure.Tenancy;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace Devlivery.Infrastructure.Http.Middlewares;
 
 public class TenantRegisterMiddleware(
@@ -11,32 +13,16 @@ public class TenantRegisterMiddleware(
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        string[] publicEndpoints =
-        [
-            "/scalar",
-            "/openapi",
-            "/health",
-            "/alive",
-            "/api/v1/auth/login"
-        ];
-        if (publicEndpoints.Any(endpoint => context.Request.Path.StartsWithSegments(endpoint)))
+        if (context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() is not null)
         {
             await next(context);
             return;
         }
 
-        try
-        {
-            var tenant = await tenantLocator.GetAsync(context.RequestAborted);
-            tenantAccessor.Register(tenant);
+        var tenant = await tenantLocator.GetAsync(context.RequestAborted);
+        tenantAccessor.Register(tenant);
+        Activity.Current?.SetTag("tenant.id", tenant.Id);
 
-            Activity.Current?.SetTag("tenant.id", tenant.Id);
-            await next(context);
-        }
-        catch (UnauthorizedAccessException)
-        {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await context.Response.CompleteAsync();
-        }
+        await next(context);
     }
 }

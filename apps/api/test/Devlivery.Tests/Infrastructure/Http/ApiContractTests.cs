@@ -1,10 +1,15 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 using Devlivery.Features.Products.Commands.CreateProduct;
 using Devlivery.Features.Products.Queries.GetAllProducts;
+using Devlivery.Infrastructure.Identity.Abstractions;
 using Devlivery.Tests.Common.Api;
 using Devlivery.Tests.Common.Builders;
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 using Shouldly;
 
@@ -44,7 +49,7 @@ public sealed class ApiContractTests(ApiFactory api)
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        response.Headers.GetValues("api-supported-versions").ShouldBe(new[] { "1.0" });
+        response.Headers.GetValues("api-supported-versions").ShouldHaveSingleItem().ShouldBe("1.0");
     }
 
     [Theory]
@@ -104,5 +109,58 @@ public sealed class ApiContractTests(ApiFactory api)
         delete.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         var stored = await owner.WithDbContextAsync(db => db.Products.FindAsync(product.Id).AsTask());
         stored.ShouldNotBeNull().Name.ShouldBe(product.Name);
+    }
+
+    [Fact]
+    public async Task GivenNoToken_WhenCallingAnonymousEndpoint_ThenRespondsWithoutResolvingTenant()
+    {
+        // Arrange
+        using var client = api.CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/alive");
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task GivenTokenWithInvalidTenant_WhenCallingProtectedEndpoint_ThenReturns401ProblemDetails()
+    {
+        // Arrange
+        string token;
+        await using (var scope = api.Services.CreateAsyncScope())
+        {
+            token = await scope.ServiceProvider.GetRequiredService<ITokenService>()
+                .GenerateTokenAsync(new TokenRequest(Guid.NewGuid().ToString(), "estabelecimento-invalido"));
+        }
+
+        using var client = api.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        var response = await client.GetAsync("/api/v1/products");
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        (await ApiTenant.ReadProblemAsync(response)).Status.ShouldBe(StatusCodes.Status401Unauthorized);
+    }
+
+    [Theory]
+    [InlineData("http://localhost:5173", true)]
+    [InlineData("https://origem-nao-permitida.example", false)]
+    public async Task GivenRequestOrigin_WhenCallingApi_ThenAllowsOnlyConfiguredOrigins(string origin, bool allowed)
+    {
+        // Arrange
+        using var client = api.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/alive");
+        request.Headers.Add("Origin", origin);
+
+        // Act
+        var response = await client.SendAsync(request);
+
+        // Assert
+        response.Headers.Contains("Access-Control-Allow-Origin").ShouldBe(allowed);
+        response.Headers.Contains("Access-Control-Allow-Credentials").ShouldBeFalse();
     }
 }
