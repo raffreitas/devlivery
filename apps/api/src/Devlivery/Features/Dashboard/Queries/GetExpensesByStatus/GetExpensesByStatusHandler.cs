@@ -26,15 +26,21 @@ public sealed class GetExpensesByStatusHandler(
         var today = timeProvider.GetBrazilToday();
 
         const string sql = """
-            select 
-                e.status as "Status",
-                e.due_date as "DueDate",
-                e.amount as "Amount"
+            select
+                case
+                    when e.status = @Paid then @PaidDisplay
+                    when e.due_date < @Today then @OverdueDisplay
+                    when e.due_date = @Today then @DueTodayDisplay
+                    else @PendingDisplay
+                end as "Status",
+                count(*)::int as "Count",
+                sum(e.amount) as "Total"
             from public.expenses e
             where e.establishment_id = @EstablishmentId
-            and e.status != 'Cancelled'
-            and (@StartDate is null or (case when e.status = 'Paid' then e.payment_date else e.due_date end) >= @StartDate)
-            and (@EndDate is null or (case when e.status = 'Paid' then e.payment_date else e.due_date end) <= @EndDate)
+            and e.status != @Cancelled
+            and (@StartDate is null or (case when e.status = @Paid then e.payment_date else e.due_date end) >= @StartDate)
+            and (@EndDate is null or (case when e.status = @Paid then e.payment_date else e.due_date end) <= @EndDate)
+            group by 1
             """;
 
         var parameters = new DynamicParameters();
@@ -42,29 +48,18 @@ public sealed class GetExpensesByStatusHandler(
         parameters.Add("StartDate", query.StartDate, DbType.Date);
         parameters.Add("EndDate", query.EndDate, DbType.Date);
         parameters.Add("Today", today, DbType.Date);
+        parameters.Add("Paid", nameof(ExpenseStatus.Paid));
+        parameters.Add("Cancelled", nameof(ExpenseStatus.Cancelled));
+        parameters.Add("PaidDisplay", nameof(ExpenseDisplayStatus.Paid));
+        parameters.Add("OverdueDisplay", nameof(ExpenseDisplayStatus.Overdue));
+        parameters.Add("DueTodayDisplay", nameof(ExpenseDisplayStatus.DueToday));
+        parameters.Add("PendingDisplay", nameof(ExpenseDisplayStatus.Pending));
 
         await using var connection = await dbConnectionFactory.OpenConnectionAsync(cancellationToken);
-        var expenses = await connection.QueryAsync<(string Status, DateOnly DueDate, decimal Amount)>(sql, parameters);
+        var totals = await connection.QueryAsync<(string Status, int Count, decimal Total)>(sql, parameters);
 
-        var statusGroups = expenses
-            .Select(e =>
-            {
-                var displayStatus = e.Status switch
-                {
-                    nameof(ExpenseStatus.Paid) => ExpenseDisplayStatus.Paid,
-                    nameof(ExpenseStatus.Cancelled) => ExpenseDisplayStatus.Cancelled,
-                    nameof(ExpenseStatus.Pending) when e.DueDate < today => ExpenseDisplayStatus.Overdue,
-                    nameof(ExpenseStatus.Pending) when e.DueDate == today => ExpenseDisplayStatus.DueToday,
-                    _ => ExpenseDisplayStatus.Pending
-                };
-
-                return new { Status = displayStatus, Amount = e.Amount };
-            })
-            .GroupBy(e => e.Status)
-            .Select(g => new ExpenseStatusItem(
-                g.Key,
-                g.Count(),
-                g.Sum(e => e.Amount)))
+        var statusGroups = totals
+            .Select(t => new ExpenseStatusItem(Enum.Parse<ExpenseDisplayStatus>(t.Status), t.Count, t.Total))
             .OrderBy(s => s.Status.ToString())
             .ToList();
 

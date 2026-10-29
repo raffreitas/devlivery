@@ -27,7 +27,7 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 | --- | --- | --- | --- |
 | D01 | Alta | API / Persistência | `row_version` em `bytea` nunca é gerado: concorrência otimista inoperante (**resolvido**) |
 | D02 | Alta | API / Tenancy | Isolamento de tenant mantido manualmente em filtros e SQL (**resolvido**) |
-| D03 | Alta | API / Dashboard | Agregações feitas em memória sobre todos os pedidos do período |
+| D03 | Alta | API / Dashboard | Agregações feitas em memória sobre todos os pedidos do período (**resolvido**) |
 | D04 | Média | Testes | Consultas quase sem testes de handler; web sem cobertura medida |
 | D05 | Média | API / HTTP | Middleware de tenant com rotas públicas fixas e 401 fora do padrão (**resolvido**) |
 | D06 | Média | API / Config | CORS lê variável de ambiente diretamente e tem fallback silencioso (**resolvido**) |
@@ -95,6 +95,14 @@ O ADR-002 já aceita o filtro explícito no SQL Dapper como consequência da dec
 **Impacto:** com poucos meses de operação o custo passa despercebido. Ele cresce linearmente com o histórico, a cada abertura do dashboard e a cada refetch do TanStack Query, e em vários endpoints em paralelo.
 
 **Correção sugerida:** projetar e agregar no banco (`GroupBy(...).Select(g => new { g.Key, Sum = g.Sum(...) })`, traduzível pelo EF, ou `sum`/`count ... filter (where ...)` no SQL). Isso pode entrar no refactor de consultas que já está planejado, sem precisar deduplicar handlers. Avaliar também um limite padrão de intervalo quando nenhuma data é enviada.
+
+**Status (28/10/2026): resolvido.**
+- Testes de caracterização vieram antes, em `DashboardApiTests`: tenant sem pedidos, limites de dia em São Paulo no filtro de período, e troco maior que o dinheiro confirmado. Eles passaram no código antigo.
+- Depois, as agregações foram para o banco. `GetDashboardStats`, `GetOrdersByStatus`, `GetPaymentBreakdown`, `GetTopProducts` e `GetSalesOverTime` usam `GroupBy`/`Sum`/`Count` traduzidos pelo EF. O dia de São Paulo vira `AT TIME ZONE`, via `TimeZoneInfo.ConvertTimeBySystemTimeZoneId`.
+- `GetExpenseSummary` usa `sum(...) filter (where ...)`, e `GetExpensesByStatus` agrupa no SQL.
+- O SQL gerado foi conferido com `ToQueryString()`.
+- Única mudança de comportamento: empate de quantidade no ranking de produtos agora é desempatado pelo nome.
+- O limite padrão de intervalo não foi adotado, porque mudaria o contrato. Com a agregação no banco, a consulta sem datas devolve só os totais.
 
 ## Prioridade média
 

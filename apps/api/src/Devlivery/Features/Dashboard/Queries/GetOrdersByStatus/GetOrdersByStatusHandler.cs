@@ -16,19 +16,18 @@ public sealed class GetOrdersByStatusHandler(ApplicationDbContext dbContext)
         GetOrdersByStatusQuery query,
         CancellationToken cancellationToken)
     {
-        var ordersQuery = dbContext.Orders
+        var countsByStatus = await dbContext.Orders
             .AsNoTracking()
-            .AsQueryable();
+            .WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate)
+            .GroupBy(o => o.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(g => g.Status, g => g.Count, cancellationToken);
 
-        ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
-
-        var orders = await ordersQuery.ToListAsync(cancellationToken);
-
-        var pending = orders.Count(o => o.Status == OrderStatus.Pending);
-        var preparing = orders.Count(o => o.Status == OrderStatus.Preparing);
-        var ready = orders.Count(o => o.Status == OrderStatus.Ready);
-        var delivered = orders.Count(o => o.Status == OrderStatus.Delivered);
-        var canceled = orders.Count(o => o.Status == OrderStatus.Canceled);
+        var pending = countsByStatus.GetValueOrDefault(OrderStatus.Pending);
+        var preparing = countsByStatus.GetValueOrDefault(OrderStatus.Preparing);
+        var ready = countsByStatus.GetValueOrDefault(OrderStatus.Ready);
+        var delivered = countsByStatus.GetValueOrDefault(OrderStatus.Delivered);
+        var canceled = countsByStatus.GetValueOrDefault(OrderStatus.Canceled);
 
         var response = new GetOrdersByStatusResponse(pending, preparing, ready, delivered, canceled);
 
