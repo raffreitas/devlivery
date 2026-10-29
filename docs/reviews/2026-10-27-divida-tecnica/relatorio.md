@@ -35,9 +35,9 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 | D08 | Média | Web / Contrato | Tipos do contrato HTTP duplicados à mão, sem geração a partir do OpenAPI |
 | D09 | Média | Web / Componentes | Componentes de formulário e lista acima de 350 linhas (**parcial**) |
 | D10 | Média | API / Build | Pacotes sem uso e ausência de política de analyzers/warnings (**parcial**) |
-| D11 | Baixa | CI | Sonar obrigatório sem segredo, `tsc` duplicado, lógica de SemVer repetida |
+| D11 | Baixa | CI | Sonar obrigatório sem segredo, `tsc` duplicado, lógica de SemVer repetida (**parcial**) |
 | D12 | Baixa | API / Persistência | Migrações `v001`…`v019` sem nome descritivo |
-| D13 | Baixa | API / SQL | SQL com literais de enum e parâmetro sem uso |
+| D13 | Baixa | API / SQL | SQL com literais de enum e parâmetro sem uso (**resolvido**) |
 | D14 | Baixa | Repositório | Skills duplicadas em `.agents` e `.claude`; pequenos resíduos de código |
 
 ## Prioridade alta
@@ -217,6 +217,12 @@ Mantenha o `Directory.Build.props` dentro de `apps/api` e `apps/backup` separada
 - O cálculo de SemVer está duplicado entre `pull-request-validation.yaml` e `release.yaml`, com pequenas diferenças (`Number` vs `parseInt`, `raw`).
 - O CI do backup constrói a imagem Docker; o da API não constrói o `Dockerfile` dela, então uma quebra só aparece no deploy.
 
+**Status (28/10/2026): parcial.**
+- O Sonar roda só quando `SONAR_TOKEN` existe, nos dois workflows, e build e testes passam a rodar sem ele.
+- O passo "Check types" saiu do web. Ele chamava `tsc` sobre um `tsconfig.json` de solução (`files: []`) sem `-b`, então não verificava nada; a checagem real é o `tsc -b` do `pnpm build`.
+- A CI da API passou a construir a imagem Docker, com timeout de 20 minutos. O build foi validado localmente.
+- A duplicação do cálculo de SemVer continua.
+
 ### D12 — Migrações
 
 As 19 migrações chamam-se `v001`…`v019`. O histórico não diz o que cada uma faz, o que dificulta revisão e rollback. Para as próximas, use nomes descritivos, como o guia de desenvolvimento local já sugere (`NomeDaMigracao`). A publicação já usa *migration bundles* gerados no Dockerfile e executados no pre-deploy.
@@ -225,10 +231,18 @@ As 19 migrações chamam-se `v001`…`v019`. O histórico não diz o que cada um
 
 Os handlers Dapper comparam `e.status != 'Cancelled'` e `= 'Paid'` como literais. Renomear um membro de `ExpenseStatus` quebra a consulta sem erro de compilação. Use `nameof(ExpenseStatus.X)` como parâmetro. `GetExpenseSummaryHandler` também envia `@Today` sem usá-lo no SQL.
 
+**Status (28/10/2026): resolvido.** `GetExpenseSummary`, `GetExpensesByStatus` e `GetExpensesByCategory` recebem os status por parâmetro (`nameof`), e o `@Today` passou a ser usado. O `GetAllExpenses` já interpolava `nameof`, que também quebra na compilação se o enum mudar.
+
 ### D14 — Resíduos no repositório
 
 - `.agents/skills/shadcn` e `.claude/skills/shadcn` são idênticos (46 arquivos versionados nas duas pastas). Prefira uma fonte única com link ou sincronização.
 - `AddHttpContextAccessor()` é chamado em `Startup` e em `TenancyFeature`. O `ApplyConfiguration` lista as configurações uma a uma; `ApplyConfigurationsFromAssembly` eliminaria o passo manual.
+
+**Status (28/10/2026): pendente, com um achado novo.**
+- `EstablishmentConfiguration` existe, mas não está na lista do `ApplicationDbContext`, então o `Establishment` é mapeado só por convenção (`trade_name` como `text`, sem limite).
+- Trocar para `ApplyConfigurationsFromAssembly` passaria a aplicá-la e mudaria o schema para `varchar(100)`, o que exige migração. É preciso decidir entre aplicar a configuração, com migração, ou apagá-la. Até lá, a lista explícita fica.
+- O `AddHttpContextAccessor()` repetido é idempotente e mantém a `TenancyFeature` autocontida, por isso ficou.
+- As skills duplicadas em `.agents` e `.claude` dependem das ferramentas de agentes que você usa, então não mexi.
 
 ## Dívidas aceitas e documentadas
 

@@ -29,7 +29,10 @@ jobs:
   code-analysis:
     name: Build, Test and Code Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     defaults:
       run:
@@ -71,8 +74,7 @@ jobs:
         run: dotnet restore
 
       - name: Begin SonarQube analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        if: env.SONAR_TOKEN != ''
         run: |
           dotnet sonarscanner begin \
             /k:"${{ env.SONAR_PROJECT_KEY }}" \
@@ -102,8 +104,10 @@ jobs:
             DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
       - name: End SonarQube analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        if: env.SONAR_TOKEN != ''
         run: |
           dotnet sonarscanner end \
             /d:sonar.token="${SONAR_TOKEN}"
+
+      - name: Build Docker image
+        run: docker build --file src/Devlivery/Dockerfile --tag devlivery-api:ci .
