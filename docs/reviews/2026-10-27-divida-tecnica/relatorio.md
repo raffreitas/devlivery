@@ -31,7 +31,7 @@ Foram identificados **14 itens**: 3 de prioridade alta, 7 de prioridade média e
 | D04 | Média | Testes | Consultas quase sem testes de handler; web sem cobertura medida (**resolvido**) |
 | D05 | Média | API / HTTP | Middleware de tenant com rotas públicas fixas e 401 fora do padrão (**resolvido**) |
 | D06 | Média | API / Config | CORS lê variável de ambiente diretamente e tem fallback silencioso (**resolvido**) |
-| D07 | Média | Web / Arquitetura | `shared` depende de `features/auth`; token lido em dois lugares |
+| D07 | Média | Web / Arquitetura | `shared` depende de `features/auth`; token lido em dois lugares (**resolvido, com ressalvas**) |
 | D08 | Média | Web / Contrato | Tipos do contrato HTTP duplicados à mão, sem geração a partir do OpenAPI |
 | D09 | Média | Web / Componentes | Componentes de formulário e lista acima de 350 linhas |
 | D10 | Média | API / Build | Pacotes sem uso e ausência de política de analyzers/warnings |
@@ -155,6 +155,13 @@ O ADR-002 já aceita o filtro explícito no SQL Dapper como consequência da dec
 - O JWT não tem renovação. Ao expirar (`ExpirationInMinutes`), o atendente é levado ao login no meio do turno e um formulário aberto pode ser perdido. É uma decisão de produto/segurança que convém registrar.
 
 **Correção sugerida:** mover o armazenamento da sessão para `shared` (ex.: `shared/services/auth-storage.ts`), consumido pela feature e pelo cliente HTTP.
+
+**Status (28/10/2026): resolvido no escopo do armazenamento.**
+- `shared/services/auth-storage.ts` concentra a chave, a leitura, a escrita e a limpeza da sessão, além dos tipos `SessionUser` e `StoredAuth`. A feature reexporta esses tipos como `User` e `AuthState`.
+- `api.ts` e `auth-service.ts` usam esse módulo, e o `api.ts` não importa mais a feature.
+- Um teste novo em `api.test.ts` confirma que o token salvo vai no header `Authorization` e que o header sai quando não há sessão.
+- Dois imports de `shared` para `features` continuam: `shared/contexts/auth-context.tsx` usa o hook de login da feature (`useAuthQuery`), e `shared/constants/ui-styles.ts` usa o tipo `PaymentMethod` de pedidos. Não movi o contexto para a feature porque `layout`, `require-auth` e `navbar-user-section`, que estão em `shared`, consomem a sessão.
+- A expiração do JWT sem renovação continua sendo uma decisão de produto em aberto. Vale registrar numa issue.
 
 ### D08 — Contrato HTTP duplicado à mão
 

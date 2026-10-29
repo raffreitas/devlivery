@@ -8,7 +8,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import { AuthProvider } from "@/shared/contexts/auth-context";
 import { authEvents } from "@/shared/services/auth-events";
-import { AUTH_STORAGE_KEY } from "../services/auth-service";
+import { AUTH_STORAGE_KEY } from "@/shared/services/auth-storage";
 import { LoginPage } from "./login-page";
 
 const url = "http://localhost:5000/api/v1/auth/login";

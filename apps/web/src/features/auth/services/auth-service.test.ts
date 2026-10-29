@@ -2,7 +2,8 @@ import { server } from "@test/server";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 import { UnauthorizedError } from "@/shared/services/api";
-import { AUTH_STORAGE_KEY, authService } from "./auth-service";
+import { AUTH_STORAGE_KEY } from "@/shared/services/auth-storage";
+import { authService } from "./auth-service";
 
 const url = "http://localhost:5000/api/v1/auth/login";
 const credentials = { email: "maria@pizzaria.com", password: "segredo" };

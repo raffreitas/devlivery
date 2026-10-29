@@ -1,6 +1,6 @@
 import axios, { type AxiosError } from "axios";
 import { env } from "@/env";
-import { AUTH_STORAGE_KEY } from "@/features/auth/services/auth-service";
+import { readAuth } from "./auth-storage";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -79,17 +79,6 @@ export function shouldRetryQuery(failureCount: number, error: Error): boolean {
   );
 }
 
-function getAuthToken(): string | null {
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { token: string | null };
-    return parsed.token ?? null;
-  } catch {
-    return null;
-  }
-}
-
 const axiosInstance = axios.create({
   baseURL: `${env.VITE_API_URL.replace(/\/$/, "")}/api/v1`,
   transitional: { clarifyTimeoutError: true },
@@ -114,7 +103,7 @@ async function request<T>(
   const isSafe =
     !options.method || options.method === "GET" || options.idempotent === true;
 
-  const token = getAuthToken();
+  const { token } = readAuth();
   const headers: Record<string, string> = {
     ...(options.headers ?? {}),
   };
