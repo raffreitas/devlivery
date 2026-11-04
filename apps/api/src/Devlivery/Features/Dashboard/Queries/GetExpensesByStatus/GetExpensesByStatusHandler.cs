@@ -4,7 +4,7 @@ using Dapper;
 
 using Devlivery.Common.Handlers;
 using Devlivery.Common.Time;
-using Devlivery.Domain.Aggregates.Expenses.Enums;
+using Devlivery.Features.Dashboard.Common;
 using Devlivery.Features.Expenses.Queries.GetAllExpenses;
 using Devlivery.Infrastructure.Persistence.Abstractions;
 using Devlivery.Infrastructure.Tenancy;
@@ -25,7 +25,7 @@ public sealed class GetExpensesByStatusHandler(
     {
         var today = timeProvider.GetBrazilToday();
 
-        const string sql = """
+        const string sql = $"""
             select
                 case
                     when e.status = @Paid then @PaidDisplay
@@ -36,20 +36,13 @@ public sealed class GetExpensesByStatusHandler(
                 count(*)::int as "Count",
                 sum(e.amount) as "Total"
             from public.expenses e
-            where e.establishment_id = @EstablishmentId
-            and e.status != @Cancelled
-            and (@StartDate is null or (case when e.status = @Paid then e.payment_date else e.due_date end) >= @StartDate)
-            and (@EndDate is null or (case when e.status = @Paid then e.payment_date else e.due_date end) <= @EndDate)
+            {ExpenseDashboardQuery.WhereClause}
             group by 1
             """;
 
-        var parameters = new DynamicParameters();
-        parameters.Add("EstablishmentId", tenantAccessor.Tenant.Id, DbType.Guid);
-        parameters.Add("StartDate", query.StartDate, DbType.Date);
-        parameters.Add("EndDate", query.EndDate, DbType.Date);
+        var parameters = ExpenseDashboardQuery.CreateParameters(
+            tenantAccessor.Tenant.Id, query.StartDate, query.EndDate);
         parameters.Add("Today", today, DbType.Date);
-        parameters.Add("Paid", nameof(ExpenseStatus.Paid));
-        parameters.Add("Cancelled", nameof(ExpenseStatus.Cancelled));
         parameters.Add("PaidDisplay", nameof(ExpenseDisplayStatus.Paid));
         parameters.Add("OverdueDisplay", nameof(ExpenseDisplayStatus.Overdue));
         parameters.Add("DueTodayDisplay", nameof(ExpenseDisplayStatus.DueToday));

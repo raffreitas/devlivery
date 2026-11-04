@@ -1,9 +1,7 @@
-using System.Data;
-
 using Dapper;
 
 using Devlivery.Common.Handlers;
-using Devlivery.Domain.Aggregates.Expenses.Enums;
+using Devlivery.Features.Dashboard.Common;
 using Devlivery.Infrastructure.Persistence.Abstractions;
 using Devlivery.Infrastructure.Tenancy;
 
@@ -20,27 +18,20 @@ public sealed class GetExpensesByCategoryHandler(
         GetExpensesByCategoryQuery query,
         CancellationToken cancellationToken)
     {
-        const string sql = """
+        const string sql = $"""
             select 
                 coalesce(ecp.name, ec.name) as "CategoryName",
                 sum(e.amount) as "Total"
             from public.expenses e
             join public.expense_categories ec on ec.id = e.category_id
             left join public.expense_categories ecp on ecp.id = ec.parent_category_id
-            where e.establishment_id = @EstablishmentId
-            and e.status != @Cancelled
-            and (@StartDate is null or (case when e.status = @Paid then e.payment_date else e.due_date end) >= @StartDate)
-            and (@EndDate is null or (case when e.status = @Paid then e.payment_date else e.due_date end) <= @EndDate)
+            {ExpenseDashboardQuery.WhereClause}
             group by coalesce(ecp.name, ec.name)
             order by sum(e.amount) desc
             """;
 
-        var parameters = new DynamicParameters();
-        parameters.Add("EstablishmentId", tenantAccessor.Tenant.Id, DbType.Guid);
-        parameters.Add("StartDate", query.StartDate, DbType.Date);
-        parameters.Add("EndDate", query.EndDate, DbType.Date);
-        parameters.Add("Paid", nameof(ExpenseStatus.Paid));
-        parameters.Add("Cancelled", nameof(ExpenseStatus.Cancelled));
+        var parameters = ExpenseDashboardQuery.CreateParameters(
+            tenantAccessor.Tenant.Id, query.StartDate, query.EndDate);
 
         await using var connection = await dbConnectionFactory.OpenConnectionAsync(cancellationToken);
         var categoryTotals = await connection.QueryAsync<(string CategoryName, decimal Total)>(sql, parameters);
