@@ -4,7 +4,7 @@ using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.Orders.Entities;
 
-public sealed class OrderPayment : Entity
+public sealed class OrderPayment : Entity, ITenantScoped
 {
     public Guid EstablishmentId { get; private set; }
     public PaymentMethod PaymentMethod { get; private set; }

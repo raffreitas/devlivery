@@ -15,13 +15,13 @@ Os testes devem proteger invariantes de domínio, comportamento dos casos de uso
 | Frontend | Cálculos, hooks, componentes e fluxos da interface | Vitest, Testing Library e MSW em jsdom |
 | Job de backup | Configuração, chaves dos objetos, retenção, orquestração, cliente R2 e `pg_dump` real | xUnit, NSubstitute e Testcontainers PostgreSQL 17 em `apps/backup/test/Devlivery.BackupJob.Tests` |
 
-O pacote `coverlet.collector` gera cobertura no CI e o SonarQube recebe o relatório. Não existe limite numérico de cobertura configurado; cobertura não substitui cenários de comportamento.
+No CI, o pacote `coverlet.collector` gera a cobertura da API, e o `@vitest/coverage-v8` gera a do web (`pnpm exec vitest run --coverage`, que grava `coverage/lcov.info`). O SonarQube recebe os dois relatórios; os componentes de `src/shared/components/ui/` ficam fora da medição, por virem do registro do shadcn. Não existe limite numérico de cobertura configurado; cobertura não substitui cenários de comportamento.
 
 ## Onde adicionar testes
 
 - Mudança em agregado ou Value Object: teste de domínio para sucesso, rejeição e fronteiras relevantes.
 - Mudança em comando, consulta ou validator: teste da classe correspondente, incluindo falhas esperadas.
-- Mudança em SQL, Dapper, mapeamento EF ou filtro de tenant: teste com PostgreSQL real via Testcontainers.
+- Mudança em SQL, Dapper, mapeamento EF ou filtro de tenant: teste com PostgreSQL real via Testcontainers. Uma nova rota de leitura entra também em `DashboardApiTests.TenantScopedReadRoutes`, que verifica se outro tenant a recebe como um tenant vazio. Uma nova entidade com `EstablishmentId` precisa implementar `ITenantScoped`; `TenantQueryFilterTests` falha se ela ficar sem filtro.
 - Mudança em autenticação, middleware, representação HTTP ou endpoint: teste de contrato HTTP em `Features/<Feature>/Api`.
 - Mudança no frontend: adicionar regressões de comportamento, executar testes, lint e build e verificar manualmente os fluxos afetados no navegador.
 
@@ -34,6 +34,10 @@ Os testes backend ficam em `apps/api/test/Devlivery.Tests` e espelham as feature
 - dados criados pelos builders de `Common/Builders` e mocks de tenant e operador por `Common/Mocks/TestMocks`;
 - validators testados com um caso válido e um `[Theory]` de casos inválidos derivados do comando válido com `with`;
 - não testar chamadas de mock que não representam efeito observável, mensagens de log ou código sem uso na aplicação.
+
+Os testes do frontend ficam ao lado do arquivo correspondente, com o mesmo nome-base: `money.test.ts`, `use-orders.test.tsx` e `products-page.test.tsx`. Use `.test.ts` sem JSX e `.test.tsx` com JSX; não use `.spec.*`. A infraestrutura compartilhada (setup, renderização com providers e servidor MSW) fica em `apps/web/test/`, fora de `src`, e usa o alias `@test/*`. Futuros testes ponta a ponta ficam em `apps/web/test/e2e/`, com configuração própria. Fixtures e handlers exclusivos de uma feature permanecem próximos dela.
+
+Cada teste usa um QueryClient isolado, sem retries, e handlers HTTP resetados entre cenários. Teste resultados observáveis, incluindo respostas atrasadas, falhas, preservação de preenchimento, mudanças de período e valores monetários. A CI executa a suíte com `pnpm test`.
 
 ## Verificação local
 
@@ -53,10 +57,6 @@ Os testes do exportador de backup executam o `pg_dump` real e são ignorados qua
 Testcontainers exige acesso ao daemon Docker. Uma falha ao iniciar o container é ambiental e não comprova falha da regra testada; registre a limitação se não for possível repetir a execução em ambiente válido.
 
 ## Critério de conclusão
-
-Os testes do frontend ficam ao lado do arquivo correspondente, com o mesmo nome-base: `money.test.ts`, `use-orders.test.tsx` e `products-page.test.tsx`. Use `.test.ts` sem JSX e `.test.tsx` com JSX; não use `.spec.*`. A infraestrutura compartilhada (setup, renderização com providers e servidor MSW) fica em `apps/web/test/`, fora de `src`, e usa o alias `@test/*`. Futuros testes ponta a ponta ficam em `apps/web/test/e2e/`, com configuração própria. Fixtures e handlers exclusivos de uma feature permanecem próximos dela.
-
-Cada teste usa um QueryClient isolado, sem retries, e handlers HTTP resetados entre cenários. Teste resultados observáveis, incluindo respostas atrasadas, falhas, preservação de preenchimento, mudanças de período e valores monetários. A CI executa a suíte com `pnpm test`.
 
 Uma mudança está verificada quando:
 

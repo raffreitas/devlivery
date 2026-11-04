@@ -3,6 +3,7 @@ import axios from "axios";
 import { delay, HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import { ApiError, api, shouldRetryQuery, UnauthorizedError } from "./api";
+import { clearAuth, writeAuth } from "./auth-storage";
 
 const url = "http://localhost:5000/api/v1/probe";
 
@@ -22,6 +23,23 @@ describe("api", () => {
       kind: "http",
     });
     await expect(api.get("/probe")).rejects.toBeInstanceOf(ApiError);
+  });
+
+  it("sends the stored session token and omits the header when signed out", async () => {
+    const authorizations: (string | null)[] = [];
+    server.use(
+      http.get(url, ({ request }) => {
+        authorizations.push(request.headers.get("Authorization"));
+        return HttpResponse.json({ data: null });
+      }),
+    );
+
+    writeAuth({ user: null, token: "jwt-token" });
+    await api.get("/probe");
+    clearAuth();
+    await api.get("/probe");
+
+    expect(authorizations).toEqual(["Bearer jwt-token", null]);
   });
 
   it("classifies unauthorized responses", async () => {

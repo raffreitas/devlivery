@@ -28,7 +28,8 @@ public sealed class CashSessionConfiguration : IEntityTypeConfiguration<CashSess
         builder.Property(x => x.EndAt).IsRequired(false);
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.UpdatedAt).IsRequired();
-        builder.Property<byte[]>("RowVersion").IsRowVersion().HasColumnName("row_version");
+        builder.Property<uint>("Version")
+            .IsRowVersion();
 
         builder.HasOne<Establishment>()
             .WithMany()

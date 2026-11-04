@@ -75,8 +75,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasIndex(x => x.EstablishmentId);
 
-        builder.Property<byte[]>("RowVersion")
-            .IsRowVersion()
-            .HasColumnName("row_version");
+        builder.Property<uint>("Version")
+            .IsRowVersion();
     }
 }

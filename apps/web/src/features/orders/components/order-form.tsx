@@ -8,8 +8,8 @@ import {
   Smartphone,
   Wallet,
 } from "lucide-react";
-import { useEffect, useId, useState } from "react";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useEffect, useId } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useProducts } from "@/features/products/hooks/use-products";
 import { FormError } from "@/shared/components/form-error";
 import { InputMoney } from "@/shared/components/input-money";
@@ -28,11 +28,12 @@ import {
   ToggleGroupItem,
 } from "@/shared/components/ui/toggle-group";
 import { applyFormError } from "@/shared/utils/form-errors";
-import { itemsSubtotal, moneyDifference, sumMoney } from "@/shared/utils/money";
 import {
   getPaymentOptionLabel,
   getPaymentOptions,
 } from "../constants/payment-methods";
+import { useOrderItems } from "../hooks/use-order-items";
+import { useOrderPayments } from "../hooks/use-order-payments";
 import {
   type OrderFormData,
   orderFormSchema,
@@ -65,14 +66,6 @@ export function OrderForm({
 }: OrderFormProps) {
   const formId = useId();
   const { products } = useProducts();
-  const recordedPrices = new Map(
-    initialData?.items.map((item) => [item.product.id, item.unitPrice]),
-  );
-  const [selectedProductId, setSelectedProductId] = useState<
-    string | undefined
-  >();
-  const [quantity, setQuantity] = useState(1);
-  const [notes, setNotes] = useState("");
 
   const form = useForm<OrderFormData>({
     resolver: zodResolver(orderFormSchema),
@@ -91,128 +84,38 @@ export function OrderForm({
     },
   });
 
-  const { fields, append, remove, update } = useFieldArray({
-    control: form.control,
-    name: "items",
-  });
+  const {
+    fields,
+    removeItem,
+    subtotal,
+    selectableProducts,
+    selectedProductId,
+    quantity,
+    notes,
+    setSelectedProductId,
+    setQuantity,
+    setNotes,
+    addSelectedItem,
+    hasPendingSelection,
+  } = useOrderItems(form, products, initialData?.items);
+
+  const {
+    paymentFields,
+    deliveryFee,
+    total,
+    remainingAmount,
+    hasElectronicExcess,
+    changePaymentMethods,
+  } = useOrderPayments(form, subtotal);
 
   const isDirty = form.formState.isDirty;
   useEffect(() => {
-    onDirtyChange?.(
-      isDirty || !!selectedProductId || quantity !== 1 || notes !== "",
-    );
-  }, [isDirty, selectedProductId, quantity, notes, onDirtyChange]);
-
-  const {
-    fields: paymentFields,
-    append: appendPayment,
-    remove: removePayment,
-  } = useFieldArray({
-    control: form.control,
-    name: "payments",
-  });
-
-  const handleAddItem = () => {
-    if (!selectedProductId) return;
-
-    const product = products.find((p) => p.id === selectedProductId);
-    if (!product) return;
-
-    const existingItemIndex = fields.findIndex(
-      (item) =>
-        item.product.id === selectedProductId &&
-        (item.notes?.trim() ?? "") === notes.trim(),
-    );
-
-    const productData = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      description: product.description,
-      category: product.category,
-      available: product.available,
-    };
-
-    if (existingItemIndex >= 0) {
-      const existingItem = fields[existingItemIndex];
-      update(existingItemIndex, {
-        product: productData,
-        unitPrice: existingItem.unitPrice,
-        quantity: existingItem.quantity + quantity,
-        notes: notes.trim() || undefined,
-      });
-    } else {
-      append({
-        product: productData,
-        unitPrice: recordedPrices.get(product.id) ?? product.price,
-        quantity,
-        notes: notes.trim() || undefined,
-      });
-    }
-
-    setSelectedProductId(undefined);
-    setQuantity(1);
-    setNotes("");
-  };
+    onDirtyChange?.(isDirty || hasPendingSelection);
+  }, [isDirty, hasPendingSelection, onDirtyChange]);
 
   const handlePlaceOrder = async (data: OrderFormData) => {
     await onSubmit(data);
   };
-
-  const handlePaymentMethodsChange = (values: string[]) => {
-    const methods = values as PaymentMethod[];
-    // Pelo menos uma forma de pagamento deve permanecer selecionada
-    if (methods.length === 0) return;
-
-    const removedIndex = paymentFields.findIndex(
-      (p) => !methods.includes(p.method),
-    );
-    if (removedIndex >= 0) {
-      removePayment(removedIndex);
-      return;
-    }
-
-    const added = methods.find(
-      (method) => !paymentFields.some((p) => p.method === method),
-    );
-    if (added) {
-      appendPayment({ method: added, amount: Math.max(0, remainingAmount) });
-    }
-  };
-
-  const deliveryFee =
-    useWatch({
-      control: form.control,
-      name: "deliveryFee",
-    }) ?? 0;
-
-  const payments = useWatch({
-    control: form.control,
-    name: "payments",
-  });
-
-  const subtotal = itemsSubtotal(fields);
-  const total = sumMoney([subtotal, deliveryFee]);
-  const totalPaid = sumMoney(
-    (payments ?? []).map((payment) => payment.amount || 0),
-  );
-  const electronicTotal = sumMoney(
-    (payments ?? [])
-      .filter((payment) => payment.method !== "Cash")
-      .map((payment) => payment.amount || 0),
-  );
-  const hasElectronicExcess = moneyDifference(electronicTotal, total) > 0;
-  const remainingAmount = moneyDifference(total, totalPaid);
-
-  useEffect(() => {
-    if (
-      paymentFields.length === 1 &&
-      payments?.[0]?.amount !== total &&
-      payments?.[0]?.method !== "Cash"
-    ) {
-      form.setValue(`payments.0.amount`, total, { shouldValidate: true });
-    }
-  }, [total, paymentFields.length, form, payments]);
 
   return (
     <form
@@ -345,19 +248,14 @@ export function OrderForm({
             </h3>
 
             <ProductSelector
-              products={products
-                .filter((p) => p.available)
-                .map((product) => ({
-                  ...product,
-                  price: recordedPrices.get(product.id) ?? product.price,
-                }))}
+              products={selectableProducts}
               selectedProductId={selectedProductId}
               quantity={quantity}
               notes={notes}
               onProductChange={setSelectedProductId}
               onQuantityChange={setQuantity}
               onNotesChange={setNotes}
-              onAddItem={handleAddItem}
+              onAddItem={addSelectedItem}
             />
           </div>
 
@@ -409,7 +307,7 @@ export function OrderForm({
               variant="outline"
               size="sm"
               value={paymentFields.map((p) => p.method)}
-              onValueChange={handlePaymentMethodsChange}
+              onValueChange={changePaymentMethods}
               aria-label="Formas de pagamento"
               className="flex-wrap"
             >
@@ -515,7 +413,7 @@ export function OrderForm({
             deliveryFee={deliveryFee}
             total={total}
             onRemoveItem={(index) => {
-              remove(index);
+              removeItem(index);
             }}
           />
           {form.formState.errors.items && (

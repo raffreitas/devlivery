@@ -16,45 +16,26 @@ public sealed class GetTopProductsHandler(ApplicationDbContext dbContext)
         GetTopProductsQuery query,
         CancellationToken cancellationToken)
     {
-        var ordersQuery = dbContext.Orders
+        var productSales = await dbContext.Orders
             .AsNoTracking()
-            .Include(o => o.Items)
-            .AsQueryable();
-
-        ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
-
-        ordersQuery = ordersQuery.Where(o => o.Status != OrderStatus.Canceled);
-
-        var orders = await ordersQuery.ToListAsync(cancellationToken);
-
-        var productIds = orders
-            .SelectMany(o => o.Items)
-            .Select(i => i.ProductId)
-            .Distinct()
-            .ToHashSet();
-
-        var products = await dbContext.Products
-            .AsNoTracking()
-            .Where(p => productIds.Contains(p.Id))
-            .ToListAsync(cancellationToken);
-
-        var productsDictionary = products.ToDictionary(p => p.Id, p => p);
-
-        var productSales = orders
+            .WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate)
+            .Where(o => o.Status != OrderStatus.Canceled)
             .SelectMany(o => o.Items)
             .GroupBy(i => i.ProductId)
-            .Select(g => new
-            {
-                ProductId = g.Key,
-                Quantity = g.Sum(i => i.Quantity)
-            })
-            .OrderByDescending(x => x.Quantity)
-            .ToList();
+            .Select(g => new { ProductId = g.Key, Quantity = g.Sum(i => i.Quantity) })
+            .ToListAsync(cancellationToken);
+
+        var productIds = productSales.Select(s => s.ProductId).ToList();
+
+        var productNames = await dbContext.Products
+            .AsNoTracking()
+            .Where(p => productIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id, p => p.Name, cancellationToken);
 
         var topProducts = productSales
-            .Select(x => new TopProductItem(
-                productsDictionary[x.ProductId].Name,
-                x.Quantity))
+            .Select(s => new TopProductItem(productNames[s.ProductId], s.Quantity))
+            .OrderByDescending(p => p.Quantity)
+            .ThenBy(p => p.Name)
             .ToList();
 
         var response = new GetTopProductsResponse(topProducts);

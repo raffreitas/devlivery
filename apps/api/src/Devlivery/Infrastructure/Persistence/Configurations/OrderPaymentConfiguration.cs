@@ -26,8 +26,7 @@ public sealed class OrderPaymentConfiguration : IEntityTypeConfiguration<OrderPa
 
         builder.HasIndex(x => x.EstablishmentId);
 
-        builder.Property<byte[]>("RowVersion")
-            .IsRowVersion()
-            .HasColumnName("row_version");
+        builder.Property<uint>("Version")
+            .IsRowVersion();
     }
 }

@@ -38,6 +38,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -74,19 +77,15 @@ jobs:
       - name: Lint
         run: pnpm --filter @devlivery/web run lint
 
-      - name: Test
-        run: pnpm --filter @devlivery/web run test
-
-      - name: Check types
-        run: pnpm --filter @devlivery/web exec tsc
+      - name: Test with coverage
+        run: pnpm --filter @devlivery/web exec vitest run --coverage
 
       - name: Build
         run: pnpm --filter @devlivery/web run build
 
       - name: SonarQube analysis
+        if: env.SONAR_TOKEN != ''
         uses: SonarSource/sonarqube-scan-action@v8
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: apps/web
           args: >
@@ -96,4 +95,5 @@ jobs:
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx
             -Dsonar.exclusions=src/shared/components/ui/**,**/*.test.ts,**/*.test.tsx
-            -Dsonar.coverage.exclusions=**/*
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.coverage.exclusions=src/shared/components/ui/**

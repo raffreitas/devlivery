@@ -195,6 +195,89 @@ public sealed class DashboardApiTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task GivenNoOrders_WhenGettingStatsAndBreakdowns_ThenReturnsZeroedResults()
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+
+        // Act
+        var stats = await ApiTenant.ReadDataAsync<GetDashboardStatsResponse>(
+            await tenant.Client.GetAsync("/api/v1/dashboard/stats"));
+        var byStatus = await ApiTenant.ReadDataAsync<GetOrdersByStatusResponse>(
+            await tenant.Client.GetAsync("/api/v1/dashboard/orders-by-status"));
+        var breakdown = await ApiTenant.ReadDataAsync<GetPaymentBreakdownResponse>(
+            await tenant.Client.GetAsync("/api/v1/dashboard/payment-breakdown"));
+        var sales = await ApiTenant.ReadDataAsync<GetSalesOverTimeResponse>(
+            await tenant.Client.GetAsync("/api/v1/dashboard/sales-over-time"));
+        var top = await ApiTenant.ReadDataAsync<GetTopProductsResponse>(
+            await tenant.Client.GetAsync("/api/v1/dashboard/top-products"));
+
+        // Assert
+        stats.ShouldBe(new GetDashboardStatsResponse(TotalOrders: 0, TotalRevenue: 0m, PendingOrders: 0,
+            DeliveredOrders: 0, AverageOrderValue: 0m));
+        byStatus.ShouldBe(new GetOrdersByStatusResponse(Pending: 0, Preparing: 0, Ready: 0, Delivered: 0, Canceled: 0));
+        breakdown.Breakdown.Values.ShouldAllBe(total => total == 0m);
+        breakdown.Breakdown.Count.ShouldBe(Enum.GetValues<PaymentMethod>().Length);
+        breakdown.Total.ShouldBe(0m);
+        sales.Data.ShouldBeEmpty();
+        top.Products.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task GivenDateRange_WhenGettingOrderDashboards_ThenUsesSaoPauloDayBoundaries()
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+        var pizza = await SeedProductAsync(tenant, "Pizza", 10m);
+        var soda = await SeedProductAsync(tenant, "Refrigerante", 5m);
+        await SeedOrderAsync(tenant, [(pizza, 1)], OrderStatus.Delivered,
+            Payment(tenant, PaymentMethod.Cash, 50m), createdAt: Utc(2026, 10, 14, 2, 59));
+        await SeedOrderAsync(tenant, [(pizza, 2)], OrderStatus.Delivered,
+            Payment(tenant, PaymentMethod.Cash, 50m), createdAt: Utc(2026, 10, 14, 3, 0));
+        await SeedOrderAsync(tenant, [(soda, 3)], OrderStatus.Delivered,
+            Payment(tenant, PaymentMethod.Pix, 15m), createdAt: Utc(2026, 10, 15, 2, 59));
+        await SeedOrderAsync(tenant, [(soda, 7)], OrderStatus.Pending,
+            Payment(tenant, PaymentMethod.Pix, 35m), createdAt: Utc(2026, 10, 15, 3, 0));
+        const string period = "?startDate=2026-10-14&endDate=2026-10-14";
+
+        // Act
+        var sales = await ApiTenant.ReadDataAsync<GetSalesOverTimeResponse>(
+            await tenant.Client.GetAsync($"/api/v1/dashboard/sales-over-time{period}"));
+        var top = await ApiTenant.ReadDataAsync<GetTopProductsResponse>(
+            await tenant.Client.GetAsync($"/api/v1/dashboard/top-products{period}"));
+        var breakdown = await ApiTenant.ReadDataAsync<GetPaymentBreakdownResponse>(
+            await tenant.Client.GetAsync($"/api/v1/dashboard/payment-breakdown{period}"));
+        var byStatus = await ApiTenant.ReadDataAsync<GetOrdersByStatusResponse>(
+            await tenant.Client.GetAsync($"/api/v1/dashboard/orders-by-status{period}"));
+
+        // Assert
+        sales.Data.ShouldBe([new SalesTimeSeriesItem("2026-10-14", 35m)]);
+        top.Products.ShouldBe([new TopProductItem("Refrigerante", 3), new TopProductItem("Pizza", 2)]);
+        breakdown.Breakdown[PaymentMethod.Cash].ShouldBe(20m);
+        breakdown.Breakdown[PaymentMethod.Pix].ShouldBe(15m);
+        breakdown.Total.ShouldBe(35m);
+        byStatus.ShouldBe(new GetOrdersByStatusResponse(Pending: 0, Preparing: 0, Ready: 0, Delivered: 2, Canceled: 0));
+    }
+
+    [Fact]
+    public async Task GivenChangeLargerThanConfirmedCash_WhenGettingPaymentBreakdown_ThenCashDoesNotGoNegative()
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+        var pizza = await SeedProductAsync(tenant, "Pizza", 30m);
+        await SeedOrderAsync(tenant, [(pizza, 1)], OrderStatus.Delivered, Payment(tenant, PaymentMethod.Cash, 50m));
+        await tenant.ExecuteSqlAsync($"update order_payments set amount = 10 where payment_method = 'Cash' and establishment_id = {tenant.EstablishmentId}");
+
+        // Act
+        var response = await tenant.Client.GetAsync("/api/v1/dashboard/payment-breakdown");
+
+        // Assert
+        var breakdown = await ApiTenant.ReadDataAsync<GetPaymentBreakdownResponse>(response);
+        breakdown.Breakdown[PaymentMethod.Cash].ShouldBe(0m);
+        breakdown.Total.ShouldBe(0m);
+    }
+
+    [Fact]
     public async Task GivenExpensesInEveryStatus_WhenGettingSummary_ThenSplitsPaidPendingAndOverdue()
     {
         // Arrange
@@ -315,6 +398,50 @@ public sealed class DashboardApiTests(ApiFactory api)
         var category = upcoming.Expenses[0].Category;
         category.Name.ShouldBe("Operacional");
         category.Subcategories.ShouldHaveSingleItem().Name.ShouldBe("Insumos");
+    }
+
+    public static TheoryData<string> TenantScopedReadRoutes => new()
+    {
+        "/api/v1/dashboard/stats",
+        "/api/v1/dashboard/orders-by-status",
+        "/api/v1/dashboard/payment-breakdown",
+        "/api/v1/dashboard/sales-over-time",
+        "/api/v1/dashboard/top-products",
+        "/api/v1/dashboard/expense-summary",
+        "/api/v1/dashboard/expenses-by-category",
+        "/api/v1/dashboard/expenses-by-status",
+        "/api/v1/dashboard/expenses-over-time",
+        "/api/v1/dashboard/upcoming-expenses?days=7",
+        "/api/v1/expenses"
+    };
+
+    [Theory]
+    [MemberData(nameof(TenantScopedReadRoutes))]
+    public async Task GivenDataInAnotherTenant_WhenReadingRoute_ThenRespondsAsAnEmptyTenant(string route)
+    {
+        // Arrange
+        var owner = await api.CreateTenantAsync();
+        var pizza = await SeedProductAsync(owner, "Pizza do outro tenant", 43.21m);
+        await SeedOrderAsync(owner, [(pizza, 2)], OrderStatus.Delivered, Payment(owner, PaymentMethod.Cash, 100m));
+        var category = await SeedCategoryAsync(owner, "Categoria do outro tenant");
+        await SeedExpenseAsync(owner, category, 12.34m, e => e.WithDueDate(Today).AsPaid(Today));
+        await SeedExpenseAsync(owner, category, 56.78m, e => e.WithDueDate(Today.AddDays(1)));
+        var intruder = await api.CreateTenantAsync();
+        var empty = await api.CreateTenantAsync();
+
+        // Act
+        var ownerResponse = await owner.Client.GetAsync(route);
+        var intruderResponse = await intruder.Client.GetAsync(route);
+        var emptyResponse = await empty.Client.GetAsync(route);
+
+        // Assert
+        new[] { ownerResponse, intruderResponse, emptyResponse }
+            .ShouldAllBe(response => response.StatusCode == HttpStatusCode.OK);
+        var ownerBody = await ownerResponse.Content.ReadAsStringAsync();
+        var intruderBody = await intruderResponse.Content.ReadAsStringAsync();
+        var emptyBody = await emptyResponse.Content.ReadAsStringAsync();
+        ownerBody.ShouldNotBe(emptyBody);
+        intruderBody.ShouldBe(emptyBody);
     }
 
     private static DateTime Utc(int year, int month, int day, int hour, int minute) =>

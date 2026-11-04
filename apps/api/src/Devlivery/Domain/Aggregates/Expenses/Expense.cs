@@ -3,7 +3,7 @@ using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.Expenses;
 
-public sealed class Expense : Entity
+public sealed class Expense : Entity, ITenantScoped
 {
     public Guid CategoryId { get; private set; }
     public Guid EstablishmentId { get; private set; }

@@ -2,7 +2,7 @@ using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.Orders.Entities;
 
-public sealed class OrderItem : Entity
+public sealed class OrderItem : Entity, ITenantScoped
 {
     public Guid ProductId { get; private set; }
     public Guid EstablishmentId { get; private set; }

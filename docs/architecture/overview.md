@@ -29,13 +29,15 @@ Ambos devem receber suas migrações em cada publicação.
 
 ## Autenticação e tenancy
 
-O token JWT carrega `sub` e `establishment_id`. O middleware autentica a assinatura antes de registrar o tenant da requisição. Filtros globais do EF Core restringem entidades tenant-aware ao estabelecimento corrente.
+O token JWT carrega `sub` e `establishment_id`. O middleware autentica a assinatura antes de registrar o tenant da requisição. Entidades que pertencem a um estabelecimento implementam `ITenantScoped` (`Domain/SeedWork`), e o `ApplicationDbContext` aplica a todas elas, por convenção, um filtro global do EF Core para o estabelecimento corrente. Ler `ITenantAccessor.Tenant` sem tenant registrado lança exceção, em vez de consultar com um identificador vazio. Consultas que precisam atravessar tenants, como o login e o seed de desenvolvimento, usam `IgnoreQueryFilters()` explicitamente. SQL executado com Dapper não recebe esses filtros e deve filtrar `establishment_id`; os testes HTTP multi-tenant do dashboard e da listagem de despesas protegem essa regra.
 
 Handlers que registram autoria resolvem o usuário do token no banco, dentro do tenant, e não confiam em identificadores enviados pelo frontend. O domínio recebe somente o identificador já resolvido.
 
 ## Eventos e consistência
 
 Eventos de domínio são despachados pelo `UnitOfWork` antes da gravação, e as alterações dos handlers são persistidas no mesmo `SaveChanges` da operação que gerou os eventos. Os handlers de caixa decorrentes de pedidos executam dentro da requisição e recebem o contexto autenticado corrente. Se o processamento migrar para filas ou jobs, o autor e o tenant deverão ser transportados explicitamente no contrato do evento.
+
+Pedidos, pagamentos, sessões de caixa e movimentações usam concorrência otimista pela coluna de sistema `xmin` do PostgreSQL (`IsRowVersion()` em uma propriedade sombra `uint`). Quando outra operação altera a mesma linha entre a leitura e a gravação, o EF lança `DbUpdateConcurrencyException` e a API responde 409 com Problem Details. A verificação vale por linha: incluir apenas uma entidade filha, como uma nova movimentação, não altera o `xmin` do agregado pai.
 
 O banco é a fronteira de persistência compartilhada desta aplicação. Não há broker, cache distribuído ou limitador distribuído neste momento.
 

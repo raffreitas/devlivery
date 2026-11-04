@@ -7,7 +7,7 @@ using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.Orders;
 
-public sealed class Order : Entity
+public sealed class Order : Entity, ITenantScoped
 {
     private readonly List<OrderItem> _items = [];
     private readonly List<OrderPayment> _payments = [];

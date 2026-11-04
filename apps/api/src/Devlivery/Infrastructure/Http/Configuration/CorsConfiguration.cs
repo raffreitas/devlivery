@@ -1,14 +1,19 @@
-﻿namespace Devlivery.Infrastructure.Http.Configuration;
+﻿using Devlivery.Common.Extensions;
+
+namespace Devlivery.Infrastructure.Http.Configuration;
 
 public static class CorsConfiguration
 {
     private const string DefaultPolicyName = "DefaultCorsPolicy";
+    public const string AllowedOriginsKey = "ALLOWED_ORIGINS";
 
-    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services)
+    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS") ?? "http://localhost:5173";
+        var origins = configuration.GetValueOrThrow<string>(AllowedOriginsKey)
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        var origins = allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (origins.Length == 0)
+            throw new InvalidOperationException($"The value {AllowedOriginsKey} must list at least one origin");
 
         services.AddCors(options =>
         {
@@ -16,8 +21,7 @@ public static class CorsConfiguration
             {
                 policy.WithOrigins(origins)
                     .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+                    .AllowAnyMethod();
             });
         });
 

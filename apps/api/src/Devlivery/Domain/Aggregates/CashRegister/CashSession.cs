@@ -5,7 +5,7 @@ using Devlivery.Domain.SeedWork;
 
 namespace Devlivery.Domain.Aggregates.CashRegister;
 
-public sealed class CashSession : Entity
+public sealed class CashSession : Entity, ITenantScoped
 {
     private readonly List<CashSessionMovement> _movements = [];
 

@@ -16,23 +16,23 @@ public sealed class GetDashboardStatsHandler(ApplicationDbContext dbContext)
         GetDashboardStatsQuery query,
         CancellationToken cancellationToken)
     {
-        var ordersQuery = dbContext.Orders
+        var totalsByStatus = await dbContext.Orders
             .AsNoTracking()
-            .AsQueryable();
+            .WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate)
+            .GroupBy(o => o.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count(), Revenue = g.Sum(o => o.Total) })
+            .ToListAsync(cancellationToken);
 
-        ordersQuery = ordersQuery.WhereDateInRange(o => o.CreatedAt, query.StartDate, query.EndDate);
+        var validTotals = totalsByStatus.Where(t => t.Status != OrderStatus.Canceled).ToList();
 
-        var orders = await ordersQuery.ToListAsync(cancellationToken);
-
-        var validOrders = orders.Where(o => o.Status != OrderStatus.Canceled).ToList();
-
-        var totalOrders = validOrders.Count;
-        var totalRevenue = validOrders.Sum(o => o.Total);
-        var pendingOrders = orders.Count(o =>
-            o.Status == OrderStatus.Pending ||
-            o.Status == OrderStatus.Preparing ||
-            o.Status == OrderStatus.Ready);
-        var deliveredOrders = orders.Count(o => o.Status == OrderStatus.Delivered);
+        var totalOrders = validTotals.Sum(t => t.Count);
+        var totalRevenue = validTotals.Sum(t => t.Revenue);
+        var pendingOrders = totalsByStatus
+            .Where(t => t.Status is OrderStatus.Pending or OrderStatus.Preparing or OrderStatus.Ready)
+            .Sum(t => t.Count);
+        var deliveredOrders = totalsByStatus
+            .Where(t => t.Status == OrderStatus.Delivered)
+            .Sum(t => t.Count);
         var averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
         var response = new GetDashboardStatsResponse(

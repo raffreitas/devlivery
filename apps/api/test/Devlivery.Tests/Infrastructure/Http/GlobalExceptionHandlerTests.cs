@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -44,6 +45,7 @@ public sealed class GlobalExceptionHandlerTests : IDisposable
         { new DomainException("Este caixa já está fechado."), StatusCodes.Status422UnprocessableEntity, LogLevel.Warning },
         { new BadHttpRequestException("JSON inválido"), StatusCodes.Status400BadRequest, LogLevel.Warning },
         { new UnauthorizedAccessException(), StatusCodes.Status401Unauthorized, LogLevel.Warning },
+        { new DbUpdateConcurrencyException("Conflito"), StatusCodes.Status409Conflict, LogLevel.Warning },
         { new InvalidOperationException("Falha inesperada"), StatusCodes.Status500InternalServerError, LogLevel.Error }
     };
 

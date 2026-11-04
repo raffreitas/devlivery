@@ -54,7 +54,7 @@ public static class Startup
         services.AddCashRegisterFeature();
         services.AddExpenseFeature();
 
-        services.AddCorsConfiguration();
+        services.AddCorsConfiguration(configuration);
 
         builder.AddObservabilityFeature();
     }
