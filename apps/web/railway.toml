@@ -1,0 +1,4 @@
+[build]
+builder = "RAILPACK"
+buildCommand = "pnpm --filter @devlivery/web run build"
+watchPatterns = ["/apps/web/**", "/package.json", "/pnpm-lock.yaml", "/pnpm-workspace.yaml"]
