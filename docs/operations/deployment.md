@@ -10,6 +10,7 @@ O frontend usa o workspace pnpm e o `pnpm-lock.yaml` da raiz do repositório. No
 | --- | --- |
 | Root Directory | `/` (raiz do repositório) |
 | Railway Config File | `/apps/web/railway.toml` |
+| Custom Build Command | `pnpm --filter @devlivery/web run build` |
 | `RAILPACK_SPA_OUTPUT_DIR` | `apps/web/dist` |
 | `VITE_API_URL` | Origem HTTPS pública da API, sem `/api/v1` e sem barra final |
 | Custom Start Command | Deixe vazio para usar o Caddy do Railpack |
@@ -17,6 +18,8 @@ O frontend usa o workspace pnpm e o `pnpm-lock.yaml` da raiz do repositório. No
 O arquivo `apps/web/railway.toml` define o build do pacote web e os caminhos que disparam deploy, incluindo o lockfile compartilhado. O Railpack detecta pnpm pelo lockfile da raiz, instala com `--frozen-lockfile` e usa Node.js 24 e pnpm 10 conforme `engines` no `package.json` da raiz. `RAILPACK_SPA_OUTPUT_DIR` ativa a publicação estática com fallback para `index.html`, necessário às rotas do React Router.
 
 Não use `/apps/web` como Root Directory: essa configuração exclui o lockfile e o manifesto do workspace do contexto de build. Adicionar apenas `packageManager` ao pacote web não torna esses arquivos acessíveis. Mantenha `vitest` e `@vitest/coverage-v8` na mesma versão exata ao atualizá-los e atualize o lockfile junto.
+
+O script `build` do `package.json` da raiz também encaminha para o pacote web, permitindo que o Railpack detecte o build padrão mesmo quando o arquivo de configuração do serviço não for aplicado. Se a cópia de `apps/web/dist` falhar com `not found` e não houver execução do build nos logs, confira o Custom Build Command e o caminho do Railway Config File antes de tentar novamente.
 
 Depois de publicar essas alterações e aplicar as configurações do serviço, faça um novo deploy. Confira nos logs a instalação via pnpm com lockfile, o comando `pnpm --filter @devlivery/web run build` e a geração de `apps/web/dist`. Valide a página inicial e o acesso direto a uma rota da aplicação. `VITE_API_URL` é incorporada durante o build; sua alteração exige novo build.
 
