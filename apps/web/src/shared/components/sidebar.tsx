@@ -37,7 +37,7 @@ export function Sidebar({ onLogout }: { onLogout: () => Promise<void> }) {
                 className="flex size-8 shrink-0 items-center justify-center rounded-md bg-sidebar-accent font-bold text-sidebar-accent-foreground"
                 aria-hidden="true"
               >
-                D<span className="text-primary">.</span>
+                D<span className="text-primary-text">.</span>
               </span>
               <Brand />
             </SidebarMenuButton>

@@ -129,7 +129,9 @@ export function CashSessionEntries({ sessionId }: { sessionId: string }) {
                         "text-right font-medium tabular-nums",
                         entry.signedAmount < 0
                           ? "text-destructive"
-                          : "text-success",
+                          : entry.signedAmount > 0
+                            ? "text-success"
+                            : "text-muted-foreground",
                       )}
                     >
                       {entry.signedAmount < 0 ? "−" : "+"}{" "}

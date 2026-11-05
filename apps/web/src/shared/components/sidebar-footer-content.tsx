@@ -63,10 +63,7 @@ export function SidebarFooterContent({
               {isLoading ? (
                 <Spinner aria-hidden="true" />
               ) : error ? (
-                <CircleAlert
-                  aria-hidden="true"
-                  className="text-muted-foreground"
-                />
+                <CircleAlert aria-hidden="true" className="text-destructive" />
               ) : currentSession ? (
                 <span
                   aria-hidden="true"

@@ -25,7 +25,7 @@ O app é feito com **shadcn/ui no estilo base-vega** (Base UI por baixo). As cor
 
 - **Dois temas completos.** Escuro é o padrão do produto (operação à noite, tela ligada o turno todo); claro tem os mesmos papéis e o mesmo contraste. O usuário escolhe na sidebar; o app guarda a escolha. No código: claro em `:root`, escuro em `.dark`, como o shadcn.
 - Texto `foreground` em qualquer superfície; secundário `muted-foreground` (≥4.7:1 em todas, nos dois temas).
-- Botão primário `primary` com texto `primary-foreground` (escuro nos dois temas). Branco sobre o laranja não passa contraste. Laranja como texto ou link: `primary-text`. Seleção: `primary-soft`.
+- Botão primário usa `primary` com texto `primary-foreground`, conforme o par definido no tema. Laranja como texto, link ou detalhe da marca usa `primary-text`, que mantém contraste sobre superfícies claras e escuras. `sidebar-primary` possui seu próprio par `sidebar-primary-foreground`; não use a cor de fundo de botão como cor de texto. Seleção da navegação usa `sidebar-accent`.
 - Bordas: `border` decorativa; `input` em campos e controles (≥3:1). Foco: `ring`.
 - Status do pedido: Pendente `status-pending`, Em preparo `status-preparing` (o próprio `primary`), Pronto e Saiu para entrega `status-ready`/`status-out` (`info`), Entregue `status-delivered` (`success`), Cancelado `status-canceled`.
 - Formas de pagamento são texto `muted-foreground` com ícone (ícone da forma de pagamento), sem cor própria.
@@ -56,7 +56,7 @@ O app é feito com **shadcn/ui no estilo base-vega** (Base UI por baixo). As cor
 
 - Lucide, traço 1.5px, 16px na interface e 14px em linhas e cards, na cor do texto ao lado (`muted-foreground` por padrão).
 - Ícones de status e pagamento são os do sistema (ícone de status e ícone da forma de pagamento).
-- Logotipo: "Devlivery" em Geist 700 com o ponto final em `primary`.
+- Logotipo: "Devlivery" em Geist 700 com o ponto final em `primary-text`.
 
 ## O que evitar
 
