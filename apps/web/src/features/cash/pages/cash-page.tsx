@@ -1,5 +1,6 @@
-import { Minus, Plus, TriangleAlert } from "lucide-react";
+import { History, Minus, Plus, TriangleAlert } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { LoadingOverlay } from "@/shared/components/loading";
 import { Modal } from "@/shared/components/modal";
 import { PageHeader } from "@/shared/components/page-header";
@@ -62,6 +63,14 @@ export function CashPage() {
               isFetching={overview.isFetching && !overview.isPending}
               position="inline"
             />
+            <Button
+              size="sm"
+              variant="ghost"
+              render={<Link to="/cash/history" />}
+            >
+              <History data-icon="inline-start" />
+              Histórico
+            </Button>
             {currentSession && (
               <>
                 <Button
@@ -103,6 +112,7 @@ export function CashPage() {
                 <div className="grid gap-3 sm:grid-cols-3">
                   <StatTile
                     label="Recebido no turno"
+                    emphasis
                     value={formatMoney(currentSession.totalRevenue)}
                     foot={`${currentSession.totalOrders} ${currentSession.totalOrders === 1 ? "pedido" : "pedidos"} com recebimento`}
                   />

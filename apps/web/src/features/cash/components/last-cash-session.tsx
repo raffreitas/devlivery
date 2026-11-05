@@ -1,7 +1,10 @@
 import { Wallet } from "lucide-react";
+import { Link } from "react-router-dom";
 import { StatTile } from "@/shared/components/stat-tile";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardHeader,
   CardTitle,
@@ -29,6 +32,15 @@ export function LastCashSession({
         <CardTitle>
           <h2>Último turno</h2>
         </CardTitle>
+        <CardAction>
+          <Button
+            size="sm"
+            variant="ghost"
+            render={<Link to="/cash/history" />}
+          >
+            Ver histórico
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent className="gap-4">
         {session ? (

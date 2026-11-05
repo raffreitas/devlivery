@@ -1,4 +1,4 @@
-using Asp.Versioning;
+using Devlivery.Infrastructure.Http.Filters;
 
 namespace Devlivery.Common.Endpoints;
 
@@ -23,7 +23,8 @@ public static class EndpointsRegistration
         {
             var api = app.NewVersionedApi()
                 .MapGroup("/api/v{version:apiVersion}")
-                .HasApiVersion(version.Key);
+                .HasApiVersion(version.Key)
+                .AddEndpointFilter<PaginationValidationFilter>();
 
             foreach (var endpoint in version)
             {

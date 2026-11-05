@@ -17,9 +17,6 @@ public sealed class GetCashMovementsHandler(ApplicationDbContext dbContext)
     public async Task<Result<PaginatedResult<GetCashMovementsResponse>>> HandleAsync(GetCashMovementsQuery query,
         CancellationToken cancellationToken)
     {
-        if (query.Page < 1 || query.PageSize is < 1 or > 100 || (long)(query.Page - 1) * query.PageSize > int.MaxValue)
-            return Result.Fail(new ValidationError("Página deve ser positiva e tamanho deve estar entre 1 e 100."));
-
         var session = await dbContext.CashSessions.AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == query.SessionId, cancellationToken);
         if (session is null) return Result.Fail(new NotFoundError("Caixa não encontrado."));

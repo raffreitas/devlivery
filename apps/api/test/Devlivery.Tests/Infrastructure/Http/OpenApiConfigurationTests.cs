@@ -74,7 +74,7 @@ public sealed class OpenApiConfigurationTests
         paths.ShouldNotContain("/api/v1/version-probe");
         var v2Json = await v2Document.Content.ReadFromJsonAsync<JsonElement>();
         v2Json.GetProperty("paths").EnumerateObject().Select(path => path.Name)
-            .ShouldBe(["/api/v2/version-probe", "/api/v2/cash-register/overview", "/api/v2/cash-register/sessions/{id}/movements"], ignoreOrder: true);
+            .ShouldBe(["/api/v2/version-probe", "/api/v2/cash-register/overview", "/api/v2/cash-register/sessions/{id}/movements", "/api/v2/cash-register/sessions", "/api/v2/cash-register/sessions/{id}"], ignoreOrder: true);
         json.GetProperty("components").GetProperty("securitySchemes")
             .GetProperty("Bearer").GetProperty("scheme").GetString().ShouldBe("bearer");
     }

@@ -19,6 +19,8 @@ public sealed class EndpointsRegistrationTests
     // Route table of the API: changing a route or tag here is a breaking change for the web app.
     private static readonly string[] ExpectedRoutes =
     [
+        "GET /api/v{version:apiVersion}/cash-register/sessions [CashRegister]",
+        "GET /api/v{version:apiVersion}/cash-register/sessions/{id:guid} [CashRegister]",
         "GET /api/v{version:apiVersion}/cash-register/overview [CashRegister]",
         "GET /api/v{version:apiVersion}/cash-register/sessions/{id:guid}/movements [CashRegister]",
         "DELETE /api/v{version:apiVersion}/expenses/categories/{categoryId:guid} [Expenses]",
@@ -88,8 +90,12 @@ public sealed class EndpointsRegistrationTests
                 var expectedVersion = endpoint.RoutePattern.RawText is
                     "/api/v{version:apiVersion}/cash-register/overview" or
                     "/api/v{version:apiVersion}/cash-register/sessions/{id:guid}/movements" ? 2 : 1;
-                version.Map(ApiVersionMapping.Explicit).SupportedApiVersions
-                    .ShouldBe([new ApiVersion(expectedVersion, 0)]);
+                var supported = version.Map(ApiVersionMapping.Explicit).SupportedApiVersions;
+                if (method == "GET" && endpoint.RoutePattern.RawText is
+                    "/api/v{version:apiVersion}/cash-register/sessions" or
+                    "/api/v{version:apiVersion}/cash-register/sessions/{id:guid}")
+                    supported.Single().ShouldBeOneOf(new ApiVersion(1, 0), new ApiVersion(2, 0));
+                else supported.ShouldBe([new ApiVersion(expectedVersion, 0)]);
                 return $"{method} {endpoint.RoutePattern.RawText} [{string.Join(",", tags)}]";
             });
 

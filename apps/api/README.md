@@ -77,3 +77,12 @@ Não salve connection strings, chaves JWT ou credenciais do R2 no repositório. 
 - [Publicação da API](../../docs/operations/deployment.md)
 - [Backup e recuperação](../../docs/operations/backup-and-restore.md)
 - [Segurança do login e do caixa](../../docs/operations/login-and-cash-security.md)
+
+## Histórico do caixa na v2
+
+`GET /api/v2/cash-register/sessions?start=YYYY-MM-DD&end=YYYY-MM-DD&page=1&pageSize=50`
+retorna `{ data: { sessions, summary }, meta }`. As datas são obrigatórias, inclusivas em São Paulo e filtram a abertura do turno. Os indicadores consolidam apenas turnos fechados em todo o intervalo; a lista inclui os abertos. Paginação padrão 50, máximo 100, ordenada por abertura e identificador decrescentes. Datas malformadas/ausentes e paginação inválida retornam 400; período invertido retorna 422. A paginação é vinculada por `PaginationParameters` e validada pelo filtro HTTP comum antes dos handlers.
+
+`GET /api/v2/cash-register/sessions/{id}` retorna a composição do turno (`CashSessionSummary`, incluindo `status`). O extrato reutiliza a rota v2 de movimentações. As leituras exigem autenticação, respeitam o tenant e retornam 404 para detalhes inexistentes ou de outro estabelecimento. Contratos e comandos v1 permanecem disponíveis, sem migração.
+
+Publicar a API com essas leituras antes de disponibilizar o frontend do histórico. Impressão, exportação e sangria ficam para entregas futuras.

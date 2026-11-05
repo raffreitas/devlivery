@@ -64,6 +64,15 @@ const router = createBrowserRouter([
                 }),
               },
               {
+                path: "cash/history",
+                handle: { fullBleed: true },
+                lazy: async () => ({
+                  Component: (
+                    await import("./features/cash/pages/cash-history-page")
+                  ).CashHistoryPage,
+                }),
+              },
+              {
                 path: "cash",
                 handle: { fullBleed: true },
                 lazy: async () => ({

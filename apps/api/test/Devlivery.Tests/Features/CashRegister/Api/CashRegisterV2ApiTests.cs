@@ -160,7 +160,7 @@ public sealed class CashRegisterV2ApiTests(ApiFactory api)
     [InlineData(0, 50)]
     [InlineData(1, 0)]
     [InlineData(1, 101)]
-    public async Task GivenInvalidPagination_WhenReadingLedger_ThenReturns422(int page, int pageSize)
+    public async Task GivenInvalidPagination_WhenReadingLedger_ThenReturns400(int page, int pageSize)
     {
         // Arrange
         var tenant = await api.CreateTenantAsync();
@@ -169,7 +169,7 @@ public sealed class CashRegisterV2ApiTests(ApiFactory api)
         var response = await tenant.Client.GetAsync($"/api/v2/cash-register/sessions/{Guid.NewGuid()}/movements?page={page}&pageSize={pageSize}");
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact]

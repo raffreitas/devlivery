@@ -7,6 +7,7 @@ namespace Devlivery.Features.CashRegister.Queries;
 
 public sealed record CashSessionSummary(
     Guid Id,
+    string Status,
     string Attendant,
     decimal OpeningAmount,
     decimal ExpectedCashAmount,
@@ -26,6 +27,7 @@ public sealed record CashSessionSummary(
 {
     public static CashSessionSummary FromDomain(CashSession session) => new(
         session.Id,
+        session.Status.ToString(),
         session.AttendantName,
         session.OpeningAmount,
         session.ExpectedCashAmount,

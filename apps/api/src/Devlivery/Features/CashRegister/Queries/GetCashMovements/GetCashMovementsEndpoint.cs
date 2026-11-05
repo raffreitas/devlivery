@@ -18,10 +18,10 @@ public sealed class GetCashMovementsEndpoint : IEndpoint
         app.MapGet("cash-register/sessions/{id:guid}/movements", Handle).WithTags(Tags.CashRegister)
             .Produces<ApiResource<GetCashMovementsResponse[]>>()
             .Produces<ApiProblemDetails>(StatusCodes.Status404NotFound)
-            .Produces<ApiProblemDetails>(StatusCodes.Status422UnprocessableEntity);
+            .Produces<ApiProblemDetails>(StatusCodes.Status400BadRequest);
 
-    private static async Task<IResult> Handle(Guid id, int? page, int? pageSize,
+    private static async Task<IResult> Handle(Guid id, [AsParameters] PaginationParameters pagination,
         IQueryHandler<GetCashMovementsQuery, Result<PaginatedResult<GetCashMovementsResponse>>> handler,
         CancellationToken ct) =>
-        (await handler.HandleAsync(new GetCashMovementsQuery(id, page ?? 1, pageSize ?? 50), ct)).ToOk();
+        (await handler.HandleAsync(new GetCashMovementsQuery(id, pagination.Page, pagination.PageSize), ct)).ToOk();
 }

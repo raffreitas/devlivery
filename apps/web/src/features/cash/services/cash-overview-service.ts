@@ -3,6 +3,7 @@ import type { PaymentMethodTotal } from "../types";
 
 export interface CashSessionSummary {
   id: string;
+  status: "Open" | "Closed";
   attendant: string;
   openingAmount: number;
   expectedCashAmount: number;

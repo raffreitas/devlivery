@@ -403,6 +403,7 @@ public sealed class DashboardApiTests(ApiFactory api)
     public static TheoryData<string> TenantScopedReadRoutes => new()
     {
         "/api/v2/cash-register/overview",
+        $"/api/v2/cash-register/sessions?start={Today:yyyy-MM-dd}&end={Today:yyyy-MM-dd}",
         "/api/v1/dashboard/stats",
         "/api/v1/dashboard/orders-by-status",
         "/api/v1/dashboard/payment-breakdown",

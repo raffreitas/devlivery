@@ -1,10 +1,14 @@
 import type { ReactNode } from "react";
+import { Fragment } from "react";
+import { Link } from "react-router-dom";
 import { useIsMobile } from "../hooks/use-mobile";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "./ui/breadcrumb";
 import { Separator } from "./ui/separator";
 import { SidebarTrigger, useSidebar } from "./ui/sidebar";
@@ -12,9 +16,11 @@ import { SidebarTrigger, useSidebar } from "./ui/sidebar";
 export function PageHeader({
   title,
   actions,
+  ancestors = [],
 }: {
   title: string;
   actions?: ReactNode;
+  ancestors?: { label: string; href: string }[];
 }) {
   const { open } = useSidebar();
   const isMobile = useIsMobile();
@@ -36,6 +42,16 @@ export function PageHeader({
         )}
         <Breadcrumb aria-label="Breadcrumb" className="min-w-0">
           <BreadcrumbList>
+            {ancestors.map((item) => (
+              <Fragment key={item.href}>
+                <BreadcrumbItem>
+                  <BreadcrumbLink render={<Link to={item.href} />}>
+                    {item.label}
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </Fragment>
+            ))}
             <BreadcrumbItem>
               <h1 className="text-sm font-semibold">
                 <BreadcrumbPage>{title}</BreadcrumbPage>

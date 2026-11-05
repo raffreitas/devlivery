@@ -25,6 +25,7 @@ const movementsUrl =
   "http://localhost:5000/api/v2/cash-register/sessions/session-1/movements";
 const session: CashSessionSummary = {
   id: "session-1",
+  status: "Open",
   attendant: "Ana Lima",
   openingAmount: 100,
   closingAmount: null,
