@@ -1,31 +1,30 @@
-import { Card, CardContent, CardDescription, CardHeader } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 
 export function StatTile({
   label,
   value,
   foot,
-  emphasis = false,
 }: {
   label: string;
   value: string;
   foot: string;
-  emphasis?: boolean;
 }) {
   return (
-    <Card size="sm" className="gap-1 rounded-lg bg-background shadow-none">
+    <Card size="sm">
       <CardHeader>
-        <CardDescription className="flex items-center gap-2">
-          {emphasis && (
-            <span aria-hidden="true" className="size-2 rounded-sm bg-primary" />
-          )}
-          {label}
-        </CardDescription>
-        <p className="text-metric leading-tight font-semibold tabular-nums">
+        <CardDescription>{label}</CardDescription>
+        <CardTitle className="font-semibold tracking-tight tabular-nums group-data-[size=sm]/card:text-2xl">
           {value}
-        </p>
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-meta text-muted-foreground">{foot}</p>
+        <p className="text-sm text-muted-foreground">{foot}</p>
       </CardContent>
     </Card>
   );

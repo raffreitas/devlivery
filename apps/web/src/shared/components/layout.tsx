@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/auth-context";
 import { useIsMobile } from "../hooks/use-mobile";
 import { NavbarBottom } from "./navbar-bottom";
 import { Sidebar } from "./sidebar";
-import { SidebarInset, SidebarProvider } from "./ui/sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "./ui/sidebar";
 
 const SIDEBAR_STORAGE_KEY = "devlivery@sidebar-expanded";
 function readSidebarPreference() {
@@ -74,6 +74,17 @@ export function Layout() {
     >
       {!isMobile && <Sidebar onLogout={onLogout} />}
       <SidebarInset className="min-w-0 md:border md:border-border md:bg-card">
+        {!fullBleed && !isMobile && (
+          <header className="flex min-h-13 items-center border-b px-4 py-2 md:px-6">
+            <SidebarTrigger
+              className="-ml-1"
+              aria-label={
+                expanded ? "Recolher navegação" : "Expandir navegação"
+              }
+              aria-expanded={expanded}
+            />
+          </header>
+        )}
         <div
           className={cn(
             "app-shell-content min-w-0 flex-1",

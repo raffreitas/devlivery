@@ -41,7 +41,6 @@ function renderLayout(path = "/orders") {
               <>
                 <PageHeader
                   title="Caixa"
-                  context="Fechado"
                   actions={<button type="button">Histórico de teste</button>}
                 />
                 <h2>Corpo do caixa</h2>
@@ -78,7 +77,14 @@ beforeEach(() => {
 });
 
 describe("Layout", () => {
-  it("renders the cash context and actions in one page header without an extra global strip", async () => {
+  it("offers the opening action in the closed cash indicator", () => {
+    renderLayout();
+    const indicator = screen.getByRole("link", { name: "Caixa fechado" });
+    expect(indicator).toHaveAttribute("href", "/cash");
+    expect(within(indicator).getByText("Abrir")).toBeVisible();
+  });
+
+  it("renders the breadcrumb, sidebar trigger and actions in one page header", async () => {
     renderLayout("/cash");
     const main = screen.getByRole("main");
     expect(main.querySelectorAll("header")).toHaveLength(1);
@@ -86,10 +92,13 @@ describe("Layout", () => {
       within(main).getByRole("heading", { name: "Caixa", level: 1 }),
     ).toBeVisible();
     const context = within(main).getByRole("navigation", {
-      name: "Contexto da página",
+      name: "Breadcrumb",
     });
-    expect(within(context).getByText("Fechado")).toBeVisible();
-    expect(within(context).getByText("/")).toBeInTheDocument();
+    expect(within(context).getByText("Caixa")).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(within(context).queryByText("Fechado")).not.toBeInTheDocument();
     expect(
       within(main).getByRole("button", { name: "Histórico de teste" }),
     ).toBeVisible();
@@ -97,7 +106,7 @@ describe("Layout", () => {
       screen
         .getByRole("button", { name: "Recolher navegação" })
         .closest("main"),
-    ).toBeNull();
+    ).toBe(main);
   });
   it("preserves destinations and marks nested routes without selecting the root", () => {
     renderLayout("/orders/123");
@@ -125,15 +134,22 @@ describe("Layout", () => {
       screen.getByRole("button", { name: "Recolher navegação" }),
     );
     expect(localStorage.getItem("devlivery@sidebar-expanded")).toBe("false");
+    expect(
+      screen.queryByRole("link", { name: "Caixa fechado" }),
+    ).not.toBeInTheDocument();
     first.unmount();
     renderLayout();
     expect(
       screen.getByRole("button", { name: "Expandir navegação" }),
     ).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("link", { name: "Caixa fechado" }),
+    ).not.toBeInTheDocument();
     await user.click(
       screen.getByRole("button", { name: "Expandir navegação" }),
     );
     expect(localStorage.getItem("devlivery@sidebar-expanded")).toBe("true");
+    expect(screen.getByRole("link", { name: "Caixa fechado" })).toBeVisible();
   });
 
   it("does not collapse while typing the native shortcut in a field", () => {

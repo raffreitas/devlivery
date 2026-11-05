@@ -22,9 +22,9 @@ Como montar os tipos de tela que se repetem no Devlivery. Cada padrão diz o com
 
 ## Cabeçalho das páginas
 
-- `PageHeader` compõe o `Breadcrumb` do shadcn: título, separador `/` e contexto à esquerda; ações disponíveis à direita. O cabeçalho fica no topo da superfície de conteúdo, com uma borda inferior contínua, sem uma segunda faixa global acima.
+- `PageHeader` compõe o `Breadcrumb` do shadcn com a página atual à esquerda e ações disponíveis à direita. O breadcrumb representa navegação, sem status operacional do caixa. O cabeçalho fica no topo da superfície de conteúdo, com uma borda inferior contínua, sem uma segunda faixa global acima.
 - A rota de Caixa declara `handle.fullBleed: true` para ocupar a largura da superfície, sem a margem ou o limite de largura das telas ainda não migradas. O corpo da página controla seu próprio padding. As próximas telas podem adotar o mesmo contrato durante a migração.
-- O controle de recolher/expandir fica no topo da sidebar. No Caixa, o contexto é Fechado ou Aberto às HH:mm por operador; a data completa de abertura permanece no título descritivo do contexto. Histórico e sangria serão adicionados quando seus fluxos estiverem integrados.
+- O controle de recolher/expandir fica no cabeçalho da superfície de conteúdo, com o `SidebarTrigger` padrão (ghost), seguido de separador vertical centralizado e breadcrumb. Nas telas ainda não migradas, o layout mantém o controle no topo do conteúdo. O status do caixa aparece no rodapé somente quando a sidebar está expandida.
 
 ## Diálogo de formulário
 

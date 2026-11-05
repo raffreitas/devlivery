@@ -26,7 +26,9 @@ O app usa o shadcn/ui no estilo `base-vega` (Base UI). As regras de manutenção
 | Gráficos | `ChartContainer` (`ui/chart`) | Regras em `web-ui.md`, seção Gráficos. |
 | Carregando | `LoadingState`, `Skeleton`, `Spinner` | Sem cor. |
 
-Ainda não instalados, adicionar com `pnpm dlx shadcn@latest add <nome>` quando a tela precisar: `kbd`, `command` (busca `Ctrl K`), `switch` (disponível para pedidos), `tooltip`, `empty` (estados vazios).
+Estados vazios usam `Empty`, `EmptyHeader`, `EmptyTitle` e `EmptyDescription`, com `EmptyMedia` quando um ícone ajudar a identificar o contexto.
+
+Ainda não instalados, adicionar com `pnpm dlx shadcn@latest add <nome>` quando a tela precisar: `kbd`, `command` (busca `Ctrl K`).
 
 ## Do Devlivery (em `src/shared/components/`)
 

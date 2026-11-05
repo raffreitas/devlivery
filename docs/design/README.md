@@ -2,6 +2,8 @@
 
 Referência visual da V2 do `apps/web`. Esta pasta guarda regras de aparência e interação e as telas que guiam a migração; protótipos não representam funcionalidade já implementada.
 
+A V2 renova todas as telas, seguindo as composições, tipografia, espaçamento e interações padrão do shadcn (`base-vega`) com as cores do Devlivery. Os protótipos orientam o novo layout e a hierarquia de informação; detalhes visuais antigos não precisam ser preservados quando divergirem dos componentes oficiais. Regras de negócio e contratos continuam preservados durante a migração.
+
 Acompanhe o trabalho no [épico da V2 #52](https://github.com/raffreitas/devlivery/issues/52), na [milestone v2.0.0](https://github.com/raffreitas/devlivery/milestone/1) e no [Devlivery Kanban](https://github.com/users/raffreitas/projects/1). O antigo `backlog-v2.md` foi migrado para issues com critérios de aceite e dependências. A fila e o status não são mantidos em Markdown.
 
 | Referência | Para que serve |

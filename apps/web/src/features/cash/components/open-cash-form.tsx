@@ -4,6 +4,7 @@ import { useId } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FormError } from "@/shared/components/form-error";
 import { InputMoney } from "@/shared/components/input-money";
+import { LoadingButton } from "@/shared/components/loading";
 import { Button } from "@/shared/components/ui/button";
 import {
   Field,
@@ -145,10 +146,14 @@ export function OpenCashForm({
                 Cancelar
               </Button>
             )}
-            <Button type="submit" disabled={isSubmitting} className="flex-1">
-              <Wallet data-icon="inline-start" />
-              {isSubmitting ? "Abrindo..." : "Abrir caixa"}
-            </Button>
+            <LoadingButton
+              type="submit"
+              isLoading={form.formState.isSubmitting || isSubmitting}
+              loadingText="Abrindo caixa…"
+              className="flex-1"
+            >
+              Abrir caixa
+            </LoadingButton>
           </Field>
         </FieldGroup>
       </fieldset>

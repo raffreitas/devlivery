@@ -11,7 +11,14 @@ import {
   AlertTitle,
 } from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import {
   Field,
   FieldError,
@@ -55,14 +62,16 @@ export function CloseCashForm({
   const difference = moneyDifference(counted, composition.expectedCashAmount);
 
   return (
-    <Card size="sm" className="gap-0 rounded-lg py-0 shadow-none">
-      <CardHeader className="flex flex-row items-center justify-between gap-2 border-b py-4">
-        <h2 className="text-ui font-semibold">Conferir e fechar</h2>
-        <span className="text-meta text-muted-foreground">
-          Passo {confirmed ? "2" : "1"} de 2
-        </span>
+    <Card size="sm">
+      <CardHeader>
+        <CardTitle>
+          <h2>Conferir e fechar</h2>
+        </CardTitle>
+        <CardAction>
+          <CardDescription>Passo {confirmed ? "2" : "1"} de 2</CardDescription>
+        </CardAction>
       </CardHeader>
-      <CardContent className="py-4">
+      <CardContent>
         <form
           onSubmit={form.handleSubmit(async (data) => {
             form.clearErrors();
@@ -81,7 +90,7 @@ export function CloseCashForm({
           })}
         >
           <fieldset disabled={busy} inert={busy} className="min-w-0">
-            <FieldGroup className="gap-4 *:data-[slot=field]:gap-2">
+            <FieldGroup className="gap-5 *:data-[slot=field]:gap-2">
               <FormError
                 message={form.formState.errors.root?.server?.message}
                 errorType={form.formState.errors.root?.server?.type}
@@ -89,7 +98,7 @@ export function CloseCashForm({
               {confirmed ? (
                 <>
                   <CashComposition {...composition} counted={counted} />
-                  <Alert role="status" className="bg-background">
+                  <Alert role="status">
                     <AlertTitle>
                       {difference === 0
                         ? "Caixa conferido"
@@ -141,7 +150,7 @@ export function CloseCashForm({
                 </>
               ) : (
                 <>
-                  <p className="text-ui">
+                  <p className="text-sm">
                     Conte o dinheiro da gaveta e informe o total. Cartão e Pix
                     não entram.
                   </p>
@@ -172,8 +181,8 @@ export function CloseCashForm({
                       </Field>
                     )}
                   />
-                  <Alert role="note" className="border-dashed bg-background">
-                    <LockKeyhole />
+                  <Alert role="note">
+                    <LockKeyhole aria-hidden="true" />
                     <AlertDescription>
                       O valor esperado aparece depois que você informar a
                       contagem.
@@ -186,7 +195,6 @@ export function CloseCashForm({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
                     onClick={() => {
                       setConfirmed(false);
                       form.clearErrors();

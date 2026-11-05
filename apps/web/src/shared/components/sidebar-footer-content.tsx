@@ -7,7 +7,12 @@ import { useTheme } from "@/shared/contexts/theme-context";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "./ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const openingTime = new Intl.DateTimeFormat("pt-BR", {
@@ -23,6 +28,7 @@ export function SidebarFooterContent({
 }) {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { open } = useSidebar();
   const { currentSession, isLoading, error } = useCurrentCashSession();
   const name = user?.name?.trim() || "Operador";
   const parts = name.split(/\s+/);
@@ -41,37 +47,47 @@ export function SidebarFooterContent({
     !isLoading && !error && currentSession
       ? openingTime.format(new Date(currentSession.startAt))
       : null;
+  const isClosed = !isLoading && !error && !currentSession;
 
   return (
     <>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            render={<Link to="/cash" />}
-            tooltip={since ? `${label}, desde ${since}` : label}
-            aria-label={since ? `${label}, desde ${since}` : label}
-            className="border border-sidebar-border bg-card"
-          >
-            <span
-              aria-hidden="true"
-              className={cn(
-                "size-2 shrink-0 rounded-full",
-                currentSession && !error && !isLoading
-                  ? "bg-success"
-                  : "bg-muted-foreground",
-              )}
-            />
-            <span className="flex-1 text-meta text-foreground group-data-[collapsible=icon]:sr-only">
-              {label}
-            </span>
-            {since && (
-              <span className="text-meta text-muted-foreground group-data-[collapsible=icon]:hidden">
-                desde {since}
+      {open && (
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link to="/cash" />}
+              tooltip={since ? `${label}, desde ${since}` : label}
+              aria-label={since ? `${label}, desde ${since}` : label}
+              className="border border-sidebar-border bg-card"
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "size-2 shrink-0 rounded-full",
+                  currentSession && !error && !isLoading
+                    ? "bg-success"
+                    : isClosed
+                      ? "border border-dashed border-muted-foreground"
+                      : "bg-muted-foreground",
+                )}
+              />
+              <span className="flex-1 text-meta text-foreground group-data-[collapsible=icon]:sr-only">
+                {label}
               </span>
-            )}
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
+              {since && (
+                <span className="text-meta text-muted-foreground group-data-[collapsible=icon]:hidden">
+                  desde {since}
+                </span>
+              )}
+              {isClosed && (
+                <span className="text-meta text-muted-foreground group-data-[collapsible=icon]:hidden">
+                  Abrir
+                </span>
+              )}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      )}
       <div className="flex min-w-0 items-center gap-1 group-data-[collapsible=icon]:flex-col">
         <div
           className="flex min-h-8 min-w-0 flex-1 items-center gap-2 px-2 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:px-0"

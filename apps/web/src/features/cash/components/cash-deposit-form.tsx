@@ -68,14 +68,12 @@ export function CashDepositForm({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={`${formId}-cash-deposit-amount`}>
-                  Valor do Aporte (R$){" "}
-                  <span className="text-destructive">*</span>
+                  Valor do aporte
                 </FieldLabel>
                 <InputMoney
                   {...field}
                   id={`${formId}-cash-deposit-amount`}
                   disabled={isLoading}
-                  placeholder="0.00"
                   aria-invalid={fieldState.invalid}
                   aria-describedby={
                     fieldState.invalid
@@ -99,13 +97,13 @@ export function CashDepositForm({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={`${formId}-cash-deposit-notes`}>
-                  Motivo ou Observações (Opcional)
+                  Observação (opcional)
                 </FieldLabel>
                 <Textarea
                   {...field}
                   id={`${formId}-cash-deposit-notes`}
                   disabled={isLoading}
-                  placeholder="Motivo do aporte (ex: Troco, Falta de dinheiro...)"
+                  placeholder="Ex.: dinheiro para troco"
                   className="resize-none"
                   rows={3}
                   aria-invalid={fieldState.invalid}
@@ -137,12 +135,12 @@ export function CashDepositForm({
             </Button>
             <LoadingButton
               type="submit"
-              isLoading={isLoading}
-              loadingText="Adicionando..."
+              isLoading={form.formState.isSubmitting || isLoading}
+              loadingText="Adicionando aporte…"
               variant="default"
               className="flex-1"
             >
-              Adicionar Aporte
+              Adicionar aporte
             </LoadingButton>
           </Field>
         </FieldGroup>

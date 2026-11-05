@@ -1,3 +1,4 @@
+import { Wallet } from "lucide-react";
 import { StatTile } from "@/shared/components/stat-tile";
 import {
   Card,
@@ -5,6 +6,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/shared/components/ui/empty";
 import { formatMoney } from "@/shared/utils/formatters";
 import type { CashSessionSummary } from "../services/cash-overview-service";
 import { formatCashDateTime } from "../utils/format-cash-date-time";
@@ -16,18 +24,20 @@ export function LastCashSession({
   session: CashSessionSummary | null;
 }) {
   return (
-    <Card size="sm" className="gap-0 py-0 shadow-none">
-      <CardHeader className="border-b py-4">
-        <CardTitle>Último turno</CardTitle>
+    <Card size="sm">
+      <CardHeader>
+        <CardTitle>
+          <h2>Último turno</h2>
+        </CardTitle>
       </CardHeader>
-      <CardContent className="gap-4 py-4">
+      <CardContent className="gap-4">
         {session ? (
           <>
             <div className="grid gap-3 sm:grid-cols-3">
               <StatTile
                 label="Recebido"
                 value={formatMoney(session.totalRevenue)}
-                foot={`${session.totalOrders} pedidos com recebimento`}
+                foot={`${session.totalOrders} ${session.totalOrders === 1 ? "pedido" : "pedidos"} com recebimento`}
               />
               <StatTile
                 label="Contado no fechamento"
@@ -56,7 +66,7 @@ export function LastCashSession({
                 }
               />
             </div>
-            <p className="flex flex-wrap justify-between gap-2 text-meta">
+            <p className="flex flex-wrap justify-between gap-2 text-sm">
               <span className="text-muted-foreground">Turno</span>
               <span>
                 {formatCashDateTime(session.startAt)} até{" "}
@@ -68,7 +78,7 @@ export function LastCashSession({
               {...session}
               counted={session.closingAmount ?? undefined}
             />
-            <div className="flex justify-between gap-3 text-ui">
+            <div className="flex justify-between gap-3 text-sm">
               <span>Diferença</span>
               <span
                 className={
@@ -83,16 +93,23 @@ export function LastCashSession({
               </span>
             </div>
             {session.notes && (
-              <p className="text-meta text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Observação do turno: {session.notes}
               </p>
             )}
           </>
         ) : (
-          <p className="py-6 text-ui text-muted-foreground">
-            Nenhum turno encerrado. O resumo aparecerá após o primeiro
-            fechamento.
-          </p>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Wallet aria-hidden="true" />
+              </EmptyMedia>
+              <EmptyTitle>Nenhum turno encerrado</EmptyTitle>
+              <EmptyDescription>
+                O resumo aparecerá após o primeiro fechamento.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
       </CardContent>
     </Card>

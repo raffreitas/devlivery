@@ -24,10 +24,6 @@ import type {
   CloseCashSessionFormData,
   CreateCashDepositFormData,
 } from "../types";
-import {
-  formatCashDateTime,
-  formatCashTime,
-} from "../utils/format-cash-date-time";
 
 export function CashPage() {
   const [depositModalOpen, setDepositModalOpen] = useState(false);
@@ -60,28 +56,6 @@ export function CashPage() {
     <div className="flex min-w-0 flex-col">
       <PageHeader
         title="Caixa"
-        context={
-          overview.data && !overview.error ? (
-            <span className="inline-flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className={
-                  currentSession
-                    ? "size-2 rounded-full bg-success"
-                    : "size-2 rounded-full border border-dashed border-muted-foreground"
-                }
-              />
-              {currentSession ? (
-                <span title={formatCashDateTime(currentSession.startAt)}>
-                  Aberto às {formatCashTime(currentSession.startAt)} por{" "}
-                  {currentSession.attendant}
-                </span>
-              ) : (
-                "Fechado"
-              )}
-            </span>
-          ) : undefined
-        }
         actions={
           <>
             <LoadingOverlay
@@ -130,8 +104,7 @@ export function CashPage() {
                   <StatTile
                     label="Recebido no turno"
                     value={formatMoney(currentSession.totalRevenue)}
-                    foot={`${currentSession.totalOrders} pedidos com recebimento`}
-                    emphasis
+                    foot={`${currentSession.totalOrders} ${currentSession.totalOrders === 1 ? "pedido" : "pedidos"} com recebimento`}
                   />
                   <StatTile label="Sangrias" value="—" foot="Em breve" />
                   <StatTile
@@ -141,7 +114,7 @@ export function CashPage() {
                         ? formatMoney(overview.data.receivableCash.amount)
                         : "—"
                     }
-                    foot={`${overview.data?.receivableCash?.orderCount ?? 0} pedidos com dinheiro a receber`}
+                    foot={`${overview.data?.receivableCash?.orderCount ?? 0} ${overview.data?.receivableCash?.orderCount === 1 ? "pedido" : "pedidos"} com dinheiro a receber`}
                   />
                 </div>
                 <div className="grid items-start gap-4 xl:grid-cols-3">
@@ -150,7 +123,7 @@ export function CashPage() {
                       key={`${currentSession.id}:${overview.dataUpdatedAt}`}
                       sessionId={currentSession.id}
                     />
-                    <p className="text-meta text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       A receber é uma previsão de dinheiro líquido, incluindo
                       pedidos criados sem caixa. Só recebimentos confirmados
                       nesta sessão compõem o fechamento.
@@ -166,15 +139,14 @@ export function CashPage() {
               </div>
             ) : (
               <div className="grid items-start gap-4 lg:grid-cols-5">
-                <Card
-                  size="sm"
-                  className="gap-0 rounded-lg py-0 shadow-none lg:col-span-2"
-                >
-                  <CardHeader className="border-b py-4">
-                    <CardTitle>Abrir caixa</CardTitle>
+                <Card size="sm" className="lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle>
+                      <h2>Abrir caixa</h2>
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="gap-4 py-4">
-                    <Alert role="note" className="bg-background">
+                  <CardContent className="gap-4">
+                    <Alert role="note">
                       <TriangleAlert
                         aria-hidden="true"
                         className="text-warning"
@@ -190,7 +162,7 @@ export function CashPage() {
                       }}
                       isSubmitting={isOpening}
                     />
-                    <p className="text-meta text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       O turno será aberto em nome do operador autenticado.
                     </p>
                   </CardContent>

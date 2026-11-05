@@ -78,7 +78,7 @@ describe("SidebarFooterContent", () => {
     expect(screen.queryByText("Caixa fechado")).not.toBeInTheDocument();
   });
 
-  it("keeps cash, logout and theme accessible when collapsed", async () => {
+  it("hides the cash indicator and keeps logout and theme accessible when collapsed", async () => {
     server.use(http.get(url, () => new HttpResponse(null, { status: 404 })));
     const user = userEvent.setup();
     renderWithProviders(
@@ -87,8 +87,8 @@ describe("SidebarFooterContent", () => {
       </SidebarProvider>,
     );
     expect(
-      await screen.findByRole("link", { name: "Caixa fechado" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("link", { name: "Caixa fechado" }),
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Alternar tema" }),
     ).toBeInTheDocument();

@@ -69,6 +69,12 @@ Referências: [estilos do shadcn](https://ui.shadcn.com/docs/changelog/2025-12-s
 
 ## Verificação de regressões
 
+### Tabela e tipografia do caixa
+
+- As telas de caixa aberto e fechado usam a tipografia padrão dos componentes shadcn: `Table` em `text-sm`, cabeçalhos e espaçamento de linhas oficiais, sem sobrescrever a altura das linhas. Preserve somente o alinhamento, a quebra de referências longas e as cores semânticas dos valores.
+- Use `CardTitle` e `CardDescription` nos cabeçalhos, `text-sm` nos textos de apoio e composições financeiras, e `text-2xl font-semibold tracking-tight` nos indicadores. Mantenha as cores do Devlivery e os controles oficiais sem alterar os arquivos de `ui/`.
+- Cards usam `size="sm"` sem sobrescrever superfície, raio, sombra ou espaçamento. O extrato usa a tabela oficial dentro de uma borda no `CardContent`, com paginação abaixo; estados vazios usam `Empty`. A composição financeira usa listas de definição separadas por `Separator`, e os formulários compartilham `LoadingButton` e rótulos em caixa de frase.
+
 ### Gráficos do dashboard
 
 - Use o `ChartContainer` oficial com altura explícita e componha Recharts com `ChartTooltipContent` e `ChartLegendContent`. A configuração (`ChartConfig`) define os rótulos e referencia variáveis CSS; não personalize `ui/chart.tsx`.

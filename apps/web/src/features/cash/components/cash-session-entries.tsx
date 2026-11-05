@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { cn } from "cn";
 import { Banknote, CreditCard, Smartphone } from "lucide-react";
 import { useState } from "react";
 import { getPaymentOptionLabel } from "@/features/orders/constants/payment-methods";
@@ -7,9 +8,15 @@ import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+} from "@/shared/components/ui/empty";
 import {
   Table,
   TableBody,
@@ -43,105 +50,117 @@ export function CashSessionEntries({ sessionId }: { sessionId: string }) {
       cashOverviewService.getMovements(sessionId, page, signal),
   });
   return (
-    <Card size="sm" className="gap-0 py-0 shadow-none">
-      <CardHeader className="flex flex-row items-center justify-between gap-3 border-b py-4">
-        <CardTitle>Movimentações do turno</CardTitle>
-        <span className="text-meta text-muted-foreground">
-          Mais recentes primeiro
-        </span>
+    <Card size="sm" className="min-w-0">
+      <CardHeader>
+        <CardTitle>
+          <h2>Movimentações do turno</h2>
+        </CardTitle>
+        <CardDescription>Mais recentes primeiro</CardDescription>
       </CardHeader>
-      <CardContent className="px-0">
+      <CardContent className="min-w-0 gap-4">
         <QueryState
           isPending={query.isPending}
           error={query.error}
           hasData={query.data !== undefined}
           refetch={query.refetch}
         >
-          <Table aria-label="Movimentações do turno">
-            <TableHeader>
-              <TableRow>
-                {["Hora", "Tipo", "Referência", "Forma", "Valor"].map(
-                  (label) => (
-                    <TableHead
-                      key={label}
-                      className={`px-4 text-meta font-normal text-muted-foreground ${label === "Valor" ? "text-right" : ""}`}
-                    >
-                      {label}
-                    </TableHead>
-                  ),
-                )}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {query.data?.data.map((entry) => (
-                <TableRow key={entry.id} className="h-11 text-ui">
-                  <TableCell className="px-4 text-meta text-muted-foreground">
-                    <time
-                      dateTime={entry.createdAt}
-                      title={formatCashDateTime(entry.createdAt)}
-                    >
-                      {formatCashTime(entry.createdAt)}
-                    </time>
-                  </TableCell>
-                  <TableCell className="px-4 font-medium">
-                    {labels[entry.type] || entry.type}
-                  </TableCell>
-                  <TableCell className="max-w-64 whitespace-normal px-4 text-meta text-muted-foreground">
-                    {entry.relatedOrderId ? (
-                      <span title={entry.relatedOrderId}>
-                        Pedido #{entry.relatedOrderId.slice(-8).toUpperCase()}
-                      </span>
-                    ) : (
-                      entry.authorName
-                    )}
-                    {entry.reason && (
-                      <span className="block">{entry.reason}</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 text-meta text-muted-foreground">
-                    {entry.method ? (
-                      <span className="flex items-center gap-2">
-                        {entry.method === "Cash" ? (
-                          <Banknote className="size-4" aria-hidden="true" />
-                        ) : entry.method === "Pix" ? (
-                          <Smartphone className="size-4" aria-hidden="true" />
-                        ) : (
-                          <CreditCard className="size-4" aria-hidden="true" />
-                        )}
-                        {getPaymentOptionLabel(entry.method)}
-                      </span>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell
-                    className={`whitespace-nowrap px-4 text-right tabular-nums ${entry.signedAmount < 0 ? "text-destructive" : "text-success"}`}
-                  >
-                    {entry.signedAmount < 0 ? "−" : "+"}{" "}
-                    {formatMoney(Math.abs(entry.signedAmount))}
-                  </TableCell>
-                </TableRow>
-              ))}
-              {query.data?.data.length === 0 && (
+          <div className="min-w-0 overflow-hidden rounded-md border">
+            <Table aria-label="Movimentações do turno">
+              <TableHeader>
                 <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="py-6 text-center text-muted-foreground"
-                  >
-                    Nenhuma movimentação nesta página.
-                  </TableCell>
+                  {["Hora", "Tipo", "Referência", "Forma", "Valor"].map(
+                    (label) => (
+                      <TableHead
+                        key={label}
+                        className={label === "Valor" ? "text-right" : undefined}
+                      >
+                        {label}
+                      </TableHead>
+                    ),
+                  )}
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {query.data?.data.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell className="text-muted-foreground">
+                      <time
+                        dateTime={entry.createdAt}
+                        title={formatCashDateTime(entry.createdAt)}
+                      >
+                        {formatCashTime(entry.createdAt)}
+                      </time>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {labels[entry.type] || entry.type}
+                    </TableCell>
+                    <TableCell className="max-w-64 whitespace-normal wrap-anywhere">
+                      {entry.relatedOrderId ? (
+                        <span title={entry.relatedOrderId}>
+                          Pedido #{entry.relatedOrderId.slice(-8).toUpperCase()}
+                        </span>
+                      ) : (
+                        entry.authorName
+                      )}
+                      {entry.reason && (
+                        <span className="block text-muted-foreground">
+                          {entry.reason}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {entry.method ? (
+                        <span className="flex items-center gap-2">
+                          {entry.method === "Cash" ? (
+                            <Banknote className="size-4" aria-hidden="true" />
+                          ) : entry.method === "Pix" ? (
+                            <Smartphone className="size-4" aria-hidden="true" />
+                          ) : (
+                            <CreditCard className="size-4" aria-hidden="true" />
+                          )}
+                          {getPaymentOptionLabel(entry.method)}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell
+                      className={cn(
+                        "text-right font-medium tabular-nums",
+                        entry.signedAmount < 0
+                          ? "text-destructive"
+                          : "text-success",
+                      )}
+                    >
+                      {entry.signedAmount < 0 ? "−" : "+"}{" "}
+                      {formatMoney(Math.abs(entry.signedAmount))}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {query.data?.data.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <Empty>
+                        <EmptyHeader>
+                          <EmptyDescription>
+                            Nenhuma movimentação nesta página.
+                          </EmptyDescription>
+                        </EmptyHeader>
+                      </Empty>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
           {query.data && query.data.meta.totalPages > 1 && (
-            <div className="flex items-center justify-end gap-3 border-t p-3">
-              <span className="text-meta text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <span className="text-sm text-muted-foreground">
                 Página {page} de {query.data.meta.totalPages}
               </span>
               <Button
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 disabled={page === 1 || query.isFetching}
                 onClick={() => setPage(page - 1)}
               >
@@ -149,7 +168,7 @@ export function CashSessionEntries({ sessionId }: { sessionId: string }) {
               </Button>
               <Button
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 disabled={
                   page >= query.data.meta.totalPages || query.isFetching
                 }

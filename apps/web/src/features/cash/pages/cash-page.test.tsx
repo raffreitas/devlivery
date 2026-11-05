@@ -4,11 +4,20 @@ import { fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
+import { SidebarProvider } from "@/shared/components/ui/sidebar";
 import type {
   CashOverview,
   CashSessionSummary,
 } from "../services/cash-overview-service";
-import { CashPage } from "./cash-page";
+import { CashPage as CashPageComponent } from "./cash-page";
+
+function CashPage() {
+  return (
+    <SidebarProvider>
+      <CashPageComponent />
+    </SidebarProvider>
+  );
+}
 
 const base = "http://localhost:5000/api/v1/cash-register/sessions";
 const overviewUrl = "http://localhost:5000/api/v2/cash-register/overview";
@@ -102,10 +111,13 @@ describe("CashPage", () => {
   it("shows the full ledger, pending cash and a non-operational withdrawal placeholder", async () => {
     mockOpenSession();
     renderWithProviders(<CashPage />);
+    expect(await screen.findByText("Recebido no turno")).toBeVisible();
     expect(
-      await screen.findByText("Aberto às 18:20 por Ana Lima"),
-    ).toBeVisible();
-    expect(screen.getByText("1 pedidos com dinheiro a receber")).toBeVisible();
+      within(
+        screen.getByRole("navigation", { name: "Breadcrumb" }),
+      ).queryByText(/Aberto|Fechado/),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("1 pedido com dinheiro a receber")).toBeVisible();
     expect(screen.getByRole("button", { name: "Sangria" })).toBeDisabled();
     const table = await screen.findByRole("table", {
       name: "Movimentações do turno",
@@ -261,17 +273,17 @@ describe("CashPage", () => {
     await user.click(await screen.findByRole("button", { name: "Aporte" }));
     const dialog = screen.getByRole("dialog");
     fireEvent.change(
-      within(dialog).getByRole("textbox", { name: /^Valor do Aporte/ }),
+      within(dialog).getByRole("textbox", { name: "Valor do aporte" }),
       { target: { value: "5000" } },
     );
     await user.type(
       within(dialog).getByRole("textbox", {
-        name: "Motivo ou Observações (Opcional)",
+        name: "Observação (opcional)",
       }),
       "Troco para o turno",
     );
     await user.click(
-      within(dialog).getByRole("button", { name: "Adicionar Aporte" }),
+      within(dialog).getByRole("button", { name: "Adicionar aporte" }),
     );
     expect(await screen.findByText("Troco para o turno")).toBeVisible();
     expect(create).toHaveBeenCalledExactlyOnceWith({
