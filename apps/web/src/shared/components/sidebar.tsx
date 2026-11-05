@@ -24,8 +24,8 @@ export function Sidebar({ onLogout }: { onLogout: () => Promise<void> }) {
 
   return (
     <SidebarPrimitive variant="inset" collapsible="icon">
-      <SidebarHeader className="flex-row items-center">
-        <SidebarMenu className="min-w-0 flex-1">
+      <SidebarHeader>
+        <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               render={<Link to="/" />}
@@ -45,7 +45,7 @@ export function Sidebar({ onLogout }: { onLogout: () => Promise<void> }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <nav aria-label="Navegação principal">
+        <nav aria-label="Navegação principal" className="flex flex-col gap-2">
           {navGroups.map((group) => (
             <SidebarGroup key={group}>
               <SidebarGroupLabel>{group}</SidebarGroupLabel>

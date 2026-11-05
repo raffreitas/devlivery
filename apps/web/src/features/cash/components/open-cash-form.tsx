@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Wallet } from "lucide-react";
 import { useId } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FormError } from "@/shared/components/form-error";

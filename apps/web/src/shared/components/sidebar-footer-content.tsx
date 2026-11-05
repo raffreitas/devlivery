@@ -1,5 +1,4 @@
-import { cn } from "cn";
-import { LogOut, Moon, Sun } from "lucide-react";
+import { CircleAlert, CircleDashed, LogOut, Moon, Sun } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCurrentCashSession } from "@/features/cash/hooks/use-current-cash-session";
 import { useAuth } from "@/shared/contexts/auth-context";
@@ -13,6 +12,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "./ui/sidebar";
+import { Spinner } from "./ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const openingTime = new Intl.DateTimeFormat("pt-BR", {
@@ -60,27 +60,32 @@ export function SidebarFooterContent({
               aria-label={since ? `${label}, desde ${since}` : label}
               className="border border-sidebar-border bg-card"
             >
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "size-2 shrink-0 rounded-full",
-                  currentSession && !error && !isLoading
-                    ? "bg-success"
-                    : isClosed
-                      ? "border border-dashed border-muted-foreground"
-                      : "bg-muted-foreground",
-                )}
-              />
-              <span className="flex-1 text-meta text-foreground group-data-[collapsible=icon]:sr-only">
-                {label}
-              </span>
+              {isLoading ? (
+                <Spinner aria-hidden="true" />
+              ) : error ? (
+                <CircleAlert
+                  aria-hidden="true"
+                  className="text-muted-foreground"
+                />
+              ) : currentSession ? (
+                <span
+                  aria-hidden="true"
+                  className="size-2 shrink-0 rounded-full bg-success"
+                />
+              ) : (
+                <CircleDashed
+                  aria-hidden="true"
+                  className="text-muted-foreground"
+                />
+              )}
+              <span className="min-w-0 flex-1 truncate">{label}</span>
               {since && (
-                <span className="text-meta text-muted-foreground group-data-[collapsible=icon]:hidden">
+                <span className="shrink-0 text-xs text-muted-foreground">
                   desde {since}
                 </span>
               )}
               {isClosed && (
-                <span className="text-meta text-muted-foreground group-data-[collapsible=icon]:hidden">
+                <span className="shrink-0 text-sm text-muted-foreground">
                   Abrir
                 </span>
               )}
@@ -89,14 +94,18 @@ export function SidebarFooterContent({
         </SidebarMenu>
       )}
       <div className="flex min-w-0 items-center gap-1 group-data-[collapsible=icon]:flex-col">
-        <div
-          className="flex min-h-8 min-w-0 flex-1 items-center gap-2 px-2 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:px-0"
-          title={name}
-        >
-          <Avatar size="sm">
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <span className="truncate text-ui group-data-[collapsible=icon]:hidden">
+        <div className="flex min-h-8 min-w-0 flex-1 items-center gap-2 px-2 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:px-0">
+          <Tooltip>
+            <TooltipTrigger
+              render={<Avatar role="img" aria-label={name} />}
+              tabIndex={open ? undefined : 0}
+              className="outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+            >
+              <AvatarFallback>{initials}</AvatarFallback>
+            </TooltipTrigger>
+            <TooltipContent side="right">{name}</TooltipContent>
+          </Tooltip>
+          <span className="truncate text-sm font-medium group-data-[collapsible=icon]:hidden">
             {name}
           </span>
         </div>
@@ -106,13 +115,17 @@ export function SidebarFooterContent({
             aria-label="Alternar tema"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           >
-            {theme === "light" ? <Sun /> : <Moon />}
+            {theme === "light" ? (
+              <Sun aria-hidden="true" />
+            ) : (
+              <Moon aria-hidden="true" />
+            )}
           </TooltipTrigger>
-          <TooltipContent>Alternar tema</TooltipContent>
+          <TooltipContent side="right">Alternar tema</TooltipContent>
         </Tooltip>
         <Separator
           orientation="vertical"
-          className="my-2 group-data-[collapsible=icon]:hidden"
+          className="data-vertical:h-4 data-vertical:self-center group-data-[collapsible=icon]:hidden"
         />
         <Tooltip>
           <TooltipTrigger
@@ -120,9 +133,9 @@ export function SidebarFooterContent({
             aria-label="Sair"
             onClick={() => void onLogout()}
           >
-            <LogOut />
+            <LogOut aria-hidden="true" />
           </TooltipTrigger>
-          <TooltipContent>Sair</TooltipContent>
+          <TooltipContent side="right">Sair</TooltipContent>
         </Tooltip>
       </div>
     </>

@@ -49,6 +49,7 @@ describe("SidebarFooterContent", () => {
       await screen.findByRole("link", { name: "Caixa aberto, desde 18:20" }),
     ).toHaveAttribute("href", "/cash");
     expect(screen.getByText("AL")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Ana Lima" })).toBeVisible();
     expect(
       screen.queryByRole("menuitem", { name: "Sair" }),
     ).not.toBeInTheDocument();
@@ -92,6 +93,14 @@ describe("SidebarFooterContent", () => {
     expect(
       screen.getByRole("button", { name: "Alternar tema" }),
     ).toBeInTheDocument();
+    const avatar = screen.getByRole("img", { name: "Ana Lima" });
+    await user.tab();
+    expect(avatar).toHaveFocus();
+    expect(
+      await screen.findByText("Ana Lima", {
+        selector: '[data-slot="tooltip-content"]',
+      }),
+    ).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Sair" }));
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
