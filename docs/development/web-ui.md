@@ -29,7 +29,7 @@ Além das variáveis do shadcn, o tema define extensões no mesmo padrão, dispo
 - Escala de texto das telas próprias: `text-meta` (12px), `text-ui` (13px), `text-title-lg`, `text-title-xl`, `text-metric`. Componentes do shadcn mantêm o tamanho deles.
 - `shadow-card` e `shadow-pop`: sombra só no que flutua.
 
-Para textos laranja sobre superfícies do tema, use `text-primary-text` (#c2410c no claro, #ff8a4c no escuro). Preserve `primary`/`primary-foreground` nos botões e demais controles preenchidos: o texto sobre o laranja é escuro nos dois temas, porque branco sobre esse laranja não tem contraste suficiente.
+Para textos laranja sobre superfícies do tema, use `text-primary-text`. Preserve o par `primary`/`primary-foreground` nos botões e demais controles preenchidos, conforme os tokens de cada tema. A sidebar usa `sidebar` e o `SidebarInset` mantém seu `bg-background` oficial; não sobrescreva o fundo do conteúdo com `bg-card` para inverter essa hierarquia.
 
 ## Regras
 

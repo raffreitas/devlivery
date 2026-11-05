@@ -42,7 +42,7 @@ O app é feito com **shadcn/ui no estilo base-vega** (Base UI por baixo). As cor
 
 - Raios do shadcn: `radius` = 0.625rem; `radius-md` (8px) em controles, `radius-lg` (10px) em painéis e cards, `radius-xl` (14px) em diálogos. Nada acima disso.
 - Controles do shadcn base-vega: botão e campo com 36px, `sm` com 32px. Barras de ferramentas e cards de pedido usam `sm`.
-- App: sidebar de 240px em `sidebar` (a cor do fundo, separada por `border`), conteúdo em `background` com painéis em `card`. Item ativo da navegação em `sidebar-accent`.
+- App: sidebar de 240px em `sidebar`, conteúdo em `background` e painéis em `card`, seguindo a hierarquia padrão do shadcn. No tema escuro, a sidebar e os cards são mais claros que o fundo do conteúdo; no claro, a sidebar usa uma superfície neutra e o conteúdo é branco. Item ativo da navegação em `sidebar-accent`.
 - Topo de cada tela: título à esquerda; à direita, busca (`Ctrl K`) e a ação primária. Abaixo, uma barra de visualização: abas, filtros em botões `ghost`, alternância Lista/Quadro.
 - No celular (abaixo de 768px), a sidebar vira barra inferior de 5 posições (detalhes em Padrões de tela).
 

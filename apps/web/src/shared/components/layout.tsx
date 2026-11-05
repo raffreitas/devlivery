@@ -73,7 +73,7 @@ export function Layout() {
       className="app-shell text-foreground"
     >
       {!isMobile && <Sidebar onLogout={onLogout} />}
-      <SidebarInset className="min-w-0 md:border md:border-border md:bg-card">
+      <SidebarInset className="min-w-0 md:border md:border-border">
         {!fullBleed && !isMobile && (
           <header className="flex min-h-13 items-center border-b px-4 py-2 md:px-6">
             <SidebarTrigger
