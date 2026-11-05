@@ -1,11 +1,11 @@
+import { cn } from "cn";
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useMatches, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context";
 import { useIsMobile } from "../hooks/use-mobile";
-import { Brand } from "./brand";
 import { NavbarBottom } from "./navbar-bottom";
 import { Sidebar } from "./sidebar";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "./ui/sidebar";
+import { SidebarInset, SidebarProvider } from "./ui/sidebar";
 
 const SIDEBAR_STORAGE_KEY = "devlivery@sidebar-expanded";
 function readSidebarPreference() {
@@ -18,6 +18,14 @@ function readSidebarPreference() {
 
 export function Layout() {
   const navigate = useNavigate();
+  const matches = useMatches();
+  const fullBleed = matches.some(
+    ({ handle }) =>
+      handle &&
+      typeof handle === "object" &&
+      "fullBleed" in handle &&
+      handle.fullBleed === true,
+  );
   const { logout } = useAuth();
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(readSidebarPreference);
@@ -66,22 +74,19 @@ export function Layout() {
     >
       {!isMobile && <Sidebar onLogout={onLogout} />}
       <SidebarInset className="min-w-0 md:border md:border-border md:bg-card">
-        <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-4">
-          {isMobile ? (
-            <Brand />
-          ) : (
-            <SidebarTrigger
-              aria-label={
-                expanded ? "Recolher navegação" : "Expandir navegação"
-              }
-              aria-expanded={expanded}
-            />
+        <div
+          className={cn(
+            "app-shell-content min-w-0 flex-1",
+            !fullBleed && "p-4 md:p-6",
           )}
-        </header>
-        <div className="app-shell-content flex-1 p-4 md:p-6">
-          <div className="mx-auto w-full max-w-screen-2xl">
+        >
+          {fullBleed ? (
             <Outlet />
-          </div>
+          ) : (
+            <div className="mx-auto w-full max-w-screen-2xl">
+              <Outlet />
+            </div>
+          )}
         </div>
       </SidebarInset>
       <NavbarBottom />

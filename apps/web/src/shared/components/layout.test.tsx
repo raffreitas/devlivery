@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/shared/contexts/theme-context";
 import { MorePage } from "@/shared/pages/more-page";
 import { Layout } from "./layout";
+import { PageHeader } from "./page-header";
 
 const state = vi.hoisted(() => ({
   mobile: false,
@@ -33,6 +34,20 @@ function renderLayout(path = "/orders") {
       {
         element: <Layout />,
         children: [
+          {
+            path: "/cash",
+            handle: { fullBleed: true },
+            element: (
+              <>
+                <PageHeader
+                  title="Caixa"
+                  context="Fechado"
+                  actions={<button type="button">Histórico de teste</button>}
+                />
+                <h2>Corpo do caixa</h2>
+              </>
+            ),
+          },
           { path: "/more", element: <MorePage /> },
           {
             path: "*",
@@ -63,6 +78,27 @@ beforeEach(() => {
 });
 
 describe("Layout", () => {
+  it("renders the cash context and actions in one page header without an extra global strip", async () => {
+    renderLayout("/cash");
+    const main = screen.getByRole("main");
+    expect(main.querySelectorAll("header")).toHaveLength(1);
+    expect(
+      within(main).getByRole("heading", { name: "Caixa", level: 1 }),
+    ).toBeVisible();
+    const context = within(main).getByRole("navigation", {
+      name: "Contexto da página",
+    });
+    expect(within(context).getByText("Fechado")).toBeVisible();
+    expect(within(context).getByText("/")).toBeInTheDocument();
+    expect(
+      within(main).getByRole("button", { name: "Histórico de teste" }),
+    ).toBeVisible();
+    expect(
+      screen
+        .getByRole("button", { name: "Recolher navegação" })
+        .closest("main"),
+    ).toBeNull();
+  });
   it("preserves destinations and marks nested routes without selecting the root", () => {
     renderLayout("/orders/123");
     const nav = screen.getByRole("navigation", { name: "Navegação principal" });

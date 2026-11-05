@@ -36,7 +36,7 @@ public sealed class OpenApiConfigurationTests
         builder.Services.AddOpenApiConfiguration();
         builder.Services.AddHandlers();
         builder.Services.AddEndpoints();
-        // A test-only endpoint verifies future version discovery without publishing a v2 in the application.
+        // A test-only endpoint verifies that additional v2 endpoints stay out of the v1 document.
         builder.Services.AddSingleton<IEndpoint, V2Endpoint>();
         builder.Services.AddAuthorization();
         builder.Services.AddRateLimiter(_ => { });
@@ -74,7 +74,7 @@ public sealed class OpenApiConfigurationTests
         paths.ShouldNotContain("/api/v1/version-probe");
         var v2Json = await v2Document.Content.ReadFromJsonAsync<JsonElement>();
         v2Json.GetProperty("paths").EnumerateObject().Select(path => path.Name)
-            .ShouldBe(["/api/v2/version-probe"]);
+            .ShouldBe(["/api/v2/version-probe", "/api/v2/cash-register/overview", "/api/v2/cash-register/sessions/{id}/movements"], ignoreOrder: true);
         json.GetProperty("components").GetProperty("securitySchemes")
             .GetProperty("Bearer").GetProperty("scheme").GetString().ShouldBe("bearer");
     }

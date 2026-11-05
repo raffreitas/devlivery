@@ -22,7 +22,7 @@ import {
 interface OpenCashFormProps {
   onSubmit: (dto: CreateCashSessionFormData) => Promise<void>;
   isSubmitting: boolean;
-  onCancel: () => void;
+  onCancel?: () => void;
 }
 
 export function OpenCashForm({
@@ -73,7 +73,7 @@ export function OpenCashForm({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={`${formId}-open-cash-amount`}>
-                  Valor de Abertura
+                  Dinheiro na gaveta
                 </FieldLabel>
                 <InputMoney
                   {...field}
@@ -89,7 +89,7 @@ export function OpenCashForm({
                     .join(" ")}
                 />
                 <FieldDescription id={`${formId}-open-cash-amount-description`}>
-                  Informe o valor inicial em dinheiro no caixa
+                  Conte as notas e moedas deixadas para troco.
                 </FieldDescription>
                 {fieldState.invalid && (
                   <FieldError
@@ -107,7 +107,7 @@ export function OpenCashForm({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={`${formId}-open-cash-notes`}>
-                  Observações (opcional)
+                  Observação (opcional)
                 </FieldLabel>
                 <Textarea
                   {...field}
@@ -134,18 +134,20 @@ export function OpenCashForm({
           />
 
           <Field orientation="horizontal">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isSubmitting}
-              className="flex-1"
-            >
-              Cancelar
-            </Button>
+            {onCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+            )}
             <Button type="submit" disabled={isSubmitting} className="flex-1">
               <Wallet data-icon="inline-start" />
-              {isSubmitting ? "Abrindo..." : "Abrir Caixa"}
+              {isSubmitting ? "Abrindo..." : "Abrir caixa"}
             </Button>
           </Field>
         </FieldGroup>

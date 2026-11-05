@@ -97,6 +97,7 @@ async function request<T>(
     body?: unknown;
     headers?: Record<string, string>;
     signal?: AbortSignal;
+    version?: "v1" | "v2";
   } & RequestOptions = {},
 ): Promise<T> {
   const url = path.startsWith("/") ? path : `/${path}`;
@@ -111,6 +112,7 @@ async function request<T>(
 
   try {
     const res = await axiosInstance.request({
+      baseURL: `${env.VITE_API_URL.replace(/\/$/, "")}/api/${options.version ?? "v1"}`,
       url,
       method: options.method ?? "GET",
       // A read can be retried. A write may have committed even if its response is lost.
@@ -177,4 +179,9 @@ export const api = {
   patch: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: "PATCH", body }),
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
+};
+
+export const apiV2 = {
+  get: <T>(path: string, signal?: AbortSignal) =>
+    request<T>(path, { method: "GET", signal, version: "v2" }),
 };

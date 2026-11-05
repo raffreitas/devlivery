@@ -22,6 +22,16 @@
   },
   "overrides": [
     {
+      "includes": ["apps/web/src/shared/components/ui/breadcrumb.tsx"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useFocusableInteractive": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["apps/web/src/shared/components/ui/sidebar.tsx"],
       "linter": {
         "rules": {

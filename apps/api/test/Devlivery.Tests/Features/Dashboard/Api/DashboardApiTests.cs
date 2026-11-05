@@ -402,6 +402,7 @@ public sealed class DashboardApiTests(ApiFactory api)
 
     public static TheoryData<string> TenantScopedReadRoutes => new()
     {
+        "/api/v2/cash-register/overview",
         "/api/v1/dashboard/stats",
         "/api/v1/dashboard/orders-by-status",
         "/api/v1/dashboard/payment-breakdown",
@@ -421,6 +422,8 @@ public sealed class DashboardApiTests(ApiFactory api)
     {
         // Arrange
         var owner = await api.CreateTenantAsync();
+        await owner.SeedAsync(new CashSessionBuilder().WithEstablishmentId(owner.EstablishmentId)
+            .WithAttendantId(owner.Operator.Id).WithOpeningAmount(50m).Build());
         var pizza = await SeedProductAsync(owner, "Pizza do outro tenant", 43.21m);
         await SeedOrderAsync(owner, [(pizza, 2)], OrderStatus.Delivered, Payment(owner, PaymentMethod.Cash, 100m));
         var category = await SeedCategoryAsync(owner, "Categoria do outro tenant");

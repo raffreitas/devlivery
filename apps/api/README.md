@@ -25,6 +25,8 @@ apps/api/
 
 Os endpoints são agrupados em `/api/v1/auth`, `/api/v1/products`, `/api/v1/orders`, `/api/v1/cash-register`, `/api/v1/expenses` e `/api/v1/dashboard`. Exceto login e health checks, a API exige um JWT válido.
 
+As leituras v2 do Caixa ficam em `GET /api/v2/cash-register/overview` (sessão ativa, último turno e dinheiro pendente) e `GET /api/v2/cash-register/sessions/{id}/movements?page=1&pageSize=50` (extrato com abertura derivada, pagamentos, aportes, trocos e estornos). O extrato aceita até 100 linhas por página e usa o envelope `data`/`meta` com `currentPage`, `pageSize`, `totalCount` e `totalPages`. Ambas exigem autenticação e respeitam o estabelecimento corrente. Nenhuma escrita ou migração foi introduzida na v2.
+
 ## Executar
 
 Pré-requisitos: .NET 10 SDK, Docker e certificado HTTPS de desenvolvimento configurado.
@@ -46,6 +48,7 @@ Endereços locais:
 - API HTTP: `http://localhost:5052`
 - Scalar: `https://localhost:7141/scalar`
 - OpenAPI: `https://localhost:7141/openapi/v1.json`
+- OpenAPI v2: `https://localhost:7141/openapi/v2.json`
 - Prontidão: `/health`
 - Vivacidade: `/alive`
 

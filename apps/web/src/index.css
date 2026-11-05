@@ -53,6 +53,11 @@
 }
 
 @theme inline {
+  --text-meta: 0.75rem;
+  --text-ui: 0.8125rem;
+  --text-title-lg: 1.0625rem;
+  --text-title-xl: 1.5rem;
+  --text-metric: 1.75rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

@@ -65,6 +65,7 @@ const router = createBrowserRouter([
               },
               {
                 path: "cash",
+                handle: { fullBleed: true },
                 lazy: async () => ({
                   Component: (await import("./features/cash/pages/cash-page"))
                     .CashPage,

@@ -17,15 +17,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   Sidebar as SidebarPrimitive,
+  SidebarTrigger,
+  useSidebar,
 } from "./ui/sidebar";
 
 export function Sidebar({ onLogout }: { onLogout: () => Promise<void> }) {
   const { pathname } = useLocation();
+  const { open } = useSidebar();
 
   return (
     <SidebarPrimitive variant="inset" collapsible="icon">
-      <SidebarHeader>
-        <SidebarMenu>
+      <SidebarHeader className="flex-row items-center">
+        <SidebarMenu className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
           <SidebarMenuItem>
             <SidebarMenuButton
               render={<Link to="/" />}
@@ -43,6 +46,11 @@ export function Sidebar({ onLogout }: { onLogout: () => Promise<void> }) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <SidebarTrigger
+          className="shrink-0"
+          aria-label={open ? "Recolher navegação" : "Expandir navegação"}
+          aria-expanded={open}
+        />
       </SidebarHeader>
       <SidebarContent>
         <nav aria-label="Navegação principal">

@@ -2,12 +2,36 @@ import { server } from "@test/server";
 import axios from "axios";
 import { delay, HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
-import { ApiError, api, shouldRetryQuery, UnauthorizedError } from "./api";
+import {
+  ApiError,
+  api,
+  apiV2,
+  shouldRetryQuery,
+  UnauthorizedError,
+} from "./api";
 import { clearAuth, writeAuth } from "./auth-storage";
 
 const url = "http://localhost:5000/api/v1/probe";
 
 describe("api", () => {
+  it("keeps v2 reads authenticated while v1 requests retain their routes", async () => {
+    const seen: string[] = [];
+    server.use(
+      http.get("http://localhost:5000/api/v2/probe", ({ request }) => {
+        seen.push(request.url);
+        expect(request.headers.get("Authorization")).toBe("Bearer jwt-token");
+        return HttpResponse.json({ data: "v2" });
+      }),
+      http.get(url, ({ request }) => {
+        seen.push(request.url);
+        return HttpResponse.json({ data: "v1" });
+      }),
+    );
+    writeAuth({ user: null, token: "jwt-token" });
+    await expect(apiV2.get("/probe")).resolves.toEqual({ data: "v2" });
+    await expect(api.get("/probe")).resolves.toEqual({ data: "v1" });
+    expect(seen).toEqual(["http://localhost:5000/api/v2/probe", url]);
+  });
   it("preserves problem details and field validation", async () => {
     server.use(
       http.get(url, () =>

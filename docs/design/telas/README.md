@@ -20,7 +20,9 @@ A fonte de verdade para escopo, prioridade, dependências e status é o [épico 
 
 ## Contratos e regras
 
-Use as rotas reais versionadas em `/api/v1`, os enums da API e testes de contrato. Não use os nomes ilustrativos de endpoints ou métodos de pagamento como especificação.
+A tela de Caixa usa leituras v2 para resumo, último turno encerrado e extrato completo paginado de abertura, aportes, pagamentos, trocos e estornos. O card **A receber** prevê somente dinheiro pendente líquido do troco, inclusive de pedidos criados sem caixa; a previsão não altera o esperado. Abertura, aporte e fechamento continuam nos comandos v1. O esperado e a diferença aparecem após confirmar a contagem; a observação permanece opcional, mesmo com diferença. Sangria aparece apenas como **— / Em breve**, com botão desabilitado, sem movimentos ou valores fictícios. O histórico completo de turnos permanece fora deste recorte.
+
+Use os contratos reais de `/api/v1` e das leituras de Caixa em `/api/v2`, os enums da API e testes de contrato. Não use os nomes ilustrativos de endpoints ou métodos de pagamento como especificação.
 
 Os pedidos funcionam com o caixa fechado, incluindo a entrega. A antiga proposta de bloqueio foi substituída por decisão de negócio. Criar, imprimir e reimprimir não pode duplicar pedidos ou recebimentos; abrir um diálogo de impressão não comprova saída física do papel.
 

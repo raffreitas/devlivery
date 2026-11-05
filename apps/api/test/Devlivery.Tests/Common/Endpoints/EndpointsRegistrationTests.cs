@@ -19,6 +19,8 @@ public sealed class EndpointsRegistrationTests
     // Route table of the API: changing a route or tag here is a breaking change for the web app.
     private static readonly string[] ExpectedRoutes =
     [
+        "GET /api/v{version:apiVersion}/cash-register/overview [CashRegister]",
+        "GET /api/v{version:apiVersion}/cash-register/sessions/{id:guid}/movements [CashRegister]",
         "DELETE /api/v{version:apiVersion}/expenses/categories/{categoryId:guid} [Expenses]",
         "DELETE /api/v{version:apiVersion}/expenses/{expenseId:guid} [Expenses]",
         "DELETE /api/v{version:apiVersion}/orders/{id:guid} [Orders]",
@@ -83,8 +85,11 @@ public sealed class EndpointsRegistrationTests
                 var version = endpoint.Metadata.GetRequiredMetadata<ApiVersionMetadata>();
                 var method = endpoint.Metadata.GetRequiredMetadata<HttpMethodMetadata>().HttpMethods.Single();
                 var tags = endpoint.Metadata.OfType<ITagsMetadata>().SelectMany(t => t.Tags);
+                var expectedVersion = endpoint.RoutePattern.RawText is
+                    "/api/v{version:apiVersion}/cash-register/overview" or
+                    "/api/v{version:apiVersion}/cash-register/sessions/{id:guid}/movements" ? 2 : 1;
                 version.Map(ApiVersionMapping.Explicit).SupportedApiVersions
-                    .ShouldBe([new ApiVersion(1, 0)]);
+                    .ShouldBe([new ApiVersion(expectedVersion, 0)]);
                 return $"{method} {endpoint.RoutePattern.RawText} [{string.Join(",", tags)}]";
             });
 

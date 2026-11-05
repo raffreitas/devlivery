@@ -20,6 +20,12 @@ Como montar os tipos de tela que se repetem no Devlivery. Cada padrão diz o com
 - O topo usa a marca Devlivery: nome e troca de estabelecimento dependem de contratos futuros. O rodapé mostra a sessão de caixa atual (horário de abertura em São Paulo), seguida de avatar com iniciais e nome do operador, com alternância de tema na mesma linha. Sair é um botão ao lado da alternância de tema, separado por uma linha vertical; o nome do usuário não abre menu. Carregamento e falha da consulta são distintos de caixa fechado; o indicador não bloqueia pedidos. Busca global e criação global ficam fora deste bloco.
 - As telas atuais continuam dentro do layout, consumindo a API v1; a entrada padrão permanece o dashboard. Login, página pública e 404 mantêm suas telas atuais.
 
+## Cabeçalho das páginas
+
+- `PageHeader` compõe o `Breadcrumb` do shadcn: título, separador `/` e contexto à esquerda; ações disponíveis à direita. O cabeçalho fica no topo da superfície de conteúdo, com uma borda inferior contínua, sem uma segunda faixa global acima.
+- A rota de Caixa declara `handle.fullBleed: true` para ocupar a largura da superfície, sem a margem ou o limite de largura das telas ainda não migradas. O corpo da página controla seu próprio padding. As próximas telas podem adotar o mesmo contrato durante a migração.
+- O controle de recolher/expandir fica no topo da sidebar. No Caixa, o contexto é Fechado ou Aberto às HH:mm por operador; a data completa de abertura permanece no título descritivo do contexto. Histórico e sangria serão adicionados quando seus fluxos estiverem integrados.
+
 ## Diálogo de formulário
 
 Novo pedido, nova despesa, editar despesa, criar categoria.

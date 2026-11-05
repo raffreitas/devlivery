@@ -99,6 +99,12 @@ valor de abertura + aportes + pagamentos em dinheiro - estornos em dinheiro - tr
 
 O fechamento registra o valor contado e encerra a sessão. Uma sessão fechada não recebe pagamentos, trocos, estornos ou aportes. Consulte [segurança do login e do caixa](../operations/login-and-cash-security.md) para autoria e proteção de acesso.
 
+Na tela de caixa, o fechamento ocorre em duas etapas: informar o dinheiro contado e conferir a diferença antes da confirmação final. A primeira etapa não grava nem encerra a sessão; o envio acontece somente ao confirmar **Fechar caixa**. Esse fluxo organiza a conferência, sem representar ocultação do saldo no contrato da API.
+
+A leitura v2 expõe o extrato completo da sessão, com abertura derivada, horários, autores, pagamentos, aportes, trocos e estornos. A tela também mostra o último turno encerrado. A observação do fechamento permanece opcional, inclusive quando o contado difere do esperado; o campo compartilhado de observação é apresentado como observação do turno.
+
+Com caixa aberto, **A receber** é uma previsão apenas do dinheiro pendente, sem incorporar recebimentos nem alterar o esperado. Para cada pedido não entregue nem cancelado, considera o menor valor entre dinheiro pendente e total do pedido menos pagamentos eletrônicos não cancelados e dinheiro já confirmado, limitado a zero. Isso desconta o troco previsto e ignora parcelas canceladas. Inclui pedidos antigos ou criados sem caixa, pois o vínculo financeiro ocorre no recebimento; não filtra pela data de criação. Sem sessão ativa, essa previsão não é apresentada. Sangria permanece somente como placeholder na interface, sem lançamento ou efeito nos cálculos.
+
 ## Despesas
 
 Uma **despesa** pertence a uma categoria, tem valor positivo, vencimento e, opcionalmente, fornecedor, descrição e data de pagamento. Informar a data de pagamento na criação torna a despesa paga; sem essa data, ela nasce pendente.
