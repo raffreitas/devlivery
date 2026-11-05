@@ -4,11 +4,21 @@ Como montar os tipos de tela que se repetem no Devlivery. Cada padrão diz o com
 
 ## Navegação no celular
 
+- O primeiro bloco implementado usa quatro posições: Pedidos, Caixa, Resumo e Mais. A ação central de novo pedido entra junto da integração do fluxo de criação global; não exibir um botão sem ação.
+- Mais (`/more`) reúne Despesas (Financeiro), Produtos (Cadastros), tema e saída. Não exibir cadastros futuros, contadores ilustrativos ou personalização por toque longo.
 - Abaixo de 768px, a sidebar vira barra inferior com **5 posições fixas**: Pedidos, Caixa, **+** (novo pedido, em `primary`), Resumo e Mais.
 - Funcionalidade nova nunca ganha posição na barra: entra no menu Mais, agrupada (Financeiro, Cadastros, Cardápio do cliente, Configurações).
 - Sidebar, barra e Mais saem da mesma lista de navegação (`nav-items.ts`, com `{ id, label, icon, href, group, mobile: "bar" | "more" }`).
 - Alvos de toque de 44px no mínimo; a ação principal da tela fica fixa no rodapé.
 - A barra é componente próprio; detalhes no celular abrem em `Drawer`.
+
+## Estrutura de navegação implementada
+
+- A composição segue o bloco oficial `sidebar-08` do shadcn (Base UI), com `variant="inset"`: navegação lateral e conteúdo com borda e margem externa no desktop, conforme `telas/Caixa.png`.
+- A sidebar aparece a partir de 768px, abre expandida em 240px e permite recolher para ícones com nomes acessíveis e tooltips. A preferência é persistida em `devlivery@sidebar-expanded`; falha no armazenamento não impede navegar.
+- Operação reúne Pedidos, Caixa e Resumo; Financeiro reúne Despesas; Cadastros reúne Produtos. `nav-items.ts` é a fonte comum dos destinos e do destaque de rota, incluindo descendentes.
+- O topo usa a marca Devlivery: nome e troca de estabelecimento dependem de contratos futuros. O rodapé mostra a sessão de caixa atual (horário de abertura em São Paulo), seguida de avatar com iniciais e nome do operador, com alternância de tema na mesma linha. Sair é um botão ao lado da alternância de tema, separado por uma linha vertical; o nome do usuário não abre menu. Carregamento e falha da consulta são distintos de caixa fechado; o indicador não bloqueia pedidos. Busca global e criação global ficam fora deste bloco.
+- As telas atuais continuam dentro do layout, consumindo a API v1; a entrada padrão permanece o dashboard. Login, página pública e 404 mantêm suas telas atuais.
 
 ## Diálogo de formulário
 

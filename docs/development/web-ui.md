@@ -52,6 +52,7 @@ Para textos laranja sobre superfícies do tema, use `text-primary-text` (#c2410c
   - `a11y/useSemanticElements`
   - `suspicious/noArrayIndexKey`
   - `suspicious/noDoubleEquals`
+- Apenas em `ui/sidebar.tsx`, também desliga `correctness/useExhaustiveDependencies` (setters estáveis incluídos no código oficial) e `suspicious/noDocumentCookie` (cookie de preferência do componente). A preferência usada pelo app é controlada externamente pelo layout e guardada em `localStorage`.
 - O SonarQube exclui `src/shared/components/ui/**` da análise (`sonar.exclusions` em `.github/workflows/web-app-ci.yaml`), pois o código vem do registro. Por isso, `ui/` contém apenas arquivos oficiais; componentes do projeto, como `input-money.tsx`, ficam em `src/shared/components/`.
 - Formulários: `Controller` + `Field`, com `aria-invalid` no controle e `data-invalid` no `Field`.
 - Gere IDs por instância com `useId()`. Vincule `FieldLabel.htmlFor` ao controle e use `aria-describedby` para as descrições e erros renderizados. Nas linhas dinâmicas, derive os IDs da chave estável do `useFieldArray`.

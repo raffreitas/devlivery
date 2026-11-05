@@ -1,39 +1,47 @@
 import { cn } from "cn";
+import { Menu } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { navItems } from "@/shared/constants/nav-items";
+import { isNavItemActive, navItems } from "@/shared/constants/nav-items";
 
 export function NavbarBottom() {
-  const location = useLocation();
-
-  const isActive = (path: string) => location.pathname === path;
+  const { pathname } = useLocation();
+  const items = [
+    ...navItems.filter((item) => item.mobile === "bar"),
+    { id: "more", href: "/more", mobileLabel: "Mais", icon: Menu },
+  ];
+  const moreActive =
+    pathname === "/more" ||
+    navItems.some(
+      (item) => item.mobile === "more" && isNavItemActive(pathname, item.href),
+    );
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border pb-safe sm:hidden">
-      <div className="flex justify-around items-center h-16">
-        {navItems.map((item) => {
-          const active = isActive(item.path);
+    <nav
+      aria-label="Navegação móvel"
+      className="mobile-navigation fixed inset-x-0 bottom-0 z-40 border-t border-sidebar-border bg-sidebar md:hidden"
+    >
+      <div className="grid grid-cols-4 px-2 py-1">
+        {items.map((item) => {
+          const active =
+            item.id === "more"
+              ? moreActive
+              : isNavItemActive(pathname, item.href);
           return (
             <Link
-              key={item.path}
-              to={item.path}
+              key={item.id}
+              to={item.href}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200",
-                active
-                  ? "text-primary-text font-medium"
-                  : "text-muted-foreground hover:text-foreground",
+                "flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-meta text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                active && "bg-sidebar-accent text-sidebar-accent-foreground",
               )}
             >
-              <item.icon
-                className={cn(
-                  "w-6 h-6",
-                  active ? "stroke-[2.5px]" : "stroke-2",
-                )}
-              />
-              <span className="text-[10px]">{item.label}</span>
+              <item.icon className="size-5" aria-hidden="true" />
+              <span>{item.mobileLabel}</span>
             </Link>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

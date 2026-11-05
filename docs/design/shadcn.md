@@ -6,6 +6,7 @@ O app usa o shadcn/ui no estilo `base-vega` (Base UI). As regras de manutenção
 
 | No design | Componente | Observação |
 | --- | --- | --- |
+| Navegação desktop | `Sidebar`, `SidebarProvider`, `SidebarInset`, `SidebarMenu` | Composição baseada em `sidebar-08`, com recolhimento para ícones. |
 | Botões | `Button` (`default`, `secondary`, `outline`, `ghost`) | 36px; `size="sm"` (32px) em barras de ferramentas e cards. Destrutivo: `ghost` com `text-destructive`, confirmado por `AlertDialog`. |
 | Atalho no botão | `<kbd>` (ou `Kbd` do registro, quando instalado) | Única fonte mono. |
 | Campos | `Field`, `FieldLabel`, `Input`, `Textarea`, `InputGroup` | Valor em reais: `input-money` do projeto. |

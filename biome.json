@@ -22,6 +22,19 @@
   },
   "overrides": [
     {
+      "includes": ["apps/web/src/shared/components/ui/sidebar.tsx"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useExhaustiveDependencies": "off"
+          },
+          "suspicious": {
+            "noDocumentCookie": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["apps/web/src/shared/components/ui/chart.tsx"],
       "linter": {
         "rules": {

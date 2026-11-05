@@ -41,6 +41,13 @@ const router = createBrowserRouter([
             errorElement: <RouteErrorPage />,
             children: [
               {
+                path: "more",
+                lazy: async () => ({
+                  Component: (await import("./shared/pages/more-page"))
+                    .MorePage,
+                }),
+              },
+              {
                 index: true,
                 lazy: async () => ({
                   Component: (

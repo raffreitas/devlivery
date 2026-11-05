@@ -1,73 +1,84 @@
-import { cn } from "cn";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/shared/components/ui/button";
-import { navItems } from "@/shared/constants/nav-items";
+import {
+  isNavItemActive,
+  navGroups,
+  navItems,
+} from "@/shared/constants/nav-items";
+import { Brand } from "./brand";
+import { SidebarFooterContent } from "./sidebar-footer-content";
+import {
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  Sidebar as SidebarPrimitive,
+} from "./ui/sidebar";
 
-export function Sidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const location = useLocation();
-
-  const isActive = (path: string) => location.pathname === path;
+export function Sidebar({ onLogout }: { onLogout: () => Promise<void> }) {
+  const { pathname } = useLocation();
 
   return (
-    <aside
-      className={cn(
-        "hidden sm:flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 sticky top-0",
-        isCollapsed ? "w-16" : "w-64",
-      )}
-    >
-      <div className="flex items-center justify-between p-4 h-16 border-b border-sidebar-border">
-        {!isCollapsed && (
-          <h1 className="whitespace-nowrap text-[25px] font-bold tracking-[-0.048em] text-[#182230] dark:text-foreground">
-            Devlivery
-            <span className="text-[#c2410c] dark:text-orange-400">.</span>
-          </h1>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="ml-auto shrink-0"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
-        </Button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto py-4 flex flex-col gap-6">
-        <div className="px-3">
-          {!isCollapsed && (
-            <h4 className="mb-2 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Operação
-            </h4>
-          )}
-          <nav className="space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium",
-                  isActive(item.path)
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/10 hover:text-foreground",
-                  isCollapsed && "justify-center px-2",
-                )}
-                title={isCollapsed ? item.label : undefined}
+    <SidebarPrimitive variant="inset" collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link to="/" />}
+              size="lg"
+              tooltip="Devlivery"
+              aria-label="Devlivery — início"
+            >
+              <span
+                className="flex size-8 shrink-0 items-center justify-center rounded-md bg-sidebar-accent font-bold text-sidebar-accent-foreground"
+                aria-hidden="true"
               >
-                <item.icon
-                  className={cn(
-                    "w-5 h-5",
-                    isActive(item.path) && "stroke-[2.5px]",
-                  )}
-                />
-                {!isCollapsed && <span>{item.label}</span>}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </div>
-    </aside>
+                D<span className="text-primary">.</span>
+              </span>
+              <Brand />
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <nav aria-label="Navegação principal">
+          {navGroups.map((group) => (
+            <SidebarGroup key={group}>
+              <SidebarGroupLabel>{group}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {navItems
+                    .filter((item) => item.group === group)
+                    .map((item) => {
+                      const active = isNavItemActive(pathname, item.href);
+                      return (
+                        <SidebarMenuItem key={item.id}>
+                          <SidebarMenuButton
+                            render={<Link to={item.href} />}
+                            isActive={active}
+                            tooltip={item.label}
+                            aria-label={item.label}
+                            aria-current={active ? "page" : undefined}
+                          >
+                            <item.icon aria-hidden="true" />
+                            <span>{item.label}</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
+        </nav>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarFooterContent onLogout={onLogout} />
+      </SidebarFooter>
+    </SidebarPrimitive>
   );
 }
