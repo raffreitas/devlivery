@@ -36,7 +36,16 @@ export function ExpensesPage() {
   const [duePeriod, setDuePeriod] = useState<DateRange | undefined>(() =>
     getDefaultDuePeriod(),
   );
-  const [categoryId, setCategoryId] = useState<string | undefined>();
+  const [{ categoryId, subcategoryId }, setCategoryFilter] = useState<{
+    categoryId?: string;
+    subcategoryId?: string;
+  }>({});
+  const handleCategoryChange = (categoryId: string | undefined) => {
+    setCategoryFilter({ categoryId });
+  };
+  const handleSubcategoryChange = (subcategoryId: string | undefined) => {
+    setCategoryFilter((current) => ({ ...current, subcategoryId }));
+  };
   const [status, setStatus] = useState<ExpenseStatus | undefined>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>();
@@ -54,7 +63,7 @@ export function ExpensesPage() {
     updateExpense,
     deleteExpense,
     markAsPaid,
-  } = useExpenses({ duePeriod, categoryId, status });
+  } = useExpenses({ duePeriod, categoryId, subcategoryId, status });
 
   const handleSubmit = async (data: ExpenseFormData) => {
     if (editingExpense) {
@@ -155,9 +164,11 @@ export function ExpensesPage() {
             <ExpensesFilters
               period={duePeriod}
               categoryId={categoryId}
+              subcategoryId={subcategoryId}
               status={status}
               onDuePeriodChange={setDuePeriod}
-              onCategoryChange={setCategoryId}
+              onCategoryChange={handleCategoryChange}
+              onSubcategoryChange={handleSubcategoryChange}
               onStatusChange={setStatus}
               onOpenFilters={() => setIsFiltersOpen(true)}
             />
@@ -199,9 +210,11 @@ export function ExpensesPage() {
             <ExpensesFiltersContent
               period={duePeriod}
               categoryId={categoryId}
+              subcategoryId={subcategoryId}
               status={status}
               onDuePeriodChange={setDuePeriod}
-              onCategoryChange={setCategoryId}
+              onCategoryChange={handleCategoryChange}
+              onSubcategoryChange={handleSubcategoryChange}
               onStatusChange={setStatus}
             />
           </div>

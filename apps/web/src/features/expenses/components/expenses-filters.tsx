@@ -1,4 +1,5 @@
 import { Filter } from "lucide-react";
+import { useId } from "react";
 import type { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/shared/components/date-range-picker";
 import { Button } from "@/shared/components/ui/button";
@@ -13,13 +14,16 @@ import {
 } from "@/shared/components/ui/select";
 import { useExpenseCategories } from "../hooks/use-expenses";
 import { ExpenseStatus } from "../types";
+import { ExpenseSubcategoryFilter } from "./expense-subcategory-filter";
 
 interface ExpensesFiltersProps {
   period?: DateRange;
   categoryId?: string;
+  subcategoryId?: string;
   status?: string;
   onDuePeriodChange: (period: DateRange | undefined) => void;
   onCategoryChange: (categoryId: string | undefined) => void;
+  onSubcategoryChange: (subcategoryId: string | undefined) => void;
   onStatusChange: (status: ExpenseStatus | undefined) => void;
   onOpenFilters: () => void;
 }
@@ -35,16 +39,22 @@ const statusLabels: Record<ExpenseStatus, string> = {
 export function ExpensesFilters({
   period,
   categoryId,
+  subcategoryId,
   status,
   onDuePeriodChange,
   onCategoryChange,
+  onSubcategoryChange,
   onStatusChange,
   onOpenFilters,
 }: ExpensesFiltersProps) {
+  const id = useId();
   const { data: categories } = useExpenseCategories();
 
   const activeFiltersCount =
-    (categoryId ? 1 : 0) + (status ? 1 : 0) + (period ? 1 : 0);
+    (categoryId ? 1 : 0) +
+    (subcategoryId ? 1 : 0) +
+    (status ? 1 : 0) +
+    (period ? 1 : 0);
 
   return (
     <>
@@ -61,9 +71,12 @@ export function ExpensesFilters({
       </div>
 
       <div className="hidden sm:block bg-card rounded-lg border border-border shadow-sm p-4">
-        <div className="flex flex-col sm:flex-row items-end gap-2 sm:gap-4 pb-2 sm:pb-1 px-1">
-          <div className="w-full sm:flex-1 sm:min-w-50 flex flex-col gap-1.5">
-            <Label className="text-xs font-medium text-muted-foreground">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 items-end gap-4 pb-1 px-1">
+          <div className="min-w-0 flex flex-col gap-1.5">
+            <Label
+              htmlFor={`${id}-category`}
+              className="text-xs font-medium text-muted-foreground"
+            >
               Categoria
             </Label>
             <Select
@@ -74,7 +87,7 @@ export function ExpensesFilters({
                 )
               }
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`${id}-category`} className="w-full">
                 <SelectValue placeholder="Todas">
                   {categoryId
                     ? categories?.find((cat) => cat.id === categoryId)?.name
@@ -96,8 +109,17 @@ export function ExpensesFilters({
             </Select>
           </div>
 
-          <div className="w-full sm:flex-1 sm:min-w-50 flex flex-col gap-1.5">
-            <Label className="text-xs font-medium text-muted-foreground">
+          <ExpenseSubcategoryFilter
+            categoryId={categoryId}
+            subcategoryId={subcategoryId}
+            onSubcategoryChange={onSubcategoryChange}
+          />
+
+          <div className="min-w-0 flex flex-col gap-1.5">
+            <Label
+              htmlFor={`${id}-status`}
+              className="text-xs font-medium text-muted-foreground"
+            >
               Status
             </Label>
             <Select
@@ -108,7 +130,7 @@ export function ExpensesFilters({
                 )
               }
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`${id}-status`} className="w-full">
                 <SelectValue placeholder="Todos">
                   {status ? statusLabels[status as ExpenseStatus] : "Todos"}
                 </SelectValue>
@@ -126,7 +148,7 @@ export function ExpensesFilters({
             </Select>
           </div>
 
-          <div className="w-full sm:w-auto sm:min-w-60 flex flex-col gap-1.5">
+          <div className="min-w-0 flex flex-col gap-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
               Período de Vencimento
             </Label>
