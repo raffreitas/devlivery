@@ -24,6 +24,34 @@ public sealed class ExpensesApiTests(ApiFactory api)
     private static readonly DateOnly DueDate = new(2026, 5, 10);
 
     [Fact]
+    public async Task GivenSubcategoryFilter_WhenListing_ThenReturnsOnlyMatchingTenantExpenses()
+    {
+        // Arrange
+        var tenant = await api.CreateTenantAsync();
+        var (parent, subcategory) = await SeedCategoriesAsync(tenant);
+        var sibling = new CategoryBuilder().WithEstablishmentId(tenant.EstablishmentId)
+            .WithName("Limpeza").WithParent(parent).Build();
+        await tenant.SeedAsync(sibling);
+        var expected = await SeedExpenseAsync(tenant, subcategory, "Selecionada");
+        await SeedExpenseAsync(tenant, sibling, "Outra subcategoria");
+        await SeedExpenseAsync(tenant, parent, "Categoria principal");
+        var otherTenant = await api.CreateTenantAsync();
+        var (_, otherSubcategory) = await SeedCategoriesAsync(otherTenant);
+        await SeedExpenseAsync(otherTenant, otherSubcategory, "Outro estabelecimento");
+
+        // Act
+        var response = await tenant.Client.GetAsync($"/api/v1/expenses?categoryId={subcategory.Id}");
+        var foreignResponse = await otherTenant.Client.GetAsync($"/api/v1/expenses?categoryId={subcategory.Id}");
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var expenses = await ApiTenant.ReadDataAsync<List<GetAllExpensesResponse>>(response);
+        expenses.ShouldHaveSingleItem().Id.ShouldBe(expected.Id);
+        foreignResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await ApiTenant.ReadDataAsync<List<GetAllExpensesResponse>>(foreignResponse)).ShouldBeEmpty();
+    }
+
+    [Fact]
     public async Task GivenQueryStringFilters_WhenListing_ThenBindsCategoryStatusAndDueDateRange()
     {
         // Arrange

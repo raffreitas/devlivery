@@ -13,10 +13,16 @@ import type { ExpenseFormData, ExpenseStatus, ExpenseSummary } from "../types";
 type ExpenseInput = {
   duePeriod?: DateRange;
   categoryId?: string;
+  subcategoryId?: string;
   status?: ExpenseStatus;
 };
 
-export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
+export function useExpenses({
+  duePeriod,
+  categoryId,
+  subcategoryId,
+  status,
+}: ExpenseInput) {
   const queryClient = useQueryClient();
 
   const expensesQuery = useQuery({
@@ -25,6 +31,7 @@ export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
       {
         ...queryKeys.period(duePeriod?.from, duePeriod?.to),
         categoryId,
+        subcategoryId,
         status,
       },
     ],
@@ -33,7 +40,7 @@ export function useExpenses({ duePeriod, categoryId, status }: ExpenseInput) {
         {
           startDate: duePeriod?.from ? formatDate(duePeriod.from) : undefined,
           endDate: duePeriod?.to ? formatDate(duePeriod.to) : undefined,
-          categoryId,
+          categoryId: subcategoryId ?? categoryId,
           status,
         },
         signal,

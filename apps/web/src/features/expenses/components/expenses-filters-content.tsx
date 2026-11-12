@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/shared/components/date-range-picker";
 import { Label } from "@/shared/components/ui/label";
@@ -11,13 +12,16 @@ import {
 } from "@/shared/components/ui/select";
 import { useExpenseCategories } from "../hooks/use-expenses";
 import { ExpenseStatus } from "../types";
+import { ExpenseSubcategoryFilter } from "./expense-subcategory-filter";
 
 interface ExpensesFiltersContentProps {
   period?: DateRange;
   categoryId?: string;
+  subcategoryId?: string;
   status?: string;
   onDuePeriodChange: (period: DateRange | undefined) => void;
   onCategoryChange: (categoryId: string | undefined) => void;
+  onSubcategoryChange: (subcategoryId: string | undefined) => void;
   onStatusChange: (status: ExpenseStatus | undefined) => void;
 }
 
@@ -32,11 +36,14 @@ const statusLabels: Record<ExpenseStatus, string> = {
 export function ExpensesFiltersContent({
   period,
   categoryId,
+  subcategoryId,
   status,
   onDuePeriodChange,
   onCategoryChange,
+  onSubcategoryChange,
   onStatusChange,
 }: ExpensesFiltersContentProps) {
+  const id = useId();
   const { data: categories } = useExpenseCategories();
 
   const handleCategoryChange = (value: string) => {
@@ -50,14 +57,17 @@ export function ExpensesFiltersContent({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <Label>Categoria</Label>
+        <Label htmlFor={`${id}-category`}>Categoria</Label>
         <Select
           value={categoryId ?? "all"}
           onValueChange={(value) => {
             if (value !== null) handleCategoryChange(value as string);
           }}
         >
-          <SelectTrigger className="w-full cursor-pointer">
+          <SelectTrigger
+            id={`${id}-category`}
+            className="w-full cursor-pointer"
+          >
             <SelectValue placeholder="Todas">
               {categoryId
                 ? categories?.find((cat) => cat.id === categoryId)?.name
@@ -79,8 +89,14 @@ export function ExpensesFiltersContent({
         </Select>
       </div>
 
+      <ExpenseSubcategoryFilter
+        categoryId={categoryId}
+        subcategoryId={subcategoryId}
+        onSubcategoryChange={onSubcategoryChange}
+      />
+
       <div className="flex flex-col gap-2">
-        <Label>Status</Label>
+        <Label htmlFor={`${id}-status`}>Status</Label>
         <Select
           value={status ?? "all"}
           onValueChange={(value) => {
@@ -88,7 +104,7 @@ export function ExpensesFiltersContent({
               handleStatusChange(value as ExpenseStatus | "all");
           }}
         >
-          <SelectTrigger className="w-full cursor-pointer">
+          <SelectTrigger id={`${id}-status`} className="w-full cursor-pointer">
             <SelectValue placeholder="Todos">
               {status ? statusLabels[status as ExpenseStatus] : "Todos"}
             </SelectValue>
