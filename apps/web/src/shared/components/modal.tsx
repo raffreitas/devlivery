@@ -1,4 +1,5 @@
 import { cn } from "cn";
+import type { ComponentProps } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,8 @@ interface ModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   dismissible?: boolean;
+  size?: "sm" | "default";
+  initialFocus?: ComponentProps<typeof DialogContent>["initialFocus"];
 }
 
 /**
@@ -38,6 +41,8 @@ export function Modal({
   children,
   footer,
   dismissible = true,
+  size = "default",
+  initialFocus,
 }: ModalProps) {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const handleOpenChange = (open: boolean) => {
@@ -48,8 +53,10 @@ export function Modal({
     return (
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogContent
+          initialFocus={initialFocus}
           className={cn(
-            "max-h-[calc(100dvh-2rem)] gap-4 sm:max-w-3xl",
+            "max-h-[calc(100dvh-2rem)] gap-4",
+            size === "sm" ? "sm:max-w-140" : "sm:max-w-3xl",
             footer
               ? "grid-rows-[auto_minmax(0,1fr)_auto]"
               : "grid-rows-[auto_minmax(0,1fr)]",

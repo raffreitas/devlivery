@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LockKeyhole } from "lucide-react";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FormError } from "@/shared/components/form-error";
 import { InputMoney } from "@/shared/components/input-money";
@@ -42,6 +42,7 @@ interface CloseCashFormProps {
   cashPayments: number;
   cashRefunds: number;
   changeAmount: number;
+  withdrawalsTotal: number;
   onSubmit: (dto: CloseCashSessionFormData) => Promise<void>;
   isSubmitting: boolean;
 }
@@ -53,6 +54,8 @@ export function CloseCashForm({
 }: CloseCashFormProps) {
   const formId = useId();
   const [confirmed, setConfirmed] = useState(false);
+  const moveFocus = useRef(false);
+  const confirmation = useRef<HTMLHeadingElement>(null);
   const form = useForm<CloseCashSessionFormData>({
     resolver: zodResolver(closeCashSessionFormSchema),
     defaultValues: { closingAmount: 0, notes: "" },
@@ -60,6 +63,12 @@ export function CloseCashForm({
   const busy = form.formState.isSubmitting || isSubmitting;
   const counted = form.watch("closingAmount");
   const difference = moneyDifference(counted, composition.expectedCashAmount);
+  useEffect(() => {
+    if (busy || !moveFocus.current) return;
+    moveFocus.current = false;
+    if (confirmed) confirmation.current?.focus();
+    else form.setFocus("closingAmount");
+  }, [busy, confirmed, form.setFocus]);
 
   return (
     <Card size="sm">
@@ -76,6 +85,7 @@ export function CloseCashForm({
           onSubmit={form.handleSubmit(async (data) => {
             form.clearErrors();
             if (!confirmed) {
+              moveFocus.current = true;
               setConfirmed(true);
               return;
             }
@@ -97,6 +107,13 @@ export function CloseCashForm({
               />
               {confirmed ? (
                 <>
+                  <h3
+                    ref={confirmation}
+                    tabIndex={-1}
+                    className="text-sm font-medium focus-visible:outline-ring"
+                  >
+                    Conferência da gaveta
+                  </h3>
                   <CashComposition {...composition} counted={counted} />
                   <Alert role="status">
                     <AlertTitle>
@@ -165,6 +182,7 @@ export function CloseCashForm({
                         <InputMoney
                           {...field}
                           id={`${formId}-amount`}
+                          className="max-md:min-h-11"
                           aria-invalid={fieldState.invalid}
                           aria-describedby={
                             fieldState.invalid
@@ -190,12 +208,14 @@ export function CloseCashForm({
                   </Alert>
                 </>
               )}
-              <div className="flex items-center justify-between gap-2">
+              <div className="cash-form-actions flex items-center justify-between gap-2">
                 {confirmed && (
                   <Button
                     type="button"
                     variant="ghost"
+                    className="max-md:min-h-11"
                     onClick={() => {
+                      moveFocus.current = true;
                       setConfirmed(false);
                       form.clearErrors();
                     }}
@@ -207,7 +227,11 @@ export function CloseCashForm({
                   type="submit"
                   isLoading={busy}
                   loadingText="Fechando caixa…"
-                  className={confirmed ? "ml-auto" : "w-full"}
+                  className={
+                    confirmed
+                      ? "ml-auto max-md:min-h-11"
+                      : "w-full max-md:min-h-11"
+                  }
                 >
                   {confirmed ? "Fechar caixa" : "Conferir contagem"}
                 </LoadingButton>

@@ -39,6 +39,7 @@ const labels: Record<string, string> = {
   Change: "Troco",
   Refund: "Estorno",
   Deposit: "Aporte",
+  Withdrawal: "Sangria",
   Adjustment: "Ajuste",
 };
 
@@ -163,6 +164,7 @@ export function CashSessionEntries({ sessionId }: { sessionId: string }) {
               <Button
                 size="sm"
                 variant="outline"
+                className="max-md:min-h-11"
                 disabled={page === 1 || query.isFetching}
                 onClick={() => setPage(page - 1)}
               >
@@ -171,6 +173,7 @@ export function CashSessionEntries({ sessionId }: { sessionId: string }) {
               <Button
                 size="sm"
                 variant="outline"
+                className="max-md:min-h-11"
                 disabled={
                   page >= query.data.meta.totalPages || query.isFetching
                 }

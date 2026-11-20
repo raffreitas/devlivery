@@ -36,6 +36,7 @@ internal static class GetCashHistorySql
                                                     coalesce(sum(amount) filter (where entry_type = @Payment), 0)
                                                       - coalesce(sum(amount) filter (where entry_type in (@Refund, @Change)), 0) as revenue,
                                                     coalesce(sum(amount) filter (where entry_type = @Deposit), 0) as deposits,
+                                                    coalesce(sum(amount) filter (where entry_type = @Withdrawal), 0) as withdrawals,
                                                     coalesce(sum(amount) filter (where entry_type = @Payment and payment_method = @Cash), 0)
                                                       - coalesce(sum(amount) filter (where entry_type = @Refund and payment_method = @Cash), 0)
                                                       - coalesce(sum(amount) filter (where entry_type = @Change), 0) as net_cash
@@ -49,7 +50,8 @@ internal static class GetCashHistorySql
                                          ),
                                          session_totals as (
                                              select s.*, coalesce(m.revenue, 0) as revenue, coalesce(o.total_orders, 0) as total_orders,
-                                                    s.closing_amount - (s.opening_amount + coalesce(m.deposits, 0) + coalesce(m.net_cash, 0)) as difference
+                                                    s.closing_amount - (s.opening_amount + coalesce(m.deposits, 0) + coalesce(m.net_cash, 0)
+                                                      - coalesce(m.withdrawals, 0)) as difference
                                              from filtered_sessions s
                                              left join movement_totals m on m.cash_session_id = s.id
                                              left join order_counts o on o.cash_session_id = s.id

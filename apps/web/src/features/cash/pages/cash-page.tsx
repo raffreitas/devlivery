@@ -1,13 +1,12 @@
 import { History, Minus, Plus, TriangleAlert } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { LoadingOverlay } from "@/shared/components/loading";
-import { Modal } from "@/shared/components/modal";
 import { PageHeader } from "@/shared/components/page-header";
 import { QueryState } from "@/shared/components/query-state";
 import { StatTile } from "@/shared/components/stat-tile";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
-import { Button } from "@/shared/components/ui/button";
+import { Button, buttonVariants } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,8 +14,9 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { formatMoney } from "@/shared/utils/formatters";
-import { CashDepositForm } from "../components/cash-deposit-form";
+import { CashDepositModal } from "../components/cash-deposit-modal";
 import { CashSessionEntries } from "../components/cash-session-entries";
+import { CashWithdrawalModal } from "../components/cash-withdrawal-modal";
 import { CloseCashForm } from "../components/close-cash-form";
 import { LastCashSession } from "../components/last-cash-session";
 import { OpenCashForm } from "../components/open-cash-form";
@@ -27,30 +27,72 @@ import type {
 } from "../types";
 
 export function CashPage() {
-  const [depositModalOpen, setDepositModalOpen] = useState(false);
+  const [dialog, setDialog] = useState<{
+    type: "deposit" | "withdrawal";
+    sessionId: string;
+  } | null>(null);
   const {
     overview,
     openCashSession,
     closeCashSession,
     createDeposit,
+    createWithdrawal,
     isOpening,
     isClosing,
     isCreatingDeposit,
+    isCreatingWithdrawal,
   } = useCashOverview();
   const currentSession = overview.data?.activeSession;
-  const disabled =
-    !!overview.error ||
-    overview.isPending ||
-    isClosing ||
-    isOpening ||
-    isCreatingDeposit;
+  const activeDialog =
+    dialog?.sessionId === currentSession?.id ? dialog?.type : undefined;
+  const canMoveCash =
+    currentSession &&
+    !overview.error &&
+    !overview.isPending &&
+    !isClosing &&
+    !isOpening &&
+    !isCreatingDeposit &&
+    !isCreatingWithdrawal;
+  const availableSessionId = canMoveCash ? currentSession.id : undefined;
+  useEffect(() => {
+    if (!availableSessionId || activeDialog) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      if (
+        (key !== "a" && key !== "s") ||
+        event.defaultPrevented ||
+        event.repeat ||
+        event.isComposing ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.shiftKey
+      )
+        return;
+      if (
+        (event.target instanceof HTMLElement &&
+          (event.target.isContentEditable ||
+            event.target.closest(
+              "input, textarea, select, [role=textbox], [role=combobox]",
+            ))) ||
+        document.querySelector('[role="dialog"]:not([data-closed])')
+      )
+        return;
+      event.preventDefault();
+      setDialog({
+        type: key === "a" ? "deposit" : "withdrawal",
+        sessionId: availableSessionId,
+      });
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [activeDialog, availableSessionId]);
   const handleClose = async (dto: CloseCashSessionFormData) => {
     if (currentSession) await closeCashSession({ id: currentSession.id, dto });
   };
   const handleDeposit = async (dto: CreateCashDepositFormData) => {
     if (!currentSession) return;
     await createDeposit({ sessionId: currentSession.id, dto });
-    setDepositModalOpen(false);
   };
 
   return (
@@ -63,40 +105,58 @@ export function CashPage() {
               isFetching={overview.isFetching && !overview.isPending}
               position="inline"
             />
-            <Button
-              size="sm"
-              variant="ghost"
-              render={<Link to="/cash/history" />}
+            <Link
+              to="/cash/history"
+              className={buttonVariants({
+                size: "sm",
+                variant: "ghost",
+                className: "max-md:min-h-11",
+              })}
             >
               <History data-icon="inline-start" />
               Histórico
-            </Button>
+            </Link>
             {currentSession && (
               <>
                 <Button
                   size="sm"
                   variant="secondary"
-                  disabled={disabled}
-                  onClick={() => setDepositModalOpen(true)}
+                  className="max-md:min-h-11"
+                  disabled={!canMoveCash}
+                  aria-label="Aporte"
+                  aria-keyshortcuts="A"
+                  onClick={() =>
+                    setDialog({ type: "deposit", sessionId: currentSession.id })
+                  }
                 >
                   <Plus data-icon="inline-start" />
                   Aporte
+                  <kbd className="hidden font-mono text-meta md:inline">A</kbd>
                 </Button>
                 <Button
                   size="sm"
                   variant="secondary"
-                  disabled
-                  title="Sangria disponível futuramente"
+                  className="max-md:min-h-11"
+                  disabled={!canMoveCash}
+                  aria-label="Sangria"
+                  aria-keyshortcuts="S"
+                  onClick={() =>
+                    setDialog({
+                      type: "withdrawal",
+                      sessionId: currentSession.id,
+                    })
+                  }
                 >
                   <Minus data-icon="inline-start" />
                   Sangria
+                  <kbd className="hidden font-mono text-meta md:inline">S</kbd>
                 </Button>
               </>
             )}
           </>
         }
       />
-      <div className="p-4 md:p-6">
+      <div className="cash-page-body p-4 md:p-6">
         <QueryState
           isPending={overview.isPending}
           error={overview.error}
@@ -116,7 +176,11 @@ export function CashPage() {
                     value={formatMoney(currentSession.totalRevenue)}
                     foot={`${currentSession.totalOrders} ${currentSession.totalOrders === 1 ? "pedido" : "pedidos"} com recebimento`}
                   />
-                  <StatTile label="Sangrias" value="—" foot="Em breve" />
+                  <StatTile
+                    label="Sangrias"
+                    value={formatMoney(currentSession.withdrawalsTotal)}
+                    foot={`${currentSession.withdrawalsCount} ${currentSession.withdrawalsCount === 1 ? "sangria" : "sangrias"} no turno`}
+                  />
                   <StatTile
                     label="A receber"
                     value={
@@ -130,7 +194,7 @@ export function CashPage() {
                 <div className="grid items-start gap-4 xl:grid-cols-3">
                   <div className="flex min-w-0 flex-col gap-4 xl:col-span-2">
                     <CashSessionEntries
-                      key={`${currentSession.id}:${overview.dataUpdatedAt}`}
+                      key={currentSession.id}
                       sessionId={currentSession.id}
                     />
                     <p className="text-sm text-muted-foreground">
@@ -167,6 +231,7 @@ export function CashPage() {
                       </AlertDescription>
                     </Alert>
                     <OpenCashForm
+                      fixedOnMobile
                       onSubmit={async (dto) => {
                         await openCashSession(dto);
                       }}
@@ -187,17 +252,26 @@ export function CashPage() {
           </fieldset>
         </QueryState>
       </div>
-      <Modal
-        dismissible={!isCreatingDeposit}
-        isOpen={depositModalOpen}
-        onClose={() => setDepositModalOpen(false)}
-        title="Adicionar aporte"
-      >
-        <CashDepositForm
-          onSubmit={handleDeposit}
-          isLoading={isCreatingDeposit}
-        />
-      </Modal>
+      {currentSession && (
+        <>
+          <CashDepositModal
+            key={`deposit:${currentSession.id}`}
+            isOpen={activeDialog === "deposit"}
+            onClose={() => setDialog(null)}
+            onSubmit={handleDeposit}
+            isLoading={isCreatingDeposit}
+          />
+          <CashWithdrawalModal
+            key={currentSession.id}
+            sessionId={currentSession.id}
+            isOpen={activeDialog === "withdrawal"}
+            onClose={() => setDialog(null)}
+            onSubmit={(request) =>
+              createWithdrawal({ sessionId: currentSession.id, request })
+            }
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -23,12 +23,14 @@ interface OpenCashFormProps {
   onSubmit: (dto: CreateCashSessionFormData) => Promise<void>;
   isSubmitting: boolean;
   onCancel?: () => void;
+  fixedOnMobile?: boolean;
 }
 
 export function OpenCashForm({
   onSubmit,
   isSubmitting,
   onCancel,
+  fixedOnMobile = false,
 }: OpenCashFormProps) {
   const formId = useId();
   const form = useForm<CreateCashSessionFormData>({
@@ -48,6 +50,18 @@ export function OpenCashForm({
 
   return (
     <form
+      onKeyDown={(event) => {
+        if (
+          event.key !== "Enter" ||
+          !event.ctrlKey ||
+          event.repeat ||
+          event.nativeEvent.isComposing
+        )
+          return;
+        event.preventDefault();
+        if (!form.formState.isSubmitting && !isSubmitting)
+          event.currentTarget.requestSubmit();
+      }}
       onSubmit={form.handleSubmit(async (data) => {
         form.clearErrors();
         try {
@@ -78,6 +92,7 @@ export function OpenCashForm({
                 <InputMoney
                   {...field}
                   id={`${formId}-open-cash-amount`}
+                  className="max-md:min-h-11"
                   aria-invalid={fieldState.invalid}
                   aria-describedby={[
                     `${formId}-open-cash-amount-description`,
@@ -133,7 +148,10 @@ export function OpenCashForm({
             )}
           />
 
-          <Field orientation="horizontal">
+          <Field
+            orientation="horizontal"
+            className={fixedOnMobile ? "cash-form-actions" : undefined}
+          >
             {onCancel && (
               <Button
                 type="button"
@@ -149,9 +167,14 @@ export function OpenCashForm({
               type="submit"
               isLoading={form.formState.isSubmitting || isSubmitting}
               loadingText="Abrindo caixa…"
-              className="flex-1"
+              className="flex-1 max-md:min-h-11"
+              aria-label="Abrir caixa"
+              aria-keyshortcuts="Control+Enter"
             >
               Abrir caixa
+              <kbd className="ml-2 hidden font-mono text-meta md:inline">
+                Ctrl+Enter
+              </kbd>
             </LoadingButton>
           </Field>
         </FieldGroup>

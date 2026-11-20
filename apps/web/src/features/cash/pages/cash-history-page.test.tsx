@@ -15,33 +15,6 @@ const viewport = vi.hoisted(() => ({ desktop: true }));
 vi.mock("@/shared/hooks/use-media-query", () => ({
   useMediaQuery: () => viewport.desktop,
 }));
-vi.mock("@/shared/components/date-range-picker", () => ({
-  DateRangePicker: ({
-    onDateChange,
-  }: {
-    onDateChange: (value: { from: Date; to?: Date }) => void;
-  }) => (
-    <>
-      <button
-        type="button"
-        onClick={() => onDateChange({ from: new Date(2026, 9, 1) })}
-      >
-        Escolher início
-      </button>
-      <button
-        type="button"
-        onClick={() =>
-          onDateChange({
-            from: new Date(2026, 9, 1),
-            to: new Date(2026, 9, 31),
-          })
-        }
-      >
-        Escolher período
-      </button>
-    </>
-  ),
-}));
 const base = "http://localhost:5000/api/v2/cash-register/sessions";
 const session: CashSessionSummary = {
   id: "turn-1",
@@ -59,6 +32,8 @@ const session: CashSessionSummary = {
   cashPayments: 100,
   cashRefunds: 0,
   changeAmount: 20,
+  withdrawalsTotal: 30,
+  withdrawalsCount: 1,
   netCashReceived: 80,
   notes: "Turno conferido",
   paymentBreakdown: [],
@@ -177,11 +152,13 @@ describe("CashHistoryPage", () => {
     const { router } = setup();
     const trigger = await screen.findByRole("link", { name: /Ver turno de/ });
     await user.click(trigger);
+    expect(trigger.closest("tr")).toHaveAttribute("data-selected", "true");
     const detail = screen.getByRole("region", { name: "Detalhes do turno" });
     expect(
       await within(detail).findByText("Observação do turno: Turno conferido"),
     ).toBeVisible();
     expect(await within(detail).findByText("Pedido #5678ABCD")).toBeVisible();
+    expect(within(detail).getByText("− R$ 30,00")).toBeVisible();
     await user.click(within(detail).getByRole("button", { name: "Próxima" }));
     expect(await within(detail).findByText("Troco")).toBeVisible();
     expect(new URLSearchParams(router.state.location.search).get("page")).toBe(
@@ -212,13 +189,66 @@ describe("CashHistoryPage", () => {
     );
     expect(router.state.location.search).not.toContain("sessionId");
     expect(await screen.findByText("R$ 180,00")).toBeVisible();
-    await user.click(screen.getByRole("button", { name: "Escolher início" }));
+    const period = screen.getByRole("button", { name: /2026.*2026/ });
+    await user.click(period);
+    await user.click(screen.getByRole("button", { name: /10 de novembro/ }));
     expect(router.state.location.search).toContain("start=2026-11-01");
-    await user.click(screen.getByRole("button", { name: "Escolher período" }));
-    expect(router.state.location.search).toContain("start=2026-10-01");
-    expect(router.state.location.search).toContain("end=2026-10-31");
+    await user.keyboard("{Escape}");
+    await user.click(period);
+    await user.click(screen.getByRole("button", { name: /12 de novembro/ }));
+    expect(router.state.location.search).toContain("end=2026-11-05");
+    await user.click(screen.getByRole("button", { name: /12 de novembro/ }));
+    expect(router.state.location.search).toContain("start=2026-11-12");
+    expect(router.state.location.search).toContain("end=2026-11-12");
     expect(router.state.location.search).toContain("page=1");
+    await act(() => router.navigate(-1));
+    expect(router.state.location.search).toContain("end=2026-11-05");
+    expect(router.state.location.search).toContain("page=2");
   });
+
+  it.each([0, 1, 2])(
+    "corrects an out-of-range URL with %i available pages",
+    async (totalPages) => {
+      server.use(
+        http.get(base, ({ request }) => {
+          const page = Number(new URL(request.url).searchParams.get("page"));
+          return HttpResponse.json({
+            data: {
+              ...resource.data,
+              sessions: page <= totalPages ? [session] : [],
+            },
+            meta: {
+              ...metadata,
+              currentPage: page,
+              totalPages,
+              totalCount: totalPages === 2 ? 51 : totalPages,
+            },
+          });
+        }),
+      );
+      const { router } = setup(
+        "/cash/history?start=2026-11-01&end=2026-11-05&page=3&sessionId=old",
+      );
+      await waitFor(() =>
+        expect(router.state.location.search).toContain(
+          `page=${Math.max(1, totalPages)}`,
+        ),
+      );
+      expect(router.state.location.search).not.toContain("sessionId");
+      if (totalPages > 0) {
+        expect(
+          await screen.findByRole("link", { name: /Ver turno de/ }),
+        ).toBeVisible();
+        expect(
+          screen.queryByText("Nenhum turno no período"),
+        ).not.toBeInTheDocument();
+      } else {
+        expect(
+          await screen.findByText("Nenhum turno no período"),
+        ).toBeVisible();
+      }
+    },
+  );
 
   it("keeps the list usable when detail fails and distinguishes an empty list from a failure", async () => {
     server.use(
@@ -286,6 +316,9 @@ describe("CashHistoryPage", () => {
       name: "Detalhes do turno",
     });
     expect(await within(drawer).findByText("Caixa aberto")).toBeVisible();
+    expect(
+      within(drawer).queryByText("Esperado em dinheiro"),
+    ).not.toBeInTheDocument();
     expect(
       within(drawer).getByRole("link", { name: "Ir para o turno atual" }),
     ).toHaveAttribute("href", "/cash");

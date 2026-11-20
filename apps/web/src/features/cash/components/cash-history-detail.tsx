@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { QueryState } from "@/shared/components/query-state";
-import { Button } from "@/shared/components/ui/button";
+import { buttonVariants } from "@/shared/components/ui/button";
 import { queryKeys } from "@/shared/services/query-keys";
 import { formatMoney } from "@/shared/utils/formatters";
 import { cashHistoryService } from "../services/cash-history-service";
@@ -32,43 +32,49 @@ export function CashHistoryDetail({ sessionId }: { sessionId: string }) {
           <p className="text-sm font-medium">
             {session.status === "Open" ? "Caixa aberto" : "Caixa fechado"}
           </p>
-          <CashComposition
-            {...session}
-            counted={
-              session.status === "Closed"
-                ? (session.closingAmount ?? undefined)
-                : undefined
-            }
-          />
-          <dl className="flex flex-col gap-2 text-sm">
-            {(session.status === "Open" || session.closingAmount === null) && (
-              <div className="flex justify-between gap-3">
-                <dt>Contado</dt>
-                <dd>—</dd>
-              </div>
-            )}
-            <div className="flex justify-between gap-3">
-              <dt>Diferença</dt>
-              <dd
-                className={
-                  session.difference !== null && session.difference < 0
-                    ? "text-destructive"
-                    : "text-foreground"
-                }
-              >
-                {session.status === "Closed" && session.difference !== null
-                  ? formatMoney(session.difference)
-                  : "—"}
-              </dd>
-            </div>
-          </dl>
+          {session.status === "Closed" && (
+            <>
+              <CashComposition
+                {...session}
+                counted={session.closingAmount ?? undefined}
+              />
+              <dl className="flex flex-col gap-2 text-sm">
+                {session.closingAmount === null && (
+                  <div className="flex justify-between gap-3">
+                    <dt>Contado</dt>
+                    <dd>—</dd>
+                  </div>
+                )}
+                <div className="flex justify-between gap-3">
+                  <dt>Diferença</dt>
+                  <dd
+                    className={
+                      session.difference !== null && session.difference < 0
+                        ? "text-destructive"
+                        : "text-foreground"
+                    }
+                  >
+                    {session.difference === null
+                      ? "—"
+                      : formatMoney(session.difference)}
+                  </dd>
+                </div>
+              </dl>
+            </>
+          )}
           <p className="text-sm text-muted-foreground">
             Observação do turno: {session.notes || "Nenhuma observação."}
           </p>
           {session.status === "Open" && (
-            <Button variant="outline" render={<Link to="/cash" />}>
+            <Link
+              to="/cash"
+              className={buttonVariants({
+                variant: "outline",
+                className: "max-md:min-h-11",
+              })}
+            >
               Ir para o turno atual
-            </Button>
+            </Link>
           )}
           <CashSessionEntries key={sessionId} sessionId={sessionId} />
         </div>

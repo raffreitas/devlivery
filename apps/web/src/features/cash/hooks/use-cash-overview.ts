@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "@/shared/services/api";
 import {
   invalidateAfterMutation,
   queryKeys,
@@ -6,6 +7,7 @@ import {
 import { cashOverviewService } from "../services/cash-overview-service";
 import { cashService } from "../services/cash-service";
 import type {
+  CashWithdrawalRequest,
   CloseCashSessionFormData,
   CreateCashDepositFormData,
   CreateCashSessionFormData,
@@ -48,16 +50,33 @@ export function useCashOverview() {
     meta: { skipGlobalErrorToast: true },
     onSuccess: refresh,
   });
+  const withdrawal = useMutation({
+    mutationFn: ({
+      sessionId,
+      request,
+    }: {
+      sessionId: string;
+      request: CashWithdrawalRequest;
+    }) => cashService.createWithdrawal(sessionId, request),
+    retry: false,
+    meta: { skipGlobalErrorToast: true },
+    onSuccess: refresh,
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 409) refresh();
+    },
+  });
   return {
     overview,
     openCashSession: open.mutateAsync,
     closeCashSession: close.mutateAsync,
     createDeposit: deposit.mutateAsync,
+    createWithdrawal: withdrawal.mutateAsync,
     isOpening: open.isPending,
     isClosing:
       close.isPending ||
       (close.isSuccess &&
         overview.data?.activeSession?.id === close.variables?.id),
     isCreatingDeposit: deposit.isPending,
+    isCreatingWithdrawal: withdrawal.isPending,
   };
 }

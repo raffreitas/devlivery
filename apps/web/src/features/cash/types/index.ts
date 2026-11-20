@@ -66,3 +66,22 @@ export const createCashDepositFormSchema = z.object({
 export type CreateCashDepositFormData = z.infer<
   typeof createCashDepositFormSchema
 >;
+
+export const createCashWithdrawalFormSchema = z.object({
+  amount: z.number().min(0.01, "Informe um valor maior que zero."),
+  reason: z
+    .string()
+    .trim()
+    .min(1, "Informe o motivo da sangria.")
+    .max(1000, "Informe um motivo com até 1.000 caracteres."),
+});
+
+export const cashWithdrawalRequestSchema =
+  createCashWithdrawalFormSchema.extend({
+    requestId: z.uuid(),
+  });
+
+export type CreateCashWithdrawalFormData = z.infer<
+  typeof createCashWithdrawalFormSchema
+>;
+export type CashWithdrawalRequest = z.infer<typeof cashWithdrawalRequestSchema>;

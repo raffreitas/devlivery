@@ -2,6 +2,7 @@ import { type ApiResponse, api } from "@/shared/services/api";
 import type {
   CashDeposit,
   CashSession,
+  CashWithdrawalRequest,
   CloseCashSessionFormData,
   CreateCashDepositFormData,
   CreateCashSessionFormData,
@@ -177,5 +178,16 @@ export const cashService = {
       signal,
     );
     return response.data?.map(mapDepositDtoToDomain) ?? [];
+  },
+
+  async createWithdrawal(
+    sessionId: string,
+    { requestId, ...payload }: CashWithdrawalRequest,
+  ) {
+    await api.post(
+      `/cash-register/sessions/${sessionId}/withdrawals`,
+      payload,
+      { idempotencyKey: requestId },
+    );
   },
 };

@@ -13,6 +13,7 @@
 /* Inset composition based on sidebar-08, sized for the Devlivery references. */
 .app-shell {
   --app-sidebar-width: 15rem;
+  --mobile-nav-height: calc(var(--spacing) * 16 + 1px + env(safe-area-inset-bottom, 0px));
 }
 
 .mobile-navigation {
@@ -22,6 +23,15 @@
 @media (width < 48rem) {
   .app-shell-content {
     padding-bottom: calc(var(--spacing) * 20 + env(safe-area-inset-bottom, 0px));
+  }
+
+  .cash-form-actions {
+    @apply fixed inset-x-0 z-30 border-t border-border bg-background p-3;
+    bottom: var(--mobile-nav-height);
+  }
+
+  .cash-page-body {
+    padding-bottom: calc(var(--spacing) * 20);
   }
 }
 
@@ -69,6 +79,7 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
   --color-primary-text: var(--primary-text);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -130,6 +141,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
   --primary: oklch(0.553 0.195 38.402);
+  --primary-soft: #fff1e8;
   --primary-text: var(--primary);
   --primary-foreground: oklch(0.98 0.016 73.684);
   --secondary: oklch(0.967 0.001 286.375);
@@ -176,6 +188,7 @@
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.47 0.157 37.304);
+  --primary-soft: #2a1a10;
   --primary-text: var(--sidebar-primary);
   --primary-foreground: oklch(0.98 0.016 73.684);
   --secondary: oklch(0.274 0.006 286.033);

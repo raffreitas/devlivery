@@ -54,6 +54,7 @@ public sealed class EndpointsRegistrationTests
         "POST /api/v{version:apiVersion}/auth/login [Auth]",
         "POST /api/v{version:apiVersion}/cash-register/sessions [CashRegister]",
         "POST /api/v{version:apiVersion}/cash-register/sessions/{cashSessionId:guid}/deposits [CashRegister]",
+        "POST /api/v{version:apiVersion}/cash-register/sessions/{sessionId:guid}/withdrawals [CashRegister]",
         "POST /api/v{version:apiVersion}/expenses [Expenses]",
         "POST /api/v{version:apiVersion}/expenses/categories [Expenses]",
         "POST /api/v{version:apiVersion}/orders [Orders]",

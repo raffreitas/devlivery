@@ -45,7 +45,7 @@ public sealed class CashSession : Entity, ITenantScoped
             .Count();
     }
 
-    public decimal ExpectedCashAmount => OpeningAmount + TotalDeposits() + TotalCashPayments();
+    public decimal ExpectedCashAmount => OpeningAmount + TotalDeposits() + TotalCashPayments() - TotalWithdrawals();
 
     private CashSession()
     {
@@ -165,6 +165,26 @@ public sealed class CashSession : Entity, ITenantScoped
         => _movements.Any(m =>
             m.EntryType == CashSessionEntryType.Refund && m.OrderPaymentId == originalOrderPaymentId);
 
+    public CashSessionMovement AddWithdrawal(decimal amount, Guid createdBy, string reason)
+    {
+        if (createdBy == Guid.Empty) throw new DomainException("O autor é obrigatório.");
+        if (Status != CashSessionStatus.Open)
+            throw new DomainException("Não é possível registrar sangria em um caixa fechado.");
+        if (amount <= 0 || decimal.Round(amount, 2) != amount)
+            throw new DomainException("Informe um valor positivo com até duas casas decimais.");
+        if (amount > ExpectedCashAmount)
+            throw new DomainException("O valor da sangria supera o dinheiro disponível.");
+        if (string.IsNullOrWhiteSpace(reason) || reason.Trim().Length > 1000)
+            throw new DomainException("Informe o motivo da sangria com até 1.000 caracteres.");
+
+        var movement = new CashSessionMovement(
+            EstablishmentId, Id, CashSessionEntryType.Withdrawal, amount, createdBy,
+            paymentMethod: PaymentMethod.Cash, reason: reason.Trim());
+        _movements.Add(movement);
+        UpdatedAt = DateTime.UtcNow;
+        return movement;
+    }
+
     public bool HasChangeFor(Guid orderId)
         => _movements.Any(p => p.EntryType == CashSessionEntryType.Change && p.RelatedOrderId == orderId);
 
@@ -184,6 +204,10 @@ public sealed class CashSession : Entity, ITenantScoped
 
     public decimal TotalDeposits() => Movements
         .Where(m => m.EntryType == CashSessionEntryType.Deposit)
+        .Sum(m => m.Amount);
+
+    public decimal TotalWithdrawals() => _movements
+        .Where(m => m.EntryType == CashSessionEntryType.Withdrawal)
         .Sum(m => m.Amount);
 
     public decimal TotalCashPayments()

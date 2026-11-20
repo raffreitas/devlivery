@@ -619,6 +619,46 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("Devlivery.Infrastructure.Persistence.Idempotency.IdempotencyRecord", b =>
+                {
+                    b.Property<Guid>("EstablishmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("establishment_id");
+
+                    b.Property<string>("Operation")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("operation");
+
+                    b.Property<Guid>("ScopeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("scope_id");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("request_id");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_id");
+
+                    b.Property<string>("RequestHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("request_hash");
+
+                    b.Property<string>("ResponseJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("response_json");
+
+                    b.HasKey("EstablishmentId", "Operation", "ScopeId", "RequestId")
+                        .HasName("pk_api_idempotency_records");
+
+                    b.ToTable("api_idempotency_records", (string)null);
+                });
+
             modelBuilder.Entity("Devlivery.Domain.Aggregates.CashRegister.CashSession", b =>
                 {
                     b.HasOne("Devlivery.Domain.Aggregates.Establishments.Establishment", null)
@@ -748,6 +788,16 @@ namespace Devlivery.Shared.Infrastructure.Database.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_users_establishments_establishment_id");
+                });
+
+            modelBuilder.Entity("Devlivery.Infrastructure.Persistence.Idempotency.IdempotencyRecord", b =>
+                {
+                    b.HasOne("Devlivery.Domain.Aggregates.Establishments.Establishment", null)
+                        .WithMany()
+                        .HasForeignKey("EstablishmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_api_idempotency_records_establishments_establishment_id");
                 });
 
             modelBuilder.Entity("Devlivery.Domain.Aggregates.CashRegister.CashSession", b =>

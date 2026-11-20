@@ -86,8 +86,10 @@ const axiosInstance = axios.create({
 });
 
 export type RequestOptions = {
-  /** The write has no lasting side effect (e.g. login), so a lost response is safe to retry. */
+  /** Repeating the same write after a lost response is safe. */
   idempotent?: boolean;
+  /** UUID for an endpoint that supports Idempotency-Key. Reuse it on retry. */
+  idempotencyKey?: string;
 };
 
 async function request<T>(
@@ -102,13 +104,18 @@ async function request<T>(
 ): Promise<T> {
   const url = path.startsWith("/") ? path : `/${path}`;
   const isSafe =
-    !options.method || options.method === "GET" || options.idempotent === true;
+    !options.method ||
+    options.method === "GET" ||
+    options.idempotent === true ||
+    !!options.idempotencyKey;
 
   const { token } = readAuth();
   const headers: Record<string, string> = {
     ...(options.headers ?? {}),
   };
   if (token) headers.Authorization = `Bearer ${token}`;
+  if (options.idempotencyKey)
+    headers["Idempotency-Key"] = options.idempotencyKey;
 
   try {
     const res = await axiosInstance.request({
@@ -174,11 +181,12 @@ export const api = {
     request<T>(path, { method: "GET", signal }),
   post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
     request<T>(path, { method: "POST", body, ...options }),
-  put: <T>(path: string, body?: unknown) =>
-    request<T>(path, { method: "PUT", body }),
-  patch: <T>(path: string, body?: unknown) =>
-    request<T>(path, { method: "PATCH", body }),
-  delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
+  put: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    request<T>(path, { method: "PUT", body, ...options }),
+  patch: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    request<T>(path, { method: "PATCH", body, ...options }),
+  delete: <T>(path: string, options?: RequestOptions) =>
+    request<T>(path, { method: "DELETE", ...options }),
 };
 
 export const apiV2 = {

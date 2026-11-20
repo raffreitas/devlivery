@@ -6,5 +6,6 @@ public enum CashSessionEntryType
     Change,
     Refund,
     Deposit,
-    Adjustment
+    Adjustment,
+    Withdrawal
 }

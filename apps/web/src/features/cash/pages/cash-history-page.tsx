@@ -9,7 +9,7 @@ import { LoadingOverlay } from "@/shared/components/loading";
 import { PageHeader } from "@/shared/components/page-header";
 import { QueryState } from "@/shared/components/query-state";
 import { StatTile } from "@/shared/components/stat-tile";
-import { Button } from "@/shared/components/ui/button";
+import { Button, buttonVariants } from "@/shared/components/ui/button";
 import {
   Card,
   CardAction,
@@ -76,15 +76,16 @@ function HistoryPeriod({
   end: string;
   onChange: (start: string, end: string) => void;
 }) {
-  const [date, setDate] = useState<DateRange | undefined>({
+  const date: DateRange = {
     from: calendarDate(start),
     to: calendarDate(end),
-  });
+  };
   return (
     <DateRangePicker
       date={date}
+      selectNewRange
+      triggerClassName="max-md:min-h-11"
       onDateChange={(value) => {
-        setDate(value);
         if (value?.from && value.to)
           onChange(
             format(value.from, "yyyy-MM-dd"),
@@ -112,26 +113,31 @@ export function CashHistoryPage() {
     Number.isInteger(rawPage) && rawPage > 0 && rawPage <= 42949673
       ? rawPage
       : 1;
-  const selected = params.get("sessionId");
   const desktop = useMediaQuery("(min-width: 1280px)");
   const opener = useRef<HTMLAnchorElement | null>(null);
+  const query = useQuery({
+    queryKey: [...queryKeys.cash, "history", start, end, page],
+    queryFn: ({ signal }) => cashHistoryService.list(start, end, page, signal),
+  });
+  const validPage = query.data
+    ? Math.min(page, Math.max(1, query.data.meta.totalPages))
+    : page;
+  const correctingPage = validPage !== page;
+  const selected = correctingPage ? null : params.get("sessionId");
   useEffect(() => {
     if (
       params.get("start") === start &&
       params.get("end") === end &&
-      params.get("page") === String(page)
+      params.get("page") === String(validPage)
     )
       return;
     const next = new URLSearchParams(params);
     next.set("start", start);
     next.set("end", end);
-    next.set("page", String(page));
+    next.set("page", String(validPage));
+    if (correctingPage) next.delete("sessionId");
     setParams(next, { replace: true });
-  }, [params, start, end, page, setParams]);
-  const query = useQuery({
-    queryKey: [...queryKeys.cash, "history", start, end, page],
-    queryFn: ({ signal }) => cashHistoryService.list(start, end, page, signal),
-  });
+  }, [params, start, end, validPage, correctingPage, setParams]);
   const changePage = (nextPage: number) => {
     const next = new URLSearchParams(params);
     next.set("page", String(nextPage));
@@ -156,7 +162,6 @@ export function CashHistoryPage() {
         actions={
           <>
             <HistoryPeriod
-              key={`${start}:${end}`}
               start={start}
               end={end}
               onChange={(from, to) => {
@@ -168,9 +173,15 @@ export function CashHistoryPage() {
                 setParams(next);
               }}
             />
-            <Button variant="outline" render={<Link to="/cash" />}>
+            <Link
+              to="/cash"
+              className={buttonVariants({
+                variant: "outline",
+                className: "max-md:min-h-11",
+              })}
+            >
               Turno atual
-            </Button>
+            </Link>
             <LoadingOverlay
               isFetching={query.isFetching && !query.isPending}
               position="inline"
@@ -180,9 +191,9 @@ export function CashHistoryPage() {
       />
       <div className="flex min-w-0 flex-col gap-4 p-4 md:gap-6 md:p-6">
         <QueryState
-          isPending={query.isPending}
+          isPending={query.isPending || correctingPage}
           error={query.error}
-          hasData={query.data !== undefined}
+          hasData={query.data !== undefined && !correctingPage}
           refetch={query.refetch}
         >
           {summary && (
@@ -213,16 +224,11 @@ export function CashHistoryPage() {
           <div
             className={
               selected && desktop
-                ? "grid min-w-0 items-start gap-4 xl:grid-cols-3"
+                ? "grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_23.75rem]"
                 : "min-w-0"
             }
           >
-            <Card
-              size="sm"
-              className={
-                selected && desktop ? "min-w-0 xl:col-span-2" : "min-w-0"
-              }
-            >
+            <Card size="sm" className="min-w-0">
               <CardHeader>
                 <CardTitle>
                   <h2>Turnos do caixa</h2>
@@ -248,9 +254,8 @@ export function CashHistoryPage() {
                         return (
                           <TableRow
                             key={session.id}
-                            data-state={
-                              selected === session.id ? "selected" : undefined
-                            }
+                            className="data-selected:bg-primary-soft"
+                            data-selected={selected === session.id || undefined}
                           >
                             <TableCell>
                               <Link
@@ -259,7 +264,7 @@ export function CashHistoryPage() {
                                 aria-current={
                                   selected === session.id ? "true" : undefined
                                 }
-                                className="font-medium underline-offset-4 hover:underline"
+                                className="inline-flex items-center font-medium underline-offset-4 hover:underline max-md:min-h-11"
                                 onClick={(event) => {
                                   opener.current = event.currentTarget;
                                 }}
@@ -303,7 +308,7 @@ export function CashHistoryPage() {
                           </TableRow>
                         );
                       })}
-                      {query.data?.data.sessions.length === 0 && (
+                      {query.data?.meta.totalCount === 0 && (
                         <TableRow>
                           <TableCell colSpan={6}>
                             <Empty>
@@ -329,6 +334,7 @@ export function CashHistoryPage() {
                     <Button
                       size="sm"
                       variant="outline"
+                      className="max-md:min-h-11"
                       disabled={page === 1 || query.isFetching}
                       onClick={() => changePage(page - 1)}
                     >
@@ -337,6 +343,7 @@ export function CashHistoryPage() {
                     <Button
                       size="sm"
                       variant="outline"
+                      className="max-md:min-h-11"
                       disabled={
                         page >= query.data.meta.totalPages || query.isFetching
                       }
@@ -387,11 +394,12 @@ export function CashHistoryPage() {
           showSwipeHandle
         >
           <DrawerContent finalFocus={opener}>
-            <DrawerHeader>
+            <DrawerHeader className="flex-row items-center justify-between">
               <DrawerTitle>Detalhes do turno</DrawerTitle>
               <Button
                 variant="ghost"
                 size="icon-sm"
+                className="max-md:size-11"
                 aria-label="Fechar detalhes"
                 onClick={closeDetail}
               >

@@ -1,10 +1,18 @@
 import { renderWithProviders } from "@test/render";
 import { server } from "@test/server";
-import { fireEvent, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import { SidebarProvider } from "@/shared/components/ui/sidebar";
+import { writeAuth } from "@/shared/services/auth-storage";
+import { queryKeys } from "@/shared/services/query-keys";
 import type {
   CashOverview,
   CashSessionSummary,
@@ -36,6 +44,8 @@ const session: CashSessionSummary = {
   cashPayments: 100,
   cashRefunds: 0,
   changeAmount: 20,
+  withdrawalsTotal: 0,
+  withdrawalsCount: 0,
   netCashReceived: 80,
   difference: null,
   paymentBreakdown: [
@@ -109,7 +119,7 @@ describe("CashPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows the full ledger, pending cash and a non-operational withdrawal placeholder", async () => {
+  it("shows the full ledger, pending cash and available withdrawal action", async () => {
     mockOpenSession();
     renderWithProviders(<CashPage />);
     expect(await screen.findByText("Recebido no turno")).toBeVisible();
@@ -119,7 +129,8 @@ describe("CashPage", () => {
       ).queryByText(/Aberto|Fechado/),
     ).not.toBeInTheDocument();
     expect(screen.getByText("1 pedido com dinheiro a receber")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Sangria" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Sangria" })).toBeEnabled();
+    expect(screen.getByText("0 sangrias no turno")).toBeVisible();
     const table = await screen.findByRole("table", {
       name: "Movimentações do turno",
     });
@@ -177,7 +188,8 @@ describe("CashPage", () => {
       screen.getByRole("textbox", { name: "Dinheiro na gaveta" }),
       { target: { value: "10000" } },
     );
-    await user.click(screen.getByRole("button", { name: "Abrir caixa" }));
+    screen.getByRole("textbox", { name: "Observação (opcional)" }).focus();
+    await user.keyboard("{Control>}{Enter}{/Control}");
     expect(await screen.findByText("Recebido no turno")).toBeVisible();
     expect(create).toHaveBeenCalledExactlyOnceWith({ openingAmount: 100 });
   });
@@ -226,6 +238,14 @@ describe("CashPage", () => {
 
   it("adds an aporte through v1 and refreshes the movements and summary", async () => {
     const user = userEvent.setup();
+    writeAuth({
+      user: {
+        id: "operator-1",
+        name: "Joana Silva",
+        email: "joana@example.test",
+      },
+      token: "fixture-token",
+    });
     let deposited = false;
     const create = vi.fn();
     server.use(
@@ -271,26 +291,65 @@ describe("CashPage", () => {
       }),
     );
     renderWithProviders(<CashPage />);
-    await user.click(await screen.findByRole("button", { name: "Aporte" }));
-    const dialog = screen.getByRole("dialog");
-    fireEvent.change(
-      within(dialog).getByRole("textbox", { name: "Valor do aporte" }),
-      { target: { value: "5000" } },
+    await screen.findByRole("button", { name: "Aporte" });
+    const counted = screen.getByRole("textbox", { name: "Dinheiro contado" });
+    counted.focus();
+    await user.keyboard("a");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    counted.blur();
+    await user.keyboard("a");
+    const dialog = screen.getByRole("dialog", { name: "Aporte" });
+    expect(
+      within(dialog).getByText("Colocar dinheiro na gaveta durante o turno."),
+    ).toBeVisible();
+    expect(within(dialog).getByText(/Joana Silva/)).toBeVisible();
+    expect(within(dialog).getByRole("note")).toHaveTextContent(
+      "O saldo da gaveta só aparece",
     );
+    expect(within(dialog).queryByText("Origem")).not.toBeInTheDocument();
+    const amount = within(dialog).getByRole("textbox", { name: "Valor" });
+    await waitFor(() => expect(amount).toHaveFocus());
+    fireEvent.change(amount, { target: { value: "5000" } });
     await user.type(
       within(dialog).getByRole("textbox", {
         name: "Observação (opcional)",
       }),
       "Troco para o turno",
     );
-    await user.click(
-      within(dialog).getByRole("button", { name: "Adicionar aporte" }),
-    );
+    await user.keyboard("{Control>}{Enter}{/Control}");
     expect(await screen.findByText("Troco para o turno")).toBeVisible();
     expect(create).toHaveBeenCalledExactlyOnceWith({
       amount: 50,
       notes: "Troco para o turno",
     });
+  });
+
+  it("cancels an aporte and clears its draft when reopened", async () => {
+    const user = userEvent.setup();
+    mockOpenSession();
+    renderWithProviders(<CashPage />);
+    const trigger = await screen.findByRole("button", { name: "Aporte" });
+    await user.click(trigger);
+    const dialog = screen.getByRole("dialog", { name: "Aporte" });
+    fireEvent.change(within(dialog).getByRole("textbox", { name: "Valor" }), {
+      target: { value: "5000" },
+    });
+    await user.type(
+      within(dialog).getByRole("textbox", { name: "Observação (opcional)" }),
+      "Rascunho",
+    );
+    await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+    await user.click(trigger);
+    const reopened = screen.getByRole("dialog", { name: "Aporte" });
+    expect(
+      within(reopened).getByRole("textbox", { name: "Valor" }),
+    ).toHaveValue("R$\u00a00,00");
+    expect(
+      within(reopened).getByRole("textbox", { name: "Observação (opcional)" }),
+    ).toHaveValue("");
   });
 
   it("paginates without altering summary totals and exposes ledger failures separately", async () => {
@@ -312,10 +371,12 @@ describe("CashPage", () => {
         });
       }),
     );
-    renderWithProviders(<CashPage />);
+    const { client } = renderWithProviders(<CashPage />);
     await user.click(await screen.findByRole("button", { name: "Próxima" }));
     expect(await screen.findByText("Troco")).toBeVisible();
     expect(screen.getByText("2 pedidos com recebimento")).toBeVisible();
+    await act(() => client.invalidateQueries({ queryKey: queryKeys.cash }));
+    expect(screen.getByText("Página 2 de 2")).toBeVisible();
     server.use(
       http.get(movementsUrl, () =>
         HttpResponse.json({ detail: "Falha no extrato" }, { status: 500 }),
@@ -326,5 +387,112 @@ describe("CashPage", () => {
       "Falha no extrato",
     );
     expect(screen.getByText("Recebido no turno")).toBeVisible();
+  });
+
+  it("retries the same withdrawal after a lost response and refreshes the ledger and balance", async () => {
+    const user = userEvent.setup();
+    const create = vi.fn();
+    let recorded = false;
+    server.use(
+      http.get(overviewUrl, () =>
+        HttpResponse.json({
+          data: {
+            ...openOverview,
+            activeSession: recorded
+              ? {
+                  ...session,
+                  expectedCashAmount: 150,
+                  withdrawalsTotal: 30,
+                  withdrawalsCount: 1,
+                }
+              : session,
+          },
+        }),
+      ),
+      http.get(movementsUrl, () =>
+        HttpResponse.json({
+          data: recorded
+            ? [
+                {
+                  ...entry,
+                  type: "Withdrawal",
+                  relatedOrderId: null,
+                  signedAmount: -30,
+                  reason: "Guardado no cofre",
+                },
+              ]
+            : [entry],
+          meta,
+        }),
+      ),
+      http.post(`${base}/session-1/withdrawals`, async ({ request }) => {
+        create(request.headers.get("Idempotency-Key"), await request.json());
+        if (!recorded) {
+          recorded = true;
+          return HttpResponse.error();
+        }
+        return HttpResponse.json({ data: { id: "withdrawal-1" } });
+      }),
+    );
+    const initial = renderWithProviders(<CashPage />);
+    await screen.findByRole("button", { name: "Sangria" });
+    await user.keyboard("s");
+    const dialog = screen.getByRole("dialog", { name: "Sangria" });
+    expect(
+      within(dialog).getByText("Tirar dinheiro da gaveta durante o turno."),
+    ).toBeVisible();
+    expect(within(dialog).getByRole("note")).toHaveTextContent(
+      "O saldo da gaveta só aparece",
+    );
+    expect(within(dialog).queryByText("Origem")).not.toBeInTheDocument();
+    expect(within(dialog).queryByText("Destino")).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole("checkbox")).not.toBeInTheDocument();
+    const amount = within(dialog).getByRole("textbox", {
+      name: "Valor",
+    });
+    fireEvent.change(amount, { target: { value: "3000" } });
+    await user.click(
+      within(dialog).getByRole("button", { name: "Registrar sangria" }),
+    );
+    expect(
+      await within(dialog).findByText("Informe o motivo da sangria."),
+    ).toBeVisible();
+    expect(create).not.toHaveBeenCalled();
+    await user.type(
+      within(dialog).getByRole("textbox", { name: "Motivo" }),
+      "Guardado no cofre",
+    );
+    await user.click(
+      within(dialog).getByRole("button", { name: "Registrar sangria" }),
+    );
+    expect(
+      await within(dialog).findByText(
+        "Reenvie esta mesma sangria para confirmar o registro.",
+      ),
+    ).toBeVisible();
+    expect(amount).toHaveAttribute("readonly");
+    initial.unmount();
+
+    renderWithProviders(<CashPage />);
+    await user.click(await screen.findByRole("button", { name: "Sangria" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Reenviar sangria" }),
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+    expect(create).toHaveBeenCalledTimes(2);
+    expect(create).toHaveBeenNthCalledWith(
+      1,
+      expect.stringMatching(/^[0-9a-f-]{36}$/i),
+      { amount: 30, reason: "Guardado no cofre" },
+    );
+    expect(create.mock.calls[1]).toEqual(create.mock.calls[0]);
+    expect(await screen.findByText("1 sangria no turno")).toBeVisible();
+    expect(await screen.findByText("Guardado no cofre")).toBeVisible();
+    expect(screen.getByText("− R$ 30,00")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Conferir contagem" }));
+    expect(await screen.findByText("Esperado em dinheiro")).toBeVisible();
+    expect(screen.getByText("R$ 150,00")).toBeVisible();
   });
 });

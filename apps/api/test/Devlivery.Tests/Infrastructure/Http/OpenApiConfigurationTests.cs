@@ -72,6 +72,20 @@ public sealed class OpenApiConfigurationTests
         paths.ShouldContain("/api/v1/auth/login");
         paths.ShouldContain("/api/v1/products");
         paths.ShouldNotContain("/api/v1/version-probe");
+        var withdrawal = json.GetProperty("paths").GetProperty("/api/v1/cash-register/sessions/{sessionId}/withdrawals")
+            .GetProperty("post");
+        var header = withdrawal.GetProperty("parameters").EnumerateArray()
+            .Single(parameter => parameter.GetProperty("name").GetString() == "Idempotency-Key");
+        header.GetProperty("in").GetString().ShouldBe("header");
+        header.GetProperty("schema").GetProperty("format").GetString().ShouldBe("uuid");
+        header.GetProperty("required").GetBoolean().ShouldBeTrue();
+        var withdrawalBody = withdrawal.GetProperty("requestBody").GetProperty("content")
+            .GetProperty("application/json").GetProperty("schema");
+        if (withdrawalBody.TryGetProperty("$ref", out var reference))
+            withdrawalBody = json.GetProperty("components").GetProperty("schemas")
+                .GetProperty(reference.GetString()!.Split('/')[^1]);
+        withdrawalBody.GetProperty("properties").EnumerateObject().Select(property => property.Name)
+            .ShouldBe(["amount", "reason"], ignoreOrder: true);
         var v2Json = await v2Document.Content.ReadFromJsonAsync<JsonElement>();
         v2Json.GetProperty("paths").EnumerateObject().Select(path => path.Name)
             .ShouldBe(["/api/v2/version-probe", "/api/v2/cash-register/overview", "/api/v2/cash-register/sessions/{id}/movements", "/api/v2/cash-register/sessions", "/api/v2/cash-register/sessions/{id}"], ignoreOrder: true);

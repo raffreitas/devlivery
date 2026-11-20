@@ -12,6 +12,7 @@ function renderForm(onSubmit = vi.fn(async () => {})) {
       cashPayments={350}
       cashRefunds={0}
       changeAmount={0}
+      withdrawalsTotal={0}
       onSubmit={onSubmit}
       isSubmitting={false}
     />,
@@ -25,8 +26,12 @@ describe("CloseCashForm", () => {
     const submit = renderForm();
     expect(screen.queryByText("Esperado em dinheiro")).not.toBeInTheDocument();
     expect(screen.queryByText(/500,00/)).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Conferir contagem" }));
+    screen.getByRole("textbox", { name: "Dinheiro contado" }).focus();
+    await user.keyboard("{Enter}");
     expect(await screen.findByText("Falta no caixa")).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Conferência da gaveta" }),
+    ).toHaveFocus();
     expect(screen.getByText(/Diferença:.*500,00/)).toBeVisible();
     expect(submit).not.toHaveBeenCalled();
   });
@@ -39,6 +44,9 @@ describe("CloseCashForm", () => {
     await user.click(screen.getByRole("button", { name: "Conferir contagem" }));
     await user.click(screen.getByRole("button", { name: "Contar de novo" }));
     expect(screen.queryByText("Esperado em dinheiro")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Dinheiro contado" }),
+    ).toHaveFocus();
     fireEvent.change(
       screen.getByRole("textbox", { name: "Dinheiro contado" }),
       { target: { value: "50000" } },

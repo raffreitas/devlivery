@@ -13,6 +13,8 @@ export interface CashSessionSummary {
   cashPayments: number;
   cashRefunds: number;
   changeAmount: number;
+  withdrawalsTotal: number;
+  withdrawalsCount: number;
   netCashReceived: number;
   closingAmount: number | null;
   difference: number | null;

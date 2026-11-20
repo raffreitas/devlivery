@@ -24,7 +24,8 @@ public static class EndpointsRegistration
             var api = app.NewVersionedApi()
                 .MapGroup("/api/v{version:apiVersion}")
                 .HasApiVersion(version.Key)
-                .AddEndpointFilter<PaginationValidationFilter>();
+                .AddEndpointFilter<PaginationValidationFilter>()
+                .AddEndpointFilter<IdempotencyFilter>();
 
             foreach (var endpoint in version)
             {

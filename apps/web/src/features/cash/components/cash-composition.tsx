@@ -7,6 +7,7 @@ export function CashComposition({
   cashPayments,
   cashRefunds,
   changeAmount,
+  withdrawalsTotal,
   expectedCashAmount,
   counted,
 }: {
@@ -15,6 +16,7 @@ export function CashComposition({
   cashPayments: number;
   cashRefunds: number;
   changeAmount: number;
+  withdrawalsTotal: number;
   expectedCashAmount: number;
   counted?: number;
 }) {
@@ -24,7 +26,12 @@ export function CashComposition({
     ["Recebido em dinheiro", `+ ${formatMoney(cashPayments)}`],
     ["Trocos", `− ${formatMoney(changeAmount)}`],
     ["Estornos em dinheiro", `− ${formatMoney(cashRefunds)}`],
-    ["Sangrias", "— · Em breve"],
+    [
+      "Sangrias",
+      withdrawalsTotal > 0
+        ? `− ${formatMoney(withdrawalsTotal)}`
+        : formatMoney(0),
+    ],
   ];
   return (
     <div className="flex flex-col gap-4 text-sm">

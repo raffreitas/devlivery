@@ -5,6 +5,7 @@ using Devlivery.Infrastructure.Identity.Users.Models;
 using Devlivery.Infrastructure.Persistence.Abstractions;
 using Devlivery.Infrastructure.Persistence.Context;
 using Devlivery.Infrastructure.Persistence.Factory;
+using Devlivery.Infrastructure.Persistence.Idempotency;
 using Devlivery.Infrastructure.Persistence.Seeder;
 
 using Microsoft.AspNetCore.Identity;
@@ -31,6 +32,7 @@ public static class DatabaseFeature
 
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IdempotencyStore>();
 
         return services;
     }

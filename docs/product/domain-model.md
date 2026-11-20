@@ -87,23 +87,26 @@ As movimentações implementadas são:
 - **pagamento:** criado quando um pagamento do pedido é confirmado;
 - **troco:** criado uma vez por pedido, quando existe pagamento em dinheiro e diferença positiva;
 - **estorno:** compensa pagamentos associados a pedido cancelado ou excluído;
-- **aporte:** entrada manual no caixa, vinculada ao operador autenticado.
+- **aporte:** entrada manual no caixa, vinculada ao operador autenticado;
+- **sangria:** retirada manual de dinheiro, com motivo e autor.
 
 Pagamentos, trocos e estornos são idempotentes pelas referências de pedido ou pagamento. O caixa é opcional: recebimentos de entregas realizadas sem sessão aberta permanecem nos pedidos e no resumo de pagamentos confirmados do Dashboard, sem movimentar uma sessão fechada. Abrir um caixa depois não incorpora automaticamente essas vendas. Portanto, os totais de uma sessão representam somente suas movimentações, não todas as vendas do estabelecimento. A contagem do caixa usa pedidos distintos com pelo menos um pagamento não estornado, tanto na sessão ativa quanto no detalhe e na listagem. A contagem por forma de pagamento usa a mesma regra dentro de cada método; um pedido misto pode aparecer em dois métodos e continua sendo um único pedido no total.
 
 O valor esperado em dinheiro é:
 
 ```text
-valor de abertura + aportes + pagamentos em dinheiro - estornos em dinheiro - trocos
+valor de abertura + aportes + pagamentos em dinheiro - estornos em dinheiro - trocos - sangrias
 ```
 
-O fechamento registra o valor contado e encerra a sessão. Uma sessão fechada não recebe pagamentos, trocos, estornos ou aportes. Consulte [segurança do login e do caixa](../operations/login-and-cash-security.md) para autoria e proteção de acesso.
+O fechamento registra o valor contado e encerra a sessão. Uma sessão fechada não recebe pagamentos, trocos, estornos, aportes ou sangrias. Consulte [segurança do login e do caixa](../operations/login-and-cash-security.md) para autoria e proteção de acesso.
 
 Na tela de caixa, o fechamento ocorre em duas etapas: informar o dinheiro contado e conferir a diferença antes da confirmação final. A primeira etapa não grava nem encerra a sessão; o envio acontece somente ao confirmar **Fechar caixa**. Esse fluxo organiza a conferência, sem representar ocultação do saldo no contrato da API.
 
-A leitura v2 expõe o extrato completo da sessão, com abertura derivada, horários, autores, pagamentos, aportes, trocos e estornos. A tela também mostra o último turno encerrado. A observação do fechamento permanece opcional, inclusive quando o contado difere do esperado; o campo compartilhado de observação é apresentado como observação do turno.
+A leitura v2 expõe o extrato completo da sessão, com abertura derivada, horários, autores, pagamentos, aportes, trocos, estornos e sangrias. A tela também mostra o último turno encerrado. A observação do fechamento permanece opcional, inclusive quando o contado difere do esperado. O campo compartilhado de observação aparece como observação do turno.
 
-Com caixa aberto, **A receber** é uma previsão apenas do dinheiro pendente, sem incorporar recebimentos nem alterar o esperado. Para cada pedido não entregue nem cancelado, considera o menor valor entre dinheiro pendente e total do pedido menos pagamentos eletrônicos não cancelados e dinheiro já confirmado, limitado a zero. Isso desconta o troco previsto e ignora parcelas canceladas. Inclui pedidos antigos ou criados sem caixa, pois o vínculo financeiro ocorre no recebimento; não filtra pela data de criação. Sem sessão ativa, essa previsão não é apresentada. Sangria permanece somente como placeholder na interface, sem lançamento ou efeito nos cálculos.
+Com caixa aberto, **A receber** é uma previsão apenas do dinheiro pendente, sem incorporar recebimentos nem alterar o esperado. Para cada pedido não entregue nem cancelado, considera o menor valor entre dinheiro pendente e total do pedido menos pagamentos eletrônicos não cancelados e dinheiro já confirmado, limitado a zero. Isso desconta o troco previsto e ignora parcelas canceladas. Inclui pedidos antigos ou criados sem caixa, pois o vínculo financeiro ocorre no recebimento. Sem sessão ativa, essa previsão não é apresentada.
+
+A sangria é a retirada manual de dinheiro de uma sessão aberta. Exige valor positivo até o saldo esperado, motivo, autor autenticado e data e hora registradas pelo servidor. Reduz o esperado na gaveta e integra a conferência e o histórico. Receita de vendas, recebimentos por forma e pedidos mantêm seus cálculos. Repetir a mesma requisição com o mesmo autor e os mesmos dados devolve o movimento original.
 
 ## Despesas
 

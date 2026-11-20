@@ -31,7 +31,8 @@ public sealed class GetCashMovementsHandler(ApplicationDbContext dbContext)
                 Type = m.EntryType == CashSessionEntryType.Payment ? "Payment"
                     : m.EntryType == CashSessionEntryType.Change ? "Change"
                     : m.EntryType == CashSessionEntryType.Refund ? "Refund"
-                    : m.EntryType == CashSessionEntryType.Deposit ? "Deposit" : "Adjustment",
+                    : m.EntryType == CashSessionEntryType.Deposit ? "Deposit"
+                    : m.EntryType == CashSessionEntryType.Withdrawal ? "Withdrawal" : "Adjustment",
                 m.Amount,
                 Method = m.PaymentMethod == PaymentMethod.Cash || m.EntryType == CashSessionEntryType.Deposit ? "Cash"
                     : m.PaymentMethod == PaymentMethod.Pix ? "Pix"
@@ -67,7 +68,7 @@ public sealed class GetCashMovementsHandler(ApplicationDbContext dbContext)
         var rows = page.Select(m => new GetCashMovementsResponse(
             m.IsOpening ? $"opening:{m.Id}" : m.Id.ToString(), m.CreatedAt,
             m.Type,
-            m.Type is "Change" or "Refund" ? -m.Amount : m.Amount,
+            m.Type is "Change" or "Refund" or "Withdrawal" ? -m.Amount : m.Amount,
             m.Method is null ? null : Enum.Parse<PaymentMethod>(m.Method),
             m.RelatedOrderId, m.OrderPaymentId, m.CreatedBy,
             m.IsOpening ? session.AttendantName : names.GetValueOrDefault(m.CreatedBy, "Usuário indisponível"),

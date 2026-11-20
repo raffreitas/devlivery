@@ -1,5 +1,7 @@
 using Asp.Versioning;
 
+using Devlivery.Infrastructure.Http.Filters;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
 
@@ -43,12 +45,26 @@ public static class OpenApiConfiguration
             });
             options.Document.AddOperationTransformer((operation, context, _) =>
             {
-                if (!context.Description.ActionDescriptor.EndpointMetadata.OfType<IAllowAnonymous>().Any())
+                var metadata = context.Description.ActionDescriptor.EndpointMetadata;
+                if (!metadata.OfType<IAllowAnonymous>().Any())
                 {
                     operation.Security = [new OpenApiSecurityRequirement
                     {
                         [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
                     }];
+                }
+
+                if (metadata.OfType<IdempotencyEndpointMetadata>().Any())
+                {
+                    operation.Parameters ??= [];
+                    operation.Parameters.Add(new OpenApiParameter
+                    {
+                        Name = IdempotencyFilter.HeaderName,
+                        In = ParameterLocation.Header,
+                        Required = true,
+                        Schema = new OpenApiSchema { Type = JsonSchemaType.String, Format = "uuid" },
+                        Description = "UUID da operação, reutilizado em reenvios."
+                    });
                 }
 
                 return Task.CompletedTask;

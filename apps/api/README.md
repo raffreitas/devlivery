@@ -25,7 +25,7 @@ apps/api/
 
 Os endpoints são agrupados em `/api/v1/auth`, `/api/v1/products`, `/api/v1/orders`, `/api/v1/cash-register`, `/api/v1/expenses` e `/api/v1/dashboard`. Exceto login e health checks, a API exige um JWT válido.
 
-As leituras v2 do Caixa ficam em `GET /api/v2/cash-register/overview` (sessão ativa, último turno e dinheiro pendente) e `GET /api/v2/cash-register/sessions/{id}/movements?page=1&pageSize=50` (extrato com abertura derivada, pagamentos, aportes, trocos e estornos). O extrato aceita até 100 linhas por página e usa o envelope `data`/`meta` com `currentPage`, `pageSize`, `totalCount` e `totalPages`. Ambas exigem autenticação e respeitam o estabelecimento corrente. Nenhuma escrita ou migração foi introduzida na v2.
+As leituras v2 do Caixa ficam em `GET /api/v2/cash-register/overview` (sessão ativa, último turno e dinheiro pendente) e `GET /api/v2/cash-register/sessions/{id}/movements?page=1&pageSize=50` (extrato com abertura derivada, pagamentos, aportes, trocos, estornos e sangrias). O extrato aceita até 100 linhas por página e usa o envelope `data`/`meta` com `currentPage`, `pageSize`, `totalCount` e `totalPages`. Ambas exigem autenticação e respeitam o estabelecimento corrente.
 
 ## Executar
 
@@ -83,6 +83,20 @@ Não salve connection strings, chaves JWT ou credenciais do R2 no repositório. 
 `GET /api/v2/cash-register/sessions?start=YYYY-MM-DD&end=YYYY-MM-DD&page=1&pageSize=50`
 retorna `{ data: { sessions, summary }, meta }`. As datas são obrigatórias, inclusivas em São Paulo e filtram a abertura do turno. Os indicadores consolidam apenas turnos fechados em todo o intervalo; a lista inclui os abertos. Paginação padrão 50, máximo 100, ordenada por abertura e identificador decrescentes. Datas malformadas/ausentes e paginação inválida retornam 400; período invertido retorna 422. A paginação é vinculada por `PaginationParameters` e validada pelo filtro HTTP comum antes dos handlers.
 
-`GET /api/v2/cash-register/sessions/{id}` retorna a composição do turno (`CashSessionSummary`, incluindo `status`). O extrato reutiliza a rota v2 de movimentações. As leituras exigem autenticação, respeitam o tenant e retornam 404 para detalhes inexistentes ou de outro estabelecimento. Contratos e comandos v1 permanecem disponíveis, sem migração.
+`GET /api/v2/cash-register/sessions/{id}` retorna a composição do turno (`CashSessionSummary`, incluindo `status`, `withdrawalsTotal` e `withdrawalsCount`). O extrato retorna sangrias com tipo `Withdrawal`, valor negativo, forma `Cash`, autor, data e motivo. As leituras exigem autenticação, respeitam o estabelecimento corrente e retornam 404 para detalhes inexistentes ou de outro estabelecimento.
 
-Publicar a API com essas leituras antes de disponibilizar o frontend do histórico. Impressão, exportação e sangria ficam para entregas futuras.
+### Registrar sangria
+
+`POST /api/v1/cash-register/sessions/{sessionId}/withdrawals` exige um UUID no header `Idempotency-Key` e um corpo com `amount` (valor positivo com até duas casas decimais) e `reason` (motivo de até 1.000 caracteres). O primeiro registro retorna 201 com ID, valor, motivo, ID do autor e data do movimento. Reenvie o mesmo conteúdo com a mesma chave para recuperar o movimento com 200. Uma chave usada com outros dados, um novo lançamento em turno encerrado ou um conflito de atualização retorna 409. Um header ausente, inválido ou com mais de um valor retorna 422, assim como um valor de sangria acima do disponível. O endpoint usa o autor autenticado e responde 404 para turnos inexistentes ou de outro estabelecimento.
+
+A migração `MoveCashWithdrawalIdempotencyToApi` preserva as chaves de sangrias já registradas.
+
+Aplicar as migrações do contexto de negócio e publicar a API antes de disponibilizar a interface com sangria. Impressão e exportação ficam para entregas futuras.
+
+Se for necessário voltar a versão da interface após registrar sangrias, mantenha a versão da API que reconhece o movimento `Withdrawal`.
+
+### Idempotência em outros endpoints
+
+O filtro compartilhado é registrado no grupo versionado da API. Ative em uma rota de escrita com `WithIdempotency<TCommand, TResponse>`. Informe um nome de operação estável e uma função que retorna o comando, o ID do escopo e o conteúdo em uma representação determinística. O filtro exige o header `Idempotency-Key` e associa a operação ao estabelecimento e ao autor autenticado.
+
+O endpoint retorna `Result<TResponse>` e o handler prepara as alterações na unidade de trabalho da requisição. O serviço confirma as alterações e o registro da chave na mesma transação. Por padrão, o primeiro sucesso e os reenvios retornam 200. Para uma criação, configure `onFirstSuccess: response => response.ToCreated()`.

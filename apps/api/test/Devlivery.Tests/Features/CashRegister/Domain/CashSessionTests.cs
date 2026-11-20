@@ -14,6 +14,52 @@ public sealed class CashSessionTests
     private static readonly Guid Operator = Guid.NewGuid();
 
     [Fact]
+    public void GivenMixedPaymentAndChange_WhenWithdrawingAllCash_ThenOnlyTheDrawerBalanceChanges()
+    {
+        // Arrange
+        var session = new CashSessionBuilder().WithOpeningAmount(50m).Build();
+        var orderId = Guid.NewGuid();
+        session.AddPayment(Guid.NewGuid(), 80m, PaymentMethod.Cash, orderId, Operator);
+        session.AddPayment(Guid.NewGuid(), 30m, PaymentMethod.Pix, orderId, Operator);
+        session.AddChange(orderId, 10m, Operator);
+
+        // Act
+        var movement = session.AddWithdrawal(120m, Operator, "  Guardado no cofre  ");
+
+        // Assert
+        session.ExpectedCashAmount.ShouldBe(0m);
+        session.TotalWithdrawals().ShouldBe(120m);
+        session.TotalRevenue.ShouldBe(100m);
+        session.TotalOrders.ShouldBe(1);
+        movement.CreatedBy.ShouldBe(Operator);
+        movement.Amount.ShouldBe(120m);
+        movement.PaymentMethod.ShouldBe(PaymentMethod.Cash);
+        movement.EntryType.ShouldBe(CashSessionEntryType.Withdrawal);
+        movement.Reason.ShouldBe("Guardado no cofre");
+    }
+
+    [Theory]
+    [InlineData(0, "Cofre", false)]
+    [InlineData(100.01, "Cofre", false)]
+    [InlineData(10.001, "Cofre", false)]
+    [InlineData(10, "  ", false)]
+    [InlineData(10, "Cofre", true)]
+    public void GivenInvalidWithdrawal_WhenRegistering_ThenKeepsTheSessionUnchanged(decimal amount, string reason, bool closed)
+    {
+        // Arrange
+        var session = new CashSessionBuilder().WithOpeningAmount(100m).Build();
+        if (closed) session.Close(100m, null);
+
+        // Act
+        var error = Record.Exception(() => session.AddWithdrawal(amount, Operator, reason));
+
+        // Assert
+        error.ShouldBeOfType<DomainException>();
+        session.ExpectedCashAmount.ShouldBe(100m);
+        session.Movements.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void GivenOpeningData_WhenOpeningSession_ThenStartsOpenWithOpeningAmountAsExpectedCash()
     {
         // Arrange

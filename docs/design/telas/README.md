@@ -20,7 +20,11 @@ A fonte de verdade para escopo, prioridade, dependências e status é o [épico 
 
 ## Contratos e regras
 
-A tela de Caixa usa leituras v2 para resumo, último turno encerrado e extrato completo paginado de abertura, aportes, pagamentos, trocos e estornos. O card **A receber** prevê somente dinheiro pendente líquido do troco, inclusive de pedidos criados sem caixa; a previsão não altera o esperado. Abertura, aporte e fechamento continuam nos comandos v1. O esperado e a diferença aparecem após confirmar a contagem; a observação permanece opcional, mesmo com diferença. Sangria aparece apenas como **— / Em breve**, com botão desabilitado, sem movimentos ou valores fictícios. O histórico de turnos é descrito abaixo.
+A tela de Caixa usa leituras v2 para resumo, último turno encerrado e extrato paginado de abertura, aportes, pagamentos, trocos, estornos e sangrias. O card **A receber** prevê dinheiro pendente líquido do troco, inclusive de pedidos criados sem caixa. O esperado inclui somente movimentos da sessão. Abertura, aporte, sangria e fechamento usam comandos v1. O esperado e a diferença aparecem após confirmar a contagem. A observação permanece opcional mesmo com diferença.
+
+A sangria registra valor e motivo durante um turno aberto e diminui o esperado em dinheiro. O card **Sangrias** consolida valor e quantidade no turno. O extrato identifica valor retirado, autor, horário e motivo. Use `A` para aporte, `S` para sangria e `Ctrl+Enter` para enviar o formulário de abertura. No celular, as ações principais de abertura e conferência ficam acima da navegação inferior.
+
+Os modais de Aporte e Sangria compartilham cabeçalho, aviso de que o saldo aparece após a contagem e rodapé com o operador autenticado, o horário de abertura do formulário e as ações **Cancelar** e **Registrar**. Use `Ctrl+Enter` para enviar. O aporte pede valor e observação opcional. A sangria pede valor e motivo obrigatório.
 
 Use os contratos reais de `/api/v1` e das leituras de Caixa em `/api/v2`, os enums da API e testes de contrato. Não use os nomes ilustrativos de endpoints ou métodos de pagamento como especificação.
 
@@ -30,4 +34,4 @@ As referências visuais permanecem úteis para recursos posteriores, sem obrigar
 
 ## Histórico do caixa implementado
 
-`/cash/history` usa o layout de `CaixaHistorico.png` com os componentes oficiais shadcn. O período inicial abrange hoje e os 29 dias anteriores em São Paulo, por data de abertura. Lista e detalhe são leituras v2; os indicadores consolidam somente turnos fechados. O detalhe abre em coluna a partir de 1280px e em `Drawer` abaixo disso, com composição financeira, observação e extrato paginado independente. Período, página e seleção ficam na URL. Impressão e resumo por forma de pagamento não fazem parte desta entrega; sangria continua como placeholder.
+`/cash/history` usa o layout de `CaixaHistorico.png` com os componentes oficiais shadcn. O período inicial abrange hoje e os 29 dias anteriores em São Paulo, por data de abertura. A seleção de duas datas aplica um novo período. Lista e detalhe são leituras v2. Os indicadores consolidam somente turnos fechados. O detalhe abre em uma coluna de 380 px a partir de 1280 px e em `Drawer` abaixo disso. Turnos abertos mostram dados operacionais e extrato. Turnos encerrados incluem a composição, com sangrias, esperado e diferença. Período, página e seleção ficam na URL. Impressão e resumo por forma de pagamento ficam para outra entrega.

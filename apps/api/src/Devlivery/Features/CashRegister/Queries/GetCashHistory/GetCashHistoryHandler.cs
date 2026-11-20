@@ -36,6 +36,7 @@ public sealed class GetCashHistoryHandler(IDbConnectionFactory dbConnectionFacto
         parameters.Add("Refund", nameof(CashSessionEntryType.Refund), DbType.String);
         parameters.Add("Change", nameof(CashSessionEntryType.Change), DbType.String);
         parameters.Add("Deposit", nameof(CashSessionEntryType.Deposit), DbType.String);
+        parameters.Add("Withdrawal", nameof(CashSessionEntryType.Withdrawal), DbType.String);
         parameters.Add("Cash", nameof(PaymentMethod.Cash), DbType.String);
 
         await using var connection = await dbConnectionFactory.OpenConnectionAsync(cancellationToken);

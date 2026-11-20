@@ -23,7 +23,9 @@ public sealed record CashSessionSummary(
     DateTime StartAt,
     DateTime? EndAt,
     string? Notes,
-    PaymentBreakdownDto[] PaymentBreakdown)
+    PaymentBreakdownDto[] PaymentBreakdown,
+    decimal WithdrawalsTotal,
+    int WithdrawalsCount)
 {
     public static CashSessionSummary FromDomain(CashSession session) => new(
         session.Id,
@@ -47,5 +49,7 @@ public sealed record CashSessionSummary(
         session.StartAt,
         session.EndAt,
         session.Notes,
-        GetActiveCashSessionResponse.FromDomain(session).PaymentBreakdown);
+        GetActiveCashSessionResponse.FromDomain(session).PaymentBreakdown,
+        session.TotalWithdrawals(),
+        session.Movements.Count(m => m.EntryType == CashSessionEntryType.Withdrawal));
 }
